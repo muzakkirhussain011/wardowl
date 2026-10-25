@@ -109,6 +109,22 @@ html.dark {
   }
 }
 
+/* ---- landing page: the film (poster until played; nothing loads before that) ----------- */
+
+.wo-film {
+  max-width: 56rem;
+  margin: 1.5rem auto 0;
+}
+
+.wo-film video {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--sy-c-border);
+  border-radius: var(--wo-radius);
+  background: #f4f2ec;
+}
+
 /* ---- landing page: sections -------------------------------------------------------------- */
 
 .yue:has(.wo-hero) > section:first-of-type > section > h2 {

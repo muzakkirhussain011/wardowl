@@ -30,6 +30,10 @@
   <a href="https://github.com/muzakkirhussain011/wardowl/blob/main/CHANGELOG.md">Changelog</a>
 </p>
 
+<p align="center">
+  <a href="https://muzakkirhussain011.github.io/wardowl/#see-it-in-47-seconds"><img src="https://raw.githubusercontent.com/muzakkirhussain011/wardowl/main/docs/_static/brand/wardowl-film-thumbnail.webp" alt="Watch the 47-second wardowl film: your information stays yours" width="720"></a>
+</p>
+
 **wardowl** is an open-source Python library for permission-aware retrieval in RAG
 (retrieval-augmented generation). It applies your permission system (OpenFGA, SpiceDB, OPA, Cerbos,
 Cedar, access lists or your own rules) inside your vector store's search (pgvector, Pinecone,

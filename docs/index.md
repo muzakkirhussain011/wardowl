@@ -34,6 +34,19 @@ pip install wardowl
 <script type="module" src="_static/hero.js"></script>
 ```
 
+## See it in 47 seconds
+
+```{raw} html
+<div class="wo-film">
+  <video controls playsinline preload="none" width="1280" height="720"
+         poster="_static/brand/wardowl-film-poster.webp"
+         aria-label="The wardowl film: an AI assistant that many companies share shows one company's private contract to another; with wardowl, each company gets only its own answer">
+    <source src="_static/brand/wardowl-film.mp4" type="video/mp4">
+    <a href="_static/brand/wardowl-film.mp4">Watch the film (MP4, 47 seconds)</a>
+  </video>
+</div>
+```
+
 ## Built for production RAG
 
 A RAG assistant over company documents is only as safe as its retrieval step. If the search ignores
