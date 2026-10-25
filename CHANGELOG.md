@@ -6,6 +6,11 @@ All notable changes are recorded here. The format follows
 
 ## [Unreleased]
 
+### Documentation
+
+- A 47-second film on the documentation's front page, linked from the README: what wardowl does,
+  shown with an AI assistant that many companies share.
+
 ## [2.1.0] - 2026-10-24
 
 Fixes found by real-world acceptance scenarios, run against real servers, a real identity provider
