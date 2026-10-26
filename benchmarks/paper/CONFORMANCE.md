@@ -144,8 +144,10 @@ worst subject's outcome (violation, then error, then refusal) and records how ma
 
 ## Running it
 
-Actions > paper-conformance > Run workflow, on branch `paper/conformance-campaign` (or `main`, once
-merged).
+Actions > paper-conformance > Run workflow, then pick the branch to test. GitHub offers that button
+(and `gh workflow run`) only for a workflow whose file is on the default branch, so the workflow
+file must reach `main` first; after that, any branch's version of the driver can be run from the
+branch picker, for example `gh workflow run paper-conformance.yml --ref paper/conformance-campaign`.
 
 | Input | Default | Meaning |
 |---|---|---|
