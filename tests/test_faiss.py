@@ -51,6 +51,25 @@ def test_pre_filtering_considers_only_permitted_chunks():
     assert backend().search("launch", 3, In("allowed_groups", ["nobody"])) == []
 
 
+def test_only_a_flat_index_is_declared_exact(tmp_path):
+    import faiss
+
+    flat = backend()
+    assert flat.exact_search is True
+    # Two of the three chunks are Ann's, and the flat index has scored all of them: she may read no other.
+    result = PermissionedRetriever(flat, MetadataACLAuthorizer()).retrieve("launch", Subject("ann", ["eng"]), k=3)
+    assert len(result.hits) == 2 and result.complete is True
+    l2 = FaissBackend(EMBED, EMBED.dim, index=faiss.IndexIDMap(faiss.IndexFlatL2(EMBED.dim)))
+    assert l2.exact_search is True
+    flat.save(tmp_path / "index")
+    assert FaissBackend.load(tmp_path / "index", EMBED).exact_search is True
+    hnsw = faiss.IndexIDMap2(faiss.IndexHNSWFlat(EMBED.dim, 8, faiss.METRIC_INNER_PRODUCT))
+    assert FaissBackend(EMBED, EMBED.dim, index=hnsw).exact_search is False
+    quantizer = faiss.IndexFlatIP(EMBED.dim)  # flat, but the IVF index around it searches only some lists
+    ivf = faiss.IndexIVFFlat(quantizer, EMBED.dim, 2, faiss.METRIC_INNER_PRODUCT)
+    assert FaissBackend(EMBED, EMBED.dim, index=ivf).exact_search is False
+
+
 def test_changes_replace_delete_and_set_metadata():
     b = backend()
     b.add([Document("hr", "pay bands, revised", {"allowed_groups": ["hr"]})])

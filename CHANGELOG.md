@@ -6,6 +6,32 @@ All notable changes are recorded here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- `RetrievalResult.complete` is no longer True for a short or empty result from an approximate
+  search. A pre-filtered result with fewer hits than were asked for, an empty one included, is
+  complete only when the backend declares exact search; so is post-filtering that runs out of
+  candidates inside a scope. The acceptance run on Kaggle found pgvector returning no rows at all
+  to least-privileged users who could read several hundred chunks, because its iterative index
+  scan stopped at `hnsw.max_scan_tuples` or at its memory limit, and wardowl reported those empty
+  results as complete. That contradicted the field's documented meaning, "False when wardowl knows
+  results may be missing"; this corrects it. Users who may read fewer than k chunks now get
+  `complete=False` on approximate stores, which cannot tell them apart from an index that stopped
+  early. Nothing else changes: the same searches run, the same hits come back, and the safety
+  guarantees are unchanged. Post-filtering without a filter still reads a short candidate list as
+  the end of the store.
+- Backends can declare `exact_search = True` when `search` ranks every chunk that matches the
+  filter, so a result with fewer than k hits proves nothing else matches. It is optional and read
+  with `getattr`, not a required member of the `SearchBackend` protocol, so existing backends still
+  satisfy it. `InMemoryBackend` declares it, and `FaissBackend` does when its index is flat (the
+  default) or an ID map around a flat index. `RankFusion` does not, even over exact backends: it
+  leaves out chunks whose metadata differs between backends after each has filled its list, so a
+  short fused list proves nothing. Every other built-in backend searches approximately and does
+  not declare it. A subclass of `InMemoryBackend` that drops hits on purpose should set
+  `exact_search = False`.
+- `check_backend` checks a backend that declares `exact_search` as exact, whatever `exact=` says,
+  since the retriever takes its short results as proof that nothing else matches.
+
 ### Documentation
 
 - A 47-second film on the documentation's front page, linked from the README: what wardowl does,
