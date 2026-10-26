@@ -152,3 +152,33 @@ is reported with the verdict.
   setting; any unreadable hit, canary or violation stops the run.
 - Paired comparisons, McNemar tests for ERR and Wilcoxon signed-rank tests on per-question recall
   are reported alongside the intervals; the verdicts above use only the rules as written.
+
+## Amendment 1 (2026-10-26, before any result)
+
+Made the same day, after a review of the harness and before any X0 or X1 result existed. It is
+committed on its own with the message `bench: amend the pre-registration before any result exists`,
+so the rules above stay readable as first written.
+
+1. **P4's plan criterion is replaced.** As first written, it compared the plan shapes EXPLAIN shows
+   under `p-asrun`, `pg-custom` and `pg-noprepare`. EXPLAIN with bound values always plans with
+   those values (a custom plan), whatever `plan_cache_mode` or psycopg's preparing does to the
+   search itself, so those shapes cannot differ and the criterion could neither confirm nor falsify
+   anything. Instead, under `p-asrun`: count how often PostgreSQL ran the search statement with a
+   generic plan (`pg_prepared_statements`, search statement only), and for each fixed question
+   compare the generic plan (`EXPLAIN (GENERIC_PLAN)`) with the custom plan (EXPLAIN ANALYZE with
+   the values). The plan part of P4 is confirmed when no generic plan of the search statement ran,
+   or when no fixed question's generic plan has another shape; it is falsified when some ran and
+   some fixed question's generic plan has another shape. The recall and ERR parts of P4 are
+   unchanged. The count of generic plans reported with the verdict is the search statement's only:
+   psycopg also prepares the `SET LOCAL` statements, which always run with a generic plan.
+2. **`ph-exact` runs on the first build of `hnsw-m16-efc64` only**, not on each index family: with
+   `enable_indexscan` off it does not use the HNSW index, so another family adds nothing. `qc-exact`
+   still runs on the first build of each Qdrant layout, since the layouts change what it searches.
+3. **`pa-t20k-m1` is `p-asrun`**: its limits are pgvector's defaults, so it is not run twice.
+4. P2 (d) is applied as written also when the other questions lose nothing (twice zero is zero).
+5. Q2's share is inferred from the hits only when the telemetry never shows the ACORN counter; when
+   it does, a person whose searches never took the ACORN path counts as not engaged.
+6. P1's reach comes from EXPLAIN of empty results: when a setting has more than 200 short results,
+   the EXPLAINs cover the empty ones first.
+
+Items 1 to 3 change the plan; items 4 to 6 say how the code applies rules already written.
