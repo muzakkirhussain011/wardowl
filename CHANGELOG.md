@@ -36,6 +36,16 @@ All notable changes are recorded here. The format follows
 
 - A 47-second film on the documentation's front page, linked from the README: what wardowl does,
   shown with an AI assistant that many companies share.
+- Corrected what the documentation said about filtered approximate search. Concepts said that
+  pgvector's iterative index scans keep a selective filter from cutting results short; they stop
+  at `hnsw.max_scan_tuples` (20,000 by default) or at `work_mem` × `hnsw.scan_mem_multiplier` of
+  memory (4 MB by default), so a selective filter can still return fewer than k rows, or none. The
+  pgvector page names both limits and how to raise them. The Qdrant page explains why filters on
+  common values, such as a tenant shared by most points or a shared corpus readable by everyone,
+  can lose recall in Qdrant's filtered HNSW search, and what helps: ACORN with `max_selectivity`,
+  per-tenant graphs (`is_tenant` with `m=0` and `payload_m`), and exact search. Concepts, the
+  security model, the threat model, operations, production, hybrid search and the store pages
+  describe `complete` as it now behaves.
 
 ## [2.1.0] - 2026-10-24
 

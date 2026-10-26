@@ -27,6 +27,18 @@ decides on it.
 Add `async def asearch(...)` with the same signature for a native async path; otherwise
 `aretrieve` runs `search` in a thread.
 
+Optionally, set `exact_search = True` when `search` ranks every chunk that matches the filter, as a
+brute-force scan or a flat index does, rather than walking an approximate index (HNSW, IVF and the
+like) that can stop early. A result with fewer than k hits then proves that no other chunk matches,
+and the retriever reports it as complete. Without the attribute, or with any value but `True`, the
+search counts as approximate: a pre-filtered result with fewer than k hits, an empty one included,
+says `complete=False`, and so does post-filtering that runs out of candidates inside a scope
+([What a result tells you](concepts.md#what-a-result-tells-you)). It is not part of the
+`SearchBackend` protocol's required members, so a backend without it still satisfies the protocol.
+Declare it only when it holds for every search, whatever the index and settings: if exactness
+depends on configuration, compute it from that configuration, as `FaissBackend` does from its
+index.
+
 Optionally, give it `set_metadata(metadata: Mapping[str, Mapping[str, Any]])` to replace stored
 chunks' metadata without re-embedding them ([Changing a document's permissions](operations.md#changing-a-documents-permissions)):
 replace the whole metadata, ignore ids that are not stored, and return once searches see the
@@ -91,7 +103,9 @@ with `retrieve` and `aretrieve` alike, never returns a chunk the subject may not
 holds what stores tend to confuse: `1` and `"1"`, `"a"` and `"A"`, one letter composed and
 decomposed, and field names with a dot or letters outside ASCII. A backend may refuse a filter on
 such a field name by raising `ValueError`; it may not answer wrongly. For an approximate index that
-may miss matches, pass `exact=False`: a result may then be short, but never wrong.
+may miss matches, pass `exact=False`: a result may then be short, but never wrong. A backend whose
+`exact_search` is True is checked as exact whatever `exact` says, since the retriever takes its
+short results as proof that nothing else matches.
 
 `check_authorizer` checks that `check` returns one boolean per hit, that a hit's answer does not
 depend on the rest of the batch, and that `check` agrees with the filter from `filter_for`. If the

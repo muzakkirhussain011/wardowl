@@ -21,7 +21,8 @@ Given an authorizer that answers correctly:
    in `violations`. With `recheck=False`, hits are still matched against the filter locally, at no
    cost, so a backend that ignores it cannot leak either.
 4. **Incomplete results are reported.** When post-filtering stops at `max_candidates` before
-   finding k permitted hits, the result says `complete=False`.
+   finding k permitted hits, the result says `complete=False`, and so does a filtered search that
+   returns fewer than k hits from an approximate index, which may have stopped early.
 5. **Audit events contain no content.** `RetrievalEvent`, `JsonLinesAudit` and the OpenTelemetry
    spans record ids, counts and outcomes, never query text or chunk text. The query appears only as
    an HMAC, and only when you supply a key. OpenTelemetry metrics record no ids at all.
@@ -41,7 +42,7 @@ services. The tests compare with an oracle written without the library's own fil
 | S4 | Decisions never carry over between requests, users, tenants, threads or tasks; a cancelled call returns nothing. | `test_invariants.py` (threads and asyncio tasks, every hit checked), `test_properties.py` (sync and async agree), `test_mcp.py` (each caller's own token) |
 | S5 | An optimization that fails keeps the guarantees or fails. | A backend that ignores the filter cannot leak, with or without `recheck` (`test_properties.py`); a failing shared cache only misses (`test_shared_cache.py`) |
 | S6 | Content the subject may not read never reaches a reranker, the model or a tool. | `test_rerank.py`, `test_frameworks.py`, `test_mcp.py` |
-| S7 | An incomplete candidate search is never reported as complete. | `test_core.py` (post-filtering capped), truncated or deadline-cut lists in `test_openfga.py` and `test_spicedb.py`. `complete` cannot see what an approximate index failed to return. |
+| S7 | An incomplete candidate search is never reported as complete. | `test_core.py` (post-filtering capped; short and empty results from approximate and exact searches), truncated or deadline-cut lists in `test_openfga.py` and `test_spicedb.py`. `complete` cannot see an approximate index that returns k chunks other than the true top k. |
 | S8 | The documented defaults keep every protection on. | `recheck=True`, `strategy="auto"`, empty `And`/`Or` and single-string groups refused (`test_core.py`) |
 | S9 | Cached decisions are used for at most `ttl`, and not at all after `invalidate()`. | `test_caching_events.py`, `test_shared_cache.py`, `test_revocation.py` (revocation under concurrent retrievals, one and three replicas) |
 | S10 | Errors and telemetry reveal no content, credentials or query text. `AuthorizationError` messages are fixed: the text of the exception behind one stays in its `__cause__`. | `test_caching_events.py` (events and OpenTelemetry), `test_core.py` (a failing authorizer or redactor whose error names a password), `test_frameworks.py` and `test_haystack.py` (the same failure seen through LangChain, LlamaIndex and Haystack), `test_mcp.py` (a failing permission service, store or subject function), each authorizer's tests |

@@ -55,8 +55,10 @@ query for the user, one per group and one for `"*"`). An `And` multiplies the co
 and 200 groups make 404.
 
 The search never returns a chunk the filter excludes, but it can return **fewer than `k` hits, or
-none, though more chunks match**, and nothing says so: the retriever reports the result as
-complete. That happens when more than 1,000 rows hold the terms every match needs and fewer than
+none, though more chunks match**, and Cassandra gives no sign of it. The backend does not declare
+`exact_search`, so the retriever reports such a short result as `complete=False`, as it does for
+every approximate search, but it cannot tell this case from a user who may read fewer than `k`
+chunks. That happens when more than 1,000 rows hold the terms every match needs and fewer than
 `k` of the 1,000 nearest pass the filter. An `Or` of users and groups needs no term in common, so
 the query reads the 1,000 nearest rows of the whole table; on a large table where the subject may
 read a small part, few of them pass.

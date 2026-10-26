@@ -77,8 +77,9 @@ Chroma searches an HNSW index, and the backend has no switch for exact search, s
 search as approximate, like an unfiltered one. In the [benchmarks](../benchmarks.md) (local Chroma
 1.5.9, default settings), pre-filtered searches found 0.996 to 1.000 of the true top 10 for users
 who may read 0.06% to 20% of the collection, and 0.990 with everything readable, which is the
-index's own recall: high, but not exact. A result can then miss a chunk the user may read and still
-say `complete=True` ([Concepts](../concepts.md#what-a-result-tells-you)). Chroma's HNSW settings,
+index's own recall: high, but not exact. A result of `k` chunks can then miss a chunk the user may
+read and still say `complete=True`; a shorter one says `complete=False`, since the index may have
+stopped early ([Concepts](../concepts.md#what-a-result-tells-you)). Chroma's HNSW settings,
 such as `ef_search` in the collection's `hnsw` configuration, trade latency for recall.
 
 ## Performance

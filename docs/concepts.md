@@ -103,7 +103,9 @@ permitted few among the global top ten.
 (default 4), and while fewer than k are permitted it multiplies the fetch by `overfetch` and
 searches again, until k are found, the backend runs out, or `max_candidates` (default 1000) is
 reached. The last case is reported as `complete=False`, so you
-know the result may be missing permitted chunks rather than finding out from users.
+know the result may be missing permitted chunks rather than finding out from users. So is running
+out inside a scope on an approximate index, which may have stopped early
+([What a result tells you](#what-a-result-tells-you)).
 `max_candidates` bounds every strategy: a `k` above it raises `ValueError`, a reranker's depth is
 capped at it, and post-filtering checks no more candidates than it asked the backend for, even if
 the backend returns more. Subjects who
@@ -148,12 +150,30 @@ candidate as well. `strategy="postfilter"` does not mean an unfiltered search.
 `violations` should always be 0. Anything else means the backend returned chunks outside the
 filter, and deserves an alert: the re-check removed them, but the backend has a bug.
 
-`complete=False` means wardowl knows results may be missing: post-filtering stopped at
-`max_candidates`, or the re-check removed hits. `complete=True` trusts the backend's ranking. An
-approximate index (HNSW and similar) can return fewer or different results than an exact search,
-and no caller can tell that apart from "the user may read fewer than k chunks". How much each
-backend misses is measured in the [benchmarks](benchmarks.md); for pgvector, keep iterative index
-scans on (the default), which is what keeps a selective filter from cutting results short.
+`complete=False` means wardowl knows results may be missing. That is the case when:
+
+- the re-check removed pre-filtered hits;
+- post-filtering stopped at `max_candidates` before it found k permitted hits;
+- a search under a filter returned fewer hits than it asked for, and the backend's search is
+  approximate. This covers a pre-filtered result with fewer than k hits, an empty one included,
+  and a scoped post-filtered search whose candidates ran out before k readable chunks were found.
+
+A short result is reported as complete only when it proves that nothing else matches: the backend
+declares `exact_search` (as `InMemoryBackend` does, and `FaissBackend` with a flat index), or
+post-filtering searched without a filter, where a short candidate list means the store ran out.
+An approximate index (HNSW and similar) can stop early under a selective filter and return fewer
+hits, or none, though the user may read more; wardowl cannot tell that apart from "the user may read
+fewer than k chunks", so it reports `complete=False`. pgvector's iterative index scans, for
+example, keep going only until they have visited `hnsw.max_scan_tuples` graph elements (20,000 by
+default) or used `work_mem` × `hnsw.scan_mem_multiplier` of memory (4 MB with PostgreSQL's default
+`work_mem`). A user who may read few chunks, none of them near the question, can then get no rows:
+in a large acceptance run on Kaggle, that happened to least-privileged users who could read
+hundreds of chunks ([pgvector](integrations/pgvector.md#iterative-index-scans)).
+
+`complete=True` with k hits trusts the backend's ranking. An approximate index can return k hits
+that are not the true top k, and `complete` cannot see that. How much each backend misses is
+measured in the [benchmarks](benchmarks.md); for pgvector, keep iterative index scans on (the
+default), and raise their limits for users who may read little.
 
 ## The guarantees
 

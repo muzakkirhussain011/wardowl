@@ -82,6 +82,7 @@ says why. The table shows what each failure looks like.
 | The vector store is down | Raises the store client's own error; nothing is returned | `error.type` names that error |
 | The vector store ignores or mistranslates the filter | The re-check drops every chunk outside it | `violations > 0` on the result, the event and the `wardowl.violations` metric |
 | Post-filtering cannot find `k` readable chunks within `max_candidates` | Returns what it found | `complete = False`; `wardowl.outcome = incomplete` |
+| An approximate index returns fewer than `k` chunks under the filter (it may have stopped early) | Returns what it found | `complete = False`; `wardowl.outcome = incomplete` |
 | A subject has no tenant under `TenantAuthorizer` | Raises `AuthorizationError` | As for a failing authorizer |
 | The shared cache (Redis) is down or slow | Treats it as a miss and asks the permission service | A warning on the `wardowl` logger; higher `wardowl.authorize.duration` |
 | A shared-cache entry is unsigned, tampered with or copied under another key | Ignores it (with `signing_key`) | Nothing: it is a miss |
