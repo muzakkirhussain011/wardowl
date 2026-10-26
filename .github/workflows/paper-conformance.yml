@@ -12,6 +12,10 @@ name: paper-conformance
 # uploads what it has, whatever happened, and the last job merges it into one summary.
 
 on:
+  # A push to this branch runs the campaign with the defaults below: a manual-only workflow cannot be
+  # started until its file is on main, and the campaign should not need a change to main.
+  push:
+    branches: [paper/conformance-campaign]
   workflow_dispatch:
     inputs:
       seeds:
@@ -44,10 +48,10 @@ concurrency:
 
 env:
   CAMPAIGN: benchmarks/paper/conformance_campaign.py
-  SEEDS: ${{ inputs.seeds }}
-  EXAMPLES: ${{ inputs.examples }}
-  VARIANTS: ${{ inputs.variants }}
-  BUDGET_MINUTES: ${{ inputs.budget_minutes }}
+  SEEDS: ${{ inputs.seeds || 20 }}
+  EXAMPLES: ${{ inputs.examples || 10 }}
+  VARIANTS: ${{ inputs.variants || 'all' }}
+  BUDGET_MINUTES: ${{ inputs.budget_minutes || 90 }}
 
 jobs:
   campaign:
@@ -281,7 +285,7 @@ jobs:
   # target is recorded as skipped and the job stays green.
   cloud:
     name: campaign (cloud)
-    if: inputs.pinecone
+    if: github.event_name == 'push' || inputs.pinecone
     runs-on: ubuntu-latest
     timeout-minutes: 180
     env:
