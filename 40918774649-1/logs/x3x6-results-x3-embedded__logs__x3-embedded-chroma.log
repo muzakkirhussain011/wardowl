@@ -1,0 +1,11 @@
+[18:30:50] x3 chroma: seed 0
+[18:30:51]   seed 0: building (8,000 chunks)
+[18:30:55]   seed 0: built in 4 s {}
+[18:30:58]   seed 0: G=1: ok, 0 errors, translation ok
+[18:31:01]   seed 0: G=10: ok, 0 errors, translation ok
+[18:31:05]   seed 0: G=100: ok, 0 errors, translation ok
+[18:31:06]   seed 0: G=1,000: refused, 3 errors, translation ok
+[18:31:08]   seed 0: G=4,000: refused, 3 errors, translation ok
+[18:31:09]   seed 0: G=10,000: refused, 3 errors, translation ok
+::warning title=x3 chroma::seed 0: the process ended with status -11
+::warning title=x3 chroma::{"0": -11}

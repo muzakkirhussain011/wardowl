@@ -1,0 +1,192 @@
+Looking in indexes: https://download.pytorch.org/whl/cpu
+Collecting torch==2.8.0
+  Downloading torch-2.8.0%2Bcpu-cp312-cp312-manylinux_2_28_x86_64.whl.metadata (29 kB)
+Collecting filelock (from torch==2.8.0)
+  Downloading filelock-4.2.4-py3-none-any.whl.metadata (2.0 kB)
+Collecting typing-extensions>=4.10.0 (from torch==2.8.0)
+  Downloading typing_extensions-4.16.0-py3-none-any.whl.metadata (3.3 kB)
+Collecting setuptools (from torch==2.8.0)
+  Downloading setuptools-78.1.0-py3-none-any.whl.metadata (6.6 kB)
+Collecting sympy>=1.13.3 (from torch==2.8.0)
+  Downloading sympy-1.14.0-py3-none-any.whl.metadata (12 kB)
+Collecting networkx (from torch==2.8.0)
+  Downloading networkx-3.7-py3-none-any.whl.metadata (6.7 kB)
+Collecting jinja2 (from torch==2.8.0)
+  Downloading jinja2-3.1.6-py3-none-any.whl.metadata (2.9 kB)
+Collecting fsspec (from torch==2.8.0)
+  Downloading fsspec-2026.9.0-py3-none-any.whl.metadata (10 kB)
+Collecting mpmath<1.4,>=1.1.0 (from sympy>=1.13.3->torch==2.8.0)
+  Downloading mpmath-1.3.0-py3-none-any.whl.metadata (8.6 kB)
+Collecting MarkupSafe>=2.0 (from jinja2->torch==2.8.0)
+  Downloading markupsafe-3.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.7 kB)
+Downloading torch-2.8.0%2Bcpu-cp312-cp312-manylinux_2_28_x86_64.whl (183.9 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 183.9/183.9 MB 177.1 MB/s  0:00:01
+Downloading sympy-1.14.0-py3-none-any.whl (6.3 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 6.3/6.3 MB 187.2 MB/s  0:00:00
+Downloading mpmath-1.3.0-py3-none-any.whl (536 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 536.2/536.2 kB 100.3 MB/s  0:00:00
+Downloading typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+Downloading filelock-4.2.4-py3-none-any.whl (162 kB)
+Downloading fsspec-2026.9.0-py3-none-any.whl (221 kB)
+Downloading jinja2-3.1.6-py3-none-any.whl (134 kB)
+Downloading markupsafe-3.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (22 kB)
+Downloading networkx-3.7-py3-none-any.whl (2.1 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.1/2.1 MB 262.3 MB/s  0:00:00
+Downloading setuptools-78.1.0-py3-none-any.whl (1.3 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.3/1.3 MB 67.6 MB/s  0:00:00
+Installing collected packages: mpmath, typing-extensions, sympy, setuptools, networkx, MarkupSafe, fsspec, filelock, jinja2, torch
+
+Successfully installed MarkupSafe-3.0.3 filelock-4.2.4 fsspec-2026.9.0 jinja2-3.1.6 mpmath-1.3.0 networkx-3.7 setuptools-78.1.0 sympy-1.14.0 torch-2.8.0+cpu typing-extensions-4.16.0
+Collecting sentence-transformers==5.0.0
+  Downloading sentence_transformers-5.0.0-py3-none-any.whl.metadata (16 kB)
+Collecting pyarrow==21.0.0
+  Downloading pyarrow-21.0.0-cp312-cp312-manylinux_2_28_x86_64.whl.metadata (3.3 kB)
+Collecting transformers<5.0.0,>=4.41.0 (from sentence-transformers==5.0.0)
+  Downloading transformers-4.57.6-py3-none-any.whl.metadata (43 kB)
+Collecting tqdm (from sentence-transformers==5.0.0)
+  Downloading tqdm-4.70.1-py3-none-any.whl.metadata (57 kB)
+Requirement already satisfied: torch>=1.11.0 in /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages (from sentence-transformers==5.0.0) (2.8.0+cpu)
+Collecting scikit-learn (from sentence-transformers==5.0.0)
+  Downloading scikit_learn-1.9.1-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (9.3 kB)
+Collecting scipy (from sentence-transformers==5.0.0)
+  Downloading scipy-1.18.1-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (62 kB)
+Collecting huggingface-hub>=0.20.0 (from sentence-transformers==5.0.0)
+  Downloading huggingface_hub-2.4.0-py3-none-any.whl.metadata (16 kB)
+Collecting Pillow (from sentence-transformers==5.0.0)
+  Downloading pillow-13.0.0-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (9.1 kB)
+Requirement already satisfied: typing_extensions>=4.5.0 in /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages (from sentence-transformers==5.0.0) (4.16.0)
+Requirement already satisfied: filelock in /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages (from transformers<5.0.0,>=4.41.0->sentence-transformers==5.0.0) (4.2.4)
+Collecting huggingface-hub>=0.20.0 (from sentence-transformers==5.0.0)
+  Downloading huggingface_hub-0.36.2-py3-none-any.whl.metadata (15 kB)
+Collecting numpy>=1.17 (from transformers<5.0.0,>=4.41.0->sentence-transformers==5.0.0)
+  Downloading numpy-2.5.4-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (6.6 kB)
+Collecting packaging>=20.0 (from transformers<5.0.0,>=4.41.0->sentence-transformers==5.0.0)
+  Downloading packaging-26.3-py3-none-any.whl.metadata (3.5 kB)
+Collecting pyyaml>=5.1 (from transformers<5.0.0,>=4.41.0->sentence-transformers==5.0.0)
+  Downloading pyyaml-6.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.4 kB)
+Collecting regex!=2019.12.17 (from transformers<5.0.0,>=4.41.0->sentence-transformers==5.0.0)
+  Downloading regex-2026.9.29-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (40 kB)
+Collecting requests (from transformers<5.0.0,>=4.41.0->sentence-transformers==5.0.0)
+  Downloading requests-2.34.2-py3-none-any.whl.metadata (4.8 kB)
+Collecting tokenizers<=0.23.0,>=0.22.0 (from transformers<5.0.0,>=4.41.0->sentence-transformers==5.0.0)
+  Downloading tokenizers-0.22.2-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (7.3 kB)
+Collecting safetensors>=0.4.3 (from transformers<5.0.0,>=4.41.0->sentence-transformers==5.0.0)
+  Downloading safetensors-0.8.0-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (4.2 kB)
+Requirement already satisfied: fsspec>=2023.5.0 in /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages (from huggingface-hub>=0.20.0->sentence-transformers==5.0.0) (2026.9.0)
+Collecting hf-xet<2.0.0,>=1.1.3 (from huggingface-hub>=0.20.0->sentence-transformers==5.0.0)
+  Downloading hf_xet-1.7.1-cp38-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (4.9 kB)
+Requirement already satisfied: setuptools in /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages (from torch>=1.11.0->sentence-transformers==5.0.0) (78.1.0)
+Requirement already satisfied: sympy>=1.13.3 in /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages (from torch>=1.11.0->sentence-transformers==5.0.0) (1.14.0)
+Requirement already satisfied: networkx in /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages (from torch>=1.11.0->sentence-transformers==5.0.0) (3.7)
+Requirement already satisfied: jinja2 in /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages (from torch>=1.11.0->sentence-transformers==5.0.0) (3.1.6)
+Requirement already satisfied: mpmath<1.4,>=1.1.0 in /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages (from sympy>=1.13.3->torch>=1.11.0->sentence-transformers==5.0.0) (1.3.0)
+Requirement already satisfied: MarkupSafe>=2.0 in /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages (from jinja2->torch>=1.11.0->sentence-transformers==5.0.0) (3.0.3)
+Collecting charset_normalizer<4,>=2 (from requests->transformers<5.0.0,>=4.41.0->sentence-transformers==5.0.0)
+  Downloading charset_normalizer-3.5.2-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (46 kB)
+Collecting idna<4,>=2.5 (from requests->transformers<5.0.0,>=4.41.0->sentence-transformers==5.0.0)
+  Downloading idna-3.20-py3-none-any.whl.metadata (7.2 kB)
+Collecting urllib3<3,>=1.26 (from requests->transformers<5.0.0,>=4.41.0->sentence-transformers==5.0.0)
+  Downloading urllib3-2.8.0-py3-none-any.whl.metadata (7.4 kB)
+Collecting certifi>=2023.5.7 (from requests->transformers<5.0.0,>=4.41.0->sentence-transformers==5.0.0)
+  Downloading certifi-2026.10.23-py3-none-any.whl.metadata (2.5 kB)
+Collecting joblib>=1.4.0 (from scikit-learn->sentence-transformers==5.0.0)
+  Downloading joblib-1.6.0-py3-none-any.whl.metadata (6.5 kB)
+Collecting narwhals>=2.0.1 (from scikit-learn->sentence-transformers==5.0.0)
+  Downloading narwhals-2.28.0-py3-none-any.whl.metadata (15 kB)
+Collecting threadpoolctl>=3.5.0 (from scikit-learn->sentence-transformers==5.0.0)
+  Downloading threadpoolctl-3.7.0-py3-none-any.whl.metadata (24 kB)
+Collecting cloudpickle>=3.0 (from joblib>=1.4.0->scikit-learn->sentence-transformers==5.0.0)
+  Downloading cloudpickle-3.1.2-py3-none-any.whl.metadata (7.1 kB)
+Downloading sentence_transformers-5.0.0-py3-none-any.whl (470 kB)
+Downloading pyarrow-21.0.0-cp312-cp312-manylinux_2_28_x86_64.whl (42.8 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 42.8/42.8 MB 313.5 MB/s  0:00:00
+Downloading transformers-4.57.6-py3-none-any.whl (12.0 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 12.0/12.0 MB 326.8 MB/s  0:00:00
+Downloading huggingface_hub-0.36.2-py3-none-any.whl (566 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 566.4/566.4 kB 101.4 MB/s  0:00:00
+Downloading hf_xet-1.7.1-cp38-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (4.2 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.2/4.2 MB 336.1 MB/s  0:00:00
+Downloading tokenizers-0.22.2-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (3.3 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.3/3.3 MB 331.9 MB/s  0:00:00
+Downloading numpy-2.5.4-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (16.7 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 16.7/16.7 MB 328.6 MB/s  0:00:00
+Downloading packaging-26.3-py3-none-any.whl (129 kB)
+Downloading pyyaml-6.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (807 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 807.9/807.9 kB 159.8 MB/s  0:00:00
+Downloading regex-2026.9.29-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (807 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 807.8/807.8 kB 172.3 MB/s  0:00:00
+Downloading safetensors-0.8.0-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (516 kB)
+Downloading tqdm-4.70.1-py3-none-any.whl (80 kB)
+Downloading pillow-13.0.0-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (7.1 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 7.1/7.1 MB 325.5 MB/s  0:00:00
+Downloading requests-2.34.2-py3-none-any.whl (73 kB)
+Downloading charset_normalizer-3.5.2-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (257 kB)
+Downloading idna-3.20-py3-none-any.whl (69 kB)
+Downloading urllib3-2.8.0-py3-none-any.whl (135 kB)
+Downloading certifi-2026.10.23-py3-none-any.whl (135 kB)
+Downloading scikit_learn-1.9.1-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (9.2 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 9.2/9.2 MB 320.3 MB/s  0:00:00
+Downloading joblib-1.6.0-py3-none-any.whl (306 kB)
+Downloading cloudpickle-3.1.2-py3-none-any.whl (22 kB)
+Downloading narwhals-2.28.0-py3-none-any.whl (490 kB)
+Downloading scipy-1.18.1-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (35.3 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 35.3/35.3 MB 322.6 MB/s  0:00:00
+Downloading threadpoolctl-3.7.0-py3-none-any.whl (26 kB)
+Installing collected packages: urllib3, tqdm, threadpoolctl, safetensors, regex, pyyaml, pyarrow, Pillow, packaging, numpy, narwhals, idna, hf-xet, cloudpickle, charset_normalizer, certifi, scipy, requests, joblib, scikit-learn, huggingface-hub, tokenizers, transformers, sentence-transformers
+
+Successfully installed Pillow-13.0.0 certifi-2026.10.23 charset_normalizer-3.5.2 cloudpickle-3.1.2 hf-xet-1.7.1 huggingface-hub-0.36.2 idna-3.20 joblib-1.6.0 narwhals-2.28.0 numpy-2.5.4 packaging-26.3 pyarrow-21.0.0 pyyaml-6.0.3 regex-2026.9.29 requests-2.34.2 safetensors-0.8.0 scikit-learn-1.9.1 scipy-1.18.1 sentence-transformers-5.0.0 threadpoolctl-3.7.0 tokenizers-0.22.2 tqdm-4.70.1 transformers-4.57.6 urllib3-2.8.0
+torch 2.8.0+cpu sentence-transformers 5.0.0
+[17:11:37] == texts and embeddings
+[17:11:40]   fiqa: 57,638 passages and 6,648 queries from hub BeIR/fiqa
+[17:11:41]   scidocs: 25,657 passages and 1,000 queries from hub BeIR/scidocs
+[17:11:41]   57,638 FiQA passages, 6,648 queries, 12,000 SciDocs passages
+[17:13:01]   FiQA passages: 2,048/57,638 embedded (28 per s, 32.8 min left)
+[17:14:11]   FiQA passages: 4,096/57,638 embedded (29 per s, 31.1 min left)
+[17:15:22]   FiQA passages: 6,144/57,638 embedded (29 per s, 29.9 min left)
+[17:16:34]   FiQA passages: 8,192/57,638 embedded (29 per s, 28.8 min left)
+[17:17:45]   FiQA passages: 10,240/57,638 embedded (29 per s, 27.5 min left)
+[17:18:56]   FiQA passages: 12,288/57,638 embedded (29 per s, 26.3 min left)
+[17:20:05]   FiQA passages: 14,336/57,638 embedded (29 per s, 25.0 min left)
+[17:21:16]   FiQA passages: 16,384/57,638 embedded (29 per s, 23.8 min left)
+[17:22:29]   FiQA passages: 18,432/57,638 embedded (29 per s, 22.7 min left)
+[17:23:41]   FiQA passages: 20,480/57,638 embedded (29 per s, 21.6 min left)
+[17:24:54]   FiQA passages: 22,528/57,638 embedded (29 per s, 20.4 min left)
+[17:26:05]   FiQA passages: 24,576/57,638 embedded (29 per s, 19.2 min left)
+[17:27:16]   FiQA passages: 26,624/57,638 embedded (29 per s, 18.0 min left)
+[17:28:29]   FiQA passages: 28,672/57,638 embedded (29 per s, 16.9 min left)
+[17:29:40]   FiQA passages: 30,720/57,638 embedded (29 per s, 15.6 min left)
+[17:30:52]   FiQA passages: 32,768/57,638 embedded (29 per s, 14.5 min left)
+[17:32:05]   FiQA passages: 34,816/57,638 embedded (29 per s, 13.3 min left)
+[17:33:15]   FiQA passages: 36,864/57,638 embedded (29 per s, 12.1 min left)
+[17:34:29]   FiQA passages: 38,912/57,638 embedded (29 per s, 10.9 min left)
+[17:35:42]   FiQA passages: 40,960/57,638 embedded (29 per s, 9.7 min left)
+[17:36:54]   FiQA passages: 43,008/57,638 embedded (29 per s, 8.5 min left)
+[17:38:05]   FiQA passages: 45,056/57,638 embedded (29 per s, 7.3 min left)
+[17:39:17]   FiQA passages: 47,104/57,638 embedded (29 per s, 6.1 min left)
+[17:40:27]   FiQA passages: 49,152/57,638 embedded (29 per s, 4.9 min left)
+[17:41:35]   FiQA passages: 51,200/57,638 embedded (29 per s, 3.7 min left)
+[17:42:45]   FiQA passages: 53,248/57,638 embedded (29 per s, 2.6 min left)
+[17:43:54]   FiQA passages: 55,296/57,638 embedded (29 per s, 1.4 min left)
+[17:45:06]   FiQA passages: 57,344/57,638 embedded (29 per s, 0.2 min left)
+[17:45:16]   FiQA passages: 57,638/57,638 embedded (29 per s, 0.0 min left)
+[17:45:24]   FiQA queries: 2,048/6,648 embedded (253 per s, 0.3 min left)
+[17:45:33]   FiQA queries: 4,096/6,648 embedded (251 per s, 0.2 min left)
+[17:45:41]   FiQA queries: 6,144/6,648 embedded (252 per s, 0.0 min left)
+[17:45:43]   FiQA queries: 6,648/6,648 embedded (252 per s, 0.0 min left)
+[17:47:17]   SciDocs passages: 2,048/12,000 embedded (22 per s, 7.6 min left)
+[17:48:50]   SciDocs passages: 4,096/12,000 embedded (22 per s, 6.0 min left)
+[17:50:23]   SciDocs passages: 6,144/12,000 embedded (22 per s, 4.5 min left)
+[17:51:57]   SciDocs passages: 8,192/12,000 embedded (22 per s, 2.9 min left)
+[17:53:35]   SciDocs passages: 10,240/12,000 embedded (22 per s, 1.4 min left)
+[17:54:55]   SciDocs passages: 12,000/12,000 embedded (22 per s, 0.0 min left)
+[17:54:56] == plans
+[17:55:01]   hubs: {'hubs': 576, 'count_threshold': 901, 'count_max': 2052, 'count_median': 179.0, 'count_expected': 230.7}
+[17:55:03]   seed 0: group 2: no probe could be placed at level 1000
+[17:55:03]   seed 0: group 3: no probe could be placed at level 1000
+[17:55:04]   seed 0: group 4: no probe could be placed at level 1000
+[17:55:04]   seed 0: group 5: no probe could be placed at level 1000
+[17:55:04]   seed 0: group 6: no probe could be placed at level 1000
+[17:55:04]   seed 0: group 7: no probe could be placed at level 1000
+[17:55:04]   seed 0: probes {'1000': 2, '100': 16, '10': 24, '1': 24}, 2 full groups, 3,864 secrets
+::notice title=x6 data (smoke)::{"counts": {"fiqa_corpus": 57638, "fiqa_queries": 6648, "scidocs_subset": 12000}, "sources": {"fiqa": "hub:BeIR/fiqa", "scidocs": "hub:BeIR/scidocs"}, "timings": {"download_s": 4.1, "embed_s": 2593.5, "plans_s": 8.5}, "hubs": {"hubs": 576, "count_threshold": 901, "count_max": 2052, "count_median": 179.0, "count_expected": 230.7}, "plans": {"0": {"probes": {"1000": 2, "100": 16, "10": 24, "1": 24}, "groups_full": 2, "shortfall": [{"group": 2, "level": 1000}, {"group": 3, "level": 1000}, {"group": 4, "level": 1000}, {"group": 5, "level": 1000}, {"group": 6, "level": 1000}, {"group": 7, "level": 1000}], "secret": 3864, "far_eligible": 9451, "far_reused": false, "far_fallback": false, "boundary": 0.1923573613166809, "far_closest_max": 0.1923355907201767, "rank_m_max": {"1000": 1059, "100": 161, "10": 12, "1": 4}}}, "from_cache": false}
+[17:55:04] == done

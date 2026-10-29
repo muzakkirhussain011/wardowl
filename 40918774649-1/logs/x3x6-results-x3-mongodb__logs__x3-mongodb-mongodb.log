@@ -1,0 +1,12 @@
+[18:30:59] x3 mongodb: seed 0
+[18:30:59]   seed 0: building (8,000 chunks)
+[18:31:03]   seed 0: built in 4 s {}
+[18:31:03]   seed 0: G=1: ok, 0 errors, translation ok
+[18:31:03]   seed 0: G=10: ok, 0 errors, translation ok
+[18:31:03]   seed 0: G=100: ok, 0 errors, translation ok
+[18:31:03]   seed 0: G=1,000: ok, 0 errors, translation ok
+[18:31:03]   seed 0: G=4,000: ok, 0 errors, translation ok
+[18:31:04]   seed 0: G=10,000: ok, 0 errors, translation ok
+[18:31:04]   seed 0: G=40,000: ok, 0 errors, translation ok
+[18:31:04] x3 mongodb: seed 0 done in 0.1 min
+::notice title=x3 mongodb::{"0": 0}

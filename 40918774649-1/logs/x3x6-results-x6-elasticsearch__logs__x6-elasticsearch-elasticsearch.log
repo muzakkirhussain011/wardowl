@@ -1,0 +1,11 @@
+[18:34:02] x6 elasticsearch: loading the data
+[18:34:03] x6 elasticsearch: seed 0
+[18:34:03]   seed 0: building w1 (57,638 chunks)
+[18:34:37]   seed 0: w1 built in 34 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 11, 'docs': 57638}
+[18:34:37]   seed 0: building sep (53,774 chunks)
+[18:35:04]   seed 0: sep built in 27 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 9, 'docs': 53774}
+[18:35:04]   seed 0: building w0 group 0 (57,638 chunks)
+[18:35:34]   seed 0: w0 group 0 built in 30 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 12, 'docs': 57638}
+[18:35:36]   seed 0: 56/1,512 retrievals (0.6 per s, 40 min left)
+[18:35:58] x6 elasticsearch: seed 0 done in 1.9 min
+::notice title=x6 elasticsearch::{"seeds": [0], "minutes": [1.9], "retrievals": [1512], "stopped": {}, "first_errors": {}}
