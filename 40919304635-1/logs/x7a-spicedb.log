@@ -1,0 +1,14 @@
+[2026-10-29T17:14:37.821+00:00] x7a spicedb-fc: start
+[2026-10-29T17:19:37.702+00:00] x7a spicedb-fc seed 0: 300 s
+[2026-10-29T17:24:37.473+00:00] x7a spicedb-fc seed 1: 600 s
+[2026-10-29T17:29:37.086+00:00] x7a spicedb-fc seed 2: 899 s
+[2026-10-29T17:34:37.064+00:00] x7a spicedb-fc seed 3: 1199 s
+[2026-10-29T17:39:36.864+00:00] x7a spicedb-fc seed 4: 1499 s
+[2026-10-29T17:39:36.865+00:00] x7a spicedb-ml: start
+[2026-10-29T17:53:00.461+00:00] x7a spicedb-ml seed 0: 804 s
+[2026-10-29T18:06:25.389+00:00] x7a spicedb-ml seed 1: 1609 s
+[2026-10-29T18:19:42.275+00:00] x7a spicedb-ml seed 2: 2405 s
+[2026-10-29T18:33:06.919+00:00] x7a spicedb-ml seed 3: 3210 s
+[2026-10-29T18:46:30.437+00:00] x7a spicedb-ml seed 4: 4014 s
+::notice title=x7 x7a-spicedb%3A no harness errors::every call the harness made returned
+::notice title=x7 x7a-spicedb records::405 records, 0 failed paths or targets, in results/x7-x7a-spicedb.jsonl

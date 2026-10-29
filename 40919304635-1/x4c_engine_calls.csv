@@ -1,0 +1,109 @@
+engine,structure,N,api,calls,status 200,counts,median s,missing,extra,with cursor,error lines,answer keys
+openfga,full-direct,10,list-objects,15,15,[10],0.161,0,0,0,0,"[('objects',)]"
+openfga,full-direct,10,streamed-list-objects,15,15,[10],0.157,0,0,0,0,[()]
+openfga,full-direct,100,list-objects,15,15,[100],0.159,0,0,0,0,"[('objects',)]"
+openfga,full-direct,100,streamed-list-objects,15,15,[100],0.155,0,0,0,0,[()]
+openfga,full-direct,999,list-objects,15,15,[999],0.155,0,0,0,0,"[('objects',)]"
+openfga,full-direct,999,streamed-list-objects,15,15,[999],0.169,0,0,0,0,[()]
+openfga,full-direct,1000,list-objects,15,15,[1000],0.159,0,0,0,0,"[('objects',)]"
+openfga,full-direct,1000,streamed-list-objects,15,15,[1000],0.177,0,0,0,0,[()]
+openfga,full-direct,1001,list-objects,15,15,[1000],0.157,15,0,0,0,"[('objects',)]"
+openfga,full-direct,1001,streamed-list-objects,15,15,[1001],0.171,0,0,0,0,[()]
+openfga,full-direct,3000,list-objects,15,15,[1000],0.151,30000,0,0,0,"[('objects',)]"
+openfga,full-direct,3000,streamed-list-objects,15,15,[3000],0.196,0,0,0,0,[()]
+openfga,full-direct,10000,list-objects,15,15,[1000],0.163,135000,0,0,0,"[('objects',)]"
+openfga,full-direct,10000,streamed-list-objects,15,15,[10000],0.311,0,0,0,0,[()]
+openfga,full-direct,30000,list-objects,15,15,[1000],0.184,435000,0,0,0,"[('objects',)]"
+openfga,full-direct,30000,streamed-list-objects,15,15,[30000],0.679,0,0,0,0,[()]
+openfga,full-direct,100000,list-objects,15,15,[1000],0.273,1485000,0,0,0,"[('objects',)]"
+openfga,full-direct,100000,streamed-list-objects,15,15,[100000],1.933,0,0,0,0,[()]
+openfga,full-folder,10,list-objects,15,15,[10],0.152,0,0,0,0,"[('objects',)]"
+openfga,full-folder,10,streamed-list-objects,15,15,[10],0.153,0,0,0,0,[()]
+openfga,full-folder,100,list-objects,15,15,[100],0.156,0,0,0,0,"[('objects',)]"
+openfga,full-folder,100,streamed-list-objects,15,15,[100],0.159,0,0,0,0,[()]
+openfga,full-folder,999,list-objects,15,15,[999],0.161,0,0,0,0,"[('objects',)]"
+openfga,full-folder,999,streamed-list-objects,15,15,[999],0.171,0,0,0,0,[()]
+openfga,full-folder,1000,list-objects,15,15,[1000],0.166,0,0,0,0,"[('objects',)]"
+openfga,full-folder,1000,streamed-list-objects,15,15,[1000],0.175,0,0,0,0,[()]
+openfga,full-folder,1001,list-objects,15,15,[1000],0.152,15,0,0,0,"[('objects',)]"
+openfga,full-folder,1001,streamed-list-objects,15,15,[1001],0.167,0,0,0,0,[()]
+openfga,full-folder,3000,list-objects,15,15,[1000],0.157,30000,0,0,0,"[('objects',)]"
+openfga,full-folder,3000,streamed-list-objects,15,15,[3000],0.203,0,0,0,0,[()]
+openfga,full-folder,10000,list-objects,15,15,[1000],0.179,135000,0,0,0,"[('objects',)]"
+openfga,full-folder,10000,streamed-list-objects,15,15,[10000],0.338,0,0,0,0,[()]
+openfga,full-folder,30000,list-objects,15,15,[1000],0.214,435000,0,0,0,"[('objects',)]"
+openfga,full-folder,30000,streamed-list-objects,15,15,[30000],0.713,0,0,0,0,[()]
+openfga,full-folder,100000,list-objects,15,15,[1000],0.335,1485000,0,0,0,"[('objects',)]"
+openfga,full-folder,100000,streamed-list-objects,15,15,[100000],2.026,0,0,0,0,[()]
+openfga,simple-direct,10,list-objects,15,15,[10],0.001,0,0,0,0,"[('objects',)]"
+openfga,simple-direct,10,streamed-list-objects,15,15,[10],0.001,0,0,0,0,[()]
+openfga,simple-direct,100,list-objects,15,15,[100],0.001,0,0,0,0,"[('objects',)]"
+openfga,simple-direct,100,streamed-list-objects,15,15,[100],0.003,0,0,0,0,[()]
+openfga,simple-direct,999,list-objects,15,15,[999],0.004,0,0,0,0,"[('objects',)]"
+openfga,simple-direct,999,streamed-list-objects,15,15,[999],0.016,0,0,0,0,[()]
+openfga,simple-direct,1000,list-objects,15,15,[1000],0.004,0,0,0,0,"[('objects',)]"
+openfga,simple-direct,1000,streamed-list-objects,15,15,[1000],0.017,0,0,0,0,[()]
+openfga,simple-direct,1001,list-objects,15,15,[1000],0.004,15,0,0,0,"[('objects',)]"
+openfga,simple-direct,1001,streamed-list-objects,15,15,[1001],0.016,0,0,0,0,[()]
+openfga,simple-direct,3000,list-objects,15,15,[1000],0.005,30000,0,0,0,"[('objects',)]"
+openfga,simple-direct,3000,streamed-list-objects,15,15,[3000],0.047,0,0,0,0,[()]
+openfga,simple-direct,10000,list-objects,15,15,[1000],0.012,135000,0,0,0,"[('objects',)]"
+openfga,simple-direct,10000,streamed-list-objects,15,15,[10000],0.159,0,0,0,0,[()]
+openfga,simple-direct,30000,list-objects,15,15,[1000],0.033,435000,0,0,0,"[('objects',)]"
+openfga,simple-direct,30000,streamed-list-objects,15,15,[30000],0.515,0,0,0,0,[()]
+openfga,simple-direct,100000,list-objects,15,15,[1000],0.116,1485000,0,0,0,"[('objects',)]"
+openfga,simple-direct,100000,streamed-list-objects,15,15,[100000],1.736,0,0,0,0,[()]
+spicedb,full-direct,10,lookup-limit,15,15,[10],0.002,0,0,15,0,"[('afterResultCursor', 'lookedUpAt', 'partialCaveatInfo', 'permissionship', 'resourceObjectId')]"
+spicedb,full-direct,10,lookup-unlimited,15,15,[10],0.001,0,0,15,0,"[('afterResultCursor', 'lookedUpAt', 'partialCaveatInfo', 'permissionship', 'resourceObjectId')]"
+spicedb,full-direct,100,lookup-limit,15,15,[100],0.003,0,0,15,0,"[('afterResultCursor', 'lookedUpAt', 'partialCaveatInfo', 'permissionship', 'resourceObjectId')]"
+spicedb,full-direct,100,lookup-unlimited,15,15,[100],0.003,0,0,15,0,"[('afterResultCursor', 'lookedUpAt', 'partialCaveatInfo', 'permissionship', 'resourceObjectId')]"
+spicedb,full-direct,999,lookup-limit,15,15,[999],0.029,0,0,15,0,"[('afterResultCursor', 'lookedUpAt', 'partialCaveatInfo', 'permissionship', 'resourceObjectId')]"
+spicedb,full-direct,999,lookup-unlimited,15,15,[999],0.027,0,0,15,0,"[('afterResultCursor', 'lookedUpAt', 'partialCaveatInfo', 'permissionship', 'resourceObjectId')]"
+spicedb,full-direct,1000,lookup-limit,15,15,[1000],0.027,0,0,15,0,"[('afterResultCursor', 'lookedUpAt', 'partialCaveatInfo', 'permissionship', 'resourceObjectId')]"
+spicedb,full-direct,1000,lookup-unlimited,15,15,[1000],0.028,0,0,15,0,"[('afterResultCursor', 'lookedUpAt', 'partialCaveatInfo', 'permissionship', 'resourceObjectId')]"
+spicedb,full-direct,1001,lookup-limit,15,15,[1000],0.030,15,0,15,0,"[('afterResultCursor', 'lookedUpAt', 'partialCaveatInfo', 'permissionship', 'resourceObjectId')]"
+spicedb,full-direct,1001,lookup-unlimited,15,15,[1001],0.027,0,0,15,0,"[('afterResultCursor', 'lookedUpAt', 'partialCaveatInfo', 'permissionship', 'resourceObjectId')]"
+spicedb,full-direct,3000,lookup-limit,15,15,[1000],0.030,30000,0,15,0,"[('afterResultCursor', 'lookedUpAt', 'partialCaveatInfo', 'permissionship', 'resourceObjectId')]"
+spicedb,full-direct,3000,lookup-unlimited,15,15,[3000],0.083,0,0,15,0,"[('afterResultCursor', 'lookedUpAt', 'partialCaveatInfo', 'permissionship', 'resourceObjectId')]"
+spicedb,full-direct,10000,lookup-limit,15,15,[1000],0.030,135000,0,15,0,"[('afterResultCursor', 'lookedUpAt', 'partialCaveatInfo', 'permissionship', 'resourceObjectId')]"
+spicedb,full-direct,10000,lookup-unlimited,15,15,[10000],0.266,0,0,15,0,"[('afterResultCursor', 'lookedUpAt', 'partialCaveatInfo', 'permissionship', 'resourceObjectId')]"
+spicedb,full-direct,30000,lookup-limit,15,15,[1000],0.144,435000,0,15,0,"[('afterResultCursor', 'lookedUpAt', 'partialCaveatInfo', 'permissionship', 'resourceObjectId')]"
+spicedb,full-direct,30000,lookup-unlimited,15,15,[30000],0.811,0,0,15,0,"[('afterResultCursor', 'lookedUpAt', 'partialCaveatInfo', 'permissionship', 'resourceObjectId')]"
+spicedb,full-direct,100000,lookup-limit,15,15,[1000],0.280,1485000,0,15,0,"[('afterResultCursor', 'lookedUpAt', 'partialCaveatInfo', 'permissionship', 'resourceObjectId')]"
+spicedb,full-direct,100000,lookup-unlimited,15,15,[100000],3.674,0,0,15,0,"[('afterResultCursor', 'lookedUpAt', 'partialCaveatInfo', 'permissionship', 'resourceObjectId')]"
+spicedb,full-folder,10,lookup-limit,15,15,[10],0.001,0,0,15,0,"[('afterResultCursor', 'lookedUpAt', 'partialCaveatInfo', 'permissionship', 'resourceObjectId')]"
+spicedb,full-folder,10,lookup-unlimited,15,15,[10],0.001,0,0,15,0,"[('afterResultCursor', 'lookedUpAt', 'partialCaveatInfo', 'permissionship', 'resourceObjectId')]"
+spicedb,full-folder,100,lookup-limit,15,15,[100],0.004,0,0,15,0,"[('afterResultCursor', 'lookedUpAt', 'partialCaveatInfo', 'permissionship', 'resourceObjectId')]"
+spicedb,full-folder,100,lookup-unlimited,15,15,[100],0.004,0,0,15,0,"[('afterResultCursor', 'lookedUpAt', 'partialCaveatInfo', 'permissionship', 'resourceObjectId')]"
+spicedb,full-folder,999,lookup-limit,15,15,[999],0.029,0,0,15,0,"[('afterResultCursor', 'lookedUpAt', 'partialCaveatInfo', 'permissionship', 'resourceObjectId')]"
+spicedb,full-folder,999,lookup-unlimited,15,15,[999],0.027,0,0,15,0,"[('afterResultCursor', 'lookedUpAt', 'partialCaveatInfo', 'permissionship', 'resourceObjectId')]"
+spicedb,full-folder,1000,lookup-limit,15,15,[1000],0.032,0,0,15,0,"[('afterResultCursor', 'lookedUpAt', 'partialCaveatInfo', 'permissionship', 'resourceObjectId')]"
+spicedb,full-folder,1000,lookup-unlimited,15,15,[1000],0.030,0,0,15,0,"[('afterResultCursor', 'lookedUpAt', 'partialCaveatInfo', 'permissionship', 'resourceObjectId')]"
+spicedb,full-folder,1001,lookup-limit,15,15,[1000],0.027,15,0,15,0,"[('afterResultCursor', 'lookedUpAt', 'partialCaveatInfo', 'permissionship', 'resourceObjectId')]"
+spicedb,full-folder,1001,lookup-unlimited,15,15,[1001],0.030,0,0,15,0,"[('afterResultCursor', 'lookedUpAt', 'partialCaveatInfo', 'permissionship', 'resourceObjectId')]"
+spicedb,full-folder,3000,lookup-limit,15,15,[1000],0.035,30000,0,15,0,"[('afterResultCursor', 'lookedUpAt', 'partialCaveatInfo', 'permissionship', 'resourceObjectId')]"
+spicedb,full-folder,3000,lookup-unlimited,15,15,[3000],0.079,0,0,15,0,"[('afterResultCursor', 'lookedUpAt', 'partialCaveatInfo', 'permissionship', 'resourceObjectId')]"
+spicedb,full-folder,10000,lookup-limit,15,15,[1000],0.035,135000,0,15,0,"[('afterResultCursor', 'lookedUpAt', 'partialCaveatInfo', 'permissionship', 'resourceObjectId')]"
+spicedb,full-folder,10000,lookup-unlimited,15,15,[10000],0.290,0,0,15,0,"[('afterResultCursor', 'lookedUpAt', 'partialCaveatInfo', 'permissionship', 'resourceObjectId')]"
+spicedb,full-folder,30000,lookup-limit,15,15,[1000],0.031,435000,0,15,0,"[('afterResultCursor', 'lookedUpAt', 'partialCaveatInfo', 'permissionship', 'resourceObjectId')]"
+spicedb,full-folder,30000,lookup-unlimited,15,15,[30000],0.822,0,0,15,0,"[('afterResultCursor', 'lookedUpAt', 'partialCaveatInfo', 'permissionship', 'resourceObjectId')]"
+spicedb,full-folder,100000,lookup-limit,15,15,[1000],0.771,1485000,0,15,0,"[('afterResultCursor', 'lookedUpAt', 'partialCaveatInfo', 'permissionship', 'resourceObjectId')]"
+spicedb,full-folder,100000,lookup-unlimited,15,15,[100000],3.419,0,0,15,0,"[('afterResultCursor', 'lookedUpAt', 'partialCaveatInfo', 'permissionship', 'resourceObjectId')]"
+spicedb,simple-direct,10,lookup-limit,15,15,[10],0.001,0,0,15,0,"[('afterResultCursor', 'lookedUpAt', 'partialCaveatInfo', 'permissionship', 'resourceObjectId')]"
+spicedb,simple-direct,10,lookup-unlimited,15,15,[10],0.001,0,0,15,0,"[('afterResultCursor', 'lookedUpAt', 'partialCaveatInfo', 'permissionship', 'resourceObjectId')]"
+spicedb,simple-direct,100,lookup-limit,15,15,[100],0.004,0,0,15,0,"[('afterResultCursor', 'lookedUpAt', 'partialCaveatInfo', 'permissionship', 'resourceObjectId')]"
+spicedb,simple-direct,100,lookup-unlimited,15,15,[100],0.004,0,0,15,0,"[('afterResultCursor', 'lookedUpAt', 'partialCaveatInfo', 'permissionship', 'resourceObjectId')]"
+spicedb,simple-direct,999,lookup-limit,15,15,[999],0.028,0,0,15,0,"[('afterResultCursor', 'lookedUpAt', 'partialCaveatInfo', 'permissionship', 'resourceObjectId')]"
+spicedb,simple-direct,999,lookup-unlimited,15,15,[999],0.027,0,0,15,0,"[('afterResultCursor', 'lookedUpAt', 'partialCaveatInfo', 'permissionship', 'resourceObjectId')]"
+spicedb,simple-direct,1000,lookup-limit,15,15,[1000],0.026,0,0,15,0,"[('afterResultCursor', 'lookedUpAt', 'partialCaveatInfo', 'permissionship', 'resourceObjectId')]"
+spicedb,simple-direct,1000,lookup-unlimited,15,15,[1000],0.027,0,0,15,0,"[('afterResultCursor', 'lookedUpAt', 'partialCaveatInfo', 'permissionship', 'resourceObjectId')]"
+spicedb,simple-direct,1001,lookup-limit,15,15,[1000],0.027,15,0,15,0,"[('afterResultCursor', 'lookedUpAt', 'partialCaveatInfo', 'permissionship', 'resourceObjectId')]"
+spicedb,simple-direct,1001,lookup-unlimited,15,15,[1001],0.027,0,0,15,0,"[('afterResultCursor', 'lookedUpAt', 'partialCaveatInfo', 'permissionship', 'resourceObjectId')]"
+spicedb,simple-direct,3000,lookup-limit,15,15,[1000],0.026,30000,0,15,0,"[('afterResultCursor', 'lookedUpAt', 'partialCaveatInfo', 'permissionship', 'resourceObjectId')]"
+spicedb,simple-direct,3000,lookup-unlimited,15,15,[3000],0.075,0,0,15,0,"[('afterResultCursor', 'lookedUpAt', 'partialCaveatInfo', 'permissionship', 'resourceObjectId')]"
+spicedb,simple-direct,10000,lookup-limit,15,15,[1000],0.031,135000,0,15,0,"[('afterResultCursor', 'lookedUpAt', 'partialCaveatInfo', 'permissionship', 'resourceObjectId')]"
+spicedb,simple-direct,10000,lookup-unlimited,15,15,[10000],0.255,0,0,15,0,"[('afterResultCursor', 'lookedUpAt', 'partialCaveatInfo', 'permissionship', 'resourceObjectId')]"
+spicedb,simple-direct,30000,lookup-limit,15,15,[1000],0.029,435000,0,15,0,"[('afterResultCursor', 'lookedUpAt', 'partialCaveatInfo', 'permissionship', 'resourceObjectId')]"
+spicedb,simple-direct,30000,lookup-unlimited,15,15,[30000],0.761,0,0,15,0,"[('afterResultCursor', 'lookedUpAt', 'partialCaveatInfo', 'permissionship', 'resourceObjectId')]"
+spicedb,simple-direct,100000,lookup-limit,15,15,[1000],0.186,1485000,0,15,0,"[('afterResultCursor', 'lookedUpAt', 'partialCaveatInfo', 'permissionship', 'resourceObjectId')]"
+spicedb,simple-direct,100000,lookup-unlimited,15,15,[100000],2.643,0,0,15,0,"[('afterResultCursor', 'lookedUpAt', 'partialCaveatInfo', 'permissionship', 'resourceObjectId')]"

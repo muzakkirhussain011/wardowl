@@ -1,0 +1,14 @@
+[2026-10-29T17:14:25.766+00:00] x7a acl-pgvector: start
+[2026-10-29T17:14:30.201+00:00] x7a acl-pgvector seed 0: 4 s
+[2026-10-29T17:14:34.535+00:00] x7a acl-pgvector seed 1: 9 s
+[2026-10-29T17:14:38.766+00:00] x7a acl-pgvector seed 2: 13 s
+[2026-10-29T17:14:43.362+00:00] x7a acl-pgvector seed 3: 18 s
+[2026-10-29T17:14:47.629+00:00] x7a acl-pgvector seed 4: 22 s
+[2026-10-29T17:14:47.637+00:00] x7a acl-qdrant: start
+[2026-10-29T17:14:52.760+00:00] x7a acl-qdrant seed 0: 5 s
+[2026-10-29T17:14:57.281+00:00] x7a acl-qdrant seed 1: 10 s
+[2026-10-29T17:15:01.807+00:00] x7a acl-qdrant seed 2: 14 s
+[2026-10-29T17:15:06.302+00:00] x7a acl-qdrant seed 3: 19 s
+[2026-10-29T17:15:10.836+00:00] x7a acl-qdrant seed 4: 23 s
+::notice title=x7 x7a-acl%3A no harness errors::every call the harness made returned
+::notice title=x7 x7a-acl records::405 records, 0 failed paths or targets, in results/x7-x7a-acl.jsonl

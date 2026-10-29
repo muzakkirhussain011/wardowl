@@ -1,0 +1,9 @@
+[2026-10-29T17:14:21.210+00:00] x4 spicedb part c: start
+[2026-10-29T17:16:32.789+00:00] x4c spicedb seed 0 done
+[2026-10-29T17:18:40.049+00:00] x4c spicedb seed 1 done
+[2026-10-29T17:20:47.922+00:00] x4c spicedb seed 2 done
+[2026-10-29T17:22:54.981+00:00] x4c spicedb seed 3 done
+[2026-10-29T17:25:06.542+00:00] x4c spicedb seed 4 done
+[2026-10-29T17:25:06.588+00:00] x4 spicedb part c: 645 s
+::notice title=x4 x4-spicedb-scale%3A no harness errors::every call the harness made returned
+::notice title=x4 x4-spicedb-scale records::5275 records, 0 failed setups or parts, in results/x4-x4-spicedb-scale.jsonl

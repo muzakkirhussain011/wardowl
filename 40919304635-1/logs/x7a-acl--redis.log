@@ -1,0 +1,60 @@
+1:M 29 Oct 2026 17:14:13.169 * <bf> RedisBloom version 8.10.1 (Git=unknown)
+1:M 29 Oct 2026 17:14:13.169 * <bf> Registering configuration options: [
+1:M 29 Oct 2026 17:14:13.169 * <bf> 	{ bf-error-rate       :      0.01 }
+1:M 29 Oct 2026 17:14:13.169 * <bf> 	{ bf-initial-size     :       100 }
+1:M 29 Oct 2026 17:14:13.169 * <bf> 	{ bf-expansion-factor :         2 }
+1:M 29 Oct 2026 17:14:13.169 * <bf> 	{ cf-bucket-size      :         2 }
+1:M 29 Oct 2026 17:14:13.169 * <bf> 	{ cf-initial-size     :      1024 }
+1:M 29 Oct 2026 17:14:13.169 * <bf> 	{ cf-max-iterations   :        20 }
+1:M 29 Oct 2026 17:14:13.169 * <bf> 	{ cf-expansion-factor :         1 }
+1:M 29 Oct 2026 17:14:13.169 * <bf> 	{ cf-max-expansions   :        32 }
+1:M 29 Oct 2026 17:14:13.169 * <bf> ]
+1:M 29 Oct 2026 17:14:13.170 * Module 'bf' loaded from /usr/local/lib/redis/modules//redisbloom.so
+1:M 29 Oct 2026 17:14:13.173 * <search> search-workers default: 4 (min of MAX_WORKER_THREADS=16 and CPU cores)
+1:M 29 Oct 2026 17:14:13.173 * <search> Redis version found by RedisSearch : 8.10.2 - oss
+1:M 29 Oct 2026 17:14:13.173 * <search> RediSearch version 8.10.1 (Git=)
+1:M 29 Oct 2026 17:14:13.173 * <search> gc: ON, prefix min length: 2, min word length to stem: 4, prefix max expansions: 200, query timeout (ms): 500, timeout policy: return, oom policy: return, cursor read size: 1000, cursor max idle (ms): 300000, max doctable size: 1000000, max number of search results:  1000000, default scorer: BM25STD, 
+1:M 29 Oct 2026 17:14:13.173 * <search> Initialized thread pools!
+1:M 29 Oct 2026 17:14:13.173 * <search> Enabled workers threadpool of size 4
+1:M 29 Oct 2026 17:14:13.173 * <search> Subscribe to config changes
+1:M 29 Oct 2026 17:14:13.173 * <search> Subscribe to cluster slot migration events
+1:M 29 Oct 2026 17:14:13.173 * <search> Subscribe to cluster topology change events
+1:M 29 Oct 2026 17:14:13.173 * <search> Enabled role change notification
+1:M 29 Oct 2026 17:14:13.173 * <search> Cluster configuration: AUTO partitions, type: 0, coordinator timeout: 0ms
+1:M 29 Oct 2026 17:14:13.173 * Module 'search' loaded from /usr/local/lib/redis/modules//redisearch.so
+1:M 29 Oct 2026 17:14:13.174 * <timeseries> RedisTimeSeries version 81001, git_sha=
+1:M 29 Oct 2026 17:14:13.174 * <timeseries> Redis version found by RedisTimeSeries : 8.10.2 - oss
+1:M 29 Oct 2026 17:14:13.174 * <timeseries> Registering configuration options: [
+1:M 29 Oct 2026 17:14:13.174 * <timeseries> 	{ ts-compaction-policy   :              }
+1:M 29 Oct 2026 17:14:13.174 * <timeseries> 	{ ts-num-threads         :            3 }
+1:M 29 Oct 2026 17:14:13.174 * <timeseries> 	{ ts-libmr-protocol      :     INTERNAL }
+1:M 29 Oct 2026 17:14:13.174 * <timeseries> 	{ ts-retention-policy    :            0 }
+1:M 29 Oct 2026 17:14:13.174 * <timeseries> 	{ ts-duplicate-policy    :        block }
+1:M 29 Oct 2026 17:14:13.174 * <timeseries> 	{ ts-chunk-size-bytes    :         4096 }
+1:M 29 Oct 2026 17:14:13.174 * <timeseries> 	{ ts-encoding            :   compressed }
+1:M 29 Oct 2026 17:14:13.174 * <timeseries> 	{ ts-ignore-max-time-diff:            0 }
+1:M 29 Oct 2026 17:14:13.174 * <timeseries> 	{ ts-ignore-max-val-diff :     0.000000 }
+1:M 29 Oct 2026 17:14:13.174 * <timeseries> 	{ ts-topology-events     :         true }
+1:M 29 Oct 2026 17:14:13.174 * <timeseries> ]
+1:M 29 Oct 2026 17:14:13.174 * <timeseries> Detected redis oss (cluster-enabled=no)
+1:M 29 Oct 2026 17:14:13.174 * <timeseries> Subscribe to ASM events
+1:M 29 Oct 2026 17:14:13.174 * <timeseries> Subscribe to topology changes events
+1:M 29 Oct 2026 17:14:13.174 * <timeseries> Enabled diskless replication
+1:M 29 Oct 2026 17:14:13.174 * Module 'timeseries' loaded from /usr/local/lib/redis/modules//redistimeseries.so
+1:M 29 Oct 2026 17:14:13.175 * <ReJSON> Created new data type 'ReJSON-RL'
+1:M 29 Oct 2026 17:14:13.175 * <ReJSON> version: 81000 git sha: unknown branch: unknown
+1:M 29 Oct 2026 17:14:13.175 * <ReJSON> Exported RedisJSON_V1 API
+1:M 29 Oct 2026 17:14:13.175 * <ReJSON> Exported RedisJSON_V2 API
+1:M 29 Oct 2026 17:14:13.175 * <ReJSON> Exported RedisJSON_V3 API
+1:M 29 Oct 2026 17:14:13.175 * <ReJSON> Exported RedisJSON_V4 API
+1:M 29 Oct 2026 17:14:13.175 * <ReJSON> Exported RedisJSON_V5 API
+1:M 29 Oct 2026 17:14:13.175 * <ReJSON> Exported RedisJSON_V6 API
+1:M 29 Oct 2026 17:14:13.175 * <ReJSON> Exported RedisJSON_V7 API
+1:M 29 Oct 2026 17:14:13.175 * <ReJSON> Exported RedisJSON_V8 API
+1:M 29 Oct 2026 17:14:13.175 * <ReJSON> Enabled diskless replication
+1:M 29 Oct 2026 17:14:13.175 * <ReJSON> Initialized shared string cache, thread safe: true.
+1:M 29 Oct 2026 17:14:13.175 * Module 'ReJSON' loaded from /usr/local/lib/redis/modules//rejson.so
+1:M 29 Oct 2026 17:14:13.175 * <search> Acquired RedisJSON_V8 API
+1:M 29 Oct 2026 17:14:13.175 * Server initialized
+1:M 29 Oct 2026 17:14:13.175 * Ready to accept connections tcp
+1:M 29 Oct 2026 17:14:13.175 # WARNING: Redis does not require authentication and is not protected by network restrictions. Redis will accept connections from any IP address on any network interface.

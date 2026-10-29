@@ -1,0 +1,73 @@
+engine,route,structure,N,queries,failed,recall@10 [95% CI],false complete,leaks,strategies,median s
+opa,opa-rel-doc,opa-share,10,150,0,"1.000 [1.000, 1.000]",0,0,{'prefilter': 150},1.643
+opa,opa-rel-doc,opa-share,100,150,0,"1.000 [1.000, 1.000]",0,0,{'prefilter': 150},1.663
+opa,opa-rel-doc,opa-share,999,150,0,"1.000 [1.000, 1.000]",0,0,{'prefilter': 150},1.662
+opa,opa-rel-doc,opa-share,1000,150,0,"1.000 [1.000, 1.000]",0,0,{'prefilter': 150},1.678
+opa,opa-rel-doc,opa-share,1001,150,0,"1.000 [1.000, 1.000]",0,0,{'prefilter': 150},1.679
+opa,opa-rel-doc,opa-share,3000,150,0,"1.000 [1.000, 1.000]",0,0,{'prefilter': 150},1.672
+opa,opa-rel-doc,opa-share,10000,150,0,"1.000 [1.000, 1.000]",0,0,{'prefilter': 150},1.681
+opa,opa-rel-doc,opa-share,30000,150,0,"1.000 [1.000, 1.000]",0,0,{'prefilter': 150},1.620
+opa,opa-rel-doc,opa-share,100000,150,0,"1.000 [1.000, 1.000]",0,0,{'prefilter': 150},1.355
+opa,opa-rel-pe,opa-share,10,150,150,"n/a [n/a, n/a]",0,0,{},2.003
+opa,opa-rel-pe,opa-share,100,150,150,"n/a [n/a, n/a]",0,0,{},2.003
+opa,opa-rel-pe,opa-share,999,150,150,"n/a [n/a, n/a]",0,0,{},2.003
+opa,opa-rel-pe,opa-share,1000,150,150,"n/a [n/a, n/a]",0,0,{},2.003
+opa,opa-rel-pe,opa-share,1001,150,150,"n/a [n/a, n/a]",0,0,{},2.003
+opa,opa-rel-pe,opa-share,3000,150,150,"n/a [n/a, n/a]",0,0,{},2.003
+opa,opa-rel-pe,opa-share,10000,150,150,"n/a [n/a, n/a]",0,0,{},2.003
+opa,opa-rel-pe,opa-share,30000,150,150,"n/a [n/a, n/a]",0,0,{},2.003
+opa,opa-rel-pe,opa-share,100000,150,150,"n/a [n/a, n/a]",0,0,{},2.003
+openfga,adapter,full-direct,10,150,0,"1.000 [1.000, 1.000]",0,0,{'prefilter': 150},0.210
+openfga,adapter,full-direct,100,150,0,"1.000 [1.000, 1.000]",0,0,{'prefilter': 150},0.209
+openfga,adapter,full-direct,999,150,0,"1.000 [1.000, 1.000]",0,0,{'prefilter': 150},0.211
+openfga,adapter,full-direct,1000,150,0,"0.880 [0.853, 0.905]",0,0,{'postfilter': 150},0.798
+openfga,adapter,full-direct,1001,150,0,"0.889 [0.861, 0.914]",0,0,{'postfilter': 150},0.781
+openfga,adapter,full-direct,3000,150,0,"1.000 [1.000, 1.000]",0,0,{'postfilter': 150},0.548
+openfga,adapter,full-direct,10000,150,0,"1.000 [1.000, 1.000]",0,0,{'postfilter': 150},0.311
+openfga,adapter,full-direct,30000,150,0,"1.000 [1.000, 1.000]",0,0,{'postfilter': 150},0.264
+openfga,adapter,full-direct,100000,150,0,"1.000 [1.000, 1.000]",0,0,{'postfilter': 150},0.334
+openfga,adapter,full-folder,10,150,0,"1.000 [1.000, 1.000]",0,0,{'prefilter': 150},0.207
+openfga,adapter,full-folder,100,150,0,"1.000 [1.000, 1.000]",0,0,{'prefilter': 150},0.208
+openfga,adapter,full-folder,999,150,0,"1.000 [1.000, 1.000]",0,0,{'prefilter': 150},0.212
+openfga,adapter,full-folder,1000,150,0,"0.880 [0.853, 0.906]",0,0,{'postfilter': 150},0.796
+openfga,adapter,full-folder,1001,150,0,"0.891 [0.865, 0.916]",0,0,{'postfilter': 150},0.778
+openfga,adapter,full-folder,3000,150,0,"1.000 [1.000, 1.000]",0,0,{'postfilter': 150},0.558
+openfga,adapter,full-folder,10000,150,0,"1.000 [1.000, 1.000]",0,0,{'postfilter': 150},0.325
+openfga,adapter,full-folder,30000,150,0,"1.000 [1.000, 1.000]",0,0,{'postfilter': 150},0.282
+openfga,adapter,full-folder,100000,150,0,"1.000 [1.000, 1.000]",0,0,{'postfilter': 150},0.402
+openfga,adapter,simple-direct,10,150,0,"1.000 [1.000, 1.000]",0,0,{'prefilter': 150},0.047
+openfga,adapter,simple-direct,100,150,0,"1.000 [1.000, 1.000]",0,0,{'prefilter': 150},0.047
+openfga,adapter,simple-direct,999,150,0,"1.000 [1.000, 1.000]",0,0,{'prefilter': 150},0.051
+openfga,adapter,simple-direct,1000,150,0,"0.878 [0.847, 0.907]",0,0,{'postfilter': 150},0.109
+openfga,adapter,simple-direct,1001,150,0,"0.875 [0.846, 0.903]",0,0,{'postfilter': 150},0.103
+openfga,adapter,simple-direct,3000,150,0,"1.000 [1.000, 1.000]",0,0,{'postfilter': 150},0.072
+openfga,adapter,simple-direct,10000,150,0,"1.000 [1.000, 1.000]",0,0,{'postfilter': 150},0.085
+openfga,adapter,simple-direct,30000,150,0,"1.000 [1.000, 1.000]",0,0,{'postfilter': 150},0.074
+openfga,adapter,simple-direct,100000,150,0,"1.000 [1.000, 1.000]",0,0,{'postfilter': 150},0.145
+spicedb,adapter,full-direct,10,150,0,"1.000 [1.000, 1.000]",0,0,{'prefilter': 150},0.037
+spicedb,adapter,full-direct,100,150,0,"1.000 [1.000, 1.000]",0,0,{'prefilter': 150},0.043
+spicedb,adapter,full-direct,999,150,0,"1.000 [1.000, 1.000]",0,0,{'prefilter': 150},0.067
+spicedb,adapter,full-direct,1000,150,0,"0.885 [0.856, 0.913]",0,0,{'postfilter': 150},0.120
+spicedb,adapter,full-direct,1001,150,0,"0.885 [0.857, 0.912]",0,0,{'postfilter': 150},0.122
+spicedb,adapter,full-direct,3000,150,0,"1.000 [1.000, 1.000]",0,0,{'postfilter': 150},0.090
+spicedb,adapter,full-direct,10000,150,0,"1.000 [1.000, 1.000]",0,0,{'postfilter': 150},0.107
+spicedb,adapter,full-direct,30000,150,0,"1.000 [1.000, 1.000]",0,0,{'postfilter': 150},0.075
+spicedb,adapter,full-direct,100000,150,0,"1.000 [1.000, 1.000]",0,0,{'postfilter': 150},0.067
+spicedb,adapter,full-folder,10,150,0,"1.000 [1.000, 1.000]",0,0,{'prefilter': 150},0.037
+spicedb,adapter,full-folder,100,150,0,"1.000 [1.000, 1.000]",0,0,{'prefilter': 150},0.043
+spicedb,adapter,full-folder,999,150,0,"1.000 [1.000, 1.000]",0,0,{'prefilter': 150},0.066
+spicedb,adapter,full-folder,1000,150,0,"0.876 [0.848, 0.902]",0,0,{'postfilter': 150},0.118
+spicedb,adapter,full-folder,1001,150,0,"0.879 [0.852, 0.905]",0,0,{'postfilter': 150},0.123
+spicedb,adapter,full-folder,3000,150,0,"1.000 [1.000, 1.000]",0,0,{'postfilter': 150},0.090
+spicedb,adapter,full-folder,10000,150,0,"1.000 [1.000, 1.000]",0,0,{'postfilter': 150},0.107
+spicedb,adapter,full-folder,30000,150,0,"1.000 [1.000, 1.000]",0,0,{'postfilter': 150},0.070
+spicedb,adapter,full-folder,100000,150,0,"1.000 [1.000, 1.000]",0,0,{'postfilter': 150},0.063
+spicedb,adapter,simple-direct,10,150,0,"1.000 [1.000, 1.000]",0,0,{'prefilter': 150},0.036
+spicedb,adapter,simple-direct,100,150,0,"1.000 [1.000, 1.000]",0,0,{'prefilter': 150},0.041
+spicedb,adapter,simple-direct,999,150,0,"1.000 [1.000, 1.000]",0,0,{'prefilter': 150},0.062
+spicedb,adapter,simple-direct,1000,150,0,"0.884 [0.857, 0.910]",0,0,{'postfilter': 150},0.084
+spicedb,adapter,simple-direct,1001,150,0,"0.855 [0.826, 0.883]",0,0,{'postfilter': 150},0.085
+spicedb,adapter,simple-direct,3000,150,0,"1.000 [1.000, 1.000]",0,0,{'postfilter': 150},0.068
+spicedb,adapter,simple-direct,10000,150,0,"1.000 [1.000, 1.000]",0,0,{'postfilter': 150},0.088
+spicedb,adapter,simple-direct,30000,150,0,"1.000 [1.000, 1.000]",0,0,{'postfilter': 150},0.063
+spicedb,adapter,simple-direct,100000,150,0,"1.000 [1.000, 1.000]",0,0,{'postfilter': 150},0.062

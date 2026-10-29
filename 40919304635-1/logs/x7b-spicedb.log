@@ -1,0 +1,8 @@
+[2026-10-29T17:14:29.295+00:00] x7b spicedb: start
+[2026-10-29T17:29:29.993+00:00] x7b spicedb seed 0: 901 s
+[2026-10-29T17:44:30.639+00:00] x7b spicedb seed 1: 1801 s
+[2026-10-29T17:59:31.211+00:00] x7b spicedb seed 2: 2702 s
+[2026-10-29T18:14:31.828+00:00] x7b spicedb seed 3: 3603 s
+[2026-10-29T18:29:31.880+00:00] x7b spicedb seed 4: 4503 s
+::notice title=x7 x7b-spicedb%3A no harness errors::every call the harness made returned
+::notice title=x7 x7b-spicedb records::244 records, 0 failed paths or targets, in results/x7-x7b-spicedb.jsonl

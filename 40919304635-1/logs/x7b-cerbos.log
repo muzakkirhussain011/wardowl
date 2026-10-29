@@ -1,0 +1,8 @@
+[2026-10-29T17:14:09.881+00:00] x7b cerbos: start
+[2026-10-29T17:29:09.689+00:00] x7b cerbos seed 0: 900 s
+[2026-10-29T17:44:09.032+00:00] x7b cerbos seed 1: 1799 s
+[2026-10-29T17:59:08.415+00:00] x7b cerbos seed 2: 2699 s
+[2026-10-29T18:14:07.772+00:00] x7b cerbos seed 3: 3598 s
+[2026-10-29T18:29:07.087+00:00] x7b cerbos seed 4: 4497 s
+::notice title=x7 x7b-cerbos%3A no harness errors::every call the harness made returned
+::notice title=x7 x7b-cerbos records::244 records, 0 failed paths or targets, in results/x7-x7b-cerbos.jsonl

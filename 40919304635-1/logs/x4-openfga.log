@@ -1,0 +1,16 @@
+[2026-10-29T17:14:25.934+00:00] x4 openfga part a: start
+[2026-10-29T17:21:51.551+00:00] x4a openfga seed 0: {'subjects': 120, 'with_filter': 120, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:29:16.766+00:00] x4a openfga-ctx seed 0: {'subjects': 120, 'with_filter': 120, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:37:03.324+00:00] x4a openfga seed 1: {'subjects': 120, 'with_filter': 120, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:44:53.507+00:00] x4a openfga-ctx seed 1: {'subjects': 120, 'with_filter': 120, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:53:30.427+00:00] x4a openfga seed 2: {'subjects': 120, 'with_filter': 120, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T18:02:13.050+00:00] x4a openfga-ctx seed 2: {'subjects': 120, 'with_filter': 120, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T18:08:51.102+00:00] x4a openfga seed 3: {'subjects': 120, 'with_filter': 120, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T18:15:36.230+00:00] x4a openfga-ctx seed 3: {'subjects': 120, 'with_filter': 120, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T18:23:10.745+00:00] x4a openfga seed 4: {'subjects': 120, 'with_filter': 120, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T18:30:45.437+00:00] x4a openfga-ctx seed 4: {'subjects': 120, 'with_filter': 120, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T18:30:45.440+00:00] x4 openfga part a: 4580 s
+[2026-10-29T18:30:45.440+00:00] x4 openfga part b: start
+[2026-10-29T19:09:38.995+00:00] x4 openfga part b: 2334 s
+::notice title=x4 x4-openfga%3A no harness errors::every call the harness made returned
+::notice title=x4 x4-openfga records::1925 records, 0 failed setups or parts, in results/x4-x4-openfga.jsonl

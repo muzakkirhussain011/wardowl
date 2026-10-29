@@ -1,0 +1,20 @@
+[2026-10-29T17:14:16.993+00:00] x7a opa-data: start
+[2026-10-29T17:19:10.399+00:00] x7a opa-data seed 0: 293 s
+[2026-10-29T17:24:03.645+00:00] x7a opa-data seed 1: 587 s
+[2026-10-29T17:28:57.001+00:00] x7a opa-data seed 2: 880 s
+[2026-10-29T17:33:50.283+00:00] x7a opa-data seed 3: 1173 s
+[2026-10-29T17:38:43.402+00:00] x7a opa-data seed 4: 1466 s
+[2026-10-29T17:38:43.402+00:00] x7a opa-policy: start
+[2026-10-29T17:43:36.585+00:00] x7a opa-policy seed 0: 293 s
+[2026-10-29T17:48:29.709+00:00] x7a opa-policy seed 1: 586 s
+[2026-10-29T17:53:22.760+00:00] x7a opa-policy seed 2: 879 s
+[2026-10-29T17:58:15.872+00:00] x7a opa-policy seed 3: 1172 s
+[2026-10-29T18:03:08.949+00:00] x7a opa-policy seed 4: 1466 s
+[2026-10-29T18:03:08.950+00:00] x7a cerbos-policy: start
+[2026-10-29T18:16:28.829+00:00] x7a cerbos-policy seed 0: 800 s
+[2026-10-29T18:29:48.437+00:00] x7a cerbos-policy seed 1: 1599 s
+[2026-10-29T18:43:06.730+00:00] x7a cerbos-policy seed 2: 2398 s
+[2026-10-29T18:56:24.326+00:00] x7a cerbos-policy seed 3: 3195 s
+[2026-10-29T19:09:45.451+00:00] x7a cerbos-policy seed 4: 3997 s
+::notice title=x7 x7a-policy%3A no harness errors::every call the harness made returned
+::notice title=x7 x7a-policy records::606 records, 0 failed paths or targets, in results/x7-x7a-policy.jsonl

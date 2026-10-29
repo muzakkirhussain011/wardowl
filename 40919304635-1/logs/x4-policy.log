@@ -1,0 +1,78 @@
+[2026-10-29T17:14:13.035+00:00] x4 controls part a: start
+[2026-10-29T17:14:13.356+00:00] x4a control-oracle seed 0: {'subjects': 120, 'with_filter': 120, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:14:13.683+00:00] x4a control-planted seed 0: {'subjects': 120, 'with_filter': 120, 'fa': 3359, 'fd': 248, 'co': 0, 'errors': 0}
+[2026-10-29T17:14:14.007+00:00] x4a control-oracle seed 1: {'subjects': 120, 'with_filter': 120, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:14:14.328+00:00] x4a control-planted seed 1: {'subjects': 120, 'with_filter': 120, 'fa': 3349, 'fd': 251, 'co': 0, 'errors': 0}
+[2026-10-29T17:14:14.650+00:00] x4a control-oracle seed 2: {'subjects': 120, 'with_filter': 120, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:14:14.972+00:00] x4a control-planted seed 2: {'subjects': 120, 'with_filter': 120, 'fa': 3349, 'fd': 251, 'co': 0, 'errors': 0}
+[2026-10-29T17:14:15.298+00:00] x4a control-oracle seed 3: {'subjects': 120, 'with_filter': 120, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:14:15.624+00:00] x4a control-planted seed 3: {'subjects': 120, 'with_filter': 120, 'fa': 3386, 'fd': 214, 'co': 0, 'errors': 0}
+[2026-10-29T17:14:15.947+00:00] x4a control-oracle seed 4: {'subjects': 120, 'with_filter': 120, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:14:16.270+00:00] x4a control-planted seed 4: {'subjects': 120, 'with_filter': 120, 'fa': 3331, 'fd': 269, 'co': 0, 'errors': 0}
+[2026-10-29T17:14:16.271+00:00] x4 controls part a: 3 s
+[2026-10-29T17:14:16.271+00:00] x4 controls part b: start
+[2026-10-29T17:14:16.272+00:00] x4 controls part b: 0 s
+[2026-10-29T17:14:16.272+00:00] x4 controls part c: start
+[2026-10-29T17:14:16.272+00:00] x4 controls part c: 0 s
+[2026-10-29T17:14:16.272+00:00] x4 cerbos part a: start
+[2026-10-29T17:14:29.488+00:00] x4a cerbos seed 0: {'subjects': 120, 'with_filter': 120, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:14:43.486+00:00] x4a cerbos-drift seed 0: {'subjects': 120, 'with_filter': 120, 'fa': 124, 'fd': 0, 'co': 124, 'errors': 0}
+[2026-10-29T17:14:57.564+00:00] x4a cerbos-excl seed 0: {'subjects': 120, 'with_filter': 0, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:15:10.751+00:00] x4a cerbos seed 1: {'subjects': 120, 'with_filter': 120, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:15:24.243+00:00] x4a cerbos-drift seed 1: {'subjects': 120, 'with_filter': 120, 'fa': 112, 'fd': 0, 'co': 112, 'errors': 0}
+[2026-10-29T17:15:38.395+00:00] x4a cerbos-excl seed 1: {'subjects': 120, 'with_filter': 0, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:15:51.221+00:00] x4a cerbos seed 2: {'subjects': 120, 'with_filter': 120, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:16:04.372+00:00] x4a cerbos-drift seed 2: {'subjects': 120, 'with_filter': 120, 'fa': 121, 'fd': 0, 'co': 121, 'errors': 0}
+[2026-10-29T17:16:18.437+00:00] x4a cerbos-excl seed 2: {'subjects': 120, 'with_filter': 0, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:16:31.570+00:00] x4a cerbos seed 3: {'subjects': 120, 'with_filter': 120, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:16:45.093+00:00] x4a cerbos-drift seed 3: {'subjects': 120, 'with_filter': 120, 'fa': 127, 'fd': 0, 'co': 127, 'errors': 0}
+[2026-10-29T17:16:59.359+00:00] x4a cerbos-excl seed 3: {'subjects': 120, 'with_filter': 0, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:17:12.441+00:00] x4a cerbos seed 4: {'subjects': 120, 'with_filter': 120, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:17:25.888+00:00] x4a cerbos-drift seed 4: {'subjects': 120, 'with_filter': 120, 'fa': 85, 'fd': 0, 'co': 85, 'errors': 0}
+[2026-10-29T17:17:40.090+00:00] x4a cerbos-excl seed 4: {'subjects': 120, 'with_filter': 0, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:17:40.091+00:00] x4 cerbos part a: 204 s
+[2026-10-29T17:17:40.091+00:00] x4 cerbos part b: start
+[2026-10-29T17:17:40.092+00:00] x4 cerbos part b: 0 s
+[2026-10-29T17:17:40.092+00:00] x4 cerbos part c: start
+[2026-10-29T17:17:40.092+00:00] x4 cerbos part c: 0 s
+[2026-10-29T17:17:40.388+00:00] x4 opa part a: start
+[2026-10-29T17:17:45.400+00:00] x4a opa-acl-doc seed 0: {'subjects': 120, 'with_filter': 120, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:17:50.017+00:00] x4a opa-acl-doc-drift seed 0: {'subjects': 120, 'with_filter': 120, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:17:57.725+00:00] x4a opa-rel-doc seed 0: {'subjects': 120, 'with_filter': 120, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:18:22.348+00:00] x4a opa-rel-pe seed 0: {'subjects': 120, 'with_filter': 120, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:18:47.181+00:00] x4a opa-rel-pe-excl seed 0: {'subjects': 120, 'with_filter': 0, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:18:52.018+00:00] x4a opa-acl-doc seed 1: {'subjects': 120, 'with_filter': 120, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:18:56.789+00:00] x4a opa-acl-doc-drift seed 1: {'subjects': 120, 'with_filter': 120, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:19:04.724+00:00] x4a opa-rel-doc seed 1: {'subjects': 120, 'with_filter': 120, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:19:29.705+00:00] x4a opa-rel-pe seed 1: {'subjects': 120, 'with_filter': 120, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:19:54.791+00:00] x4a opa-rel-pe-excl seed 1: {'subjects': 120, 'with_filter': 0, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:19:59.667+00:00] x4a opa-acl-doc seed 2: {'subjects': 120, 'with_filter': 120, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:20:04.513+00:00] x4a opa-acl-doc-drift seed 2: {'subjects': 120, 'with_filter': 120, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:20:12.565+00:00] x4a opa-rel-doc seed 2: {'subjects': 120, 'with_filter': 120, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:20:38.220+00:00] x4a opa-rel-pe seed 2: {'subjects': 120, 'with_filter': 120, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:21:03.908+00:00] x4a opa-rel-pe-excl seed 2: {'subjects': 120, 'with_filter': 0, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:21:08.742+00:00] x4a opa-acl-doc seed 3: {'subjects': 120, 'with_filter': 120, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:21:13.531+00:00] x4a opa-acl-doc-drift seed 3: {'subjects': 120, 'with_filter': 120, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:21:21.373+00:00] x4a opa-rel-doc seed 3: {'subjects': 120, 'with_filter': 120, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:21:46.330+00:00] x4a opa-rel-pe seed 3: {'subjects': 120, 'with_filter': 120, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:22:11.454+00:00] x4a opa-rel-pe-excl seed 3: {'subjects': 120, 'with_filter': 0, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:22:16.230+00:00] x4a opa-acl-doc seed 4: {'subjects': 120, 'with_filter': 120, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:22:20.938+00:00] x4a opa-acl-doc-drift seed 4: {'subjects': 120, 'with_filter': 120, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:22:28.430+00:00] x4a opa-rel-doc seed 4: {'subjects': 120, 'with_filter': 120, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:22:53.024+00:00] x4a opa-rel-pe seed 4: {'subjects': 120, 'with_filter': 120, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:23:18.021+00:00] x4a opa-rel-pe-excl seed 4: {'subjects': 120, 'with_filter': 0, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:23:18.022+00:00] x4 opa part a: 338 s
+[2026-10-29T17:23:18.022+00:00] x4 opa part b: start
+[2026-10-29T17:23:33.611+00:00] x4 opa part b: 16 s
+[2026-10-29T17:23:33.611+00:00] x4 opa part c: start
+[2026-10-29T17:24:34.504+00:00] error in x4c opa-rel-pe filter_for: wardowl.authz.AuthorizationError: OPA compile x4rel/allow timed out after 2.0 s at ['x4_engines.py:1235 _filter', 'x4_engines.py:234 filter_for', '_http.py:321 post_json']
+[2026-10-29T17:24:41.385+00:00] error in x4c opa-rel-pe retrieve: wardowl.authz.AuthorizationError: OPA compile x4rel/allow timed out after 2.0 s at ['retriever.py:285 retrieve', 'retriever.py:510 _run', 'x4_engines.py:234 filter_for', '_http.py:321 post_json']
+[2026-10-29T17:45:29.631+00:00] x4c opa seed 0 done
+[2026-10-29T18:07:35.445+00:00] x4c opa seed 1 done
+[2026-10-29T18:29:39.132+00:00] x4c opa seed 2 done
+[2026-10-29T18:51:39.136+00:00] x4c opa seed 3 done
+[2026-10-29T19:13:46.451+00:00] x4c opa seed 4 done
+[2026-10-29T19:13:46.499+00:00] x4 opa part c: 6613 s
+::warning title=x4 x4-policy%3A x4c opa-rel-pe retrieve x1350::wardowl.authz.AuthorizationError: OPA compile x4rel/allow timed out after 2.0 s%0Aat ['retriever.py:285 retrieve', 'retriever.py:510 _run', 'x4_engines.py:234 filter_for', '_http.py:321 post_json']
+::warning title=x4 x4-policy%3A x4c opa-rel-pe filter_for x45::wardowl.authz.AuthorizationError: OPA compile x4rel/allow timed out after 2.0 s%0Aat ['x4_engines.py:1235 _filter', 'x4_engines.py:234 filter_for', '_http.py:321 post_json']
+::notice title=x4 x4-policy records::9904 records, 0 failed setups or parts, in results/x4-x4-policy.jsonl

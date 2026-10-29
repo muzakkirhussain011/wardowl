@@ -1,0 +1,11 @@
+[2026-10-29T17:14:26.959+00:00] x4 spicedb part a: start
+[2026-10-29T17:14:56.225+00:00] x4a spicedb seed 0: {'subjects': 120, 'with_filter': 120, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:15:27.201+00:00] x4a spicedb seed 1: {'subjects': 120, 'with_filter': 120, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:15:58.315+00:00] x4a spicedb seed 2: {'subjects': 120, 'with_filter': 120, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:16:28.544+00:00] x4a spicedb seed 3: {'subjects': 120, 'with_filter': 120, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:16:59.842+00:00] x4a spicedb seed 4: {'subjects': 120, 'with_filter': 120, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:16:59.843+00:00] x4 spicedb part a: 153 s
+[2026-10-29T17:16:59.843+00:00] x4 spicedb part b: start
+[2026-10-29T17:21:09.013+00:00] x4 spicedb part b: 249 s
+::notice title=x4 x4-spicedb%3A no harness errors::every call the harness made returned
+::notice title=x4 x4-spicedb records::1470 records, 0 failed setups or parts, in results/x4-x4-spicedb.jsonl

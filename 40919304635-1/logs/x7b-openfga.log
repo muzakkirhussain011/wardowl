@@ -1,0 +1,8 @@
+[2026-10-29T17:14:23.316+00:00] x7b openfga: start
+[2026-10-29T17:29:23.881+00:00] x7b openfga seed 0: 901 s
+[2026-10-29T17:44:23.613+00:00] x7b openfga seed 1: 1800 s
+[2026-10-29T17:59:23.145+00:00] x7b openfga seed 2: 2700 s
+[2026-10-29T18:14:22.706+00:00] x7b openfga seed 3: 3599 s
+[2026-10-29T18:29:22.419+00:00] x7b openfga seed 4: 4499 s
+::notice title=x7 x7b-openfga%3A no harness errors::every call the harness made returned
+::notice title=x7 x7b-openfga records::244 records, 0 failed paths or targets, in results/x7-x7b-openfga.jsonl

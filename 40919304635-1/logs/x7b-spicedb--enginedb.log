@@ -1,0 +1,60 @@
+.2026-10-29 17:14:09.260 UTC [49] LOG:  aborting any active transactions
+2026-10-29 17:14:09.262 UTC [49] LOG:  background worker "logical replication launcher" (PID 55) exited with exit code 1
+2026-10-29 17:14:09.263 UTC [50] LOG:  shutting down
+2026-10-29 17:14:09.263 UTC [50] LOG:  checkpoint starting: shutdown immediate
+2026-10-29 17:14:09.350 UTC [50] LOG:  checkpoint complete: wrote 921 buffers (5.6%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.051 s, sync=0.036 s, total=0.088 s; sync files=301, longest=0.033 s, average=0.001 s; distance=4238 kB, estimate=4238 kB; lsn=0/190A9B8, redo lsn=0/190A9B8
+2026-10-29 17:14:09.357 UTC [49] LOG:  database system is shut down
+ done
+server stopped
+
+PostgreSQL init process complete; ready for start up.
+
+2026-10-29 17:14:09.379 UTC [1] LOG:  starting PostgreSQL 17.11 (Debian 17.11-1.pgdg12+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit
+2026-10-29 17:14:09.379 UTC [1] LOG:  listening on IPv4 address "0.0.0.0", port 5432
+2026-10-29 17:14:09.379 UTC [1] LOG:  listening on IPv6 address "::", port 5432
+2026-10-29 17:14:09.381 UTC [1] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+2026-10-29 17:14:09.385 UTC [65] LOG:  database system was shut down at 2026-10-29 17:14:09 UTC
+2026-10-29 17:14:09.389 UTC [1] LOG:  database system is ready to accept connections
+2026-10-29 17:14:26.708 UTC [90] ERROR:  relation "alembic_version" does not exist at character 25
+2026-10-29 17:14:26.708 UTC [90] STATEMENT:  SELECT version_num from alembic_version
+2026-10-29 17:14:26.708 UTC [90] ERROR:  relation "alembic_version" does not exist at character 25
+2026-10-29 17:14:26.708 UTC [90] STATEMENT:  SELECT version_num from alembic_version
+2026-10-29 17:15:57.271 UTC [163] LOG:  could not receive data from client: Connection reset by peer
+2026-10-29 17:19:09.478 UTC [63] LOG:  checkpoint starting: time
+2026-10-29 17:20:02.261 UTC [260] LOG:  could not receive data from client: Connection reset by peer
+2026-10-29 17:22:34.256 UTC [63] LOG:  checkpoint complete: wrote 2045 buffers (12.5%); 0 WAL file(s) added, 0 removed, 1 recycled; write=204.774 s, sync=0.002 s, total=204.778 s; sync files=682, longest=0.001 s, average=0.001 s; distance=10781 kB, estimate=10781 kB; lsn=0/2397560, redo lsn=0/2392020
+2026-10-29 17:24:09.336 UTC [63] LOG:  checkpoint starting: time
+2026-10-29 17:24:10.577 UTC [63] LOG:  checkpoint complete: wrote 11 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=1.236 s, sync=0.001 s, total=1.241 s; sync files=8, longest=0.001 s, average=0.001 s; distance=54 kB, estimate=9708 kB; lsn=0/239FB20, redo lsn=0/239FAC8
+2026-10-29 17:26:44.506 UTC [392] LOG:  could not receive data from client: Connection reset by peer
+2026-10-29 17:29:09.676 UTC [63] LOG:  checkpoint starting: time
+2026-10-29 17:29:10.081 UTC [63] LOG:  checkpoint complete: wrote 5 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.402 s, sync=0.003 s, total=0.406 s; sync files=5, longest=0.002 s, average=0.001 s; distance=27 kB, estimate=8740 kB; lsn=0/23A6AA8, redo lsn=0/23A6A50
+2026-10-29 17:34:09.150 UTC [63] LOG:  checkpoint starting: time
+2026-10-29 17:34:26.288 UTC [63] LOG:  checkpoint complete: wrote 172 buffers (1.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=17.137 s, sync=0.001 s, total=17.138 s; sync files=19, longest=0.001 s, average=0.001 s; distance=1946 kB, estimate=8061 kB; lsn=0/25915D0, redo lsn=0/258D3A8
+2026-10-29 17:39:09.378 UTC [63] LOG:  checkpoint starting: time
+2026-10-29 17:39:10.483 UTC [63] LOG:  checkpoint complete: wrote 12 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=1.105 s, sync=0.001 s, total=1.106 s; sync files=8, longest=0.001 s, average=0.001 s; distance=73 kB, estimate=7262 kB; lsn=0/259FAF8, redo lsn=0/259FAA0
+2026-10-29 17:44:09.509 UTC [63] LOG:  checkpoint starting: time
+2026-10-29 17:44:10.915 UTC [63] LOG:  checkpoint complete: wrote 15 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=1.405 s, sync=0.001 s, total=1.407 s; sync files=8, longest=0.001 s, average=0.001 s; distance=77 kB, estimate=6544 kB; lsn=0/25B3020, redo lsn=0/25B2F90
+2026-10-29 17:49:10.003 UTC [63] LOG:  checkpoint starting: time
+2026-10-29 17:49:26.648 UTC [63] LOG:  checkpoint complete: wrote 167 buffers (1.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=16.643 s, sync=0.001 s, total=16.645 s; sync files=18, longest=0.001 s, average=0.001 s; distance=1951 kB, estimate=6084 kB; lsn=0/27A1B38, redo lsn=0/279AEE0
+2026-10-29 17:50:27.714 UTC [926] LOG:  could not receive data from client: Connection reset by peer
+2026-10-29 17:54:10.743 UTC [63] LOG:  checkpoint starting: time
+2026-10-29 17:54:12.351 UTC [63] LOG:  checkpoint complete: wrote 17 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=1.605 s, sync=0.001 s, total=1.608 s; sync files=8, longest=0.001 s, average=0.001 s; distance=78 kB, estimate=5484 kB; lsn=0/27AE900, redo lsn=0/27AE8A8
+2026-10-29 17:59:10.389 UTC [63] LOG:  checkpoint starting: time
+2026-10-29 17:59:11.197 UTC [63] LOG:  checkpoint complete: wrote 9 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.802 s, sync=0.004 s, total=0.808 s; sync files=6, longest=0.004 s, average=0.001 s; distance=37 kB, estimate=4939 kB; lsn=0/27B7E30, redo lsn=0/27B7DD8
+2026-10-29 18:04:10.291 UTC [63] LOG:  checkpoint starting: time
+2026-10-29 18:04:27.735 UTC [63] LOG:  checkpoint complete: wrote 175 buffers (1.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=17.439 s, sync=0.002 s, total=17.445 s; sync files=18, longest=0.001 s, average=0.001 s; distance=1969 kB, estimate=4642 kB; lsn=0/29A8178, redo lsn=0/29A42D8
+2026-10-29 18:09:10.783 UTC [63] LOG:  checkpoint starting: time
+2026-10-29 18:09:11.186 UTC [63] LOG:  checkpoint complete: wrote 5 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.401 s, sync=0.001 s, total=0.404 s; sync files=5, longest=0.001 s, average=0.001 s; distance=34 kB, estimate=4181 kB; lsn=0/29ACDE0, redo lsn=0/29ACD88
+2026-10-29 18:14:10.279 UTC [63] LOG:  checkpoint starting: time
+2026-10-29 18:14:11.683 UTC [63] LOG:  checkpoint complete: wrote 15 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=1.403 s, sync=0.001 s, total=1.405 s; sync files=8, longest=0.001 s, average=0.001 s; distance=79 kB, estimate=3771 kB; lsn=0/29C0C20, redo lsn=0/29C0BC8
+2026-10-29 18:16:44.849 UTC [1580] LOG:  could not receive data from client: Connection reset by peer
+2026-10-29 18:17:37.196 UTC [1636] LOG:  could not receive data from client: Connection reset by peer
+2026-10-29 18:19:10.783 UTC [63] LOG:  checkpoint starting: time
+2026-10-29 18:19:29.401 UTC [63] LOG:  checkpoint complete: wrote 186 buffers (1.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=18.616 s, sync=0.001 s, total=18.618 s; sync files=18, longest=0.001 s, average=0.001 s; distance=1860 kB, estimate=3580 kB; lsn=0/2B987A0, redo lsn=0/2B91F90
+2026-10-29 18:24:10.419 UTC [63] LOG:  checkpoint starting: time
+2026-10-29 18:24:11.827 UTC [63] LOG:  checkpoint complete: wrote 15 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=1.407 s, sync=0.001 s, total=1.409 s; sync files=8, longest=0.001 s, average=0.001 s; distance=85 kB, estimate=3230 kB; lsn=0/2BA7668, redo lsn=0/2BA7610
+2026-10-29 18:28:13.226 UTC [1789] LOG:  could not receive data from client: Connection reset by peer
+2026-10-29 18:28:32.190 UTC [1821] LOG:  could not receive data from client: Connection reset by peer
+2026-10-29 18:28:32.191 UTC [1819] LOG:  could not receive data from client: Connection reset by peer
+2026-10-29 18:29:10.827 UTC [63] LOG:  checkpoint starting: time
+2026-10-29 18:29:11.787 UTC [63] LOG:  checkpoint complete: wrote 10 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.902 s, sync=0.057 s, total=0.960 s; sync files=5, longest=0.056 s, average=0.012 s; distance=40 kB, estimate=2911 kB; lsn=0/2BB18B0, redo lsn=0/2BB1858
