@@ -323,6 +323,43 @@ class Candidate:
         self.rank_m = int(positions[-1]) + 1
 
 
+RETRIES = 25  # placements of one group, each with another m = 1,000 probe (Amendment 3)
+
+
+def place_group(
+    order: list[int], used: set[int], set_aside: set[int], n: int, candidate: Any
+) -> tuple[list[tuple[int, int, Candidate]], list[int]]:
+    """One placement of a group: the levels from the largest m down, each slot taking the first
+    candidate in `order` whose near set meets no mate's zone and whose zone meets no mate's near set.
+    Returns the (query, m, candidate) placed and the levels of the slots left empty."""
+    top = max(PER_GROUP)
+    zone = np.zeros(n, dtype=bool)  # the group's zones
+    secret = np.zeros(n, dtype=bool)  # the group's near sets
+    taken: set[int] = set()
+    placed: list[tuple[int, int, Candidate]] = []
+    missing: list[int] = []
+    for m in sorted(PER_GROUP, reverse=True):
+        for _ in range(PER_GROUP[m]):
+            chosen: tuple[int, Candidate] | None = None
+            for q in order:
+                if q in used or q in taken or (m == top and q in set_aside):
+                    continue
+                c = candidate(q, m)
+                if not c.ok or zone[c.near].any() or secret[c.zone].any():
+                    continue
+                chosen = (q, c)
+                break
+            if chosen is None:
+                missing.append(m)
+                continue
+            q, c = chosen
+            taken.add(q)
+            secret[c.near] = True
+            zone[c.zone] = True
+            placed.append((q, m, c))
+    return placed, missing
+
+
 def make_plan(
     seed: int,
     corpus: np.ndarray,
@@ -337,6 +374,13 @@ def make_plan(
     n = len(corpus)
     rng = np.random.default_rng([SEED_BASE, seed])
     order = [int(q) for q in rng.permutation(len(queries))]
+    memo: dict[tuple[int, int], Candidate] = {}
+
+    def candidate(q: int, m: int) -> Candidate:
+        if (q, m) not in memo:
+            memo[(q, m)] = Candidate(q, m, near_index, near_similarity, hubs)
+        return memo[(q, m)]
+
     # Every secret of the seed. Near sets of different groups may share passages (Amendment 2): a
     # shared passage is replaced in the W0 of each group it belongs to, so every probe's two worlds
     # still differ in its own group's secrets only.
@@ -344,41 +388,41 @@ def make_plan(
     used: set[int] = set()
     probes: list[dict[str, Any]] = []
     shortfall: list[dict[str, Any]] = []
+    attempts: dict[str, int] = {}
+    top = max(PER_GROUP)
     for group in range(GROUPS):
-        zone = np.zeros(n, dtype=bool)  # the group's zones
-        secret = np.zeros(n, dtype=bool)  # the group's near sets
-        for m in sorted(PER_GROUP, reverse=True):
-            for _ in range(PER_GROUP[m]):
-                chosen: tuple[int, Candidate] | None = None
-                for q in order:
-                    if q in used:
-                        continue
-                    c = Candidate(q, m, near_index, near_similarity, hubs)
-                    # Within the group, no near set inside a mate's zone, in either direction.
-                    if not c.ok or zone[c.near].any() or secret[c.zone].any():
-                        continue
-                    chosen = (q, c)
-                    break
-                if chosen is None:
-                    shortfall.append({"group": group, "level": m})
-                    log(f"  seed {seed}: group {group}: no probe could be placed at level {m}")
-                    continue
-                q, c = chosen
-                used.add(q)
-                claimed[c.near] = True
-                secret[c.near] = True
-                zone[c.zone] = True
-                probes.append(
-                    {
-                        "qindex": q,
-                        "qid": query_ids[q],
-                        "group": group,
-                        "level": m,
-                        "near": [int(i) for i in c.near],
-                        "rank_m": c.rank_m,
-                        "tau": c.tau,
-                    }
-                )
+        set_aside: set[int] = set()
+        best: tuple[list[tuple[int, int, Candidate]], list[int]] | None = None
+        for attempt in range(1, RETRIES + 1):
+            placed, missing = place_group(order, used, set_aside, n, candidate)
+            if best is None or len(placed) > len(best[0]):
+                best = (placed, missing)
+            attempts[str(group)] = attempt
+            if not missing:
+                break
+            tops = [q for q, m, _ in placed if m == top]
+            if not tops:
+                break  # no m = 1,000 probe can be placed at all: another try would not change that
+            set_aside.add(tops[0])
+        assert best is not None
+        placed, missing = best
+        for m in missing:
+            shortfall.append({"group": group, "level": m})
+            log(f"  seed {seed}: group {group}: no probe could be placed at level {m}")
+        for q, m, c in placed:
+            used.add(q)
+            claimed[c.near] = True
+            probes.append(
+                {
+                    "qindex": q,
+                    "qid": query_ids[q],
+                    "group": group,
+                    "level": m,
+                    "near": [int(i) for i in c.near],
+                    "rank_m": c.rank_m,
+                    "tau": c.tau,
+                }
+            )
     if not probes:
         raise RuntimeError(f"seed {seed}: no probe could be placed")
 
@@ -433,6 +477,7 @@ def make_plan(
         "probes": counts,
         "groups_full": sum(1 for g in groups if len(g["probes"]) == sum(PER_GROUP.values())),
         "shortfall": shortfall,
+        "placements_per_group": attempts,
         "secret": int(len(secret_ids)),
         "secret_extra_group_memberships": shared,
         "far_eligible": int(len(eligible)),
