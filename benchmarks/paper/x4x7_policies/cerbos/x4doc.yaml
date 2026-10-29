@@ -1,0 +1,26 @@
+# X4 profiles cerbos and cerbos-drift: the X4 model as Cerbos sees it, without folders and bans.
+#
+# Each chunk is a resource of kind x4doc whose attributes are its metadata (tenant, owner,
+# classification, allowed_users, allowed_groups with "*" for everyone). The principal carries its
+# tenant, the classification labels it may read (`levels`, so the plan stays a membership test) and
+# its groups, already flattened. Every condition is one wardowl translates into a filter.
+apiVersion: api.cerbos.dev/v1
+resourcePolicy:
+  version: default
+  resource: x4doc
+  rules:
+    - actions: ["read"]
+      effect: EFFECT_ALLOW
+      roles: ["*"]
+      condition:
+        match:
+          all:
+            of:
+              - expr: request.resource.attr.tenant == request.principal.attr.tenant
+              - expr: request.resource.attr.classification in request.principal.attr.levels
+              - any:
+                  of:
+                    - expr: request.resource.attr.owner == request.principal.id
+                    - expr: request.principal.id in request.resource.attr.allowed_users
+                    - expr: hasIntersection(request.resource.attr.allowed_groups, request.principal.attr.groups)
+                    - expr: '"*" in request.resource.attr.allowed_groups'

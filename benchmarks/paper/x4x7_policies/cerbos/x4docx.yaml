@@ -1,0 +1,32 @@
+# X4 profile cerbos-excl: the cerbos profile's rule plus bans, as Cerbos expresses them: DENY rules,
+# which override the ALLOW. Every chunk carries `banned_users` and `banned_groups` (lists, empty when
+# nobody is banned). The query plan then holds a `not`, which wardowl's filter language cannot express.
+apiVersion: api.cerbos.dev/v1
+resourcePolicy:
+  version: default
+  resource: x4docx
+  rules:
+    - actions: ["read"]
+      effect: EFFECT_ALLOW
+      roles: ["*"]
+      condition:
+        match:
+          all:
+            of:
+              - expr: request.resource.attr.tenant == request.principal.attr.tenant
+              - expr: request.resource.attr.classification in request.principal.attr.levels
+              - any:
+                  of:
+                    - expr: request.resource.attr.owner == request.principal.id
+                    - expr: request.principal.id in request.resource.attr.allowed_users
+                    - expr: hasIntersection(request.resource.attr.allowed_groups, request.principal.attr.groups)
+                    - expr: '"*" in request.resource.attr.allowed_groups'
+    - actions: ["read"]
+      effect: EFFECT_DENY
+      roles: ["*"]
+      condition:
+        match:
+          any:
+            of:
+              - expr: request.principal.id in request.resource.attr.banned_users
+              - expr: hasIntersection(request.resource.attr.banned_groups, request.principal.attr.groups)

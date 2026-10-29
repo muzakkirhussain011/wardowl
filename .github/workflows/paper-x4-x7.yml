@@ -1,0 +1,364 @@
+name: paper-x4-x7
+
+# The research paper's experiments X4 (do authorization engines' filters agree with their checks?)
+# and X7 (revocation latency, and fail-closed behaviour under faults). The hypotheses, rules and
+# statistics are pre-registered in benchmarks/paper/PREREG_X4_X7.md; how to run and read the results
+# is in benchmarks/paper/X4_X7.md.
+#
+# One job per engine and part, in parallel; each tees its log into its artifact. The report job runs
+# the statistics over every job's records and commits the reports, the raw records (compressed) and
+# the tail of every job's log to the branch results/x4-x7, under <run id>-<run attempt>/, so the
+# results can be read with git alone.
+#
+# A push to paper/x4-x7 runs the configuration named by PROFILE below (smoke while the harness is
+# checked, full for the run the paper reports); workflow_dispatch can choose either.
+
+on:
+  push:
+    branches: [paper/x4-x7]
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: smoke (one seed, small worlds, short phases; never analysed) or full (the pre-registered design)
+        type: choice
+        options: [smoke, full]
+        default: smoke
+
+permissions:
+  contents: read
+
+concurrency:
+  group: paper-x4-x7-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PROFILE: ${{ inputs.profile || 'smoke' }}
+
+jobs:
+  experiment:
+    name: ${{ matrix.job }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # X4: a and b on the X4 worlds; c (and the latency of X4d) at scale.
+          - job: x4-openfga
+            script: x4_engines.py
+            stats: x4_stats.py
+            args: --engines openfga --parts a,b
+            services: enginedb openfga
+          - job: x4-spicedb
+            script: x4_engines.py
+            stats: x4_stats.py
+            args: --engines spicedb --parts a,b
+            services: enginedb spicedb
+          - job: x4-policy
+            script: x4_engines.py
+            stats: x4_stats.py
+            args: --engines controls,cerbos,opa --parts a,b,c
+            services: cerbos opa
+          - job: x4-openfga-scale
+            script: x4_engines.py
+            stats: x4_stats.py
+            args: --engines openfga --parts c
+            services: enginedb openfga
+          - job: x4-spicedb-scale
+            script: x4_engines.py
+            stats: x4_stats.py
+            args: --engines spicedb --parts c
+            services: enginedb spicedb
+          # X7a: revocation, one job per family of paths.
+          - job: x7a-openfga
+            script: x7_revocation_faults.py
+            stats: x7_stats.py
+            args: revocation --paths openfga,openfga-cached-hc,openfga-cached-ml --containers openfga,openfga-cached,enginedb,redis
+            services: enginedb openfga openfga-cached redis
+          - job: x7a-spicedb
+            script: x7_revocation_faults.py
+            stats: x7_stats.py
+            args: revocation --paths spicedb-fc,spicedb-ml --containers spicedb,enginedb,redis
+            services: enginedb spicedb redis
+          - job: x7a-policy
+            script: x7_revocation_faults.py
+            stats: x7_stats.py
+            args: revocation --paths opa-data,opa-policy,cerbos-policy --containers cerbos,redis
+            services: cerbos-watch opa redis
+          - job: x7a-acl
+            script: x7_revocation_faults.py
+            stats: x7_stats.py
+            args: revocation --paths acl-pgvector,acl-qdrant --containers pgv,qdrant,redis
+            services: pgv qdrant redis
+          # X7b: faults, one job per target.
+          - job: x7b-openfga
+            script: x7_revocation_faults.py
+            stats: x7_stats.py
+            args: faults --targets openfga --containers openfga,enginedb
+            services: enginedb openfga
+          - job: x7b-spicedb
+            script: x7_revocation_faults.py
+            stats: x7_stats.py
+            args: faults --targets spicedb --containers spicedb,enginedb
+            services: enginedb spicedb
+          - job: x7b-opa
+            script: x7_revocation_faults.py
+            stats: x7_stats.py
+            args: faults --targets opa
+            services: opa
+          - job: x7b-cerbos
+            script: x7_revocation_faults.py
+            stats: x7_stats.py
+            args: faults --targets cerbos --containers cerbos
+            services: cerbos
+          - job: x7b-stores
+            script: x7_revocation_faults.py
+            stats: x7_stats.py
+            args: faults --targets pgvector,qdrant --containers pgv,qdrant
+            services: pgv qdrant
+    env:
+      X4X7_JOB: ${{ matrix.job }}
+      SERVICES: ${{ matrix.services }}
+      OPENFGA_DB: postgres://test:test@enginedb:5432/openfga?sslmode=disable
+      SPICEDB_DB: postgres://test:test@enginedb:5432/spicedb?sslmode=disable
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: { persist-credentials: false }
+
+      # ---- the servers that need nothing else start first, and boot while Python installs
+
+      - name: Start the base servers
+        run: |
+          has() { [[ " $SERVICES " == *" $1 "* ]]; }
+          docker network create wo
+          if has enginedb; then
+            docker run -d --name enginedb --network wo -p 5433:5432 -e POSTGRES_USER=test -e POSTGRES_PASSWORD=test \
+              -e POSTGRES_DB=engines pgvector/pgvector:pg17
+          fi
+          if has pgv; then
+            docker run -d --name pgv -p 5432:5432 -e POSTGRES_USER=test -e POSTGRES_PASSWORD=test -e POSTGRES_DB=test \
+              pgvector/pgvector:pg17
+          fi
+          if has qdrant; then docker run -d --name qdrant -p 6333:6333 qdrant/qdrant:v1.19.2; fi
+          if has redis; then docker run -d --name redis -p 6379:6379 redis:8.10.2-alpine; fi
+          if has cerbos; then
+            # X4's policies (x4doc, x4docx), read at startup.
+            docker run -d --name cerbos -p 3592:3592 -v "$PWD/benchmarks/paper/x4x7_policies/cerbos:/policies:ro" \
+              ghcr.io/cerbos/cerbos:0.56.0
+          fi
+          if has cerbos-watch; then
+            # X7's policy-change path: an empty directory the harness writes, which Cerbos watches.
+            mkdir -p "$RUNNER_TEMP/cerbos-x7" "$RUNNER_TEMP/cerbos-conf"
+            printf '%s\n' 'server:' '  httpListenAddr: ":3592"' '  grpcListenAddr: ":3593"' 'storage:' '  driver: "disk"' \
+              '  disk:' '    directory: /policies' '    watchForChanges: true' > "$RUNNER_TEMP/cerbos-conf/conf.yaml"
+            docker run -d --name cerbos -p 3592:3592 -v "$RUNNER_TEMP/cerbos-x7:/policies" \
+              -v "$RUNNER_TEMP/cerbos-conf:/conf:ro" ghcr.io/cerbos/cerbos:0.56.0 server --config=/conf/conf.yaml
+          fi
+      - uses: open-policy-agent/setup-opa@b2b258e089860efaadaaf71bf6e3aecb4a3eeff1 # v2.4.0
+        if: contains(matrix.services, 'opa')
+        with: { version: 1.21.2 }
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with: { python-version: "3.12", cache: pip }
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with: { version: "0.13.1", enable-cache: false }
+      - name: Install from uv.lock, by hash
+        run: |
+          uv export --frozen --no-emit-project --extra faiss --extra pgvector --extra qdrant --extra redis \
+            -o "$RUNNER_TEMP/requirements.txt"
+          pip install --require-hashes --no-deps -r "$RUNNER_TEMP/requirements.txt"
+          pip install --require-hashes --no-deps -r .github/requirements/build.txt
+          pip install --no-deps --no-build-isolation -e .
+          python -c "import wardowl, faiss, numpy; print('wardowl', wardowl.__version__)"
+
+      # ---- the engines, on a Postgres datastore so a restarted engine keeps its data
+
+      - name: Start OpenFGA and SpiceDB on Postgres
+        run: |
+          has() { [[ " $SERVICES " == *" $1 "* ]]; }
+          ready() {
+            local name=$1 tries=$2; shift 2
+            for _ in $(seq 1 "$tries"); do "$@" > /dev/null 2>&1 && { echo "$name is ready"; return 0; }; sleep 2; done
+            echo "::warning::$name did not answer"; docker logs --tail 50 "$name" || true; return 1
+          }
+          if has enginedb; then
+            # Over TCP: during its first start the image runs a temporary server on the socket only.
+            ready enginedb 60 docker exec enginedb pg_isready -h 127.0.0.1 -U test -d engines
+            for db in openfga spicedb; do
+              for _ in $(seq 1 30); do
+                docker exec -e PGPASSWORD=test enginedb psql -h 127.0.0.1 -U test -d engines -c "CREATE DATABASE $db" && break
+                docker exec -e PGPASSWORD=test enginedb psql -h 127.0.0.1 -U test -d engines -tAc \
+                  "SELECT 1 FROM pg_database WHERE datname = '$db'" | grep -q 1 && break
+                sleep 2
+              done
+            done
+          fi
+          if has openfga; then
+            docker run --rm --network wo openfga/openfga:v1.22.0 migrate --datastore-engine postgres --datastore-uri "$OPENFGA_DB"
+            docker run -d --name openfga --network wo -p 8080:8080 openfga/openfga:v1.22.0 run \
+              --datastore-engine postgres --datastore-uri "$OPENFGA_DB" --playground-enabled=false
+          fi
+          if has openfga-cached; then
+            # A second server on the same datastore, with the check-query cache (TTL 10 s), for X7.
+            docker run -d --name openfga-cached --network wo -p 8090:8080 openfga/openfga:v1.22.0 run \
+              --datastore-engine postgres --datastore-uri "$OPENFGA_DB" --playground-enabled=false \
+              --check-query-cache-enabled=true --check-query-cache-ttl=10s
+          fi
+          if has spicedb; then
+            docker run --rm --network wo authzed/spicedb:v1.56.2 datastore migrate head --datastore-engine postgres \
+              --datastore-conn-uri "$SPICEDB_DB" \
+              || docker run --rm --network wo authzed/spicedb:v1.56.2 migrate head --datastore-engine postgres \
+                --datastore-conn-uri "$SPICEDB_DB"
+            docker run -d --name spicedb --network wo -p 8443:8443 authzed/spicedb:v1.56.2 serve \
+              --grpc-preshared-key wo-test --http-enabled --datastore-engine postgres --datastore-conn-uri "$SPICEDB_DB"
+          fi
+      - name: Wait for every server
+        run: |
+          has() { [[ " $SERVICES " == *" $1 "* ]]; }
+          ready() {
+            local name=$1 tries=$2; shift 2
+            for _ in $(seq 1 "$tries"); do "$@" > /dev/null 2>&1 && { echo "$name is ready"; return 0; }; sleep 2; done
+            echo "::warning::$name did not answer; the harness will record the failure"; docker logs --tail 50 "$name" || true
+          }
+          if has openfga; then ready openfga 60 curl -sf http://127.0.0.1:8080/healthz; fi
+          if has openfga-cached; then ready openfga-cached 60 curl -sf http://127.0.0.1:8090/healthz; fi
+          if has spicedb; then ready spicedb 60 curl -s -o /dev/null http://127.0.0.1:8443/; fi
+          if has cerbos || has cerbos-watch; then ready cerbos 60 curl -sf http://127.0.0.1:3592/_cerbos/health; fi
+          if has pgv; then ready pgv 60 docker exec pgv pg_isready -h 127.0.0.1 -U test -d test; fi
+          if has qdrant; then ready qdrant 60 curl -sf http://127.0.0.1:6333/readyz; fi
+          if has redis; then ready redis 60 docker exec redis redis-cli ping; fi
+          docker ps --format '{{.Names}} {{.Image}} {{.Status}}'
+
+      - name: Run ${{ matrix.job }} (${{ env.PROFILE }})
+        env:
+          X4X7_CERBOS_WATCH_DIR: ${{ runner.temp }}/cerbos-x7
+        run: |
+          mkdir -p results/logs
+          set +e
+          python -u "benchmarks/paper/${{ matrix.script }}" ${{ matrix.args }} --profile "$PROFILE" --out results \
+            2>&1 | tee results/logs/driver.log
+          status=${PIPESTATUS[0]}
+          set -e
+          echo "{\"job\": \"$X4X7_JOB\", \"exit_status\": $status, \"profile\": \"$PROFILE\"}" > results/status.json
+          if [ "$status" -ne 0 ]; then echo "::error::the driver stopped with exit status $status"; fi
+      - name: Statistics for this job
+        if: always()
+        run: |
+          shopt -s nullglob
+          files=(results/*.jsonl)
+          if [ ${#files[@]} -eq 0 ]; then echo "::error::no records were written"; exit 0; fi
+          python "benchmarks/paper/${{ matrix.stats }}" "${files[@]}" --out results/report 2>&1 | tail -n 120 \
+            | tee results/logs/stats.log || true
+      - name: Keep the servers' logs
+        if: always()
+        run: |
+          mkdir -p results/logs
+          for name in $(docker ps -a --format '{{.Names}}'); do
+            docker logs --tail 300 "$name" > "results/logs/$name.log" 2>&1 || true
+          done
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: x4x7-${{ matrix.job }}
+          path: results/
+          if-no-files-found: warn
+          retention-days: 90
+
+  report:
+    name: report
+    needs: [experiment]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: { persist-credentials: false }
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with: { python-version: "3.12" }
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with: { version: "0.13.1", enable-cache: false }
+      - name: Install numpy from uv.lock, by hash
+        run: |
+          uv export --frozen --no-emit-project --extra faiss -o "$RUNNER_TEMP/requirements.txt"
+          pip install --require-hashes --no-deps -r "$RUNNER_TEMP/requirements.txt"
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: x4x7-*
+          path: parts
+      - name: Statistics over every job (the pre-registered verdicts)
+        run: |
+          shopt -s nullglob
+          mkdir -p report
+          x4=(parts/*/x4-*.jsonl)
+          x7=(parts/*/x7-*.jsonl)
+          if [ ${#x4[@]} -gt 0 ]; then
+            python benchmarks/paper/x4_stats.py "${x4[@]}" --out report --annotate 2>&1 | tee report/x4_stats.log || true
+          fi
+          if [ ${#x7[@]} -gt 0 ]; then
+            python benchmarks/paper/x7_stats.py "${x7[@]}" --out report --annotate 2>&1 | tee report/x7_stats.log || true
+          fi
+      - name: Gather the reports, records and log tails
+        if: always()
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+        run: |
+          shopt -s nullglob
+          dest="publish/${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          mkdir -p "$dest/logs" "$dest/raw" "$dest/jobs"
+          cp report/* "$dest/" 2>/dev/null || true
+          for dir in parts/*/; do
+            job=$(basename "$dir"); job=${job#x4x7-}
+            [ -f "$dir/status.json" ] && cp "$dir/status.json" "$dest/jobs/$job.status.json"
+            [ -f "$dir/logs/driver.log" ] && tail -n 200 "$dir/logs/driver.log" > "$dest/logs/$job.log"
+            [ -f "$dir/logs/stats.log" ] && cp "$dir/logs/stats.log" "$dest/logs/$job.stats.log"
+            for f in "$dir"/logs/*.log; do
+              case "$(basename "$f")" in driver.log|stats.log) continue ;; esac
+              tail -n 60 "$f" > "$dest/logs/$job--$(basename "$f")"
+            done
+            for f in "$dir"/report/*.md; do cp "$f" "$dest/jobs/$job--$(basename "$f")"; done
+            for f in "$dir"/*.jsonl; do gzip -9 -c "$f" > "$dest/raw/$job--$(basename "$f").gz"; done
+          done
+          # Raw records are kept only while they stay small; the artifacts hold them in any case.
+          size=$(du -sm "$dest/raw" | cut -f1)
+          if [ "$size" -gt 60 ]; then rm -rf "$dest/raw"; echo "raw records ($size MB) left out" > "$dest/RAW_LEFT_OUT.txt"; fi
+          {
+            echo "# paper-x4-x7 run ${GITHUB_RUN_ID}, attempt ${GITHUB_RUN_ATTEMPT}"
+            echo
+            echo "- Commit: ${GITHUB_SHA}"
+            echo "- Ref: ${GITHUB_REF_NAME}"
+            echo "- Profile: ${PROFILE}"
+            echo "- Run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+            echo "- Artifacts: $(ls parts | tr '\n' ' ')"
+            echo
+            echo '```json'
+            echo "$NEEDS"
+            echo '```'
+          } > "$dest/RUN.md"
+          ls -R publish | head -n 200
+      - name: Publish to the branch results/x4-x7
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cd publish
+          git init -q
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          if git fetch -q origin results/x4-x7; then
+            git checkout -q -b results/x4-x7 FETCH_HEAD
+          else
+            git symbolic-ref HEAD refs/heads/results/x4-x7  # the branch's first commit
+          fi
+          dest="${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          git add "$dest"
+          git commit -q -m "paper-x4-x7: run ${GITHUB_RUN_ID} attempt ${GITHUB_RUN_ATTEMPT} (${PROFILE}) of ${GITHUB_SHA}"
+          for attempt in 1 2 3 4 5; do
+            if git push -q origin HEAD:refs/heads/results/x4-x7; then echo "published $dest"; exit 0; fi
+            git fetch -q origin results/x4-x7 && git rebase -q FETCH_HEAD || true
+            sleep $((attempt * 5))
+          done
+          echo "::error::could not push to results/x4-x7"
+          exit 1
