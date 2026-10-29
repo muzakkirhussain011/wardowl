@@ -69,9 +69,13 @@ pgvector items for time, and showed that most of its pgvector searches ran Postg
 plan, an exact search that never touches the HNSW index. Amendment 2 of the pre-registration fixes
 run 2 (`--grid run2`, the default, output folder `x1run2/`):
 
-- **Plan control.** `pg-custom` (`plan_cache_mode = force_custom_plan`) is the reference of P1 and
-  P2, and every P-a to P-e setting sets the same plan mode, so every search is planned with its
-  own values. `p-asrun` keeps the defaults and remains the reference of P4.
+- **Plan control.** `pg-custom` (`plan_cache_mode = force_custom_plan`) plans every search with its
+  own values and leaves the plan to the planner, as the original run did (P4, P5). `pg-hnsw` and
+  every P-a to P-e setting also set `enable_seqscan` and `enable_bitmapscan` to off, so the HNSW
+  scan is the only plan left; `pg-hnsw` is the reference of P1 and P2. `p-asrun` keeps the defaults
+  and remains the reference of P4. Every pgvector invocation runs `VACUUM (ANALYZE)` once, after
+  the replays, so every later setting sees the same index state (the smoke run showed the generic
+  plan winning only after a VACUUM).
 - **Executed plans.** `auto_explain` is loaded into each pgvector session with its log level at
   NOTICE; the plan of every first-pass search arrives with its result and is kept per question
   (`plan5`, `plan10`: `hnsw`, `gin`, `seq` or `other`; `generic5`, `generic10`). The fixed
