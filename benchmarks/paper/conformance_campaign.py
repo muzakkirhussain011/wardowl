@@ -1407,6 +1407,22 @@ class Engine:
     def reported(self) -> dict[str, Any]:
         return {}
 
+    def reference(self, subject: Any, metadata: Mapping[str, Any]) -> bool:
+        """The reference answer for the target's rule, by `wardowl.filters.matches`, to tell which side
+        of a filter-and-check disagreement gives it: the metadata ACL rule (a listed user, a shared
+        group, or "*" for everyone), and for the tenant profiles the acceptance rule (the subject's
+        tenant, and a listed user or a shared group, without "*")."""
+        from wardowl.filters import And, In, Or, matches
+
+        groups = sorted(subject.groups)
+        if not self.tenant:
+            return matches(Or(In("allowed_users", [subject.id]), In("allowed_groups", [*groups, "*"])), metadata)
+        tenant = subject.attributes.get("tenant")
+        if not isinstance(tenant, str):
+            return False
+        shared = Or(In("allowed_users", [subject.id]), In("allowed_groups", groups))
+        return matches(And(In("tenant", [tenant]), shared), metadata)
+
 
 class MetadataACL(Engine):
     notes = "MetadataACLAuthorizer, in process: the positive control"
@@ -2021,7 +2037,9 @@ def _where(error: BaseException) -> list[str]:
     return [f"{Path(f.filename).parent.name}/{Path(f.filename).name}:{f.lineno} {f.name}" for f in frames]
 
 
-def _outcome(error: BaseException) -> dict[str, Any]:
+def _outcome(error: BaseException, *, keep: bool = False) -> dict[str, Any]:
+    """What a failure was. With `keep`, the whole message too, under `full_message`, which `_emit`
+    writes to the findings file and leaves out of campaign.jsonl."""
     outcome = classify(error)
     message = _scrub(str(error))
     info: dict[str, Any] = {
@@ -2030,6 +2048,8 @@ def _outcome(error: BaseException) -> dict[str, Any]:
         "raised_in": _raised_in(error),
         "message": _truncate(message, MESSAGE_LIMIT),
     }
+    if keep:
+        info["full_message"] = message
     if outcome == VIOLATION:
         parsed = parse_failure(message)
         info["kinds"] = violation_kinds(parsed)
@@ -2059,6 +2079,27 @@ class Results:
             out.write(line + "\n")
             out.flush()
             os.fsync(out.fileno())
+
+    def finding(self, record: Mapping[str, Any], message: str) -> None:
+        """A run that did not pass, with its whole message, uncut, in findings/<target>.txt beside
+        campaign.jsonl: the documents, the filter and every value as the kit printed them."""
+        folder = self.path.parent / "findings"
+        folder.mkdir(parents=True, exist_ok=True)
+        what = record.get("kind") or _short_class(record.get("error_class"))
+        lines = [
+            f"==== {record.get('target')} seed {record.get('seed')} {record.get('variant')} ({record.get('mode')}): "
+            f"{record.get('outcome')} {what}",
+            f"replay: {record.get('replay', '')}",
+        ]
+        if record.get("subject"):
+            lines.append(f"subject: {json.dumps(record['subject'], ensure_ascii=False, default=repr)}")
+        disagreements = _disagreement_lines(record, DISAGREEMENT_LIMIT)
+        if disagreements:
+            lines += [f"disagreeing hits ({record.get('disagreements_total')}):", *(f"  {d}" for d in disagreements)]
+        lines += ["message:", message, ""]
+        target = re.sub(r"[^\w.-]", "_", str(record.get("target")))
+        with (folder / f"{target}.txt").open("a", encoding="utf-8", errors="backslashreplace") as out:
+            out.write("\n".join(lines) + "\n")
 
 
 def _run_info() -> dict[str, Any]:
@@ -2091,7 +2132,51 @@ def _annotate(level: str, title: str, message: str) -> None:
     print(f"::{level} title={title.replace(':', ' ').replace(',', ' ')}::{text}", flush=True)
 
 
-def _log(name: str, record: Mapping[str, Any]) -> None:
+BRIEF_LINES = 12  # lines of the head of a message in the log and in an annotation
+
+
+def _said(answer: Any) -> str:
+    return "allows" if answer else "denies"
+
+
+def _disagreement_lines(record: Mapping[str, Any], limit: int) -> list[str]:
+    """One line per disagreeing hit: who, the hit's metadata, the filter's and check's answers, and
+    which of them gives the reference answer."""
+    lines = []
+    for d in (record.get("disagreements") or [])[:limit]:
+        side = d.get("matches_reference")
+        verdict = f"the reference {_said(d.get('reference'))}, as the {side} does" if side else "no reference"
+        metadata = json.dumps(d.get("metadata"), ensure_ascii=False, sort_keys=True, default=repr)
+        lines.append(
+            f"{d.get('subject')}, {d.get('hit')} {metadata}: the filter {_said(d.get('filter'))}, "
+            f"check {_said(d.get('check'))}; {verdict}"
+        )
+    return lines
+
+
+def _brief(record: Mapping[str, Any], message: str) -> str:
+    """A failure in a few lines, for the log and the annotation: the head of the message, each line cut
+    at STRING_LIMIT characters, then the disagreeing hits, or the documents the problems name, with
+    their metadata (the kit lists every document after the head, so a cut message hid them)."""
+    head: list[str] = []
+    for line in message.splitlines():
+        if line.startswith("  documents ("):
+            break
+        head.append(_truncate(line, STRING_LIMIT))
+    named = _disagreement_lines(record, 5)
+    if not named:
+        reproducer = record.get("reproducer") or {}
+        documents = reproducer.get("documents") or {}
+        ids = {i for p in reproducer.get("problems") or [] for i in re.findall(r"'([^']+)'", str(p))}
+        named = [
+            f"{i}: {_truncate(json.dumps(documents[i], ensure_ascii=False, sort_keys=True, default=repr), 600)}"
+            for i in sorted(ids)
+            if i in documents
+        ][:5]
+    return "\n".join([*head[:BRIEF_LINES], *named])
+
+
+def _log(name: str, record: Mapping[str, Any], message: str) -> None:
     outcome = record["outcome"]
     what = record.get("kind") or (record.get("error_class") if outcome != PASS else "") or ""
     subjects = f" subjects {record['subjects']}" if "subjects" in record else ""
@@ -2101,20 +2186,25 @@ def _log(name: str, record: Mapping[str, Any]) -> None:
         f"{refusals} in {record['duration_s']:.1f} s",
         flush=True,
     )
-    if outcome != PASS:
-        first = str(record.get("message", "")).splitlines()[:1]
-        if first:
-            print(f"    {_truncate(first[0], 300)}", flush=True)
+    if outcome == PASS:
+        return
+    brief = _brief(record, message or str(record.get("message", "")))
+    for line in brief.splitlines():
+        print(f"    {line}", flush=True)
     if outcome == VIOLATION:
-        _annotate("warning", f"{name} {record['variant']} seed {record['seed']}", str(record.get("message", ""))[:600])
-    elif outcome != PASS and name in CONTROLS:
-        _annotate("error", f"control {name} did not pass", str(record.get("message", ""))[:600])
+        _annotate("warning", f"{name} {record['variant']} seed {record['seed']}", brief)
+    elif name in CONTROLS:
+        _annotate("error", f"control {name} did not pass", brief)
 
 
 def _emit(name: str, results: Results, base: Mapping[str, Any], record: dict[str, Any], counts: Counter[str]) -> None:
+    # The whole message goes to findings/<target>.txt; campaign.jsonl keeps the first MESSAGE_LIMIT characters.
+    message = record.pop("full_message", None)
     results.write({**base, **record})
+    if message is not None:
+        results.finding({**base, **record}, message)
     counts[f"{record['mode']} {record['outcome']}"] += 1
-    _log(name, record)
+    _log(name, record, message or "")
 
 
 # ---- running -------------------------------------------------------------------------------------
@@ -2198,7 +2288,7 @@ def _store_run(
         "duration_s": round(time.monotonic() - started, 3),
         "filter_refusals": counter["filter_refusals"],
     }
-    record.update({"outcome": PASS} if failure is None else _outcome(failure))
+    record.update({"outcome": PASS} if failure is None else _outcome(failure, keep=True))
     record["replay"] = _replay(name, seed, variant, settings, sound=not exact and store.exact)
     return record
 
@@ -2269,10 +2359,51 @@ def _combine(answers: Sequence[tuple[Any, BaseException | None]]) -> dict[str, A
         info["outcome"] = PASS
         return info
     subject, failure, _ = worst
-    info.update(_outcome(failure))
+    info.update(_outcome(failure, keep=True))
     who = {"id": subject.id, "groups": sorted(subject.groups), "attributes": dict(subject.attributes)}
     info["subject"] = _clip(who)
     return info
+
+
+DISAGREEMENT_LIMIT = 100  # disagreeing hits kept in one record
+
+
+def _disagreements(engine: Engine, subject: Any, failure: BaseException | None, hits: Sequence[Any]) -> list[Any]:
+    """For a filter-and-check disagreement, each disagreeing hit: its metadata, what the filter and
+    check said, the reference answer for the target's rule, and which of the two gives it."""
+    from wardowl.filters import filter_from_dict, matches
+    from wardowl.testing import ConformanceError
+
+    if not isinstance(failure, ConformanceError):
+        return []
+    parsed = parse_failure(str(failure))
+    ids = parsed["details"].get("hits")
+    if parsed["what"] != "filter_for and check disagree" or not isinstance(ids, list):
+        return []
+    try:
+        pushed = filter_from_dict(parsed["details"].get("filter"))
+    except (TypeError, ValueError):
+        return []
+    by_id = {hit.id: hit for hit in hits}
+    found = []
+    for hit_id in ids:
+        hit = by_id.get(hit_id)
+        if hit is None:
+            continue
+        by_filter = matches(pushed, hit.metadata)
+        reference = engine.reference(subject, hit.metadata)
+        found.append(
+            {
+                "subject": _clip(subject.id),
+                "hit": _clip(hit_id),
+                "metadata": _clip(dict(hit.metadata)),
+                "filter": by_filter,
+                "check": not by_filter,  # the kit reports the hits where the two differ
+                "reference": reference,
+                "matches_reference": None if reference is None else ("filter" if reference == by_filter else "check"),
+            }
+        )
+    return found
 
 
 def _engine_run(
@@ -2287,7 +2418,7 @@ def _engine_run(
         with time_limit(limit):
             authorizer = engine.prepare(subjects, hits)
     except (Exception, CallTimeout) as error:
-        record.update(_outcome(error))
+        record.update(_outcome(error, keep=True))
         record["stage"] = "prepare"
     else:
         answers: list[tuple[Any, BaseException | None]] = []
@@ -2300,6 +2431,12 @@ def _engine_run(
                 failure = error
             answers.append((subject, failure))
         record.update(_combine(answers))
+        found = [d for subject, failure in answers for d in _disagreements(engine, subject, failure, hits)]
+        if found:
+            # Every subject's disagreeing hits, and which side gives the reference answer for each.
+            record["disagreements"] = found[:DISAGREEMENT_LIMIT]
+            record["disagreements_total"] = len(found)
+            record["reference_side"] = dict(Counter(str(d["matches_reference"]) for d in found))
     finally:
         with contextlib.suppress(Exception):
             engine.finish()
@@ -2627,6 +2764,14 @@ def _findings_section(names: Sequence[str], runs: Mapping[str, Sequence[Mapping[
             variants = sorted({str(r.get("variant")) for r in records}, key=_variant_index)
             seeds = _ranges([int(r.get("seed", 0)) for r in records])
             lines.append(f"- {name}: {kind} in {len(records)} runs (variants {', '.join(variants)}; seeds {seeds})")
+            sides: Counter[str] = Counter()
+            for record in records:
+                sides.update(record.get("reference_side") or {})
+            if sides:
+                lines.append(
+                    f"  - {sum(sides.values())} disagreeing hits: the filter gives the reference answer for "
+                    f"{sides.get('filter', 0)}, check for {sides.get('check', 0)}"
+                )
         lines.append("")
     return lines
 
@@ -2729,9 +2874,36 @@ def _target_section(
                 f"- {variant} ({mode}), seed {record.get('seed')}: **{outcome}** {what}. "
                 f"{_cell(message[0] if message else '', 300)}"
             )
+            lines += [f"  Disagreeing hit: {_cell(d, 400)}" for d in _disagreement_lines(record, 3)]
             lines.append(f"  Replay: `{record.get('replay', '')}`")
         lines.append("")
     return lines
+
+
+_STATUS_RANK = {"ok": 0, "skipped": 1, "setup-error": 2, "driver-error": 3}
+
+
+def _merge_start(previous: Mapping[str, Any] | None, record: Mapping[str, Any]) -> Mapping[str, Any]:
+    """One target-start for a target whose seeds ran in several jobs: the first, with every job's seeds."""
+    if previous is None:
+        return record
+    return {**previous, "seeds": sorted({*(previous.get("seeds") or []), *(record.get("seeds") or [])})}
+
+
+def _merge_end(previous: Mapping[str, Any] | None, record: Mapping[str, Any]) -> Mapping[str, Any]:
+    """One target-end for a target whose seeds ran in several jobs: runs and outcomes added up, and
+    the worst status kept, so a part that stopped early is not hidden by one that finished."""
+    if previous is None:
+        return record
+    rank = _STATUS_RANK.get(str(record.get("status")), len(_STATUS_RANK))
+    worse = record if rank > _STATUS_RANK.get(str(previous.get("status")), len(_STATUS_RANK)) else previous
+    merged = dict(worse)
+    for key in ("runs_planned", "runs_done", "runs_not_started"):
+        merged[key] = int(previous.get(key) or 0) + int(record.get(key) or 0)
+    outcomes: Counter[str] = Counter(previous.get("outcomes") or {})
+    outcomes.update(record.get("outcomes") or {})
+    merged["outcomes"] = dict(outcomes)
+    return merged
 
 
 def summarize_records(records: Sequence[Mapping[str, Any]], unreadable: int = 0) -> str:
@@ -2744,11 +2916,11 @@ def summarize_records(records: Sequence[Mapping[str, Any]], unreadable: int = 0)
         name = str(record.get("target", "?"))
         kind = record.get("type")
         if kind == "target-start":
-            starts[name] = record
+            starts[name] = _merge_start(starts.get(name), record)
         elif kind == "versions":
             versions[name] = record
         elif kind == "target-end":
-            ends[name] = record
+            ends[name] = _merge_end(ends.get(name), record)
         elif kind == "crash":
             crashes[name].append(record)
         elif kind == "result":
@@ -2767,7 +2939,8 @@ def summarize_records(records: Sequence[Mapping[str, Any]], unreadable: int = 0)
         "",
         "Outcomes: **pass**, the kit found nothing; **conformance-violation**, the kit's first disagreement with "
         "the reference; **refused-ValueError**, wardowl refused the data or a filter; **error**, anything else. "
-        "Engines are checked one subject at a time; a run takes its worst subject's outcome. "
+        "Engines are checked one subject at a time; a run takes its worst subject's outcome. Every run "
+        "that did not pass is in its group's artifact, findings/<target>.txt, with the whole message. "
         "See benchmarks/paper/CONFORMANCE.md.",
         "",
     ]

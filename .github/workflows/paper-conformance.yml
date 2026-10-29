@@ -8,8 +8,9 @@ name: paper-conformance
 #
 # The servers are the images and versions of ci.yml's test job, started with its options. Each group
 # of targets is one job; inside a job each target runs in its own process with its own time budget,
-# so a store that does not start, or a driver that crashes, costs only its own rows. Every job
-# uploads what it has, whatever happened, and the last job merges it into one summary.
+# so a store that does not start, or a driver that crashes, costs only its own rows. A slow target
+# has a job of its own, or two that split its seeds. Every job uploads what it has, whatever
+# happened, and the last job merges it into one summary.
 
 on:
   # A push to this branch runs the campaign with the defaults below: a manual-only workflow cannot be
@@ -71,10 +72,27 @@ jobs:
           - group: embedded
             targets: memory,chroma,lancedb,faiss
           - group: engines
-            targets: metadata-acl,opa,opa-tenant,openfga,openfga-tenant,spicedb,spicedb-tenant,cerbos,cerbos-tenant,keto,cedar,cedar-tenant,casbin,casbin-tenant
+            targets: metadata-acl,opa,opa-tenant,openfga,openfga-tenant,spicedb,spicedb-tenant,cerbos,cerbos-tenant,cedar,cedar-tenant,casbin-tenant
+          # Keto and Casbin with groups asked about one at a time are the slow engines: run 1 gave them
+          # a share of the engines job and they stopped on it after 72 and 43 of 140 runs (about 0.8
+          # and 2.1 minutes a run). Each now has a job of its own whose whole time goes to that one
+          # target (`budget`), and Casbin's seeds are split over two jobs (`seeds`), so every run fits.
+          - group: engines-keto
+            targets: keto
+            budget: 320
+          - group: engines-casbin-1
+            targets: casbin
+            budget: 320
+            seeds: first-half
+          - group: engines-casbin-2
+            targets: casbin
+            budget: 320
+            seeds: second-half
     env:
       CAMPAIGN_GROUP: ${{ matrix.group }}
       CAMPAIGN_TARGETS: ${{ matrix.targets }}
+      TARGET_BUDGET: ${{ matrix.budget }}
+      SEED_PART: ${{ matrix.seeds }}
       WARDOWL_TEST_DATABASE_URL: postgresql://test:test@localhost:5432/test
       WARDOWL_TEST_REDIS_URL: redis://127.0.0.1:6379/0
       WARDOWL_TEST_CASSANDRA_HOST: 127.0.0.1
@@ -139,7 +157,7 @@ jobs:
       - uses: open-policy-agent/setup-opa@b2b258e089860efaadaaf71bf6e3aecb4a3eeff1 # v2.4.0
         if: matrix.group == 'engines'
         with: { version: 1.21.2 }
-      - name: Start OPA, OpenFGA, SpiceDB, Cerbos (twice) and Ory Keto
+      - name: Start OPA, OpenFGA, SpiceDB and Cerbos (twice)
         if: matrix.group == 'engines'
         run: |
           # OPA with the example policy, as CI starts it; the driver uploads the acceptance policy itself.
@@ -153,6 +171,9 @@ jobs:
             ghcr.io/cerbos/cerbos:0.56.0
           docker run -d --name cerbos-tenant -p 3593:3592 -v "$PWD/acceptance/policies/cerbos:/policies:ro" \
             ghcr.io/cerbos/cerbos:0.56.0
+      - name: Start Ory Keto
+        if: matrix.group == 'engines-keto'
+        run: |
           docker run -d --name keto -p 4466:4466 -p 4467:4467 -v "$PWD/acceptance/policies/keto:/config:ro" \
             oryd/keto:v26.2.0 serve -c /config/keto.yml
 
@@ -214,7 +235,7 @@ jobs:
           ready milvus 120 curl -sf http://127.0.0.1:9091/healthz
           ready weaviate 60 curl -sf "$WARDOWL_TEST_WEAVIATE_URL/v1/.well-known/ready"
           ready mongodb 120 mongodb_healthy
-      - name: Wait for OPA, OpenFGA, SpiceDB, both Cerbos and Ory Keto
+      - name: Wait for OPA, OpenFGA, SpiceDB and both Cerbos
         if: matrix.group == 'engines'
         run: |
           ready() {
@@ -227,22 +248,35 @@ jobs:
           ready spicedb 30 curl -s -o /dev/null "$WARDOWL_TEST_SPICEDB_URL/"
           ready cerbos 30 curl -sf "$WARDOWL_TEST_CERBOS_URL/_cerbos/health"
           ready cerbos-tenant 30 curl -sf "$WARDOWL_CAMPAIGN_CERBOS_TENANT_URL/_cerbos/health"
-          ready keto 30 curl -sf "$WARDOWL_TEST_KETO_URL/health/ready"
+      - name: Wait for Ory Keto
+        if: matrix.group == 'engines-keto'
+        run: |
+          for _ in $(seq 1 30); do curl -sf "$WARDOWL_TEST_KETO_URL/health/ready" > /dev/null 2>&1 && { echo "keto is ready"; exit 0; }; sleep 2; done
+          echo "::warning::keto did not answer; its target will record a setup error"; docker logs --tail 50 keto || true
 
       - name: Run the campaign, one process per target
         run: |
           mkdir -p results
           # Each target gets the smaller of BUDGET_MINUTES and a fair share of what is left of 320
           # minutes, so the job ends inside its timeout; targets that finish early leave time to the rest.
+          # A job with a matrix budget (one slow target) gives that target the budget instead, and a
+          # job with a seed part runs only that half of the seeds; the summary adds the halves up.
           deadline=$(( $(date +%s) + 320 * 60 ))
+          budget=${TARGET_BUDGET:-$BUDGET_MINUTES}
+          half=$(( (SEEDS + 1) / 2 ))
+          case "$SEED_PART" in
+            first-half) seeds=(--seed-start 0 --seeds "$half") ;;
+            second-half) seeds=(--seed-start "$half" --seeds "$(( SEEDS - half ))") ;;
+            *) seeds=(--seeds "$SEEDS") ;;
+          esac
           IFS=, read -r -a targets <<< "$CAMPAIGN_TARGETS"
           count=${#targets[@]}
           for i in "${!targets[@]}"; do
             target=${targets[$i]}
             echo "::group::$target"
             status=0
-            python "$CAMPAIGN" run --targets "$target" --seeds "$SEEDS" --examples "$EXAMPLES" \
-              --variants "$VARIANTS" --budget-minutes "$BUDGET_MINUTES" --group-deadline "$deadline" \
+            python "$CAMPAIGN" run --targets "$target" "${seeds[@]}" --examples "$EXAMPLES" \
+              --variants "$VARIANTS" --budget-minutes "$budget" --group-deadline "$deadline" \
               --remaining "$((count - i))" --out results || status=$?
             if [ "$status" -ne 0 ]; then
               echo "::error::$target: the driver stopped with exit status $status"
@@ -358,6 +392,12 @@ jobs:
           mkdir -p merged
           python "$CAMPAIGN" summarize "${files[@]}" --merged merged/campaign.jsonl --summary merged/summary.md
           cat merged/summary.md >> "$GITHUB_STEP_SUMMARY"
+          # Every group's findings (each failed run's whole message), under the group's name.
+          for found in parts/*/findings; do
+            group=$(basename "$(dirname "$found")")
+            mkdir -p merged/findings
+            cp -r "$found" "merged/findings/${group#conformance-}"
+          done
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: conformance-summary

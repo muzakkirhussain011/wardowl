@@ -91,9 +91,18 @@ Engines (subjects and chunks; each chunk's `doc_id` is its own id):
 | | `spicedb-tenant` | `acceptance/policies/spicedb/schema.zed` (view = reader & tenant->member), memberships stored in SpiceDB |
 | | `cerbos` | `cerbos:0.56.0` with `examples/cerbos/policies` (metadata ACLs); filter from the query plan |
 | | `cerbos-tenant` | A second Cerbos with `acceptance/policies/cerbos` (tenant equality and sharing) |
-| | `keto` | `keto:v26.2.0` with `acceptance/policies/keto`, groups checked as subject sets; no filter |
 | | `cedar`, `cedar-tenant` | In process: the ACL policy of wardowl's tests, and `acceptance/policies/cedar/documents.cedar`; no filter |
-| | `casbin`, `casbin-tenant` | In process: the RBAC model of wardowl's tests, and `acceptance/policies/casbin/model.conf` (a domain per tenant); no filter |
+| | `casbin-tenant` | In process: `acceptance/policies/casbin/model.conf` (a domain per tenant); no filter |
+| engines-keto | `keto` | `keto:v26.2.0` with `acceptance/policies/keto`, groups checked as subject sets; no filter. The job's whole time is its budget |
+| engines-casbin-1, engines-casbin-2 | `casbin` | In process: the RBAC model of wardowl's tests, groups asked about one at a time; no filter. Seeds 0-9 in one job and 10-19 in the other, each with the job's whole time |
+
+Keto and Casbin ran inside the engines job in run 1 and stopped on their time budget after 72 and
+43 of 140 runs. Both are slow by design rather than by fault: the kit asks about every chunk alone
+as well as in a batch, a subject in 300 or 1,000 groups multiplies every question by its groups
+(`group_subjects=True` asks about each group in turn), Keto answers 10 tuples per HTTP request, and
+Casbin evaluates its matcher against every policy row for each request. Run 1 took about 0.8 and 2.1
+minutes per run for them, so 140 runs need about 2 and 5 hours; from run 2 on, each has a job of its
+own and Casbin's seeds are split over two. Nothing else about them changed.
 
 The images are ci.yml's test job's, started with its options; the run records each container's image
 id and registry digest, and the version each server reports about itself where it reports one.
@@ -113,7 +122,7 @@ Every (target, seed, variant) is one record:
 |---|---|
 | `pass` | The kit found nothing |
 | `conformance-violation` | The kit raised `ConformanceError`: its first disagreement in that run, with the kind of disagreement and a reproducer |
-| `refused-ValueError` | A `ValueError` raised inside one of wardowl's adapters (not the harness): the store or engine refused the data or a filter it cannot express. Refusing is allowed; answering wrongly is not |
+| `refused-ValueError` | A `ValueError` raised inside one of wardowl's adapters (not the harness): the store or engine refused the data or a filter it cannot express. This includes `UnsupportedSubject`, which OpenFGA's and SpiceDB's adapters raise before sending a subject the service cannot represent (it is also an `AuthorizationError`, so retrieval fails closed). Refusing is allowed; answering wrongly is not |
 | `error` | Anything else: a server error, a crash, a client library's own `ValueError`, a time-out (`CallTimeout`), an engine's `AuthorizationError` (fail-closed) |
 
 Violation kinds, the first one being the record's `kind`: `leak` (a filtered search returned a
@@ -154,12 +163,13 @@ branch picker, for example `gh workflow run paper-conformance.yml --ref paper/co
 | `seeds` | 20 | Seeds 0 to N-1 for every target and variant |
 | `examples` | 10 | Corpora per seed for the store `default` variant; the stress variants run a third (at least 2). The kit's own default is 25 |
 | `variants` | `all` | Or a comma-separated list, for example `default,wide-or` |
-| `budget_minutes` | 90 | Time per target; each target also gets at most a fair share of what is left of 320 minutes in its job |
+| `budget_minutes` | 90 | Time per target; each target also gets at most a fair share of what is left of 320 minutes in its job. Keto's and Casbin's jobs give their target the whole 320 minutes instead |
 | `pinecone` | true | Run the Pinecone job (it needs the `PINECONE_API_KEY` secret, and records the target as skipped without it) |
 
-Six jobs run in parallel (sql-and-kv, search-engines, vector-dbs, embedded, engines, and cloud for
-Pinecone), then `summary` merges them. Seeds are the outer loop and variants the inner one, so a run
-cut short by its budget still covers every variant for the seeds it reached.
+Nine jobs run in parallel (sql-and-kv, search-engines, vector-dbs, embedded, engines, engines-keto,
+engines-casbin-1, engines-casbin-2, and cloud for Pinecone), then `summary` merges them; a target
+whose seeds ran in two jobs is one row, its runs added up. Seeds are the outer loop and variants the
+inner one, so a run cut short by its budget still covers every variant for the seeds it reached.
 
 To replay one record, start the same server as the workflow does (its `docker run` line and the
 environment variables at the top of the job) and run the `replay` command the record carries, for
@@ -170,11 +180,49 @@ python benchmarks/paper/conformance_campaign.py run --targets qdrant --seed-list
   --examples 10 --stress-examples 3 --large-documents 150
 ```
 
+## Runs
+
+The workflow installs wardowl from the commit it runs (`pip install -e .`), and every record's
+`target-start` carries that commit as `github_sha`.
+
+| Run | Workflow run | Branch commit | wardowl tested | What changed |
+|---|---|---|---|---|
+| 1 | [40313285885](https://github.com/muzakkirhussain011/wardowl/actions/runs/40313285885), 2026-10-26 | `5d0f414` | 2.1.0 as released (main at `950a5cc`) | The first run |
+| 2 | The push that follows the merge commit `10c6e93` | The head of this branch at that push | `fix/engine-limits` at `e7776f0`: main at `438a176` (2.1.0 and the unreleased fix to `complete`, #166) and the two fixes run 1 led to | See below |
+
+Run 2 changes only what run 1's findings called for; images, seeds, variants, corpora, call limits
+and every other target's budget are run 1's, so the two runs compare target by target.
+
+- The library (merged from `fix/engine-limits`): OpenFGA's and SpiceDB's adapters raise
+  `UnsupportedSubject`, a refusal, before sending a subject the service cannot represent, where run 1
+  recorded the service's HTTP 400 as an error (a subject in more than 100 groups, a user over 512
+  bytes or a group over 256 characters for OpenFGA; an id outside SpiceDB's object id syntax, such as
+  the kit's `zoë`). Redis and MongoDB store and search a permission term too long for their index
+  (over 2,048 bytes of field and value for Redis, whose terms are hex-encoded; over 8,181 characters
+  for MongoDB) as its SHA-256 digest, where run 1 found them missing matching chunks. From main,
+  #166 makes the kit check a backend that declares `exact_search` as exact whatever `exact=` says;
+  the only such targets, `memory` and `faiss`, run exact already, and the kit draws the same data
+  from each seed.
+- The harness: `findings/<target>.txt` with every failure's whole message (run 1's annotations cut
+  them at 600 characters, hiding the metadata of the hits they named), the disagreeing hits of a
+  filter-and-check disagreement with the side that gives the reference answer, and Keto and Casbin
+  in jobs of their own (see Targets).
+
+Expected in run 2, as run 1's evidence predicts: OpenFGA's and SpiceDB's 479 errors become
+refusals at the same rates (no engine errors left), Redis's and MongoDB's long and huge string
+variants pass, Keto and Casbin complete 140 runs each, and Cerbos's `scalar-fields` disagreements
+recur unchanged, now with the metadata of every disagreeing hit and the side the reference takes.
+Elasticsearch, OpenSearch, Milvus, Chroma and Qdrant keep their errors, which are engine limits that
+fail closed.
+
 ## Reading the results
 
-Each job uploads `conformance-<group>`: `campaign.jsonl`, `summary.md` and the servers' logs
-(`logs/`). The `summary` job uploads `conformance-summary`: every group's records in one
-`campaign.jsonl` and one `summary.md`, which is also the run's job summary.
+Each job uploads `conformance-<group>`: `campaign.jsonl`, `summary.md`, the servers' logs (`logs/`)
+and `findings/<target>.txt`, which holds every run that did not pass with the kit's whole message
+(every document, the filter and every value, uncut), its replay command and, for an engine, the
+subject. The `summary` job uploads `conformance-summary`: every group's records in one
+`campaign.jsonl`, one `summary.md`, which is also the run's job summary, and every group's findings
+under `findings/<group>/`.
 
 `campaign.jsonl` holds one JSON object per line, with `type`:
 
@@ -186,14 +234,22 @@ Each job uploads `conformance-<group>`: `campaign.jsonl`, `summary.md` and the s
   `duration_s`, `kind` and `kinds` with a `reproducer` (the problems, the filter, k, expected and
   returned ids, the documents) for a violation, `error_class`, `raised_in`, `message`, `where` and
   `cause` otherwise, `subjects` and `subject` for an engine, `case` (tuples written and refused), and
-  `replay`;
+  `replay`. For a filter-and-check disagreement, `disagreements` lists every disagreeing hit of every
+  subject (up to 100; `disagreements_total` counts them all): the subject, the hit, its metadata,
+  what the filter and `check` said, the `reference` answer, and `matches_reference`, the side that
+  gives it; `reference_side` counts the hits by that side. The reference applies
+  `wardowl.filters.matches` to the target's rule: a listed user, a shared group or `"*"` for the
+  metadata ACL profiles, and the subject's tenant with a listed user or a shared group (no `"*"`)
+  for the tenant profiles;
 - `target-end`: `status` (`ok`, `skipped`, `setup-error` or `driver-error`), runs planned, done and not
   started, and the outcome counts;
 - `crash`: the driver process stopped (the workflow writes this).
 
-Messages are cut at 4,000 characters, strings in reproducers at 300 and lists at 40 items; the seed
-and the replay command reproduce everything exactly. Values of environment variables named like
-secrets are replaced by `***`.
+In `campaign.jsonl`, messages are cut at 4,000 characters, strings in reproducers at 300 and lists
+at 40 items; `findings/` has them whole, and the seed and the replay command reproduce everything
+exactly. The job log prints, and a warning annotation carries, the head of each failure and the
+metadata of the hits or documents it names (GitHub shows at most 10 warnings per step). Values of
+environment variables named like secrets are replaced by `***`.
 
 `summary.md` starts with the controls (`memory` and `metadata-acl` must pass every run; if one does
 not, the harness is at fault and nothing else should be read), then the violations, wrong answers
