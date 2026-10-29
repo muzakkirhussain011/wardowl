@@ -24,6 +24,19 @@ Added to the scenario:
   results, gross misses, the similarity gap, the share of kb/ hits, latency (median of 3 passes),
   and the `complete` flag wardowl reported, with the confusion against the exact answer.
 
+Run 2 (amendment 2 of PREREGISTRATION.md, `--grid run2`, the default) adds:
+
+* plan control: the P-a to P-e settings and `pg-custom` plan every search with its own values
+  (plan_cache_mode = force_custom_plan); `p-asrun` keeps PostgreSQL's and psycopg's defaults;
+* the plan PostgreSQL executed for every first-pass search, from auto_explain, and a flag on any
+  setting meant to search the HNSW graph that mostly did not;
+* `p-x0` and `p-x0v`, replays of the original run's pgvector pass, with the table's vacuum history
+  and the GIN index's pending list before and after;
+* a `one-segment` Qdrant layout that really ends with one segment holding points, and the points
+  of every segment of every build;
+* shards: `--prepare-only`, `--families`, `--reps` and `--pin-from`, so several sessions can share
+  one set of vectors and one exact baseline (README.md, "Run 2").
+
 Every retrieval goes through wardowl's PermissionedRetriever, which re-checks every hit, and every
 hit is checked again against the scenario's oracle and canary detector. An unreadable hit, a canary
 of an unreadable document or a violation stops the run at once (exit code 3, LEAK.json).
@@ -39,8 +52,9 @@ layouts. Qdrant's hnsw_ef, exact and ACORN go through QdrantBackend's own `searc
     python x1_underretrieval.py --resume           # the full grid, both stores
     python x1_underretrieval.py --stores qdrant --resume
 
-Outputs (default /kaggle/working/x1, or /kaggle/working/x1-smoke) are written after every setting,
-so a crash keeps what finished; --resume skips what is done. README.md lists every file.
+Outputs (default /kaggle/working/x1run2, x1run2-smoke with --smoke, x1 and x1-smoke with --grid run1)
+are written after every setting, so a crash keeps what finished; --resume skips what is done.
+README.md lists every file.
 """
 
 from __future__ import annotations
@@ -52,6 +66,7 @@ import gzip
 import hashlib
 import json
 import math
+import random
 import re
 import shutil
 import time
@@ -109,8 +124,13 @@ PG_GUCS: dict[str, str] = {
     "plan_cache_mode": "plan_cache_mode",
 }
 PG_ASRUN: dict[str, Any] = {"ef_search": 100, "iterative_scan": "relaxed_order"}  # the original run
+PG_CUSTOM: dict[str, Any] = {"plan_cache_mode": "force_custom_plan"}  # run 2: every search planned with its values
 PG_DEFAULT_FAMILY = "hnsw-m16-efc64"
 PG_FAMILIES = ((PG_DEFAULT_FAMILY, 16, 64, False), ("hnsw-m32-efc200", 32, 200, True))  # name, m, efc, core grid
+GRIDS = ("run1", "run2")  # run 1 as pre-registered; run 2 as amendment 2 changes it
+# Where a plan keeps its parameters: a generic plan shows $1, $2, ... there, a custom plan the values.
+PLAN_FIELDS = ("Filter", "Index Cond", "Recheck Cond", "Order By", "Sort Key", "Output")
+HNSW_SHARE_FLOOR = 0.5  # amendment 2: below this share of HNSW plans, an approximate setting "ran mostly exact"
 
 # Qdrant's per-segment search counters in /telemetry (VectorIndexSearchesTelemetry).
 COUNTERS = frozenset(
@@ -129,6 +149,7 @@ COUNTERS = frozenset(
 )
 ASRUN_FIELDS = ("allowed_users", "allowed_groups", "tenant")  # the original run's keyword indexes
 ONE_SEGMENT_KB = 1_000_000  # max_segment_size for one-segment: the corpus's 330 MB of vectors fit in one
+QDRANT_INDEXING_KB = 10_000  # Qdrant's default indexing_threshold (DEFAULT_INDEXING_THRESHOLD_KB in 1.19.2)
 LAYOUTS: dict[str, str] = {
     "as-run": "enterprise_rag.QdrantStore.load, as the original run: wardowl's create_collection with keyword "
     "indexes on allowed_users, allowed_groups, tenant and wardowl_id, default HNSW (m 16, ef_construct 100) "
@@ -138,6 +159,12 @@ LAYOUTS: dict[str, str] = {
     "graph (harness-level)",
     "separate-kb": "company documents and notices in one collection, the FiQA base in another, both created as "
     "as-run; each search queries both under the same filter and merges the hits by cosine score (harness-level)",
+    "one-segment": "as-run, with optimizers_config default_segment_number=1, max_segment_size 1,000,000 KB and "
+    "indexing_threshold 0 (indexing off) while the corpus is uploaded into one segment, then indexing_threshold "
+    "10,000 KB (Qdrant's default) and a wait until every vector is indexed (harness-level, amendment 2)",
+}
+LAYOUTS_RUN1 = {
+    **LAYOUTS,
     "one-segment": "as-run, with optimizers_config default_segment_number=1 and max_segment_size 1,000,000 KB "
     "so the optimizer can merge everything into one segment (harness-level)",
 }
@@ -152,7 +179,8 @@ class Setting:
 
     `harness` names the parameters wardowl's backend does not expose: this harness sets them on the
     store itself, and they are reported as harness-level. `first_build_only` marks exact search,
-    which does not use the graph, so one build is enough.
+    which does not use the graph, so one build is enough. `passes` overrides `--passes` (the
+    replays of the original run make one pass, as the original did).
     """
 
     id: str
@@ -160,6 +188,7 @@ class Setting:
     params: dict[str, Any] = field(default_factory=dict)
     harness: tuple[str, ...] = ()
     first_build_only: bool = False
+    passes: int | None = None
 
     def describe(self) -> dict[str, Any]:
         return {
@@ -167,32 +196,50 @@ class Setting:
             "params": self.params,
             "harness_level": list(self.harness),
             "first_build_only": self.first_build_only,
+            "passes": self.passes,
         }
 
 
-def pg_settings(core: bool) -> list[Setting]:
-    """Section 6.2's query-time grid; `core` is the subset run on the second index family."""
-    scan = ("max_scan_tuples", "scan_mem_multiplier")
+def pg_settings(core: bool, grid_name: str = "run2") -> list[Setting]:
+    """Section 6.2's query-time grid; `core` is the subset run on the second index family.
+
+    Run 2 (amendment 2) adds the replays `p-x0` and `p-x0v` first, makes `pg-custom` the second
+    setting (the reference of P1 and P2), and plans every P-a to P-e search with its own values.
+    """
+    run2 = grid_name == "run2"
+    plan = dict(PG_CUSTOM) if run2 else {}
+    planned = ("plan_cache_mode",) if run2 else ()
+    scan = ("max_scan_tuples", "scan_mem_multiplier", *planned)
     every = ("as run", "P-a", "P-b", "P-c", "P-d", "P-e", "P-f", "P-g", "P-h")
-    grid = [Setting("p-asrun", every, dict(PG_ASRUN))]
+    grid: list[Setting] = []
+    if run2:
+        replay = {**PG_ASRUN, "replay": "x0"}
+        vacuumed = {**replay, "vacuum": True}
+        for name, params, harness in (("p-x0", replay, ("replay",)), ("p-x0v", vacuumed, ("replay", "vacuum"))):
+            grid.append(Setting(name, ("X0 replay", "P5"), params, harness, first_build_only=True, passes=1))
+    grid.append(Setting("p-asrun", (*every, "P5") if run2 else every, dict(PG_ASRUN)))
+    custom = {**PG_ASRUN, "plan_cache_mode": "force_custom_plan"}
+    if run2:
+        grid.append(Setting("pg-custom", ("P-g", "P1", "P2", "P4", "P5"), custom, ("plan_cache_mode",)))
     limits = ((20_000, 8), (100_000, 1), (100_000, 8), (1_000_000, 1), (1_000_000, 8), (1_000_000, 16))
     for tuples, multiplier in limits:
-        params = {**PG_ASRUN, "max_scan_tuples": tuples, "scan_mem_multiplier": float(multiplier)}
+        params = {**PG_ASRUN, **plan, "max_scan_tuples": tuples, "scan_mem_multiplier": float(multiplier)}
         grid.append(Setting(f"pa-t{tuples // 1000}k-m{multiplier}", ("P-a", "P1"), params, scan))
-    grid.append(Setting("pb-wm64", ("P-b", "P1"), {**PG_ASRUN, "work_mem": "64MB"}, ("work_mem",)))
+    grid.append(Setting("pb-wm64", ("P-b", "P1"), {**PG_ASRUN, **plan, "work_mem": "64MB"}, ("work_mem", *planned)))
     for ef in (40, 200, 400, 1000):
-        grid.append(Setting(f"pc-ef{ef}", ("P-c", "P2"), {**PG_ASRUN, "ef_search": ef}))
+        grid.append(Setting(f"pc-ef{ef}", ("P-c", "P2"), {**PG_ASRUN, **plan, "ef_search": ef}, planned))
     for factor in (4, 10):
-        grid.append(Setting(f"pd-lim{factor}", ("P-d", "P2"), {**PG_ASRUN, "limit_factor": factor}, ("limit_factor",)))
-    grid.append(Setting("pe-strict", ("P-e", "P2"), {**PG_ASRUN, "iterative_scan": "strict_order"}))
-    custom = {**PG_ASRUN, "plan_cache_mode": "force_custom_plan"}
-    grid.append(Setting("pg-custom", ("P-g", "P4"), custom, ("plan_cache_mode",)))
+        params = {**PG_ASRUN, **plan, "limit_factor": factor}
+        grid.append(Setting(f"pd-lim{factor}", ("P-d", "P2"), params, ("limit_factor", *planned)))
+    grid.append(Setting("pe-strict", ("P-e", "P2"), {**PG_ASRUN, **plan, "iterative_scan": "strict_order"}, planned))
+    if not run2:
+        grid.append(Setting("pg-custom", ("P-g", "P4"), custom, ("plan_cache_mode",)))
     noprepare = {**PG_ASRUN, "prepare_threshold": "none"}
     grid.append(Setting("pg-noprepare", ("P-g", "P4"), noprepare, ("prepare_threshold",)))
     exact = {**PG_ASRUN, "enable_indexscan": "off"}
     grid.append(Setting("ph-exact", ("P-h", "P3"), exact, ("enable_indexscan",), first_build_only=True))
     if core:
-        keep = {"p-asrun", "pc-ef400", "pa-t1000k-m8", "pd-lim10"}
+        keep = {"p-asrun", "pc-ef400", "pa-t1000k-m8", "pd-lim10"} | ({"pg-custom"} if run2 else set())
         grid = [s for s in grid if s.id in keep]
     return grid
 
@@ -239,6 +286,130 @@ class LastEvent:
         return float(self.event.search_ms) if self.event is not None else math.nan
 
 
+class PlanCapture:
+    """The plans PostgreSQL executed, from auto_explain, for searches run while it is armed.
+
+    EXPLAIN with a search's values always shows a custom plan, while a prepared search may run a
+    generic one; auto_explain reports the plan the executor actually ran. It is loaded into each
+    session with its log level at NOTICE, so a plan reaches this client with the search's result
+    (harness-level, amendment 2). While armed, `statements` turns it on for the search's own
+    transaction only; `session=True` turns it on for the whole session instead, for the replays,
+    which run wardowl's backend unchanged. With `analyze`, the plans carry actual rows and buffers.
+    """
+
+    def __init__(self) -> None:
+        self.supported: bool | None = None
+        self.reason = ""
+        self.armed = False
+        self.analyze = False
+        self.plans: list[dict[str, Any]] = []
+        self.unparsed = 0
+
+    def attach(self, conn: Any, session: bool = False) -> bool:
+        """Loads auto_explain into this connection's session; a refusal is recorded, never raised."""
+        import psycopg
+
+        conn.add_notice_handler(self.notice)
+        statements = [
+            "LOAD 'auto_explain'",
+            "SET auto_explain.log_format = 'json'",
+            "SET auto_explain.log_level = 'notice'",
+            "SET auto_explain.log_analyze = off",
+            "SET auto_explain.log_nested_statements = off",
+            f"SET auto_explain.log_min_duration = {0 if session else -1}",
+        ]
+        try:
+            for statement in statements:
+                conn.execute(statement)
+            # PostgreSQL 16 adds the bound values to each plan unless told not to: 8 KB per search here.
+            if conn.execute("SELECT current_setting('auto_explain.log_parameter_max_length', true)").fetchone()[0]:
+                conn.execute("SET auto_explain.log_parameter_max_length = 0")
+            conn.commit()
+        except psycopg.Error as error:
+            conn.rollback()
+            self.supported, self.reason = False, f"{type(error).__name__}: {error}"
+            log.once("auto_explain", f"auto_explain could not be loaded ({self.reason}): no executed plan is recorded")
+            return False
+        self.supported = True
+        return True
+
+    def detach(self, conn: Any) -> None:
+        """Turns a session-wide capture off again (the replays)."""
+        if self.supported:
+            conn.execute("SET auto_explain.log_min_duration = -1")
+            conn.commit()
+
+    def statements(self) -> list[Any]:
+        """SET LOCAL statements that turn auto_explain on for one search's transaction, while armed."""
+        from psycopg import sql
+
+        if not (self.armed and self.supported):
+            return []
+        names = ["log_min_duration = 0", *(["log_analyze = on", "log_buffers = on"] if self.analyze else [])]
+        return [sql.SQL(f"SET LOCAL auto_explain.{n}") for n in names]
+
+    def notice(self, diagnostic: Any) -> None:
+        message = diagnostic.message_primary or ""
+        if not (message.startswith("duration:") and "plan:" in message):
+            log(f"  PostgreSQL {diagnostic.severity}: {message}")
+            return
+        if not self.armed:
+            return
+        try:
+            self.plans.append(json.loads(message.split("plan:", 1)[1]))
+        except ValueError:
+            self.unparsed += 1
+
+    def take(self) -> list[dict[str, Any]]:
+        plans, self.plans = self.plans, []
+        return plans
+
+    def describe(self) -> dict[str, Any]:
+        return {"supported": self.supported, "reason": self.reason, "unparsed_notices": self.unparsed}
+
+
+def plan_kind(document: Any, table: str) -> dict[str, Any]:
+    """What an executed plan did: searched the HNSW graph, the GIN index, the whole table, or else;
+    and whether it is a generic plan (its parameters left as $1, $2, ... where values would be)."""
+    root = document[0] if isinstance(document, list) else document
+    nodes = plan_nodes(root["Plan"])
+    names = [str(n.get("Index Name", "")) for n in nodes]
+    if any(n.endswith("_embedding_hnsw") for n in names):
+        kind = "hnsw"
+    elif any(n.endswith("_metadata_gin") for n in names):
+        kind = "gin"
+    elif any(n.get("Node Type") == "Seq Scan" and n.get("Relation Name") == table for n in nodes):
+        kind = "seq"
+    else:
+        kind = "other"
+    generic = any(re.search(r"\$\d", str(n.get(f, ""))) for n in nodes for f in PLAN_FIELDS)
+    return {"kind": kind, "generic": generic}
+
+
+def plan_columns(k: int, plans: list[dict[str, Any]] | None) -> dict[str, Any]:
+    """The executed plan of one retrieval, as columns of the runs table (empty when none was captured)."""
+    if not plans:
+        return {f"plan{k}": "", f"generic{k}": math.nan}
+    found = plan_kind(plans[-1], NAME)
+    return {f"plan{k}": found["kind"], f"generic{k}": float(found["generic"])}
+
+
+def plan_counts(runs: pd.DataFrame) -> dict[str, Any]:
+    """How many first-pass searches had a captured plan, and how many of those searched the HNSW graph."""
+    kinds = pd.concat([runs[c] for c in ("plan5", "plan10") if c in runs], ignore_index=True)
+    kinds = kinds[kinds.fillna("") != ""]
+    generic = pd.concat([runs[c] for c in ("generic5", "generic10") if c in runs], ignore_index=True).dropna()
+    captured = len(kinds)
+    hnsw = int((kinds == "hnsw").sum())
+    return {
+        "captured": captured,
+        "hnsw": hnsw,
+        "hnsw_share": hnsw / captured if captured else None,
+        "generic": int(generic.sum()),
+        "kinds": {str(k): int(v) for k, v in kinds.value_counts().items()},
+    }
+
+
 class HarnessPgVector(PgVectorBackend):
     """wardowl's PgVectorBackend, plus the pgvector settings it does not expose (harness-level).
 
@@ -256,6 +427,7 @@ class HarnessPgVector(PgVectorBackend):
         )
         self.extra = [(guc, str(params[name])) for name, guc in PG_GUCS.items() if params.get(name) is not None]
         self.limit_factor = int(params.get("limit_factor", 1))
+        self.capture: PlanCapture | None = None  # set by the stage: the executed plans, while armed
 
     def _settings(self) -> list[Any]:
         from psycopg import sql
@@ -263,6 +435,8 @@ class HarnessPgVector(PgVectorBackend):
         statements = super()._settings()
         for guc, value in self.extra:
             statements.append(sql.SQL("SET LOCAL {} = {}").format(sql.SQL(guc), sql.Literal(value)))
+        if self.capture is not None:
+            statements += self.capture.statements()
         return statements
 
     def _query(self, query_vector: str, k: int, f: Any) -> tuple[Any, list[Any]]:
@@ -407,6 +581,30 @@ def search_counters(document: Any) -> Counter[tuple[str, str]]:
     return found
 
 
+SEGMENT_FIELDS = ("segment_type", "is_appendable", "num_points", "num_vectors", "num_indexed_vectors")
+
+
+def segment_list(document: Any, collection: str) -> list[dict[str, Any]]:
+    """One collection's segments in a /telemetry document (collections, shards, local, segments, info),
+    with the points, vectors and indexed vectors each holds."""
+    found: list[dict[str, Any]] = []
+    stack: list[Any] = [document]
+    while stack:
+        node = stack.pop()
+        if isinstance(node, dict):
+            if node.get("id") == collection and "shards" in node:
+                for shard in node.get("shards") or []:
+                    local = (shard or {}).get("local") or {}
+                    for segment in local.get("segments") or []:
+                        info = (segment or {}).get("info") or {}
+                        found.append({key: info.get(key) for key in SEGMENT_FIELDS})
+                continue
+            stack.extend(node.values())
+        elif isinstance(node, list):
+            stack.extend(node)
+    return found
+
+
 def counter_rows(person: str, before: Counter | None, after: Counter | None) -> list[dict[str, Any]]:
     """The counters that changed while one person's questions ran."""
     if before is None or after is None:
@@ -460,7 +658,9 @@ class Experiment:
         self.authorizer = self.er.tenant_acl()
         self.filters: dict[str, Any] = {}
         self.is_kb = np.zeros(0, dtype=bool)  # per chunk row: whether it is a FiQA passage
-        self.durations: dict[str, list[float]] = defaultdict(list)
+        self.original_count = 0  # the original run's questions come first in run.pairs, the probes after them
+        # Seconds each setting took in this session, by store and setting id, for the time guard.
+        self.durations: dict[str, dict[str, list[float]]] = defaultdict(lambda: defaultdict(list))
         if not args.resume:
             self.refuse_overwrite()
 
@@ -507,16 +707,20 @@ class Experiment:
         if moved:
             self.manifest.warn(f"{store} {build} was partly done; moved {len(moved)} files to {target}, redoing it")
 
-    def time_for(self, label: str, store: str) -> bool:
-        """Whether there is time to start one more setting of this store before the deadline."""
+    def time_for(self, label: str, store: str, setting: str | None = None) -> bool:
+        """Whether there is time to start one more setting of this store before the deadline: the
+        longest earlier run of the same setting, or of any setting of the store if it has not run yet
+        (amendment 2, item 9). A build is checked against the store's longest setting."""
         durations = self.durations[store]
-        estimate = max(durations) if durations else 0.0
+        same = durations.get(setting, []) if setting else []
+        every = [s for runs in durations.values() for s in runs]
+        estimate = max(same or every or [0.0])
         left = self.deadline - time.time()
         if left > estimate:
             return True
+        what = f"{setting} took" if same else f"a {store} setting took"
         message = (
-            f"skipped {label}: {left / 60:.0f} min left before the deadline, and a {store} setting took up to "
-            f"{estimate / 60:.0f} min"
+            f"skipped {label}: {left / 60:.0f} min left before the deadline, and {what} up to {estimate / 60:.0f} min"
         )
         log.loud(message)
         self.manifest.add("skipped", {"what": label, "reason": message})
@@ -561,7 +765,7 @@ class Experiment:
         self.manifest.set("environment", env)
         seeds = {"run": self.args.seed, "fixed_explain": self.args.seed + 1, "probe": PROBE_SEED}
         self.manifest.set("seeds", {**seeds, "scenario": self.er.Config.seed})
-        self.manifest.set("qdrant_layouts", LAYOUTS)
+        self.manifest.set("qdrant_layouts", LAYOUTS if self.args.grid == "run2" else LAYOUTS_RUN1)
 
     def prepare(self) -> None:
         er = self.er
@@ -584,6 +788,8 @@ class Experiment:
             )
         with self.manifest.stage("embeddings") as record:
             record["copied_from_input"] = self.reuse_cache()
+            record["adopted_from_prep"] = self.adopt()
+            self.check_embedding_device()
             before = set(self.run.cache.glob("chunks-*.npy"))
             self.run.embed()
             self.require("embeddings")
@@ -619,6 +825,7 @@ class Experiment:
     def add_probes(self) -> None:
         """Section 6.1's probe set, appended to the scenario's people and questions before embedding."""
         er, run = self.er, self.run
+        self.original_count = len(run.pairs)
         rng = np.random.default_rng(PROBE_SEED)
         generated = [t for t in er.TENANT_IDS if t not in er.enterprise.TENANTS]
         by_kind: dict[tuple[str, str], list[Any]] = defaultdict(list)
@@ -671,15 +878,70 @@ class Experiment:
         log(f"cached embeddings copied from /kaggle/input: {copied or 'none'}")
         return copied
 
+    def adopt(self) -> list[str]:
+        """--pin-from: the query vectors and question table of the session that prepared them, copied
+        here, so that this shard searches with the same vectors and checks its exact baseline against
+        that session's (amendment 2, item 8)."""
+        source: Path | None = self.args.pin_from
+        if source is None:
+            return []
+        copied = []
+        for name in ("query_vectors.npy", "query_vectors.json", "questions.parquet", "questions.csv", "people.csv"):
+            path, target = source / name, self.out / name
+            if path.is_file() and not target.exists():
+                shutil.copy(path, target)
+                copied.append(name)
+        if not (self.out / "query_vectors.npy").is_file():
+            raise FileNotFoundError(f"{source} holds no query_vectors.npy: is it the output of --prepare-only?")
+        log(f"adopted from {source}: {copied or 'nothing new'}")
+        return copied
+
+    def cached_embeddings(self) -> Path:
+        """The file enterprise_rag.Run.embed reads the chunk vectors from, named as it names it."""
+        run = self.run
+        digest = hashlib.sha256(run.cfg.embed_model.encode())
+        for d in run.docs:
+            digest.update(f"{d.id}\0{d.text}\1".encode())
+        name = re.sub(r"[^\w.-]+", "_", run.cfg.embed_model)
+        return run.cache / f"chunks-{name}-{digest.hexdigest()[:16]}.npy"
+
+    def check_embedding_device(self) -> None:
+        """Stops before embedding the whole corpus on a CPU, about an hour, unless that is allowed."""
+        if self.args.smoke or self.args.allow_cpu_embedding or not str(self.run.embed_device).startswith("cpu"):
+            return
+        path = self.cached_embeddings()
+        if path.is_file():
+            return
+        raise RuntimeError(
+            f"no GPU and no cached chunk embeddings ({path.name}): attach the output of a session that embedded "
+            "this corpus (prep, or the original run), use a GPU, or pass --allow-cpu-embedding"
+        )
+
+    def find_pinned(self, digest: str, vectors: Path, meta: Path) -> None:
+        """Query vectors of these very questions in an attached earlier output, copied here if found."""
+        for found in pc.input_files("**/query_vectors.json"):
+            try:
+                same = json.loads(found.read_text(encoding="utf-8")).get("digest") == digest
+            except ValueError:
+                continue
+            if same and found.with_suffix(".npy").is_file():
+                shutil.copy(found.with_suffix(".npy"), vectors)
+                shutil.copy(found, meta)
+                log(f"query vectors of these questions found in {found.parent}; pinned from there")
+                return
+
     def pin_query_vectors(self) -> None:
         """Uses the same query vectors in every invocation that writes to this folder.
 
         The pgvector and Qdrant cells run in separate processes; pinning the query vectors keeps
-        their exact baselines, and so their recall, identical to the last bit.
+        their exact baselines, and so their recall, identical to the last bit. A folder without them
+        takes them from --pin-from (copied by `adopt`) or from an attached output of the same questions.
         """
         run = self.run
         digest = hashlib.sha256("\0".join(p.question for p in run.pairs).encode()).hexdigest()
         vectors, meta = self.out / "query_vectors.npy", self.out / "query_vectors.json"
+        if not (vectors.is_file() and meta.is_file()):
+            self.find_pinned(digest, vectors, meta)
         if vectors.is_file() and meta.is_file():
             saved_digest = json.loads(meta.read_text(encoding="utf-8")).get("digest")
             saved = np.load(vectors)
@@ -779,16 +1041,40 @@ class Experiment:
         stem = self.out / "questions"
         existing = pc.read_table(stem)
         if existing is not None:
-            key = ["qid", "person", "question", "R", "exact10_ids"]
+            key = ["qid", "person", "question", "R"]
             mine = self.questions[key].reset_index(drop=True)
             theirs = existing[key].reset_index(drop=True)
             if len(mine) != len(theirs) or not mine.astype(str).equals(theirs.astype(str)):
-                raise RuntimeError(f"{stem} describes other questions or another exact baseline: use another --out")
-            log(f"{stem}: the same questions and exact baseline as the earlier invocation")
+                raise RuntimeError(f"{stem} describes other questions: use another --out")
+            reordered = self.compare_baseline(existing)
+            log(
+                f"{stem}: the same questions and exact baseline as the earlier invocation or prep "
+                f"({reordered} questions with tied exact hits in another order)"
+            )
             return
         pc.write_table(self.questions, stem)
         people = self.questions.groupby(["person", "tenant", "groups", "persona_type"], sort=False)
         people[["R", "R_kb"]].first().reset_index().to_csv(self.out / "people.csv", index=False)
+
+    def compare_baseline(self, existing: pd.DataFrame) -> int:
+        """The exact top-10 scores of every question against a saved table's, which must agree within
+        the tie tolerance; the count of questions whose tied hits came out in another order is returned.
+
+        Two sessions with the same vectors can still order exact ties differently (a GPU and a CPU sum
+        in another order); recall credits ties, so only a score difference would matter."""
+        def scores(value: Any) -> list[float]:  # a CSV reads an empty list back as NaN
+            text = "" if value is None or (isinstance(value, float) and math.isnan(value)) else str(value)
+            return [float(s) for s in text.split("|") if s]
+
+        mine = self.questions.set_index("qid")
+        theirs = existing.set_index("qid")
+        reordered = 0
+        for qid in mine.index:
+            a, b = scores(mine.at[qid, "exact10_scores"]), scores(theirs.at[qid, "exact10_scores"])
+            if len(a) != len(b) or any(abs(x - y) > TIE for x, y in zip(a, b, strict=True)):
+                raise RuntimeError(f"question {qid}: this exact baseline's scores differ from the saved one's: {a} {b}")
+            reordered += str(mine.at[qid, "exact10_ids"]) != str(theirs.at[qid, "exact10_ids"])
+        return reordered
 
     def choose_active(self) -> None:
         """The questions this invocation asks (all, or a smoke subset), the order of people and the
@@ -868,13 +1154,21 @@ class Experiment:
         return result, elapsed, timer.search_ms()
 
     def sweep(
-        self, label: str, backend: Any, telemetry: Callable[[], Counter | None] | None = None
+        self,
+        label: str,
+        backend: Any,
+        telemetry: Callable[[], Counter | None] | None = None,
+        passes: int | None = None,
     ) -> tuple[pd.DataFrame, pd.DataFrame, dict[str, Any]]:
         """Every active question under one setting: k=5 in `passes` timed passes, k=10 in the first.
 
         People take turns in a seeded order, each asking all their questions; Qdrant's counters
-        are read after each person of the first pass, so they can be attributed to people.
+        are read after each person of the first pass, so they can be attributed to people. A
+        backend with a PlanCapture (pgvector) records the plan each first-pass search executed.
         """
+        passes = passes or self.args.passes
+        capture: PlanCapture | None = getattr(backend, "capture", None)
+        plans: dict[tuple[int, int], list[dict[str, Any]]] = {}
         timer = LastEvent()
         retriever = PermissionedRetriever(backend, self.er.tenant_acl(), observers=[timer])
         order = [i for person in self.person_order for i in self.qids_of[person]]
@@ -895,19 +1189,28 @@ class Experiment:
         telemetry_rows: list[dict[str, Any]] = []
         previous = telemetry() if telemetry else None
         started, calls = time.perf_counter(), 0
-        for p in range(self.args.passes):
+        for p in range(passes):
             done = 0
+            if capture is not None:
+                capture.armed = p == 0  # only the first pass: the plan of every k=5 and k=10 search
+                capture.take()
             for person in self.person_order:
                 for i in self.qids_of[person]:
                     if i in errors:
                         continue
                     try:
                         r5, ms, search_ms = self.retrieve(retriever, timer, i, 5, label)
+                        if capture is not None and p == 0:
+                            plans[(i, 5)] = capture.take()
                         r10 = self.retrieve(retriever, timer, i, 10, label)[0] if p == 0 else None
+                        if capture is not None and p == 0:
+                            plans[(i, 10)] = capture.take()
                     except LeakError:
                         raise
                     except Exception as error:
                         errors[i] = f"pass {p + 1}: {type(error).__name__}: {error}"
+                        if capture is not None:
+                            capture.take()
                         continue
                     calls += 2 if p == 0 else 1
                     times[i].append(ms)
@@ -923,7 +1226,9 @@ class Experiment:
                     current = telemetry()
                     telemetry_rows += counter_rows(person, previous, current)
                     previous = current
-            log(f"  {label}: pass {p + 1} of {self.args.passes} ({time.perf_counter() - started:.0f} s)")
+            log(f"  {label}: pass {p + 1} of {passes} ({time.perf_counter() - started:.0f} s)")
+        if capture is not None:
+            capture.armed = False
         if errors:
             examples = list(errors.values())[:3]
             self.manifest.warn(f"{label}: {len(errors)} of {len(order)} questions raised errors, e.g. {examples}")
@@ -933,16 +1238,90 @@ class Experiment:
             self.score(i, first5.get(i), first10.get(i), times[i], backend_ms[i], i in unstable, errors.get(i, ""))
             for i in self.active
         ]
+        if capture is not None:
+            for row in rows:
+                row.update(plan_columns(5, plans.get((row["qid"], 5))))
+                row.update(plan_columns(10, plans.get((row["qid"], 10))))
         info = {
             "questions": len(order),
             "retrievals": calls,
             "errors": len(errors),
             "error_examples": list(errors.values())[:5],
             "unstable_k5": len(unstable),
-            "passes": self.args.passes,
+            "passes": passes,
             "sweep_seconds": round(time.perf_counter() - started, 1),
         }
-        return pd.DataFrame(rows), pd.DataFrame(telemetry_rows), info
+        frame = pd.DataFrame(rows)
+        if capture is not None:
+            info["plans"] = {**plan_counts(frame), **capture.describe()}
+        return frame, pd.DataFrame(telemetry_rows), info
+
+    def replay(self, label: str, backend: Any, capture: PlanCapture) -> tuple[pd.DataFrame, dict[str, Any]]:
+        """The original run's pgvector pass (enterprise_rag.Run.evaluate), retrieval only: the original
+        questions in its order (the seed-7 shuffle), 10 untimed warm-ups, then per question the k=5
+        retrieval, timed, and the k=10 retrieval, once. `backend` is the original's own backend object."""
+        timer = LastEvent()
+        retriever = PermissionedRetriever(backend, self.er.tenant_acl(), observers=[timer])
+        order = list(range(self.original_count))
+        random.Random(self.run.cfg.seed).shuffle(order)  # noqa: S311 - the original run's question order
+        asked = set(self.active)
+        order = [i for i in order if i in asked]
+        for i in order[:10]:
+            try:
+                warm = retriever.retrieve(self.run.queries[i], self.er.person_subject(self.run.pairs[i].persona), k=5)
+            except Exception as error:  # the original suppressed warm-up errors too
+                log(f"  {label}: warm-up error on question {i}: {type(error).__name__}: {error}")
+                continue
+            self.check_safety(i, 5, warm, f"{label} warm-up")
+        capture.armed = True
+        capture.take()
+        first5: dict[int, Any] = {}
+        first10: dict[int, Any] = {}
+        times: dict[int, list[float]] = defaultdict(list)
+        backend_ms: dict[int, list[float]] = defaultdict(list)
+        plans: dict[tuple[int, int], list[dict[str, Any]]] = {}
+        errors: dict[int, str] = {}
+        started = time.perf_counter()
+        for done, i in enumerate(order, 1):
+            try:
+                first5[i], ms, search_ms = self.retrieve(retriever, timer, i, 5, label)
+                plans[(i, 5)] = capture.take()
+                first10[i] = self.retrieve(retriever, timer, i, 10, label)[0]
+                plans[(i, 10)] = capture.take()
+            except LeakError:
+                raise
+            except Exception as error:
+                errors[i] = f"{type(error).__name__}: {error}"
+                capture.take()
+                continue
+            times[i].append(ms)
+            backend_ms[i].append(search_ms)
+            if done % 250 == 0:
+                log(f"  {label}: {done} of {len(order)} questions ({time.perf_counter() - started:.0f} s)")
+        capture.armed = False
+        if errors:
+            examples = list(errors.values())[:3]
+            self.manifest.warn(f"{label}: {len(errors)} of {len(order)} questions raised errors, e.g. {examples}")
+        if order and len(errors) == len(order):
+            raise RuntimeError(f"{label}: every retrieval failed, e.g. {next(iter(errors.values()))}")
+        rows = []
+        for i in sorted(order):
+            row = self.score(i, first5.get(i), first10.get(i), times[i], backend_ms[i], False, errors.get(i, ""))
+            row.update(plan_columns(5, plans.get((i, 5))))
+            row.update(plan_columns(10, plans.get((i, 10))))
+            rows.append(row)
+        frame = pd.DataFrame(rows)
+        info = {
+            "questions": len(order),
+            "order": "enterprise_rag.Run.evaluate: random.Random(seed 7).shuffle of the original questions",
+            "retrievals": 2 * (len(order) - len(errors)),
+            "errors": len(errors),
+            "error_examples": list(errors.values())[:5],
+            "passes": 1,
+            "sweep_seconds": round(time.perf_counter() - started, 1),
+            "plans": {**plan_counts(frame), **capture.describe()},
+        }
+        return frame, info
 
     def score(
         self,
@@ -1030,7 +1409,7 @@ class Experiment:
         """Runs one setting and writes its tables and meta file; a failure is recorded and the run goes
         on, except a leak, which stops everything."""
         label = f"{store} {build} {setting.id}"
-        if not self.time_for(label, store):
+        if not self.time_for(label, store, setting.id):
             return
         name = self.name(store, layout, build, setting.id)
         meta: dict[str, Any] = {
@@ -1061,7 +1440,8 @@ class Experiment:
             pc.write_json(self.out / "meta" / f"{name}.json", {**meta, "status": "failed", "trace": trace})
             return
         seconds = time.perf_counter() - clock
-        self.durations[store].append(seconds)
+        self.durations[store][setting.id].append(seconds)
+        self.check_plans(label, setting, result.get("meta", {}))
         columns = {"store": store, "layout": layout, "build": build, "rep": rep, "setting": setting.id}
         files = {}
         for kind in ("runs", "explain", "telemetry"):
@@ -1093,10 +1473,34 @@ class Experiment:
             status="done", seconds=round(seconds, 1), summary=summary, files=files, **result.get("meta", {})
         )
         pc.write_json(self.out / "meta" / f"{name}.json", meta)  # written last: it marks the setting done
+        plans = meta.get("plans") or {}
+        share = plans.get("hnsw_share")
         log(
             f"   {label}: recall@5 {summary['recall5']}, recall@10 {summary['recall10']}, ERR {summary['err5']}, "
             f"p50 {summary['latency_p50_ms']:.1f} ms, {seconds:.0f} s"
+            + (f", HNSW plans {share:.3f} of {plans.get('captured')}" if share is not None else "")
         )
+
+    def check_plans(self, label: str, setting: Setting, meta: dict[str, Any]) -> None:
+        """Amendment 2, item 3: flags, loudly and in the record, a setting meant to search the HNSW
+        graph whose executed plans mostly did not, and says so when no plan could be captured."""
+        plans = meta.get("plans")
+        if plans is None:
+            return  # not pgvector
+        exact = setting.params.get("enable_indexscan") == "off"
+        share = plans.get("hnsw_share")
+        if share is None:
+            meta["ran_mostly_exact"] = None
+            if not exact:
+                self.manifest.warn(f"{label}: no executed plan was captured, so whether it used HNSW is unknown")
+            return
+        meta["ran_mostly_exact"] = not exact and share < HNSW_SHARE_FLOOR
+        if meta["ran_mostly_exact"]:
+            self.manifest.warn(
+                f"{label} RAN MOSTLY EXACT: it is meant to search the HNSW graph, but only {share:.3f} of its "
+                f"{plans['captured']} captured plans did ({plans['kinds']}, {plans['generic']} generic plans); "
+                "P1 and P2 do not use such a setting (amendment 2)"
+            )
 
 
 # ---- pgvector ------------------------------------------------------------------------------------
@@ -1111,15 +1515,22 @@ class PgVectorStage:
         self.x, self.er, self.run = x, x.er, x.run
         self.url = self.run.cfg.pg_url
         self.fresh_index = False  # whether the index enterprise_rag's load built is still in place
+        self.store_object: Any = None  # enterprise_rag.PgVectorStore, whose pool and backend p-x0 replays
+        self.untouched = False  # whether the load's own pool has served nothing since the load
+        self.estimated = False  # whether the filter estimates (P3) have been written in this invocation
 
     def notice(self, diagnostic: Any) -> None:
         log(f"  PostgreSQL {diagnostic.severity}: {diagnostic.message_primary}")
 
-    def configure(self, conn: Any) -> None:
-        conn.add_notice_handler(self.notice)
+    def configure(self, conn: Any, capture: PlanCapture | None = None) -> None:
+        if capture is None:
+            conn.add_notice_handler(self.notice)
+        else:
+            capture.attach(conn)  # its notice handler logs every notice that is not a plan
 
     def execute(self) -> None:
-        store = self.er.PgVectorStore(self.run)
+        store = self.store_object = self.er.PgVectorStore(self.run)
+        families = [f for f in PG_FAMILIES if f[0] in self.x.args.families]
         try:
             with self.x.manifest.stage("pgvector: start and load") as record:
                 store.start()
@@ -1127,17 +1538,59 @@ class PgVectorStage:
                 rows = store.count()
                 if rows != len(self.run.docs):
                     raise RuntimeError(f"pgvector holds {rows} chunks, not {len(self.run.docs)}")
-                self.fresh_index = True
-                record.update(load=load, server=self.server_info())
-            with self.x.manifest.stage("pgvector: filter estimates"):
-                self.filter_estimates()
-            for family, m, efc, core in PG_FAMILIES:
-                grid = pg_settings(core)
+                self.fresh_index = self.untouched = True
+                record.update(load=load, server=self.server_info(), table_state=self.table_state())
+            for family, m, efc, core in families:
+                grid = pg_settings(core, self.x.args.grid)
                 self.x.register(self.store, family, grid)
-                for rep in range(self.x.args.builds):
+                for rep in self.x.args.reps:
                     self.build(family, m, efc, rep, grid, load)
+            self.estimate_once()
         finally:
             store.stop()
+
+    def estimate_once(self) -> None:
+        """P3's filter estimates, once per invocation: after the replays, which must come first."""
+        if not self.estimated:
+            self.estimated = True
+            with self.x.manifest.stage("pgvector: filter estimates"):
+                self.filter_estimates()
+
+    def table_state(self) -> dict[str, Any]:
+        """The table's vacuum and analyze history and the GIN index's metapage: its pending list, which
+        a manual ANALYZE does not flush, and the entry statistics the planner costs GIN scans with."""
+        import psycopg
+        from psycopg.rows import dict_row
+
+        def plain(row: Any) -> dict[str, Any]:  # JSON-ready: numbers stay numbers, timestamps become text
+            return {k: (v if v is None or isinstance(v, int | float) else str(v)) for k, v in dict(row or {}).items()}
+
+        state: dict[str, Any] = {"at": time.strftime("%Y-%m-%dT%H:%M:%S%z")}
+        with psycopg.connect(self.url, autocommit=True, row_factory=dict_row) as conn:
+            history = conn.execute(
+                "SELECT n_live_tup, n_ins_since_vacuum, last_vacuum, last_autovacuum, last_analyze, last_autoanalyze,"
+                " vacuum_count, autovacuum_count, analyze_count, autoanalyze_count"
+                " FROM pg_stat_user_tables WHERE relname = %s",
+                [NAME],
+            ).fetchone()
+            state["table"] = plain(history)
+            gin = f"{NAME}_metadata_gin"
+            try:
+                conn.execute("CREATE EXTENSION IF NOT EXISTS pageinspect")
+                state["gin_metapage"] = plain(
+                    conn.execute("SELECT * FROM gin_metapage_info(get_raw_page(%s, 0))", [gin]).fetchone()
+                )
+                state["gin_pg_class"] = plain(
+                    conn.execute(
+                        "SELECT relpages, reltuples,"
+                        " pg_relation_size(oid) / current_setting('block_size')::int AS pages"
+                        " FROM pg_class WHERE relname = %s",
+                        [gin],
+                    ).fetchone()
+                )
+            except psycopg.Error as error:
+                state["gin_metapage"] = f"unavailable: {type(error).__name__}: {error}"
+        return state
 
     def server_info(self) -> dict[str, Any]:
         import psycopg
@@ -1214,6 +1667,8 @@ class PgVectorStage:
                 record.update(self.index(family, m, efc, rep, load))
                 pc.write_json(self.x.out / "builds" / f"{self.x.name(self.store, family, build)}.json", record)
                 for setting in todo:
+                    if not setting.params.get("replay"):
+                        self.estimate_once()
                     self.x.guarded(self.store, family, build, rep, setting, self.setting)
         except LeakError:
             raise
@@ -1267,23 +1722,131 @@ class PgVectorStage:
     def setting(self, family: str, build: str, rep: int, setting: Setting) -> dict[str, Any]:
         from psycopg_pool import ConnectionPool
 
+        if setting.params.get("replay"):
+            return self.replay(family, build, rep, setting)
         # One connection, so prepared statements and their plans are observable; a fresh pool per
-        # setting, so no setting inherits another's prepared statements.
+        # setting, so no setting inherits another's prepared statements. Run 2 captures executed plans.
+        capture = PlanCapture() if self.x.args.grid == "run2" else None
         kwargs = {"prepare_threshold": None} if setting.params.get("prepare_threshold") == "none" else {}
         pool = ConnectionPool(
-            self.url, min_size=1, max_size=1, open=True, kwargs=kwargs, max_lifetime=86_400.0, configure=self.configure
+            self.url,
+            min_size=1,
+            max_size=1,
+            open=True,
+            kwargs=kwargs,
+            max_lifetime=86_400.0,
+            configure=lambda conn: self.configure(conn, capture),
         )
         try:
             pool.wait(timeout=60)
             backend = HarnessPgVector(pool, setting, NAME)
+            backend.capture = capture
             effective = self.effective(pool, backend, setting)
             label = f"pgvector {build} {setting.id}"
-            runs, _, info = self.x.sweep(label, backend)
+            state = self.table_state() if capture is not None else None
+            runs, _, info = self.x.sweep(label, backend, passes=setting.passes)
             info["prepared_statements"] = self.prepared(pool)
+            executed, executed_raw = self.executed_plans(backend, capture, label)
             explain, raw = self.explain_all(pool, backend, runs, label)
         finally:
             pool.close()
-        return {"runs": runs, "explain": explain, "explain_raw": raw, "meta": {**info, "effective_settings": effective}}
+        if state is not None:
+            info["table_state"] = state
+        explain = pd.concat([executed, explain], ignore_index=True) if len(executed) else explain
+        meta = {**info, "effective_settings": effective}
+        return {"runs": runs, "explain": explain, "explain_raw": [*executed_raw, *raw], "meta": meta}
+
+    def replay(self, family: str, build: str, rep: int, setting: Setting) -> dict[str, Any]:
+        """`p-x0` and `p-x0v` (amendment 2, item 4): the original run's pgvector pass, replayed.
+
+        `p-x0` uses enterprise_rag's own backend object on the pool its load created, untouched since
+        the load, as the original did. `p-x0v` first runs VACUUM (ANALYZE) on the table, then the same
+        replay on a fresh pool made with the original's arguments. Both record the plans executed,
+        the generic plans PostgreSQL used, and the table and GIN index state before and after.
+        """
+        import psycopg
+        from psycopg import sql
+        from psycopg_pool import ConnectionPool
+
+        if family != PG_DEFAULT_FAMILY or rep != 0:
+            raise Unsupported("the replays run on the first build of the original index only")
+        label = f"pgvector {build} {setting.id}"
+        own = None
+        if setting.params.get("vacuum"):
+            clock = time.perf_counter()
+            with psycopg.connect(self.url, autocommit=True) as conn:
+                conn.execute(sql.SQL("VACUUM (ANALYZE) {}").format(sql.Identifier(NAME)))
+            vacuum_s = round(time.perf_counter() - clock, 1)
+            own = ConnectionPool(self.url, min_size=1, max_size=4, open=True)  # enterprise_rag.PgVectorStore.load's
+            pool = own
+            backend = PgVectorBackend(own, None, table=NAME, ef_search=self.run.cfg.pg_ef_search)
+            origin = "a fresh pool with the original's arguments (min 1, max 4, psycopg defaults), after VACUUM"
+        else:
+            if not self.untouched:
+                raise Unsupported("the load's own pool has served other searches since the load: p-x0 needs it fresh")
+            pool, backend = self.store_object.pool, self.store_object.backend()
+            vacuum_s = None
+            origin = "enterprise_rag.PgVectorStore: the load's own pool and backend(), as the original run"
+        self.untouched = False
+        capture = PlanCapture()
+        try:
+            pool.wait(timeout=60)
+            before = self.table_state()
+            with pool.connection() as conn:
+                capture.attach(conn, session=True)
+            runs, info = self.x.replay(label, backend, capture)
+            with pool.connection() as conn:
+                capture.detach(conn)
+            info["prepared_statements"] = self.prepared(pool)
+            asked = set(runs["qid"])
+            fixed = [i for i in self.x.fixed if i in asked]
+            explain, raw = self.explain_all(pool, backend, runs, label, fixed)
+            after = self.table_state()
+        finally:
+            if own is not None:
+                own.close()
+        info.update(
+            pool=origin,
+            vacuum_seconds=vacuum_s,
+            table_state_before=before,
+            table_state_after=after,
+            effective_settings={"hnsw.ef_search": self.run.cfg.pg_ef_search, "hnsw.iterative_scan": "relaxed_order"},
+        )
+        return {"runs": runs, "explain": explain, "explain_raw": raw, "meta": info}
+
+    def executed_plans(
+        self, backend: HarnessPgVector, capture: PlanCapture | None, label: str
+    ) -> tuple[pd.DataFrame, list[dict[str, Any]]]:
+        """Amendment 2, item 3: the fixed questions once more after the timed passes, with auto_explain's
+        ANALYZE and BUFFERS, on the same connection: the plan the setting's searches were running by
+        then (generic or custom), with its actual rows. Every hit is checked as in the sweep."""
+        if capture is None or not capture.supported:
+            return pd.DataFrame(), []
+        retriever = PermissionedRetriever(backend, self.er.tenant_acl())
+        rows, raw = [], []
+        capture.armed, capture.analyze = True, True
+        try:
+            for i in self.x.fixed:
+                pair = self.run.pairs[i]
+                base = {"qid": i, "person": pair.persona.id, "k": 5, "reason": "executed"}
+                capture.take()
+                try:
+                    result = retriever.retrieve(self.run.queries[i], self.er.person_subject(pair.persona), k=5)
+                except Exception as error:
+                    rows.append({**base, "error": f"{type(error).__name__}: {error}"})
+                    continue
+                self.x.check_safety(i, 5, result, f"{label} executed plans")
+                plans = capture.take()
+                if not plans:
+                    rows.append({**base, "n_hits": len(result.hits), "error": "no plan captured"})
+                    continue
+                found = plan_kind(plans[-1], NAME)
+                row = {**base, "n_hits": len(result.hits), **parse_plan(plans[-1], NAME)}
+                rows.append({**row, "generic": float(found["generic"]), "binding": "auto_explain", "error": ""})
+                raw.append({**base, "plan": plans[-1]})
+        finally:
+            capture.armed, capture.analyze = False, False
+        return pd.DataFrame(rows), raw
 
     def effective(self, pool: Any, backend: HarnessPgVector, setting: Setting) -> dict[str, Any]:
         """The settings inside a search's transaction; a refused or ignored one makes the setting unsupported."""
@@ -1334,11 +1897,12 @@ class PgVectorStage:
         }
 
     def explain_all(
-        self, pool: Any, backend: HarnessPgVector, runs: pd.DataFrame, label: str
+        self, pool: Any, backend: Any, runs: pd.DataFrame, label: str, fixed: Sequence[int] | None = None
     ) -> tuple[pd.DataFrame, list[dict[str, Any]]]:
         """EXPLAIN (ANALYZE, BUFFERS) of the fixed questions (k=5) and of every short result, empty ones
-        first (P1 reads the scan's reach from them); for the fixed questions also the generic plan."""
-        targets = [(i, 5, "fixed") for i in self.x.fixed]
+        first (P1 reads the scan's reach from them); for the fixed questions also the generic plan.
+        `fixed` narrows the fixed questions to those a replay asked."""
+        targets = [(i, 5, "fixed") for i in (self.x.fixed if fixed is None else fixed)]
         hits = runs.set_index("qid")
         shorts = [(int(i), k, "short") for k in (5, 10) for i in runs.loc[runs[f"short{k}"] == 1, "qid"]]
         shorts.sort(key=lambda t: (hits.at[t[0], f"n{t[1]}"] != 0, t[1], t[0]))
@@ -1434,7 +1998,7 @@ class QdrantStage:
             for layout in self.x.args.layouts:
                 grid = qdrant_settings(full=layout == "as-run")
                 self.x.register(self.store, layout, grid)
-                for rep in range(self.x.args.builds):
+                for rep in self.x.args.reps:
                     self.build(layout, rep, grid)
         finally:
             with contextlib.suppress(Exception):
@@ -1500,7 +2064,11 @@ class QdrantStage:
                 loaded = {"company_s": self.add(COMPANY, self.company_rows), "kb_s": self.add(KNOWLEDGE, self.kb_rows)}
             else:
                 loaded = {"load_s": self.add(NAME, None)}
-        self.wait_indexed(names)
+        whole = False
+        if layout == "one-segment" and self.x.args.grid == "run2":
+            whole = self.index_one_segment()
+            loaded["indexing_enabled_after_upload_kb"] = QDRANT_INDEXING_KB
+        self.wait_indexed(names, every_vector=whole)
         counts = {n: int(self.client.count(n, exact=True).count) for n in names}
         if sum(counts.values()) != len(self.run.docs):
             raise RuntimeError(f"Qdrant holds {counts} points, not {len(self.run.docs)}")
@@ -1512,18 +2080,37 @@ class QdrantStage:
             with gzip.open(path, "wt", encoding="utf-8") as out:
                 json.dump(snapshot, out)
         segments = {n: infos[n].get("segments_count") if isinstance(infos[n], dict) else None for n in names}
-        log(f"qdrant {layout} build {rep}: {counts} points, segments {segments}")
+        listed = {n: segment_list(snapshot, n) for n in names} if snapshot is not None else {}
+        data = {n: sum(1 for s in found if (s.get("num_points") or 0) > 0) for n, found in listed.items()}
+        log(f"qdrant {layout} build {rep}: {counts} points, segments {segments}, segments holding points {data}")
+        if layout == "one-segment" and self.x.args.grid == "run2" and any(v != 1 for v in data.values()):
+            self.x.manifest.warn(f"qdrant one-segment build {rep} has {data} segments holding points, not 1: {listed}")
         return {
             "store": self.store,
             "layout": layout,
             "rep": rep,
-            "builder": LAYOUTS[layout],
+            "builder": (LAYOUTS if self.x.args.grid == "run2" else LAYOUTS_RUN1)[layout],
             "loaded": loaded,
             "seconds": round(time.perf_counter() - clock, 1),
             "points": counts,
             "segments": segments,
+            "data_segments": data or None,  # amendment 2, item 6: segments holding points, from /telemetry
+            "segment_list": listed or None,
             "collections": infos,
         }
+
+    def index_one_segment(self) -> bool:
+        """one-segment, run 2: the upload went into one segment with indexing off; turning it back on at
+        Qdrant's default lets the optimizer index that segment whole. Returns whether every vector
+        must end up indexed (a corpus below the threshold, the smoke run's, stays a plain segment)."""
+        from qdrant_client import models
+
+        info = self.client.get_collection(NAME)
+        on = models.OptimizersConfigDiff(indexing_threshold=QDRANT_INDEXING_KB)
+        self.client.update_collection(NAME, optimizers_config=on)
+        vectors_kb = (info.points_count or 0) * self.run.dim * 4 / 1024
+        log(f"  one-segment: indexing turned on at {QDRANT_INDEXING_KB:,} KB for {vectors_kb:,.0f} KB of vectors")
+        return vectors_kb >= QDRANT_INDEXING_KB
 
     def create(self, layout: str) -> list[str]:
         """Harness-level collection layouts. wardowl's create_collection still makes the payload
@@ -1541,7 +2128,9 @@ class QdrantStage:
         hnsw = models.HnswConfigDiff(m=0, payload_m=16) if layout == "tenant-m0" else None
         optimizers = None
         if layout == "one-segment":
-            optimizers = models.OptimizersConfigDiff(default_segment_number=1, max_segment_size=ONE_SEGMENT_KB)
+            # Run 2: indexing off (0) during the upload, so every point lands in the one segment.
+            off = {"indexing_threshold": 0} if self.x.args.grid == "run2" else {}
+            optimizers = models.OptimizersConfigDiff(default_segment_number=1, max_segment_size=ONE_SEGMENT_KB, **off)
         self.client.create_collection(NAME, vectors_config=vectors, hnsw_config=hnsw, optimizers_config=optimizers)
         fields: tuple[str, ...] = ASRUN_FIELDS
         if layout in ("is-tenant", "tenant-m0"):
@@ -1560,14 +2149,26 @@ class QdrantStage:
             source = types.SimpleNamespace(docs=[self.run.docs[r] for r in rows], vectors=self.run.vectors[rows])
         return float(self.er.add_all(QdrantBackend(self.client, collection, None), source))
 
-    def wait_indexed(self, names: Sequence[str], timeout: float = 7200.0) -> None:
-        """Until every collection is green with the same counts over four checks, 5 s apart."""
+    def wait_indexed(self, names: Sequence[str], timeout: float = 7200.0, every_vector: bool = False) -> None:
+        """Until every collection is green with the same counts over four checks, 5 s apart, and, with
+        `every_vector`, every vector indexed. A grey collection (optimizations pending but not
+        started) gets an empty optimizer update, which Qdrant's documentation gives to start them."""
+        from qdrant_client import models
+
         deadline = time.monotonic() + timeout
         last: Any = None
         stable = 0
+        nudged = 0.0
         while True:
             infos = [self.client.get_collection(n) for n in names]
+            for n, i in zip(names, infos, strict=True):
+                if str(i.status).lower().endswith("grey") and time.monotonic() - nudged > 60:
+                    log(f"  Qdrant {n} is grey: sending an empty optimizer update to start its optimizations")
+                    self.client.update_collection(n, optimizers_config=models.OptimizersConfigDiff())
+                    nudged = time.monotonic()
             green = all(str(i.status).lower().endswith("green") for i in infos)
+            if every_vector:
+                green = green and all((i.indexed_vectors_count or 0) >= (i.points_count or 0) for i in infos)
             state = tuple((i.points_count, i.indexed_vectors_count, i.segments_count) for i in infos)
             stable = stable + 1 if green and state == last else 0
             if stable >= 3:
@@ -1636,7 +2237,7 @@ class QdrantStage:
                 raise Unsupported(f"Qdrant refused {setting.params}: {type(error).__name__}: {error}") from error
             raise
         self.x.check_safety(probe, 5, result, f"{label} probe")
-        runs, telemetry, info = self.x.sweep(label, backend, self.counters)
+        runs, telemetry, info = self.x.sweep(label, backend, self.counters, passes=setting.passes)
         if setting.params.get("acorn"):
             total = int(telemetry.loc[telemetry["counter"] == "filtered_acorn", "count"].sum()) if len(telemetry) else 0
             info["acorn_searches_counted"] = total
@@ -1655,9 +2256,16 @@ class QdrantStage:
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Experiment X1: under-retrieval under permission filters")
-    parser.add_argument("--out", type=Path, default=None, help="default /kaggle/working/x1 (x1-smoke with --smoke)")
+    parser.add_argument("--out", type=Path, default=None, help="default /kaggle/working/x1run2 (x1run2-smoke, x1, ...)")
+    parser.add_argument("--grid", choices=GRIDS, default="run2", help="run1 as pre-registered, run2 as amendment 2")
     parser.add_argument("--stores", default=",".join(STORES), help="pgvector, qdrant or both, comma-separated")
     parser.add_argument("--layouts", default=",".join(LAYOUTS), help="Qdrant layouts, comma-separated")
+    families = ",".join(f[0] for f in PG_FAMILIES)
+    parser.add_argument("--families", default=families, help="pgvector index families, comma-separated (a shard)")
+    parser.add_argument("--reps", default=None, help="builds to run, comma-separated (0,1,2; a shard runs some)")
+    parser.add_argument("--prepare-only", action="store_true", help="corpus, vectors, baseline, questions; no store")
+    parser.add_argument("--pin-from", type=Path, default=None, help="a --prepare-only output: its vectors, questions")
+    parser.add_argument("--allow-cpu-embedding", action="store_true", help="embed the whole corpus without a GPU")
     parser.add_argument("--smoke", action="store_true", help="small corpus, few people, one build: every code path")
     parser.add_argument("--builds", type=int, default=None, help="builds per build-time variant (3; 1 with --smoke)")
     parser.add_argument("--passes", type=int, default=None, help="timed k=5 passes (3; 2 with --smoke)")
@@ -1673,12 +2281,19 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     args = parser.parse_args(argv)
     args.stores = tuple(s.strip() for s in args.stores.split(",") if s.strip())
     args.layouts = tuple(s.strip() for s in args.layouts.split(",") if s.strip())
+    args.families = tuple(s.strip() for s in args.families.split(",") if s.strip())
     unknown = sorted({*args.stores} - set(STORES)) + sorted({*args.layouts} - set(LAYOUTS))
+    unknown += sorted({*args.families} - {f[0] for f in PG_FAMILIES})
     if unknown:
-        parser.error(f"unknown stores or layouts: {unknown}")
+        parser.error(f"unknown stores, layouts or index families: {unknown}")
     smoke = args.smoke
-    args.out = args.out or Path("/kaggle/working/x1-smoke" if smoke else "/kaggle/working/x1")
+    folder = "x1run2" if args.grid == "run2" else "x1"
+    args.out = args.out or Path(f"/kaggle/working/{folder}{'-smoke' if smoke else ''}")
     args.builds = args.builds or (1 if smoke else 3)
+    try:
+        args.reps = [int(r) for r in args.reps.split(",") if r.strip()] if args.reps else list(range(args.builds))
+    except ValueError:
+        parser.error(f"--reps takes build numbers, comma-separated, not {args.reps!r}")
     args.passes = args.passes or (2 if smoke else 3)
     args.explain_fixed = args.explain_fixed if args.explain_fixed is not None else (10 if smoke else 50)
     return args
@@ -1691,7 +2306,7 @@ def main(argv: list[str] | None = None) -> int:
         x.environment()
         x.prepare()
         stages = {"pgvector": PgVectorStage, "qdrant": QdrantStage}
-        for store in args.stores:
+        for store in () if args.prepare_only else args.stores:
             try:
                 stages[store](x).execute()
             except LeakError:
