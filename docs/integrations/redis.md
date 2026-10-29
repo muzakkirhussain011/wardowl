@@ -77,6 +77,13 @@ a call to Redis; `filter_to_query` raises `NothingMatches` for a filter that can
 since a query without the expression matches every hash. The metadata is stored as JSON and
 returned exactly as written, so the retriever's re-check sees the true permissions.
 
+The Query Engine indexes at most 4,096 bytes of a TAG value (`MAX_TAG_LEN` in RediSearch's
+`src/tag_index.c`) and cuts a longer one short, while a query looks for the whole value. A term
+whose hex form is longer, that is a field name and value of more than 2,048 bytes together, is
+therefore stored and searched as the hex of its SHA-256 digest, 144 hex digits. Its chunk is found
+like any other, and a value that is only the first 2,048 bytes of a longer one does not match it.
+`permission_terms` writes the same form.
+
 ## Hashes written by other tools
 
 A hash without `wardowl_terms` is invisible to a pre-filtered search, though post-filtering
