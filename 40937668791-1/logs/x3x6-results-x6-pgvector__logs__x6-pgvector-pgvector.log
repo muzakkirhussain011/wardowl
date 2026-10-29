@@ -1,0 +1,11 @@
+[19:13:19] x6 pgvector: loading the data
+[19:13:20] x6 pgvector: seed 0
+[19:13:21]   seed 0: building w1 (57,638 chunks)
+[19:13:58]   seed 0: w1 built in 37 s {}
+[19:13:58]   seed 0: building sep (49,603 chunks)
+[19:14:30]   seed 0: sep built in 32 s {}
+[19:14:30]   seed 0: building w0 group 0 (57,638 chunks)
+[19:15:08]   seed 0: w0 group 0 built in 38 s {}
+[19:15:09]   seed 0: 40/1,080 retrievals (0.4 per s, 47 min left)
+[19:15:44] x6 pgvector: seed 0 done in 2.4 min
+::notice title=x6 pgvector::{"seeds": [0], "minutes": [2.4], "retrievals": [1080], "stopped": {}, "first_errors": {}}

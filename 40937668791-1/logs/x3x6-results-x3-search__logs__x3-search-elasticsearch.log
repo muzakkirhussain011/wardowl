@@ -1,0 +1,12 @@
+[19:14:01] x3 elasticsearch: seed 0
+[19:14:02]   seed 0: building (8,000 chunks)
+[19:14:08]   seed 0: built in 6 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 5, 'docs': 8000}
+[19:14:08]   seed 0: G=1: ok, 0 errors, translation ok
+[19:14:08]   seed 0: G=10: ok, 0 errors, translation ok
+[19:14:09]   seed 0: G=100: ok, 0 errors, translation ok
+[19:14:09]   seed 0: G=1,000: ok, 0 errors, translation ok
+[19:14:09]   seed 0: G=4,000: ok, 0 errors, translation ok
+[19:14:09]   seed 0: G=10,000: ok, 0 errors, translation ok
+[19:14:10]   seed 0: G=40,000: ok, 0 errors, translation ok
+[19:14:10] x3 elasticsearch: seed 0 done in 0.1 min
+::notice title=x3 elasticsearch::{"0": 0}

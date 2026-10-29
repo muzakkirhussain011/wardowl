@@ -1,0 +1,167 @@
+guard,store,config,passed,evidence,hypothesis,part,outcome
+G1,elasticsearch,bm25-pre,,"0.519 [0.333, 0.704] (9 clusters, 1 seeds)",,,
+G1,elasticsearch,hybrid-exact,,"0.481 [0.370, 0.556] (9 clusters, 1 seeds)",,,
+G1,elasticsearch,hybrid-pre,,"0.519 [0.333, 0.704] (9 clusters, 1 seeds)",,,
+G1,elasticsearch,post,,"0.481 [0.259, 0.705] (9 clusters, 1 seeds)",,,
+G1,elasticsearch,post-const,,"0.556 [0.406, 0.741] (9 clusters, 1 seeds)",,,
+G1,elasticsearch,pre,,"0.444 [0.370, 0.556] (9 clusters, 1 seeds)",,,
+G1,elasticsearch,pre-exact,,"0.556 [0.258, 0.815] (9 clusters, 1 seeds)",,,
+G1,faiss,post,,"0.444 [0.333, 0.593] (9 clusters, 1 seeds)",,,
+G1,faiss,post-const,,"0.556 [0.407, 0.704] (9 clusters, 1 seeds)",,,
+G1,faiss,pre,,"0.519 [0.333, 0.741] (9 clusters, 1 seeds)",,,
+G1,memory,post,,"0.000 [0.000, 0.000] (4 clusters, 1 seeds)",,,
+G1,memory,pre,,"1.000 [1.000, 1.000] (4 clusters, 1 seeds)",,,
+G1,pgvector,bm25-pre,,"0.481 [0.370, 0.667] (9 clusters, 1 seeds)",,,
+G1,pgvector,post,,"0.407 [0.333, 0.519] (9 clusters, 1 seeds)",,,
+G1,pgvector,post-const,,"0.593 [0.407, 0.815] (9 clusters, 1 seeds)",,,
+G1,pgvector,pre,,"0.370 [0.222, 0.519] (9 clusters, 1 seeds)",,,
+G1,pgvector,pre-exact,,"0.556 [0.370, 0.741] (9 clusters, 1 seeds)",,,
+G1,qdrant,bm25-pre,,"0.519 [0.370, 0.631] (9 clusters, 1 seeds)",,,
+G1,qdrant,post,,"0.556 [0.370, 0.741] (9 clusters, 1 seeds)",,,
+G1,qdrant,post-const,,"0.407 [0.259, 0.593] (9 clusters, 1 seeds)",,,
+G1,qdrant,pre,,"0.556 [0.407, 0.704] (9 clusters, 1 seeds)",,,
+G1,qdrant,pre-exact,,"0.556 [0.332, 0.778] (9 clusters, 1 seeds)",,,
+G2,elasticsearch,pre-exact,True,pre-exact: change rate 0.0000,,,
+G2,faiss,pre,True,pre: change rate 0.0000,,,
+G2,pgvector,pre-exact,True,pre-exact: change rate 0.0000,,,
+G2,qdrant,pre-exact,True,pre-exact: change rate 0.0000,,,
+,faiss,post,,"1.000 [1.000, 1.000] (1 clusters, 1 seeds)",H1,(a) m=1000 p=1 count >= 0.95,inconclusive
+,faiss,post,,"1.000 [1.000, 1.000] (1 clusters, 1 seeds)",H1,(a) m=1000 p=10 count >= 0.95,inconclusive
+,faiss,post,,"0.500 [0.500, 0.500] (1 clusters, 1 seeds)",H1,(a) m=1000 p=50 count >= 0.95,inconclusive
+,faiss,post,,"1.000 [1.000, 1.000] (2 clusters, 1 seeds)",H1,(b) m=100 p=10 latency >= 0.75,inconclusive
+,faiss,post,,"1.000 [1.000, 1.000] (2 clusters, 1 seeds)",H1,(b) m=100 p=50 latency >= 0.75,inconclusive
+,faiss,post,,"0.444 [0.333, 0.558] (3 clusters, 1 seeds)",H1,(c) m=1 no channel in latency,inconclusive
+,faiss,post,,"0.500 [0.500, 0.500] (3 clusters, 1 seeds)",H1,(c) m=1 no channel in count,inconclusive
+,faiss,post,,"0.500 [0.500, 0.500] (3 clusters, 1 seeds)",H1,(c) m=1 no channel in complete,inconclusive
+,faiss,post,,"0.500 [0.500, 0.500] (3 clusters, 1 seeds)",H1,(c) m=1 no channel in recall,inconclusive
+,faiss,post,,"0.500 [0.500, 0.500] (3 clusters, 1 seeds)",H1,(c) m=1 no channel in score,inconclusive
+,pgvector,post,,"1.000 [1.000, 1.000] (1 clusters, 1 seeds)",H1,(a) m=1000 p=1 count >= 0.95,inconclusive
+,pgvector,post,,"1.000 [1.000, 1.000] (1 clusters, 1 seeds)",H1,(a) m=1000 p=10 count >= 0.95,inconclusive
+,pgvector,post,,"0.500 [0.500, 0.500] (1 clusters, 1 seeds)",H1,(a) m=1000 p=50 count >= 0.95,inconclusive
+,pgvector,post,,"1.000 [1.000, 1.000] (2 clusters, 1 seeds)",H1,(b) m=100 p=10 latency >= 0.75,inconclusive
+,pgvector,post,,"1.000 [1.000, 1.000] (2 clusters, 1 seeds)",H1,(b) m=100 p=50 latency >= 0.75,inconclusive
+,pgvector,post,,"0.444 [0.333, 0.556] (3 clusters, 1 seeds)",H1,(c) m=1 no channel in latency,inconclusive
+,pgvector,post,,"0.500 [0.500, 0.500] (3 clusters, 1 seeds)",H1,(c) m=1 no channel in count,inconclusive
+,pgvector,post,,"0.500 [0.500, 0.500] (3 clusters, 1 seeds)",H1,(c) m=1 no channel in complete,inconclusive
+,pgvector,post,,"0.500 [0.500, 0.500] (3 clusters, 1 seeds)",H1,(c) m=1 no channel in recall,inconclusive
+,pgvector,post,,"0.500 [0.500, 0.500] (3 clusters, 1 seeds)",H1,(c) m=1 no channel in score,inconclusive
+,qdrant,post,,"1.000 [1.000, 1.000] (1 clusters, 1 seeds)",H1,(a) m=1000 p=1 count >= 0.95,inconclusive
+,qdrant,post,,"1.000 [1.000, 1.000] (1 clusters, 1 seeds)",H1,(a) m=1000 p=10 count >= 0.95,inconclusive
+,qdrant,post,,"0.500 [0.500, 0.500] (1 clusters, 1 seeds)",H1,(a) m=1000 p=50 count >= 0.95,inconclusive
+,qdrant,post,,"1.000 [1.000, 1.000] (2 clusters, 1 seeds)",H1,(b) m=100 p=10 latency >= 0.75,inconclusive
+,qdrant,post,,"1.000 [1.000, 1.000] (2 clusters, 1 seeds)",H1,(b) m=100 p=50 latency >= 0.75,inconclusive
+,qdrant,post,,"0.667 [0.667, 0.667] (3 clusters, 1 seeds)",H1,(c) m=1 no channel in latency,inconclusive
+,qdrant,post,,"0.500 [0.500, 0.500] (3 clusters, 1 seeds)",H1,(c) m=1 no channel in count,inconclusive
+,qdrant,post,,"0.500 [0.500, 0.500] (3 clusters, 1 seeds)",H1,(c) m=1 no channel in complete,inconclusive
+,qdrant,post,,"0.500 [0.500, 0.500] (3 clusters, 1 seeds)",H1,(c) m=1 no channel in recall,inconclusive
+,qdrant,post,,"0.500 [0.500, 0.500] (3 clusters, 1 seeds)",H1,(c) m=1 no channel in score,inconclusive
+,elasticsearch,post,,"1.000 [1.000, 1.000] (1 clusters, 1 seeds)",H1,(a) m=1000 p=1 count >= 0.95,inconclusive
+,elasticsearch,post,,"1.000 [1.000, 1.000] (1 clusters, 1 seeds)",H1,(a) m=1000 p=10 count >= 0.95,inconclusive
+,elasticsearch,post,,"0.500 [0.500, 0.500] (1 clusters, 1 seeds)",H1,(a) m=1000 p=50 count >= 0.95,inconclusive
+,elasticsearch,post,,"1.000 [1.000, 1.000] (2 clusters, 1 seeds)",H1,(b) m=100 p=10 latency >= 0.75,inconclusive
+,elasticsearch,post,,"1.000 [1.000, 1.000] (2 clusters, 1 seeds)",H1,(b) m=100 p=50 latency >= 0.75,inconclusive
+,elasticsearch,post,,"0.889 [0.667, 1.000] (3 clusters, 1 seeds)",H1,(c) m=1 no channel in latency,inconclusive
+,elasticsearch,post,,"0.500 [0.500, 0.500] (3 clusters, 1 seeds)",H1,(c) m=1 no channel in count,inconclusive
+,elasticsearch,post,,"0.500 [0.500, 0.500] (3 clusters, 1 seeds)",H1,(c) m=1 no channel in complete,inconclusive
+,elasticsearch,post,,"0.500 [0.500, 0.500] (3 clusters, 1 seeds)",H1,(c) m=1 no channel in recall,inconclusive
+,elasticsearch,post,,"0.444 [0.167, 0.613] (3 clusters, 1 seeds)",H1,(c) m=1 no channel in score,inconclusive
+,vector stores,,,"0 confirmed, 0 falsified, 40 inconclusive parts",H1,VERDICT,inconclusive
+,faiss,post-const,,"0.481 [0.370, 0.630] (9 clusters, 1 seeds)",H2,(a) no latency channel pooled,inconclusive
+,faiss,post-const,,"0.333 [0.333, 0.333] (1 clusters, 1 seeds)",H2,(a) m=1000 latency upper <= 0.65,inconclusive
+,faiss,post-const,,"1.000 [1.000, 1.000] (1 clusters, 1 seeds)",H2,(b) m=1000 p=10 count >= 0.95,inconclusive
+,faiss,post-const,,"0.500 [0.500, 0.500] (1 clusters, 1 seeds)",H2,(b) m=1000 p=50 count >= 0.95,inconclusive
+,pgvector,post-const,,"0.333 [0.148, 0.519] (9 clusters, 1 seeds)",H2,(a) no latency channel pooled,inconclusive
+,pgvector,post-const,,"0.000 [0.000, 0.000] (1 clusters, 1 seeds)",H2,(a) m=1000 latency upper <= 0.65,inconclusive
+,pgvector,post-const,,"1.000 [1.000, 1.000] (1 clusters, 1 seeds)",H2,(b) m=1000 p=10 count >= 0.95,inconclusive
+,pgvector,post-const,,"0.500 [0.500, 0.500] (1 clusters, 1 seeds)",H2,(b) m=1000 p=50 count >= 0.95,inconclusive
+,qdrant,post-const,,"0.370 [0.222, 0.481] (9 clusters, 1 seeds)",H2,(a) no latency channel pooled,inconclusive
+,qdrant,post-const,,"0.333 [0.333, 0.333] (1 clusters, 1 seeds)",H2,(a) m=1000 latency upper <= 0.65,inconclusive
+,qdrant,post-const,,"1.000 [1.000, 1.000] (1 clusters, 1 seeds)",H2,(b) m=1000 p=10 count >= 0.95,inconclusive
+,qdrant,post-const,,"0.500 [0.500, 0.500] (1 clusters, 1 seeds)",H2,(b) m=1000 p=50 count >= 0.95,inconclusive
+,elasticsearch,post-const,,"0.593 [0.333, 0.852] (9 clusters, 1 seeds)",H2,(a) no latency channel pooled,inconclusive
+,elasticsearch,post-const,,"0.667 [0.667, 0.667] (1 clusters, 1 seeds)",H2,(a) m=1000 latency upper <= 0.65,inconclusive
+,elasticsearch,post-const,,"1.000 [1.000, 1.000] (1 clusters, 1 seeds)",H2,(b) m=1000 p=10 count >= 0.95,inconclusive
+,elasticsearch,post-const,,"0.500 [0.500, 0.500] (1 clusters, 1 seeds)",H2,(b) m=1000 p=50 count >= 0.95,inconclusive
+,vector stores,,,"0 confirmed, 0 falsified, 16 inconclusive parts",H2,VERDICT,inconclusive
+,pgvector,pre,,"1.000 [1.000, 1.000] (1 clusters, 1 seeds)",H3a,m=1000 p=10 latency >= 0.75,inconclusive
+,pgvector,pre,,"1.000 [1.000, 1.000] (1 clusters, 1 seeds)",H3a,m=1000 p=50 latency >= 0.75,inconclusive
+,pgvector,pre,,"1.000 [1.000, 1.000] (2 clusters, 1 seeds)",H3a,m=100 p=50 latency >= 0.75,inconclusive
+,pgvector,,,"0 confirmed, 0 falsified, 3 inconclusive parts",H3a,VERDICT,inconclusive
+,elasticsearch,pre,,"1.000 [1.000, 1.000] (1 clusters, 1 seeds)",H3b,m=1000 p=10 latency >= 0.75,inconclusive
+,elasticsearch,pre,,"1.000 [1.000, 1.000] (1 clusters, 1 seeds)",H3b,m=1000 p=50 latency >= 0.75,inconclusive
+,elasticsearch,,,"0 confirmed, 0 falsified, 2 inconclusive parts",H3b,VERDICT,inconclusive
+,qdrant,pre,,"0.778 [0.611, 0.944] (9 clusters, 1 seeds)",H3c,"p in (1, 10): no channel in latency",inconclusive
+,qdrant,pre,,"0.500 [0.500, 0.500] (9 clusters, 1 seeds)",H3c,"p in (1, 10): no channel in count",inconclusive
+,qdrant,pre,,"0.500 [0.500, 0.500] (9 clusters, 1 seeds)",H3c,"p in (1, 10): no channel in complete",inconclusive
+,qdrant,pre,,"0.500 [0.500, 0.500] (9 clusters, 1 seeds)",H3c,"p in (1, 10): no channel in recall",inconclusive
+,qdrant,pre,,"0.500 [0.500, 0.500] (9 clusters, 1 seeds)",H3c,"p in (1, 10): no channel in score",inconclusive
+,qdrant,,,"0 confirmed, 0 falsified, 5 inconclusive parts",H3c,VERDICT,inconclusive
+,pgvector,pre-exact,,"0.148 [0.000, 0.370] (9 clusters, 1 seeds)",H4,no channel in latency pooled,inconclusive
+,pgvector,pre-exact,,"0.000 [0.000, 0.000] (1 clusters, 1 seeds)",H4,m=1000 latency upper <= 0.65,inconclusive
+,pgvector,pre-exact,,"0.500 [0.500, 0.500] (9 clusters, 1 seeds)",H4,no channel in count pooled,inconclusive
+,pgvector,pre-exact,,"0.500 [0.500, 0.500] (1 clusters, 1 seeds)",H4,m=1000 count upper <= 0.65,inconclusive
+,pgvector,pre-exact,,"0.500 [0.500, 0.500] (9 clusters, 1 seeds)",H4,no channel in complete pooled,inconclusive
+,pgvector,pre-exact,,"0.500 [0.500, 0.500] (1 clusters, 1 seeds)",H4,m=1000 complete upper <= 0.65,inconclusive
+,pgvector,pre-exact,,"0.500 [0.500, 0.500] (9 clusters, 1 seeds)",H4,no channel in recall pooled,inconclusive
+,pgvector,pre-exact,,"0.500 [0.500, 0.500] (1 clusters, 1 seeds)",H4,m=1000 recall upper <= 0.65,inconclusive
+,pgvector,pre-exact,,"0.500 [0.500, 0.500] (9 clusters, 1 seeds)",H4,no channel in score pooled,inconclusive
+,pgvector,pre-exact,,"0.500 [0.500, 0.500] (1 clusters, 1 seeds)",H4,m=1000 score upper <= 0.65,inconclusive
+,pgvector pre-exact,,,"0 confirmed, 0 falsified, 10 inconclusive parts",H4,VERDICT,inconclusive
+,qdrant,pre-exact,,"0.444 [0.259, 0.667] (9 clusters, 1 seeds)",H4,no channel in latency pooled,inconclusive
+,qdrant,pre-exact,,"0.333 [0.333, 0.333] (1 clusters, 1 seeds)",H4,m=1000 latency upper <= 0.65,inconclusive
+,qdrant,pre-exact,,"0.500 [0.500, 0.500] (9 clusters, 1 seeds)",H4,no channel in count pooled,inconclusive
+,qdrant,pre-exact,,"0.500 [0.500, 0.500] (1 clusters, 1 seeds)",H4,m=1000 count upper <= 0.65,inconclusive
+,qdrant,pre-exact,,"0.500 [0.500, 0.500] (9 clusters, 1 seeds)",H4,no channel in complete pooled,inconclusive
+,qdrant,pre-exact,,"0.500 [0.500, 0.500] (1 clusters, 1 seeds)",H4,m=1000 complete upper <= 0.65,inconclusive
+,qdrant,pre-exact,,"0.500 [0.500, 0.500] (9 clusters, 1 seeds)",H4,no channel in recall pooled,inconclusive
+,qdrant,pre-exact,,"0.500 [0.500, 0.500] (1 clusters, 1 seeds)",H4,m=1000 recall upper <= 0.65,inconclusive
+,qdrant,pre-exact,,"0.500 [0.500, 0.500] (9 clusters, 1 seeds)",H4,no channel in score pooled,inconclusive
+,qdrant,pre-exact,,"0.500 [0.500, 0.500] (1 clusters, 1 seeds)",H4,m=1000 score upper <= 0.65,inconclusive
+,qdrant pre-exact,,,"0 confirmed, 0 falsified, 10 inconclusive parts",H4,VERDICT,inconclusive
+,elasticsearch,pre-exact,,"0.667 [0.519, 0.815] (9 clusters, 1 seeds)",H4,no channel in latency pooled,inconclusive
+,elasticsearch,pre-exact,,"0.667 [0.667, 0.667] (1 clusters, 1 seeds)",H4,m=1000 latency upper <= 0.65,inconclusive
+,elasticsearch,pre-exact,,"0.500 [0.500, 0.500] (9 clusters, 1 seeds)",H4,no channel in count pooled,inconclusive
+,elasticsearch,pre-exact,,"0.500 [0.500, 0.500] (1 clusters, 1 seeds)",H4,m=1000 count upper <= 0.65,inconclusive
+,elasticsearch,pre-exact,,"0.500 [0.500, 0.500] (9 clusters, 1 seeds)",H4,no channel in complete pooled,inconclusive
+,elasticsearch,pre-exact,,"0.500 [0.500, 0.500] (1 clusters, 1 seeds)",H4,m=1000 complete upper <= 0.65,inconclusive
+,elasticsearch,pre-exact,,"0.500 [0.500, 0.500] (9 clusters, 1 seeds)",H4,no channel in recall pooled,inconclusive
+,elasticsearch,pre-exact,,"0.500 [0.500, 0.500] (1 clusters, 1 seeds)",H4,m=1000 recall upper <= 0.65,inconclusive
+,elasticsearch,pre-exact,,"0.500 [0.500, 0.500] (9 clusters, 1 seeds)",H4,no channel in score pooled,inconclusive
+,elasticsearch,pre-exact,,"0.500 [0.500, 0.500] (1 clusters, 1 seeds)",H4,m=1000 score upper <= 0.65,inconclusive
+,elasticsearch pre-exact,,,"0 confirmed, 0 falsified, 10 inconclusive parts",H4,VERDICT,inconclusive
+,faiss,pre,,"0.556 [0.406, 0.742] (9 clusters, 1 seeds)",H4,no channel in latency pooled,inconclusive
+,faiss,pre,,"1.000 [1.000, 1.000] (1 clusters, 1 seeds)",H4,m=1000 latency upper <= 0.65,inconclusive
+,faiss,pre,,"0.500 [0.500, 0.500] (9 clusters, 1 seeds)",H4,no channel in count pooled,inconclusive
+,faiss,pre,,"0.500 [0.500, 0.500] (1 clusters, 1 seeds)",H4,m=1000 count upper <= 0.65,inconclusive
+,faiss,pre,,"0.500 [0.500, 0.500] (9 clusters, 1 seeds)",H4,no channel in complete pooled,inconclusive
+,faiss,pre,,"0.500 [0.500, 0.500] (1 clusters, 1 seeds)",H4,m=1000 complete upper <= 0.65,inconclusive
+,faiss,pre,,"0.500 [0.500, 0.500] (9 clusters, 1 seeds)",H4,no channel in recall pooled,inconclusive
+,faiss,pre,,"0.500 [0.500, 0.500] (1 clusters, 1 seeds)",H4,m=1000 recall upper <= 0.65,inconclusive
+,faiss,pre,,"0.500 [0.500, 0.500] (9 clusters, 1 seeds)",H4,no channel in score pooled,inconclusive
+,faiss,pre,,"0.500 [0.500, 0.500] (1 clusters, 1 seeds)",H4,m=1000 score upper <= 0.65,inconclusive
+,faiss pre,,,"0 confirmed, 0 falsified, 10 inconclusive parts",H4,VERDICT,inconclusive
+,memory,pre,,"0.750 [0.250, 1.000] (4 clusters, 1 seeds)",H4,no channel in latency pooled,inconclusive
+,memory,pre,,"1.000 [1.000, 1.000] (1 clusters, 1 seeds)",H4,m=1000 latency upper <= 0.65,inconclusive
+,memory,pre,,"0.500 [0.500, 0.500] (4 clusters, 1 seeds)",H4,no channel in count pooled,inconclusive
+,memory,pre,,"0.500 [0.500, 0.500] (1 clusters, 1 seeds)",H4,m=1000 count upper <= 0.65,inconclusive
+,memory,pre,,"0.500 [0.500, 0.500] (4 clusters, 1 seeds)",H4,no channel in complete pooled,inconclusive
+,memory,pre,,"0.500 [0.500, 0.500] (1 clusters, 1 seeds)",H4,m=1000 complete upper <= 0.65,inconclusive
+,memory,pre,,"0.500 [0.500, 0.500] (4 clusters, 1 seeds)",H4,no channel in score pooled,inconclusive
+,memory,pre,,"0.500 [0.500, 0.500] (1 clusters, 1 seeds)",H4,m=1000 score upper <= 0.65,inconclusive
+,memory pre,,,"0 confirmed, 0 falsified, 8 inconclusive parts",H4,VERDICT,inconclusive
+,elasticsearch,bm25-pre,,"1.000 [1.000, 1.000] (3 clusters, 1 seeds)",H5a,m=1 score >= 0.90,inconclusive
+,elasticsearch,bm25-pre,,"0.778 [0.333, 1.000] (3 clusters, 1 seeds)",H5a,m=10 score >= 0.90,inconclusive
+,elasticsearch,bm25-pre,,"1.000 [1.000, 1.000] (2 clusters, 1 seeds)",H5a,m=100 score >= 0.90,inconclusive
+,elasticsearch,bm25-pre,,"1.000 [1.000, 1.000] (1 clusters, 1 seeds)",H5a,m=1000 score >= 0.90,inconclusive
+,elasticsearch,,,"0 confirmed, 0 falsified, 4 inconclusive parts",H5a,VERDICT,inconclusive
+,qdrant,bm25-pre,,"1.000 [1.000, 1.000] (3 clusters, 1 seeds)",H5a,m=1 score >= 0.90,inconclusive
+,qdrant,bm25-pre,,"0.778 [0.550, 1.000] (3 clusters, 1 seeds)",H5a,m=10 score >= 0.90,inconclusive
+,qdrant,bm25-pre,,"1.000 [1.000, 1.000] (2 clusters, 1 seeds)",H5a,m=100 score >= 0.90,inconclusive
+,qdrant,bm25-pre,,"1.000 [1.000, 1.000] (1 clusters, 1 seeds)",H5a,m=1000 score >= 0.90,inconclusive
+,qdrant,,,"0 confirmed, 0 falsified, 4 inconclusive parts",H5a,VERDICT,inconclusive
+,pgvector,bm25-pre,,"0.500 [0.500, 0.500] (9 clusters, 1 seeds)",H5b,no channel in the score,inconclusive
+,pgvector,bm25-pre,,"change rate 0.000 [0.000, 0.000] (9 clusters, 1 seeds)",H5b,id-list change rate <= 0.01,inconclusive
+,pgvector,,,"0 confirmed, 0 falsified, 2 inconclusive parts",H5b,VERDICT,inconclusive
+,elasticsearch,hybrid-exact,,"change rate 0.333 [0.333, 0.333] (1 clusters, 1 seeds)",H5c,m=1000 change rate >= 0.25,inconclusive
+,elasticsearch,,,"0 confirmed, 0 falsified, 1 inconclusive parts",H5c,VERDICT,inconclusive
+,every cell with a raw latency channel,,,"0 confirmed, 0 falsified, 0 inconclusive parts",H6,VERDICT,inconclusive

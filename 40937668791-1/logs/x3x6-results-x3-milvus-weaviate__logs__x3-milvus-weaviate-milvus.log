@@ -1,0 +1,12 @@
+[19:13:28] x3 milvus: seed 0
+[19:13:29]   seed 0: building (8,000 chunks)
+[19:13:37]   seed 0: built in 8 s {'indexed_rows': 8000, 'total_rows': 8000, 'pending_index_rows': 0, 'state': 'Finished', 'wait_s': 4.5}
+[19:13:37]   seed 0: G=1: ok, 0 errors, translation ok
+[19:13:37]   seed 0: G=10: ok, 0 errors, translation ok
+[19:13:37]   seed 0: G=100: ok, 0 errors, translation ok
+[19:13:37]   seed 0: G=1,000: ok, 0 errors, translation ok
+[19:13:37]   seed 0: G=4,000: ok, 0 errors, translation ok
+[19:13:37]   seed 0: G=10,000: ok, 0 errors, translation ok
+[19:13:38]   seed 0: G=40,000: ok, 0 errors, translation ok
+[19:13:39] x3 milvus: seed 0 done in 0.2 min
+::notice title=x3 milvus::{"0": 0}

@@ -1,0 +1,11 @@
+[19:12:49] x6 memory: loading the data
+[19:12:49] x6 memory: seed 0
+[19:12:50]   seed 0: building w1 (57,638 chunks)
+[19:12:50]   seed 0: w1 built in 0 s {}
+[19:12:50]   seed 0: building sep (49,603 chunks)
+[19:12:51]   seed 0: sep built in 0 s {}
+[19:12:51]   seed 0: building w0 group 0 (57,638 chunks)
+[19:12:51]   seed 0: w0 group 0 built in 0 s {}
+[19:14:22]   seed 0: 48/64 retrievals (0.5 per s, 1 min left)
+[19:14:50] x6 memory: seed 0 done in 2.0 min
+::notice title=x6 memory::{"seeds": [0], "minutes": [2.0], "retrievals": [64], "stopped": {}, "first_errors": {}}

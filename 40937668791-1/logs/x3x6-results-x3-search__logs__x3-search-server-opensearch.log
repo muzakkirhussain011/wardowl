@@ -1,0 +1,200 @@
+[2026-10-29T19:13:03,863][INFO ][o.o.t.g.p.r.s.q.QueryBuilderProtoConverterSpiRegistry] [4141546a5c21] Registered query converter for CONSTANT_SCORE: org.opensearch.transport.grpc.proto.request.search.query.ConstantScoreQueryBuilderProtoConverter
+[2026-10-29T19:13:03,864][INFO ][o.o.t.g.p.r.s.q.QueryBuilderProtoConverterSpiRegistry] [4141546a5c21] Registered query converter for FUZZY: org.opensearch.transport.grpc.proto.request.search.query.FuzzyQueryBuilderProtoConverter
+[2026-10-29T19:13:03,864][INFO ][o.o.t.g.p.r.s.q.QueryBuilderProtoConverterSpiRegistry] [4141546a5c21] Registered query converter for PREFIX: org.opensearch.transport.grpc.proto.request.search.query.PrefixQueryBuilderProtoConverter
+[2026-10-29T19:13:03,864][INFO ][o.o.t.g.p.r.s.q.QueryBuilderProtoConverterSpiRegistry] [4141546a5c21] Registered query converter for MATCH: org.opensearch.transport.grpc.proto.request.search.query.MatchQueryBuilderProtoConverter
+[2026-10-29T19:13:03,864][INFO ][o.o.t.g.p.r.s.q.QueryBuilderProtoConverterSpiRegistry] [4141546a5c21] Registered query converter for MATCH_BOOL_PREFIX: org.opensearch.transport.grpc.proto.request.search.query.MatchBoolPrefixQueryBuilderProtoConverter
+[2026-10-29T19:13:03,865][INFO ][o.o.t.g.p.r.s.q.QueryBuilderProtoConverterSpiRegistry] [4141546a5c21] Registered query converter for MATCH_PHRASE_PREFIX: org.opensearch.transport.grpc.proto.request.search.query.MatchPhrasePrefixQueryBuilderProtoConverter
+[2026-10-29T19:13:03,865][INFO ][o.o.t.g.p.r.s.q.QueryBuilderProtoConverterSpiRegistry] [4141546a5c21] Registered query converter for FUNCTION_SCORE: org.opensearch.transport.grpc.proto.request.search.query.functionscore.FunctionScoreQueryBuilderProtoConverter
+[2026-10-29T19:13:03,865][INFO ][o.o.t.g.p.r.s.q.QueryBuilderProtoConverterSpiRegistry] [4141546a5c21] Set registry on 24 converters
+[2026-10-29T19:13:03,865][INFO ][o.o.t.g.p.r.s.q.QueryBuilderProtoConverterRegistryImpl] [4141546a5c21] Registered 24 built-in query converters
+[2026-10-29T19:13:03,867][INFO ][o.o.t.g.p.r.s.a.AggregationBuilderProtoConverterSpiRegistry] [4141546a5c21] Registered aggregation converter for MIN: org.opensearch.transport.grpc.proto.request.search.aggregation.metrics.MinAggregationBuilderProtoConverter
+[2026-10-29T19:13:03,867][INFO ][o.o.t.g.p.r.s.a.AggregationBuilderProtoConverterSpiRegistry] [4141546a5c21] Registered aggregation converter for MAX: org.opensearch.transport.grpc.proto.request.search.aggregation.metrics.MaxAggregationBuilderProtoConverter
+[2026-10-29T19:13:03,869][INFO ][o.o.t.g.p.r.s.a.AggregationBuilderProtoConverterSpiRegistry] [4141546a5c21] Registered aggregation converter for TERMS_AGGREGATION: org.opensearch.transport.grpc.proto.request.search.aggregation.bucket.terms.TermsAggregationBuilderConverter
+[2026-10-29T19:13:03,869][INFO ][o.o.t.g.p.r.s.a.AggregationBuilderProtoConverterSpiRegistry] [4141546a5c21] Set registry on 3 aggregation converter(s)
+[2026-10-29T19:13:03,869][INFO ][o.o.t.g.p.r.s.a.AggregationBuilderProtoConverterRegistryImpl] [4141546a5c21] Registered 3 built-in aggregation converter(s)
+[2026-10-29T19:13:03,870][INFO ][o.o.t.g.p.r.s.a.AggregateProtoConverterSpiRegistry] [4141546a5c21] Registered aggregate converter for org.opensearch.search.aggregations.metrics.InternalMin: org.opensearch.transport.grpc.proto.response.search.aggregation.metrics.MinAggregateProtoConverter
+[2026-10-29T19:13:03,870][INFO ][o.o.t.g.p.r.s.a.AggregateProtoConverterSpiRegistry] [4141546a5c21] Registered aggregate converter for org.opensearch.search.aggregations.metrics.InternalMax: org.opensearch.transport.grpc.proto.response.search.aggregation.metrics.MaxAggregateProtoConverter
+[2026-10-29T19:13:03,871][INFO ][o.o.t.g.p.r.s.a.AggregateProtoConverterSpiRegistry] [4141546a5c21] Registered aggregate converter for org.opensearch.search.aggregations.bucket.terms.DoubleTerms: org.opensearch.transport.grpc.proto.response.search.aggregation.bucket.terms.DoubleTermsAggregateConverter
+[2026-10-29T19:13:03,871][INFO ][o.o.t.g.p.r.s.a.AggregateProtoConverterSpiRegistry] [4141546a5c21] Registered aggregate converter for org.opensearch.search.aggregations.bucket.terms.LongTerms: org.opensearch.transport.grpc.proto.response.search.aggregation.bucket.terms.LongTermsAggregateConverter
+[2026-10-29T19:13:03,872][INFO ][o.o.t.g.p.r.s.a.AggregateProtoConverterSpiRegistry] [4141546a5c21] Registered aggregate converter for org.opensearch.search.aggregations.bucket.terms.UnsignedLongTerms: org.opensearch.transport.grpc.proto.response.search.aggregation.bucket.terms.UnsignedLongTermsAggregateConverter
+[2026-10-29T19:13:03,872][INFO ][o.o.t.g.p.r.s.a.AggregateProtoConverterSpiRegistry] [4141546a5c21] Registered aggregate converter for org.opensearch.search.aggregations.bucket.terms.StringTerms: org.opensearch.transport.grpc.proto.response.search.aggregation.bucket.terms.StringTermsAggregateConverter
+[2026-10-29T19:13:03,873][INFO ][o.o.t.g.p.r.s.a.AggregateProtoConverterSpiRegistry] [4141546a5c21] Registered aggregate converter for org.opensearch.search.aggregations.bucket.terms.UnmappedTerms: org.opensearch.transport.grpc.proto.response.search.aggregation.bucket.terms.UnmappedTermsAggregateConverter
+[2026-10-29T19:13:03,873][INFO ][o.o.t.g.p.r.s.a.AggregateProtoConverterSpiRegistry] [4141546a5c21] Set registry on 7 aggregate converter(s)
+[2026-10-29T19:13:03,873][INFO ][o.o.t.g.GrpcPlugin       ] [4141546a5c21] Injecting registry and registering 2 external QueryBuilderProtoConverter(s)
+[2026-10-29T19:13:03,873][INFO ][o.o.t.g.GrpcPlugin       ] [4141546a5c21] Processing external converter: org.opensearch.knn.grpc.proto.request.search.query.KNNQueryBuilderProtoConverter (handles: KNN)
+[2026-10-29T19:13:03,874][INFO ][o.o.t.g.GrpcPlugin       ] [4141546a5c21] Injected registry into converter: org.opensearch.knn.grpc.proto.request.search.query.KNNQueryBuilderProtoConverter
+[2026-10-29T19:13:03,874][INFO ][o.o.t.g.p.r.s.q.QueryBuilderProtoConverterSpiRegistry] [4141546a5c21] Registered query converter for KNN: org.opensearch.knn.grpc.proto.request.search.query.KNNQueryBuilderProtoConverter
+[2026-10-29T19:13:03,874][INFO ][o.o.t.g.GrpcPlugin       ] [4141546a5c21] Processing external converter: org.opensearch.neuralsearch.grpc.proto.request.search.query.HybridQueryBuilderProtoConverter (handles: HYBRID)
+[2026-10-29T19:13:03,874][INFO ][o.o.t.g.GrpcPlugin       ] [4141546a5c21] Injected registry into converter: org.opensearch.neuralsearch.grpc.proto.request.search.query.HybridQueryBuilderProtoConverter
+[2026-10-29T19:13:03,874][INFO ][o.o.t.g.p.r.s.q.QueryBuilderProtoConverterSpiRegistry] [4141546a5c21] Registered query converter for HYBRID: org.opensearch.neuralsearch.grpc.proto.request.search.query.HybridQueryBuilderProtoConverter
+[2026-10-29T19:13:03,874][INFO ][o.o.t.g.GrpcPlugin       ] [4141546a5c21] Successfully injected registry and registered all 2 external converters
+[2026-10-29T19:13:03,874][INFO ][o.o.t.g.p.r.s.q.QueryBuilderProtoConverterSpiRegistry] [4141546a5c21] Set registry on 26 converters
+[2026-10-29T19:13:03,874][INFO ][o.o.t.g.GrpcPlugin       ] [4141546a5c21] Updated registry on all converters to include external converters
+[2026-10-29T19:13:03,874][INFO ][o.o.t.g.GrpcPlugin       ] [4141546a5c21] No external AggregationBuilderProtoConverter(s) to register
+[2026-10-29T19:13:03,874][INFO ][o.o.t.g.GrpcPlugin       ] [4141546a5c21] No external AggregateProtoConverter(s) to register
+[2026-10-29T19:13:03,994][INFO ][o.o.l.b.LTRCircuitBreakerService] [4141546a5c21] Registered memory breaker.
+[2026-10-29T19:13:04,279][INFO ][o.o.t.b.CircuitBreakerService] [4141546a5c21] Registered memory breaker.
+[2026-10-29T19:13:04,517][INFO ][o.o.r.m.c.i.SdkClientFactory] [4141546a5c21] Using local opensearch cluster as metadata store.
+[2026-10-29T19:13:04,546][INFO ][o.o.r.m.c.i.SdkClientFactory] [4141546a5c21] Using local opensearch cluster as metadata store.
+[2026-10-29T19:13:04,611][INFO ][o.o.c.u.s.JobQueueAccountIdProvider] [4141546a5c21] Discovered JobQueueAccountIdProvider: [plugin_setting]
+[2026-10-29T19:13:04,611][INFO ][o.o.c.u.s.JobQueueAccountIdProvider] [4141546a5c21] Found JobQueueAccountIdProvider for type [plugin_setting]
+[2026-10-29T19:13:04,831][INFO ][o.o.s.e.ExperimentTaskManager] [4141546a5c21] ExperimentTaskManager initialized with batch size 2 (processors: 4)
+[2026-10-29T19:13:04,861][INFO ][o.o.r.m.c.i.SdkClientFactory] [4141546a5c21] Using local opensearch cluster as metadata store.
+[2026-10-29T19:13:05,097][INFO ][o.o.r.m.c.i.SdkClientFactory] [4141546a5c21] Using local opensearch cluster as metadata store.
+[2026-10-29T19:13:05,120][WARN ][o.o.s.p.SQLPlugin        ] [4141546a5c21] Master key is a required config for using create and update datasource APIs. Please set plugins.query.datasources.encryption.masterkey config in opensearch.yml in all the cluster nodes. More details can be found here: https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/admin/datasources.rst#master-key-config-for-encrypting-credential-information
+[2026-10-29T19:13:05,457][INFO ][o.o.p.i.c.s.LocalIndexLifecycleManager] [4141546a5c21] Setting Query Insights delete after to [7]
+[2026-10-29T19:13:05,667][INFO ][o.o.r.m.c.i.SdkClientFactory] [4141546a5c21] Using local opensearch cluster as metadata store.
+[2026-10-29T19:13:05,700][INFO ][o.o.m.b.MLCircuitBreakerService] [4141546a5c21] Registered ML memory breaker.
+[2026-10-29T19:13:05,701][INFO ][o.o.m.b.MLCircuitBreakerService] [4141546a5c21] Registered ML disk breaker.
+[2026-10-29T19:13:05,701][INFO ][o.o.m.b.MLCircuitBreakerService] [4141546a5c21] Registered ML native memory breaker.
+[2026-10-29T19:13:05,898][INFO ][o.r.Reflections          ] [4141546a5c21] Reflections took 95 ms to scan 1 urls, producing 39 keys and 103 values 
+[2026-10-29T19:13:05,936][INFO ][o.r.Reflections          ] [4141546a5c21] Reflections took 2 ms to scan 1 urls, producing 3 keys and 5 values 
+[2026-10-29T19:13:05,944][INFO ][o.r.Reflections          ] [4141546a5c21] Reflections took 3 ms to scan 1 urls, producing 5 keys and 23 values 
+[2026-10-29T19:13:06,876][INFO ][o.o.t.NettyAllocator     ] [4141546a5c21] creating NettyAllocator with the following configs: [name=opensearch_configured, chunk_size=256kb, suggested_max_allocation_size=256kb, factors={opensearch.unsafe.use_netty_default_chunk_and_page_size=false, g1gc_enabled=true, g1gc_region_size=1mb}]
+[2026-10-29T19:13:06,953][INFO ][o.o.d.DiscoveryModule    ] [4141546a5c21] using discovery type [single-node] and seed hosts providers [settings]
+[2026-10-29T19:13:07,746][WARN ][o.o.g.DanglingIndicesState] [4141546a5c21] gateway.auto_import_dangling_indices is disabled, dangling indices will not be automatically detected or imported and must be managed manually
+[2026-10-29T19:13:07,797][WARN ][o.o.m.a.p.TransportPredictionStreamTaskAction] [4141546a5c21] StreamTransportService is not available.
+[2026-10-29T19:13:08,339][WARN ][o.o.m.a.e.TransportExecuteStreamTaskAction] [4141546a5c21] StreamTransportService is not available.
+[2026-10-29T19:13:08,625][INFO ][o.o.s.e.LlmJudgmentTaskManager] [4141546a5c21] LlmJudgmentTaskManager initialized with 2 max concurrent tasks (processors: 4)
+[2026-10-29T19:13:09,213][INFO ][o.o.p.h.c.PerformanceAnalyzerConfigAction] [4141546a5c21] PerformanceAnalyzer Enabled: false
+[2026-10-29T19:13:09,248][INFO ][o.o.n.Node               ] [4141546a5c21] initialized
+[2026-10-29T19:13:09,249][INFO ][o.o.n.Node               ] [4141546a5c21] starting ...
+[2026-10-29T19:13:09,249][INFO ][o.o.a.s.MonitorJobPoller ] [4141546a5c21] MonitorJobPoller disabled, not starting poll workers
+[2026-10-29T19:13:09,360][INFO ][o.o.s.l.BuiltinLogTypeLoader] [4141546a5c21] Loaded [windows_logtype.json] log type
+[2026-10-29T19:13:09,361][INFO ][o.o.s.l.BuiltinLogTypeLoader] [4141546a5c21] Loaded [waf_logtype.json] log type
+[2026-10-29T19:13:09,362][INFO ][o.o.s.l.BuiltinLogTypeLoader] [4141546a5c21] Loaded [vpcflow_logtype.json] log type
+[2026-10-29T19:13:09,363][INFO ][o.o.s.l.BuiltinLogTypeLoader] [4141546a5c21] Loaded [test_windows_logtype.json] log type
+[2026-10-29T19:13:09,364][INFO ][o.o.s.l.BuiltinLogTypeLoader] [4141546a5c21] Loaded [s3_logtype.json] log type
+[2026-10-29T19:13:09,364][INFO ][o.o.s.l.BuiltinLogTypeLoader] [4141546a5c21] Loaded [others_web_logtype.json] log type
+[2026-10-29T19:13:09,365][INFO ][o.o.s.l.BuiltinLogTypeLoader] [4141546a5c21] Loaded [others_proxy_logtype.json] log type
+[2026-10-29T19:13:09,366][INFO ][o.o.s.l.BuiltinLogTypeLoader] [4141546a5c21] Loaded [others_macos_logtype.json] log type
+[2026-10-29T19:13:09,366][INFO ][o.o.s.l.BuiltinLogTypeLoader] [4141546a5c21] Loaded [others_compliance_logtype.json] log type
+[2026-10-29T19:13:09,367][INFO ][o.o.s.l.BuiltinLogTypeLoader] [4141546a5c21] Loaded [others_cloud_logtype.json] log type
+[2026-10-29T19:13:09,368][INFO ][o.o.s.l.BuiltinLogTypeLoader] [4141546a5c21] Loaded [others_apt_logtype.json] log type
+[2026-10-29T19:13:09,368][INFO ][o.o.s.l.BuiltinLogTypeLoader] [4141546a5c21] Loaded [others_application_logtype.json] log type
+[2026-10-29T19:13:09,370][INFO ][o.o.s.l.BuiltinLogTypeLoader] [4141546a5c21] Loaded [okta_logtype.json] log type
+[2026-10-29T19:13:09,370][INFO ][o.o.s.l.BuiltinLogTypeLoader] [4141546a5c21] Loaded [network_logtype.json] log type
+[2026-10-29T19:13:09,370][INFO ][o.o.s.l.BuiltinLogTypeLoader] [4141546a5c21] Loaded [netflow_logtype.json] log type
+[2026-10-29T19:13:09,371][INFO ][o.o.s.l.BuiltinLogTypeLoader] [4141546a5c21] Loaded [m365_logtype.json] log type
+[2026-10-29T19:13:09,371][INFO ][o.o.s.l.BuiltinLogTypeLoader] [4141546a5c21] Loaded [linux_logtype.json] log type
+[2026-10-29T19:13:09,371][INFO ][o.o.s.l.BuiltinLogTypeLoader] [4141546a5c21] Loaded [gworkspace_logtype.json] log type
+[2026-10-29T19:13:09,372][INFO ][o.o.s.l.BuiltinLogTypeLoader] [4141546a5c21] Loaded [github_logtype.json] log type
+[2026-10-29T19:13:09,372][INFO ][o.o.s.l.BuiltinLogTypeLoader] [4141546a5c21] Loaded [dns_logtype.json] log type
+[2026-10-29T19:13:09,373][INFO ][o.o.s.l.BuiltinLogTypeLoader] [4141546a5c21] Loaded [cloudtrail_logtype.json] log type
+[2026-10-29T19:13:09,374][INFO ][o.o.s.l.BuiltinLogTypeLoader] [4141546a5c21] Loaded [azure_logtype.json] log type
+[2026-10-29T19:13:09,374][INFO ][o.o.s.l.BuiltinLogTypeLoader] [4141546a5c21] Loaded [apache_access_logtype.json] log type
+[2026-10-29T19:13:09,375][INFO ][o.o.s.l.BuiltinLogTypeLoader] [4141546a5c21] Loaded [ad_ldap_logtype.json] log type
+[2026-10-29T19:13:09,557][INFO ][o.o.t.TransportService   ] [4141546a5c21] publish_address {172.17.0.3:9300}, bound_addresses {[::]:9300}
+[2026-10-29T19:13:09,559][INFO ][o.o.t.TransportService   ] [4141546a5c21] Remote clusters initialized successfully.
+[2026-10-29T19:13:10,020][INFO ][o.o.c.c.Coordinator      ] [4141546a5c21] setting initial configuration to VotingConfiguration{TAw7BEHrRhCw2Pu1cdoy6g}
+[2026-10-29T19:13:10,147][INFO ][o.o.c.s.ClusterManagerService] [4141546a5c21] Tasks batched with key: org.opensearch.cluster.coordination.JoinHelper, count:3 and sample tasks: elected-as-cluster-manager ([1] nodes joined)[{4141546a5c21}{TAw7BEHrRhCw2Pu1cdoy6g}{lQgj21voTxSvvaf3ie83tg}{172.17.0.3}{172.17.0.3:9300}{dimr}{shard_indexing_pressure_enabled=true} elect leader, _BECOME_CLUSTER_MANAGER_TASK_, _FINISH_ELECTION_], term: 1, version: 1, delta: cluster-manager node changed {previous [], current [{4141546a5c21}{TAw7BEHrRhCw2Pu1cdoy6g}{lQgj21voTxSvvaf3ie83tg}{172.17.0.3}{172.17.0.3:9300}{dimr}{shard_indexing_pressure_enabled=true}]}
+[2026-10-29T19:13:10,185][INFO ][o.o.c.c.CoordinationState] [4141546a5c21] cluster UUID set to [jeBkx52aTV-mVhTSQOqCFQ]
+[2026-10-29T19:13:10,209][INFO ][o.o.c.s.ClusterApplierService] [4141546a5c21] cluster-manager node changed {previous [], current [{4141546a5c21}{TAw7BEHrRhCw2Pu1cdoy6g}{lQgj21voTxSvvaf3ie83tg}{172.17.0.3}{172.17.0.3:9300}{dimr}{shard_indexing_pressure_enabled=true}]}, term: 1, version: 1, reason: Publication{term=1, version=1}
+[2026-10-29T19:13:10,219][INFO ][o.o.t.i.IndexManagement  ] [4141546a5c21] Candidate custom result indices are empty.
+[2026-10-29T19:13:10,219][INFO ][o.o.t.i.IndexManagement  ] [4141546a5c21] Candidate custom result indices are empty.
+[2026-10-29T19:13:10,220][INFO ][o.o.t.c.ClusterEventListener] [4141546a5c21] Cluster is not recovered yet.
+[2026-10-29T19:13:10,245][INFO ][o.o.i.i.ManagedIndexCoordinator] [4141546a5c21] Cache cluster manager node onClusterManager time: 1793301190244
+[2026-10-29T19:13:10,253][WARN ][o.o.p.c.s.h.ConfigOverridesClusterSettingHandler] [4141546a5c21] Config override setting update called with empty string. Ignoring.
+[2026-10-29T19:13:10,268][INFO ][o.o.d.PeerFinder         ] [4141546a5c21] setting findPeersInterval to [1s] as node commission status = [true] for local node [{4141546a5c21}{TAw7BEHrRhCw2Pu1cdoy6g}{lQgj21voTxSvvaf3ie83tg}{172.17.0.3}{172.17.0.3:9300}{dimr}{shard_indexing_pressure_enabled=true}]
+[2026-10-29T19:13:10,274][INFO ][o.o.h.AbstractHttpServerTransport] [4141546a5c21] publish_address {172.17.0.3:9200}, bound_addresses {[::]:9200}
+[2026-10-29T19:13:10,276][INFO ][o.o.n.Node               ] [4141546a5c21] started
+[2026-10-29T19:13:10,278][INFO ][o.o.s.OpenSearchSecurityPlugin] [4141546a5c21] 0 OpenSearch Security modules loaded so far: []
+[2026-10-29T19:13:10,298][INFO ][o.o.t.c.HashRing         ] [4141546a5c21] Node added: [TAw7BEHrRhCw2Pu1cdoy6g]
+[2026-10-29T19:13:10,308][INFO ][o.o.t.c.HashRing         ] [4141546a5c21] Add data node to version hash ring: TAw7BEHrRhCw2Pu1cdoy6g
+[2026-10-29T19:13:10,312][INFO ][o.o.t.c.HashRing         ] [4141546a5c21] All nodes with known version: {TAw7BEHrRhCw2Pu1cdoy6g=ADNodeInfo{version=3.9.0, isEligibleDataNode=true}}
+[2026-10-29T19:13:10,312][INFO ][o.o.t.c.HashRing         ] [4141546a5c21] Rebuild hash ring for realtime with cooldown, nodeChangeEvents size 0
+[2026-10-29T19:13:10,312][INFO ][o.o.t.c.HashRing         ] [4141546a5c21] Build version hash ring successfully
+[2026-10-29T19:13:10,316][INFO ][o.o.t.c.ADDataMigrator   ] [4141546a5c21] Start migrating AD data
+[2026-10-29T19:13:10,317][INFO ][o.o.t.c.ADDataMigrator   ] [4141546a5c21] AD job index doesn't exist, no need to migrate
+[2026-10-29T19:13:10,317][INFO ][o.o.t.c.ClusterEventListener] [4141546a5c21] Init version hash ring successfully
+[2026-10-29T19:13:10,345][INFO ][o.o.c.s.ClusterManagerTaskThrottler] [4141546a5c21] Starting cluster manager throttling as all nodes are higher than or equal to 2.5.0
+[2026-10-29T19:13:10,347][INFO ][o.o.g.GatewayService     ] [4141546a5c21] recovered [0] indices into cluster_state
+[2026-10-29T19:13:10,361][INFO ][o.o.i.MergeSchedulerConfig] [4141546a5c21] Updating autoThrottle for index .opensearch-sap-log-types-config from [false] to [true]
+[2026-10-29T19:13:10,361][INFO ][o.o.i.MergeSchedulerConfig] [4141546a5c21] Updating maxThreadCount from [0] to [2] and maxMergeCount from [0] to [7] for index .opensearch-sap-log-types-config.
+[2026-10-29T19:13:10,361][INFO ][o.o.i.MergeSchedulerConfig] [4141546a5c21] Initialized index .opensearch-sap-log-types-config with maxMergeCount=7, maxThreadCount=2, autoThrottleEnabled=true
+[2026-10-29T19:13:10,398][INFO ][o.o.p.PluginsService     ] [4141546a5c21] PluginService:onIndexModule index:[.opensearch-sap-log-types-config/O51MvM6gSpugMpGeAl74nQ]
+[2026-10-29T19:13:10,553][INFO ][o.o.i.MergeSchedulerConfig] [4141546a5c21] Updating autoThrottle for index .opensearch-sap-log-types-config from [true] to [true]
+[2026-10-29T19:13:10,624][INFO ][o.o.c.m.MetadataCreateIndexService] [4141546a5c21] [.opensearch-sap-log-types-config] creating index, cause [auto(sap-logtype api)], templates [], shards [1]/[1]
+[2026-10-29T19:13:10,702][INFO ][o.o.c.r.a.AllocationService] [4141546a5c21] updating number_of_replicas to [0] for indices [.opensearch-sap-log-types-config]
+[2026-10-29T19:13:10,803][INFO ][o.o.i.MergeSchedulerConfig] [4141546a5c21] Updating autoThrottle for index .opensearch-sap-log-types-config from [false] to [true]
+[2026-10-29T19:13:10,803][INFO ][o.o.i.MergeSchedulerConfig] [4141546a5c21] Updating maxThreadCount from [0] to [2] and maxMergeCount from [0] to [7] for index .opensearch-sap-log-types-config.
+[2026-10-29T19:13:10,804][INFO ][o.o.i.MergeSchedulerConfig] [4141546a5c21] Initialized index .opensearch-sap-log-types-config with maxMergeCount=7, maxThreadCount=2, autoThrottleEnabled=true
+[2026-10-29T19:13:10,809][INFO ][o.o.p.PluginsService     ] [4141546a5c21] PluginService:onIndexModule index:[.opensearch-sap-log-types-config/O51MvM6gSpugMpGeAl74nQ]
+[2026-10-29T19:13:10,816][INFO ][o.o.i.MergeSchedulerConfig] [4141546a5c21] Updating autoThrottle for index .opensearch-sap-log-types-config from [true] to [true]
+[2026-10-29T19:13:11,079][INFO ][o.o.c.r.a.AllocationService] [4141546a5c21] Cluster health status changed from [YELLOW] to [GREEN] (reason: [shards started [[.opensearch-sap-log-types-config][0]]]).
+[2026-10-29T19:13:11,117][INFO ][o.o.s.l.LogTypeService   ] [4141546a5c21] Loading builtin types!
+[2026-10-29T19:13:11,120][INFO ][o.o.s.l.LogTypeService   ] [4141546a5c21] Indexing [432] fieldMappingDocs from logTypes: 24
+[2026-10-29T19:13:11,236][INFO ][o.o.s.l.LogTypeService   ] [4141546a5c21] Indexing [432] fieldMappingDocs
+[2026-10-29T19:13:11,260][INFO ][o.o.s.l.LogTypeService   ] [4141546a5c21] Loading builtin types!
+[2026-10-29T19:13:11,261][INFO ][o.o.s.l.LogTypeService   ] [4141546a5c21] Indexing [432] fieldMappingDocs from logTypes: 24
+[2026-10-29T19:13:11,266][INFO ][o.o.s.l.LogTypeService   ] [4141546a5c21] Loading builtin types!
+[2026-10-29T19:13:11,267][INFO ][o.o.s.l.LogTypeService   ] [4141546a5c21] Indexing [432] fieldMappingDocs from logTypes: 24
+[2026-10-29T19:13:11,271][INFO ][o.o.s.i.DetectorIndexManagementService] [4141546a5c21] info deleteOldIndices
+[2026-10-29T19:13:11,276][INFO ][o.o.s.l.LogTypeService   ] [4141546a5c21] Indexing [432] fieldMappingDocs
+[2026-10-29T19:13:11,281][INFO ][o.o.s.i.DetectorIndexManagementService] [4141546a5c21] No Old Correlation Indices to delete
+[2026-10-29T19:13:11,283][INFO ][o.o.s.i.DetectorIndexManagementService] [4141546a5c21] info deleteOldIndices
+[2026-10-29T19:13:11,286][INFO ][o.o.s.i.DetectorIndexManagementService] [4141546a5c21] No Old IOC Findings Indices to delete
+[2026-10-29T19:13:11,296][INFO ][o.o.s.l.LogTypeService   ] [4141546a5c21] Indexing [432] fieldMappingDocs
+[2026-10-29T19:13:11,317][INFO ][o.o.i.MergeSchedulerConfig] [4141546a5c21] Updating autoThrottle for index .opensearch-sap-log-types-config from [false] to [true]
+[2026-10-29T19:13:11,317][INFO ][o.o.i.MergeSchedulerConfig] [4141546a5c21] Updating maxThreadCount from [0] to [2] and maxMergeCount from [0] to [7] for index .opensearch-sap-log-types-config.
+[2026-10-29T19:13:11,318][INFO ][o.o.i.MergeSchedulerConfig] [4141546a5c21] Initialized index .opensearch-sap-log-types-config with maxMergeCount=7, maxThreadCount=2, autoThrottleEnabled=true
+[2026-10-29T19:13:11,319][INFO ][o.o.p.PluginsService     ] [4141546a5c21] PluginService:onIndexModule index:[.opensearch-sap-log-types-config/O51MvM6gSpugMpGeAl74nQ]
+[2026-10-29T19:13:11,337][INFO ][o.o.c.m.MetadataMappingService] [4141546a5c21] [.opensearch-sap-log-types-config/O51MvM6gSpugMpGeAl74nQ] update_mapping [_doc]
+[2026-10-29T19:13:11,375][INFO ][o.o.i.MergeSchedulerConfig] [4141546a5c21] Updating autoThrottle for index .opensearch-sap-log-types-config from [false] to [true]
+[2026-10-29T19:13:11,375][INFO ][o.o.i.MergeSchedulerConfig] [4141546a5c21] Updating maxThreadCount from [0] to [2] and maxMergeCount from [0] to [7] for index .opensearch-sap-log-types-config.
+[2026-10-29T19:13:11,375][INFO ][o.o.i.MergeSchedulerConfig] [4141546a5c21] Initialized index .opensearch-sap-log-types-config with maxMergeCount=7, maxThreadCount=2, autoThrottleEnabled=true
+[2026-10-29T19:13:11,376][INFO ][o.o.p.PluginsService     ] [4141546a5c21] PluginService:onIndexModule index:[.opensearch-sap-log-types-config/O51MvM6gSpugMpGeAl74nQ]
+[2026-10-29T19:13:11,424][INFO ][o.o.i.MergeSchedulerConfig] [4141546a5c21] Updating autoThrottle for index .opensearch-sap-log-types-config from [false] to [true]
+[2026-10-29T19:13:11,426][INFO ][o.o.i.MergeSchedulerConfig] [4141546a5c21] Updating maxThreadCount from [0] to [2] and maxMergeCount from [0] to [7] for index .opensearch-sap-log-types-config.
+[2026-10-29T19:13:11,427][INFO ][o.o.i.MergeSchedulerConfig] [4141546a5c21] Initialized index .opensearch-sap-log-types-config with maxMergeCount=7, maxThreadCount=2, autoThrottleEnabled=true
+[2026-10-29T19:13:11,428][INFO ][o.o.p.PluginsService     ] [4141546a5c21] PluginService:onIndexModule index:[.opensearch-sap-log-types-config/O51MvM6gSpugMpGeAl74nQ]
+[2026-10-29T19:13:11,446][INFO ][o.o.c.m.MetadataMappingService] [4141546a5c21] [.opensearch-sap-log-types-config/O51MvM6gSpugMpGeAl74nQ] update_mapping [_doc]
+[2026-10-29T19:13:11,484][INFO ][o.o.i.MergeSchedulerConfig] [4141546a5c21] Updating autoThrottle for index .opensearch-sap-log-types-config from [false] to [true]
+[2026-10-29T19:13:11,486][INFO ][o.o.i.MergeSchedulerConfig] [4141546a5c21] Updating maxThreadCount from [0] to [2] and maxMergeCount from [0] to [7] for index .opensearch-sap-log-types-config.
+[2026-10-29T19:13:11,486][INFO ][o.o.i.MergeSchedulerConfig] [4141546a5c21] Initialized index .opensearch-sap-log-types-config with maxMergeCount=7, maxThreadCount=2, autoThrottleEnabled=true
+[2026-10-29T19:13:11,488][INFO ][o.o.p.PluginsService     ] [4141546a5c21] PluginService:onIndexModule index:[.opensearch-sap-log-types-config/O51MvM6gSpugMpGeAl74nQ]
+[2026-10-29T19:13:12,025][INFO ][o.o.s.l.LogTypeService   ] [4141546a5c21] Loaded [432] field mapping docs successfully!
+[2026-10-29T19:13:12,065][INFO ][o.o.s.l.LogTypeService   ] [4141546a5c21] Indexing [23] customLogTypes
+[2026-10-29T19:13:12,078][INFO ][o.o.s.l.LogTypeService   ] [4141546a5c21] Loaded [432] field mapping docs successfully!
+[2026-10-29T19:13:12,085][INFO ][o.o.s.l.LogTypeService   ] [4141546a5c21] Indexing [23] customLogTypes
+[2026-10-29T19:13:12,218][INFO ][o.o.s.l.LogTypeService   ] [4141546a5c21] Loaded [23] customLogType docs successfully!
+[2026-10-29T19:13:12,218][INFO ][o.o.s.SecurityAnalyticsPlugin] [4141546a5c21] LogType config index successfully created and builtin log types loaded
+[2026-10-29T19:13:12,267][INFO ][o.o.s.l.LogTypeService   ] [4141546a5c21] Loaded [23] customLogType docs successfully!
+[2026-10-29T19:13:12,268][INFO ][o.o.s.l.LogTypeService   ] [4141546a5c21] Loaded [432] field mapping docs successfully!
+[2026-10-29T19:13:12,284][INFO ][o.o.s.l.LogTypeService   ] [4141546a5c21] Indexing [23] customLogTypes
+[2026-10-29T19:13:12,409][INFO ][o.o.s.i.DetectorIndexManagementService] [4141546a5c21] info deleteOldIndices
+[2026-10-29T19:13:12,410][INFO ][o.o.s.i.DetectorIndexManagementService] [4141546a5c21] No Old Finding Indices to delete
+[2026-10-29T19:13:12,525][INFO ][o.o.s.l.LogTypeService   ] [4141546a5c21] Loaded [23] customLogType docs successfully!
+[2026-10-29T19:13:12,536][INFO ][o.o.s.i.DetectorIndexManagementService] [4141546a5c21] info deleteOldIndices
+[2026-10-29T19:13:12,536][INFO ][o.o.s.i.DetectorIndexManagementService] [4141546a5c21] No Old Alert Indices to delete
+[2026-10-29T19:13:20,250][INFO ][o.o.m.a.MLModelAutoReDeployer] [4141546a5c21] Index not found, not performing auto reloading!
+[2026-10-29T19:13:20,250][INFO ][o.o.m.c.MLCommonsClusterManagerEventListener] [4141546a5c21] Starting ML sync up job...
+[2026-10-29T19:13:30,254][INFO ][o.o.m.e.i.MLIndicesHandler] [4141546a5c21] Using initIndexWithoutThreadContext method to create index: .plugins-ml-config
+[2026-10-29T19:13:30,257][INFO ][o.o.i.MergeSchedulerConfig] [4141546a5c21] Updating autoThrottle for index .plugins-ml-config from [false] to [true]
+[2026-10-29T19:13:30,257][INFO ][o.o.i.MergeSchedulerConfig] [4141546a5c21] Updating maxThreadCount from [0] to [2] and maxMergeCount from [0] to [7] for index .plugins-ml-config.
+[2026-10-29T19:13:30,257][INFO ][o.o.i.MergeSchedulerConfig] [4141546a5c21] Initialized index .plugins-ml-config with maxMergeCount=7, maxThreadCount=2, autoThrottleEnabled=true
+[2026-10-29T19:13:30,259][INFO ][o.o.p.PluginsService     ] [4141546a5c21] PluginService:onIndexModule index:[.plugins-ml-config/ho-hxLWTTa6OoZL20l-NLQ]
+[2026-10-29T19:13:30,261][INFO ][o.o.i.MergeSchedulerConfig] [4141546a5c21] Updating autoThrottle for index .plugins-ml-config from [true] to [true]
+[2026-10-29T19:13:30,268][INFO ][o.o.c.m.MetadataCreateIndexService] [4141546a5c21] [.plugins-ml-config] creating index, cause [api], templates [], shards [1]/[1]
+[2026-10-29T19:13:30,269][INFO ][o.o.c.r.a.AllocationService] [4141546a5c21] updating number_of_replicas to [0] for indices [.plugins-ml-config]
+[2026-10-29T19:13:30,285][INFO ][o.o.i.MergeSchedulerConfig] [4141546a5c21] Updating autoThrottle for index .plugins-ml-config from [false] to [true]
+[2026-10-29T19:13:30,285][INFO ][o.o.i.MergeSchedulerConfig] [4141546a5c21] Updating maxThreadCount from [0] to [2] and maxMergeCount from [0] to [7] for index .plugins-ml-config.
+[2026-10-29T19:13:30,285][INFO ][o.o.i.MergeSchedulerConfig] [4141546a5c21] Initialized index .plugins-ml-config with maxMergeCount=7, maxThreadCount=2, autoThrottleEnabled=true
+[2026-10-29T19:13:30,286][INFO ][o.o.p.PluginsService     ] [4141546a5c21] PluginService:onIndexModule index:[.plugins-ml-config/ho-hxLWTTa6OoZL20l-NLQ]
+[2026-10-29T19:13:30,289][INFO ][o.o.i.MergeSchedulerConfig] [4141546a5c21] Updating autoThrottle for index .plugins-ml-config from [true] to [true]
+[2026-10-29T19:13:30,318][INFO ][o.o.c.r.a.AllocationService] [4141546a5c21] Cluster health status changed from [YELLOW] to [GREEN] (reason: [shards started [[.plugins-ml-config][0]]]).
+[2026-10-29T19:13:30,335][INFO ][o.o.m.e.i.MLIndicesHandler] [4141546a5c21] create index:.plugins-ml-config
+[2026-10-29T19:13:30,368][INFO ][o.o.m.c.MLSyncUpCron     ] [4141546a5c21] ML configuration initialized successfully
+[2026-10-29T19:14:11,194][INFO ][o.o.i.MergeSchedulerConfig] [4141546a5c21] Updating autoThrottle for index x3s057f4fbfa from [false] to [true]
+[2026-10-29T19:14:11,194][INFO ][o.o.i.MergeSchedulerConfig] [4141546a5c21] Updating maxThreadCount from [0] to [2] and maxMergeCount from [0] to [7] for index x3s057f4fbfa.
+[2026-10-29T19:14:11,194][INFO ][o.o.i.MergeSchedulerConfig] [4141546a5c21] Initialized index x3s057f4fbfa with maxMergeCount=7, maxThreadCount=2, autoThrottleEnabled=true
+[2026-10-29T19:14:11,196][INFO ][o.o.p.PluginsService     ] [4141546a5c21] PluginService:onIndexModule index:[x3s057f4fbfa/9P6dVVG6TSWb5RH6a6KLQg]
+[2026-10-29T19:14:11,199][INFO ][o.o.i.MergeSchedulerConfig] [4141546a5c21] Updating autoThrottle for index x3s057f4fbfa from [true] to [true]
+[2026-10-29T19:14:11,222][INFO ][o.o.c.m.MetadataCreateIndexService] [4141546a5c21] [x3s057f4fbfa] creating index, cause [api], templates [], shards [1]/[0]
+[2026-10-29T19:14:11,238][INFO ][o.o.i.MergeSchedulerConfig] [4141546a5c21] Updating autoThrottle for index x3s057f4fbfa from [false] to [true]
+[2026-10-29T19:14:11,239][INFO ][o.o.i.MergeSchedulerConfig] [4141546a5c21] Updating maxThreadCount from [0] to [2] and maxMergeCount from [0] to [7] for index x3s057f4fbfa.
+[2026-10-29T19:14:11,239][INFO ][o.o.i.MergeSchedulerConfig] [4141546a5c21] Initialized index x3s057f4fbfa with maxMergeCount=7, maxThreadCount=2, autoThrottleEnabled=true
+[2026-10-29T19:14:11,240][INFO ][o.o.p.PluginsService     ] [4141546a5c21] PluginService:onIndexModule index:[x3s057f4fbfa/9P6dVVG6TSWb5RH6a6KLQg]
+[2026-10-29T19:14:11,242][INFO ][o.o.i.MergeSchedulerConfig] [4141546a5c21] Updating autoThrottle for index x3s057f4fbfa from [true] to [true]
+[2026-10-29T19:14:11,269][INFO ][o.o.c.r.a.AllocationService] [4141546a5c21] Cluster health status changed from [YELLOW] to [GREEN] (reason: [shards started [[x3s057f4fbfa][0]]]).
+[2026-10-29T19:14:19,572][INFO ][o.o.c.m.MetadataDeleteIndexService] [4141546a5c21] [x3s057f4fbfa/9P6dVVG6TSWb5RH6a6KLQg] deleting index
