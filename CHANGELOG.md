@@ -6,6 +6,12 @@ All notable changes are recorded here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- `ChromaBackend(fallback_candidates=...)`, how many chunks a search reads when its filter is too
+  large to send to Chroma whole (1,000 by default), and `wardowl.backends.chroma.FilterTooLarge`,
+  the `ValueError` that `filter_to_where` raises for such a filter. See Fixed.
+
 ### Changed
 
 - `RetrievalResult.complete` is no longer True for a short or empty result from an approximate
@@ -31,6 +37,37 @@ All notable changes are recorded here. The format follows
   `exact_search = False`.
 - `check_backend` checks a backend that declares `exact_search` as exact, whatever `exact=` says,
   since the retriever takes its short results as proof that nothing else matches.
+
+### Security
+
+- `ChromaBackend` no longer sends Chroma a filter that can crash the application. With chromadb
+  1.5.9's embedded client, the first search by a subject in 40,000 groups ended the Python process
+  with a segmentation fault, without an exception or a message, in 5 of 5 processes (the filter-size
+  experiment for the paper). Anyone whose filter grows that large, through groups that users can
+  create and join themselves or an authorizer that lists that many values, could stop the
+  application for every user with one search. The cause inside Chroma is not established, and the
+  smallest filter that crashes was not measured (10,000 groups gave an error instead); a Chroma
+  server on a single node runs the same code. wardowl now sends a `where` only within bounds well
+  below anything Chroma refused or crashed on: 10,000 SQL parameters, an expression 250 deep, 32
+  levels of `$and` and `$or`, and 500,000 characters. Larger filters are applied by the backend
+  itself (see Fixed).
+
+### Fixed
+
+- `ChromaBackend` answers subjects in 1,000 groups or more. Chroma 1.5 writes each `$or` as one
+  binary OR per clause, and SQLite refuses an expression more than 1,000 deep, so the flat `$or`
+  wardowl sent made every search by such a subject fail with
+  `Expression tree is too large (maximum depth 1000)`. The conformance campaign and the filter-size
+  experiment for the paper both found it at 1,000 values. Each `$and` and `$or` now holds at most
+  16 clauses, nested as a balanced tree, which Chroma keeps nested: about 50 levels deep for 1,000
+  groups instead of 1,000. A filter beyond the bounds under Security (with `MetadataACLAuthorizer`,
+  a subject in more than about 3,200 groups with short names) is no longer sent whole: the search
+  sends the part of it every match must meet, such as a tenant, if that fits, or no `where`; reads
+  `fallback_candidates` chunks (1,000, or `k` if more); and applies the filter to them itself. It
+  never returns a chunk the filter excludes, but can return fewer than `k` hits though more chunks
+  match, which the retriever reports as `complete=False`. `filter_to_where` returns the nested form
+  and raises `FilterTooLarge` beyond the bounds. CI searches real Chroma for subjects in 1,001 and
+  in 40,000 groups, and checks that Chroma reads nested trees exactly as the reference semantics.
 
 ### Documentation
 
