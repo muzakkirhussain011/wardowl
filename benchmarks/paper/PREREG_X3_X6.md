@@ -340,3 +340,21 @@ first written. No hypothesis, prediction, threshold, statistic or verdict rule c
 4. **Smoke runs embed the full corpus** (cached between runs) and plan every seed's groups as the full
    run does, so they test probe placement at full scale; they measure group 0 of seed 0 only. This
    changes the smoke procedure, not the full design.
+
+## Amendment 2 (2026-10-29, after the third smoke run, before any full result)
+
+Committed on its own, before the full configuration ran. No hypothesis, prediction, threshold,
+statistic or verdict rule changes.
+
+1. **Near sets may be shared between groups.** Amendment 1 required every passage to be a secret of
+   at most one probe in the seed. At full scale (57,638 passages) that placed every probe at m = 100,
+   10 and 1, but only 2 of the 8 at m = 1,000: after two sets of 1,000 passages, no other question's
+   1,000 nearest passages avoid them. The rule is not needed. A secret held by several groups gets one
+   far chunk, which replaces it in the W0 of each of those groups, so W1 and W0_g still differ in
+   group g's secrets only, and every probe's comparison is unchanged. The zone rule within a group
+   stays. The plan records how many secrets belong to more than one group.
+2. **Qdrant's indexing threshold is 10 KB, not 1,000 KB.** At 1,000 KB a last appendable segment
+   (320 of 8,000 vectors in the X3 smoke run) stayed below the threshold and unindexed; 10 KB, a few
+   vectors, indexes every segment, which is what the design states. A build is ready when the
+   collection is green and either its vectors are indexed on two polls in a row or its indexed count
+   has not changed for a minute; the indexed count is recorded with every build.
