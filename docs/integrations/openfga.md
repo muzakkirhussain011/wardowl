@@ -64,6 +64,8 @@ looked complete. So when the answer reaches `list_objects_limit` (default 1000),
 retriever post-filters with BatchCheck instead. Set both to your server's values;
 `list_objects_deadline=None` suits a server configured without a deadline. With the default
 `timeout` of 2 seconds, a call slow enough to meet the default deadline fails first and raises.
+To raise the server's deadline, raise `OPENFGA_REQUEST_TIMEOUT` (3 seconds by default) with it:
+OpenFGA refuses to start when the ListObjects deadline is longer than its request timeout.
 
 `In` matches a list field when any of its elements is listed, while `check` denies a chunk whose
 resource field is not one string. The retriever's re-check of pre-filtered hits (`recheck=True`,
