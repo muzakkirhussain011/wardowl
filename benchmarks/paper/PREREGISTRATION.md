@@ -288,3 +288,36 @@ scorable questions), so P1 has enough events to judge; `p-asrun` runs generic, e
 falsify it on recall; `p-x0v` runs generic, exact plans after its first ten executions per
 statement; for `p-x0` no prediction is made, because its plan depends on what autovacuum has done
 to the table when its statements first switch.
+
+### Amendment 2, revised after the smoke run (2026-10-29, before any full run)
+
+The smoke run of the run-2 code (Kaggle kernel `x1run2-smoke`: about 3,000 chunks, a dozen people,
+one build; a test of the code paths, whose numbers are not results) showed two things that would
+make run 2 unable to answer what it is for. Both are fixed here, before `prep`'s output is used by
+any shard and before any full setting has run.
+
+10. **The HNSW settings force the index.** Planning every search with its values is not enough to
+    keep the HNSW scan: pgvector's cost estimate of the scan grows with `ef_search`, so the planner
+    can choose an exact plan instead (in the smoke run, `pc-ef40` to `pc-ef1000` and `pd-lim10`
+    used the HNSW index in none of their searches). P1 and P2 are about the HNSW scan. Therefore
+    every P-a to P-e setting also sets `enable_seqscan` and `enable_bitmapscan` to off in the
+    search's transaction (harness-level). The only plan left for the search is then the HNSW index
+    scan. A new setting `pg-hnsw` (`p-asrun` with these three settings) replaces `pg-custom` as
+    the reference of P1 and P2, wherever amendment 2 put `pg-custom` there, and joins the core grid
+    of `hnsw-m32-efc200`. `pg-custom` keeps only `plan_cache_mode = force_custom_plan`: it is the
+    planner's own choice with the values, as in the original run, and stays the setting of P4 and
+    P5. Item 3's rule (flag and leave out a setting that ran mostly exact) is unchanged.
+11. **Every shard searches a vacuumed table.** In the smoke run the generic plan won or lost
+    depending on whether the table had been vacuumed. Right after the load the GIN index held 152
+    pending pages and statistics never set by VACUUM, and `p-x0` ran 12 generic and 83 custom
+    plans. After `VACUUM (ANALYZE)` it held none, and `p-x0v` ran 156 generic and 49 custom plans.
+    Autovacuum's timing is not under the run's control, so every pgvector invocation now runs
+    `VACUUM (ANALYZE)` on the table once, after the replays (shard A) or before its first setting
+    (shards B and C), and records the table and GIN state before and after. Every setting after it
+    sees the same index state.
+12. **P5 is computed on the original questions throughout:** the HNSW share in (a), like the recall
+    in (b) and (c), counts only the searches of the original 1,105 questions.
+
+Prediction added: `p-x0`, run as the first setting after the load, keeps custom HNSW plans for
+most of its searches, and `p-x0v` switches to generic exact plans (the smoke run's pattern, now
+predicted for the full corpus); H2a of the gap analysis is supported if both hold.
