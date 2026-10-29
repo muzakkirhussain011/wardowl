@@ -78,14 +78,20 @@ def make_retriever(config: str, built: common.Built) -> tuple[Any, LastEvent]:
         backend = RankFusion(built.vector, built.keyword) if built.keyword is not None else None
         strategy = "prefilter"
     elif config == "hybrid-exact":
-        backend = RankFusion(built.exact, built.keyword) if built.keyword is not None and built.exact is not None else None
+        both = built.keyword is not None and built.exact is not None
+        backend = RankFusion(built.exact, built.keyword) if both else None
         strategy = "prefilter"
     else:
         raise ValueError(f"unknown configuration {config!r}")
     if backend is None:
         raise ValueError(f"configuration {config!r} needs a backend this store did not build")
     retriever = PermissionedRetriever(
-        backend, MetadataACLAuthorizer(), strategy=strategy, max_candidates=MAX_CANDIDATES, observers=[observer], **extra
+        backend,
+        MetadataACLAuthorizer(),
+        strategy=strategy,
+        max_candidates=MAX_CANDIDATES,
+        observers=[observer],
+        **extra,
     )
     return retriever, observer
 
@@ -148,7 +154,8 @@ def build_worlds(
 
     def background_doc(i: int) -> Any:
         b = buckets[i]
-        return Document(fiqa.ids[i], fiqa.texts[i], {"allowed_users": [f"owner{b:02d}"], "allowed_groups": [f"g{b:02d}"]})
+        metadata = {"allowed_users": [f"owner{b:02d}"], "allowed_groups": [f"g{b:02d}"]}
+        return Document(fiqa.ids[i], fiqa.texts[i], metadata)
 
     def secret_metadata() -> dict[str, list[str]]:
         return {key: list(values) for key, values in SECRET_META.items()}
@@ -243,9 +250,8 @@ def play_seed(
                 common.unique_base(f"x6s{seed}{world}"), docs, vectors, keyword=args.store in KEYWORD_STORES
             )
             seconds = round(time.monotonic() - clock, 1)
-            records.write(
-                {"type": "build", "seed": seed, "world": world, "docs": len(docs), "seconds": seconds, "info": built[world].info}
-            )
+            info = built[world].info
+            records.write({"type": "build", "seed": seed, "world": world, "docs": len(docs), "seconds": seconds, "info": info})
             log(f"  seed {seed}: {world} built in {seconds:.0f} s {built[world].info}")
         del worlds
 
@@ -320,7 +326,8 @@ def play_seed(
                 if time.monotonic() - shown > 60:
                     shown = time.monotonic()
                     rate = done / max(1e-9, shown - clock)
-                    log(f"  seed {seed}: {done:,}/{total:,} retrievals ({rate:.1f} per s, {(total - done) / max(rate, 1e-9) / 60:.0f} min left)")
+                    left = (total - done) / max(rate, 1e-9) / 60
+                    log(f"  seed {seed}: {done:,}/{total:,} retrievals ({rate:.1f} per s, {left:.0f} min left)")
 
         if args.store == "pgvector":
             explain(seed, target, built, probes, pcts, subjects, query_of, records, MetadataACLAuthorizer())
@@ -369,7 +376,8 @@ def explain(
 def run(args: argparse.Namespace) -> int:
     data = Path(args.data)
     out = Path(args.out)
-    records = common.Records(out / f"x6-{args.store}.jsonl", {"exp": "x6", "store": args.store, "mode": args.mode, "run": common.RUN_ID})
+    base = {"exp": "x6", "store": args.store, "mode": args.mode, "run": common.RUN_ID}
+    records = common.Records(out / f"x6-{args.store}.jsonl", base)
     if args.store not in CONFIGS:
         raise SystemExit(f"X6 runs on {sorted(CONFIGS)}, not {args.store!r}")
     if not common.data_ready(data):
@@ -400,7 +408,8 @@ def run(args: argparse.Namespace) -> int:
     try:
         attempts = common.connect(target)
     except Exception as error:
-        records.write({"type": "setup-error", "error": common.short(error, 1000), "versions": common.target_versions(target, reachable=False)})
+        versions = common.target_versions(target, reachable=False)
+        records.write({"type": "setup-error", "error": common.short(error, 1000), "versions": versions})
         common.annotate("error", f"x6 {args.store} setup", common.short(error, 1000))
         return 1
     records.write({"type": "versions", "attempts": attempts, **common.target_versions(target, reachable=True)})

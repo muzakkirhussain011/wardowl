@@ -327,7 +327,9 @@ class PgVector(Target):
             conn.execute(sql.SQL("ANALYZE {}").format(sql.Identifier(table)))
         vector = PgVectorBackend(self.search_pool, table=table)
         exact = _exact_pgvector()(self.search_pool, table=table)
-        words = PgVectorBackend(self.search_pool, table=table, mode="keyword", text_search="english") if keyword else None
+        words = None
+        if keyword:
+            words = PgVectorBackend(self.search_pool, table=table, mode="keyword", text_search="english")
         return Built(table, vector, exact=exact, keyword=words)
 
     def drop(self, built: Built) -> None:
@@ -389,7 +391,14 @@ class PgVector(Target):
 
 
 def _plan_nodes(node: Mapping[str, Any], depth: int = 0) -> list[dict[str, Any]]:
-    keep = ("Node Type", "Index Name", "Actual Rows", "Actual Loops", "Rows Removed by Filter", "Rows Removed by Index Recheck")
+    keep = (
+        "Node Type",
+        "Index Name",
+        "Actual Rows",
+        "Actual Loops",
+        "Rows Removed by Filter",
+        "Rows Removed by Index Recheck",
+    )
     found = [{"depth": depth, **{key: node[key] for key in keep if key in node}}]
     for child in node.get("Plans", []) or []:
         found += _plan_nodes(child, depth + 1)

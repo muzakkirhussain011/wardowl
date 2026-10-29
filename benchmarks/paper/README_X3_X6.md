@@ -45,9 +45,19 @@ Jobs:
    versions), installs from `uv.lock` by hash, runs each target in its own process with its own time
    budget, and uploads `x3x6-results-<group>` whatever happened (records, logs, server logs).
 3. **summary** runs both statistics scripts and writes `x3_report.md` and `x6_report.md` to its job
-   summary, uploads them (artifact `x3x6-reports`), and publishes the health, verdicts and headline
-   cells as annotations, which the public API serves without a token:
-   `GET /repos/muzakkirhussain011/wardowl/check-runs/<summary job id>/annotations`.
+   summary, uploads them (artifact `x3x6-reports`), and prints the health, verdicts and headline cells
+   as annotations.
+4. **publish** commits the reports and CSV tables, the data job's manifest, the result of every job
+   (`jobs.json`), crash records and the last 200 lines of every job's and server's log to the branch
+   `results/x3-x6`, in the folder `<run id>-<attempt>/`. They can then be read with git alone, which
+   has no API rate limit:
+
+   ```
+   git fetch origin results/x3-x6
+   git show origin/results/x3-x6:<run id>-<attempt>/reports/x6_report.md
+   ```
+
+   The raw JSON lines stay in the artifacts `x3x6-results-*` (90 days), which are too large for git.
 
 ### Expected time (full)
 

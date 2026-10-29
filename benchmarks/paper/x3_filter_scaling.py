@@ -179,7 +179,8 @@ def play_seed(
     try:
         for level in LEVELS:
             if stop:
-                records.write({"type": "level", "seed": seed, "G": level, "run": False, "reason": "a smaller level timed out"})
+                reason = "a smaller level timed out"
+                records.write({"type": "level", "seed": seed, "G": level, "run": False, "reason": reason})
                 continue
             if time.time() > hard_deadline:
                 raise TimeoutError("the job's hard deadline passed during the seed")
@@ -212,7 +213,8 @@ def play_seed(
             records.write({"type": "level", "seed": seed, "G": level, "run": True, "queries": used, "reduced": reduced,
                            "refused": refused, "timed_out": level_timeout, "errors": errors})  # fmt: skip
             summary["levels"][str(level)] = "timeout" if level_timeout else "refused" if refused else "ok"
-            log(f"  seed {seed}: G={level:,}: {summary['levels'][str(level)]}, {errors} errors, translation {translated['status']}")
+            state = summary["levels"][str(level)]
+            log(f"  seed {seed}: G={level:,}: {state}, {errors} errors, translation {translated['status']}")
             if level_timeout:
                 stop = True
                 continue

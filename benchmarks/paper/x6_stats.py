@@ -51,11 +51,22 @@ DETERMINISTIC = {
     ("elasticsearch", "bm25-pre"),
     ("elasticsearch", "hybrid-exact"),
 }
+EXACT_CONTROLS = (
+    ("pgvector", "pre-exact"),
+    ("qdrant", "pre-exact"),
+    ("elasticsearch", "pre-exact"),
+    ("faiss", "pre"),
+    ("memory", "pre"),
+)
 PCT_GROUPS = {"low": (1, 10)}  # pooled selectivities a rule names (H3 c)
 MIN_CLUSTERS = 20
 MIN_SEEDS = 5
 MAX_ERROR_RATE = 0.05
 CONFIRMED, FALSIFIED, INCONCLUSIVE = "confirmed", "falsified", "inconclusive"
+
+Pair = dict[str, Any]  # the observations of two slots of one (seed, probe, p)
+Cell = dict[str, Any]  # one cell's estimates
+Key = tuple[Any, ...]
 
 
 def has_recall(store: str, config: str) -> bool:
@@ -71,48 +82,50 @@ class Data:
         self.records = records
         self.resamples = resamples
         self.seed = seed
-        self.groups: dict[tuple[Any, ...], dict[str, Any]] = {}
-        self.single: dict[tuple[str, str], list[tuple[int, float]]] = defaultdict(list)  # (seed, latency) per retrieval
-        self.cells: dict[tuple[Any, ...], dict[str, Any]] = {}
+        self.groups: dict[Key, dict[str, Any]] = {}
+        self.single: dict[tuple[str, str], list[tuple[int, float]]] = defaultdict(list)  # (seed, latency)
         for r in records:
             if r.get("type") != "retrieval":
                 continue
             key = (r["store"], r["config"], int(r["seed"]), int(r["probe"]), int(r["pct"]), r["slot"])
-            g = self.groups.setdefault(
-                key,
-                {"level": int(r["level"]), "lat": [], "pad": [], "count": [], "complete": [], "recall": [], "score": [],
-                 "searches": [], "examined": [], "errors": 0, "total": 0, "first": None, "ids": None},
-            )  # fmt: skip
+            g = self.groups.get(key)
+            if g is None:
+                g = {"level": int(r["level"]), "errors": 0, "total": 0, "first": None, "ids": None}
+                for name in ("lat", "count", "complete", "recall", "score", "searches", "examined"):
+                    g[name] = []
+                self.groups[key] = g
             if r.get("warmup"):
                 continue
             g["total"] += 1
             if r.get("error"):
                 g["errors"] += 1
                 continue
+            scores = r.get("scores") or []
             g["lat"].append(float(r["latency_ms"]))
             g["count"].append(float(r["count"]))
             g["complete"].append(1.0 if r["complete"] else 0.0)
             g["recall"].append(math.nan if r.get("recall") is None else float(r["recall"]))
-            scores = r.get("scores") or []
             g["score"].append(float(np.mean(scores)) if scores else -math.inf)
-            g["searches"].append(float(r["searches"]) if r.get("searches") is not None else math.nan)
+            g["searches"].append(math.nan if r.get("searches") is None else float(r["searches"]))
             g["examined"].append(float(r.get("examined") or 0))
             if g["first"] is None or int(r["rep"]) < g["first"]:
                 g["first"] = int(r["rep"])
                 g["ids"] = (tuple(r.get("ids") or []), tuple(round(float(s), 9) for s in scores))
             self.single[(r["store"], r["config"])].append((int(r["seed"]), float(r["latency_ms"])))
-        self.obs: dict[tuple[Any, ...], dict[str, Any]] = {}
+        self.obs: dict[Key, dict[str, Any]] = {}
         for key, g in self.groups.items():
             if not g["lat"]:
                 continue
+            recalls = np.array(g["recall"], dtype=float)
+            searches = np.array(g["searches"], dtype=float)
             self.obs[key] = {
                 "level": g["level"],
                 "latency": float(np.median(g["lat"])),
                 "count": float(np.median(g["count"])),
                 "complete": float(np.mean(g["complete"])),
-                "recall": float(np.mean(g["recall"])) if not any(math.isnan(x) for x in g["recall"]) else math.nan,
+                "recall": float(recalls.mean()) if not np.isnan(recalls).any() else math.nan,
                 "score": float(np.mean(g["score"])),
-                "searches": float(np.nanmean(g["searches"])) if any(not math.isnan(x) for x in g["searches"]) else math.nan,
+                "searches": float(np.nanmean(searches)) if not np.isnan(searches).all() else math.nan,
                 "examined": float(np.mean(g["examined"])),
                 "ids": g["ids"],
                 "lat_all": list(g["lat"]),
@@ -121,7 +134,7 @@ class Data:
         self.levels = sorted({g["level"] for g in self.groups.values()})
         self.pcts = sorted({k[4] for k in self.groups})
 
-    def pairs(self, store: str, config: str, a: str, b: str, *, seeds: Iterable[int] | None = None) -> list[dict[str, Any]]:
+    def pairs(self, store: str, config: str, a: str, b: str, *, seeds: Iterable[int] | None = None) -> list[Pair]:
         """Observations of slot `a` and slot `b` of the same (seed, probe, p)."""
         chosen = set(seeds) if seeds is not None else None
         found = []
@@ -148,14 +161,22 @@ class Data:
         return errors / total if total else math.nan
 
 
-def select(pairs: list[dict[str, Any]], level: Any, pct: Any) -> list[dict[str, Any]]:
-    pcts = PCT_GROUPS.get(pct) if isinstance(pct, str) and pct in PCT_GROUPS else None
-    return [
-        p
-        for p in pairs
-        if (level == "all" or p["level"] == level)
-        and (pct == "all" or (pcts is not None and p["pct"] in pcts) or (pcts is None and p["pct"] == pct))
-    ]
+def pct_values(data: Data, pct: Any) -> list[int]:
+    """The selectivities a cell's `pct` names: one, all of them, or a named group."""
+    if pct == "all":
+        return list(data.pcts)
+    if isinstance(pct, str):
+        return list(PCT_GROUPS[pct])
+    return [pct]
+
+
+def select(data: Data, pairs: list[Pair], level: Any, pct: Any) -> list[Pair]:
+    wanted = set(pct_values(data, pct))
+    return [p for p in pairs if (level == "all" or p["level"] == level) and p["pct"] in wanted]
+
+
+def keyed(pairs: list[Pair]) -> dict[tuple[int, int, int], Pair]:
+    return {(p["seed"], p["probe"], p["pct"]): p for p in pairs}
 
 
 # ---- statistics ----------------------------------------------------------------------------------
@@ -179,7 +200,8 @@ def ks_advantage(x1: np.ndarray, x0: np.ndarray) -> float:
     return best
 
 
-def auc_cell(pairs: list[dict[str, Any]], observable: str, resamples: int, rng: np.random.Generator) -> dict[str, Any] | None:
+def auc_cell(pairs: list[Pair], observable: str, resamples: int, rng: np.random.Generator) -> Cell | None:
+    """Paired and pooled AUC of slot a (predicted W1) against slot b, with cluster-bootstrap intervals."""
     if not pairs:
         return None
     sign = SIGN[observable]
@@ -191,7 +213,7 @@ def auc_cell(pairs: list[dict[str, Any]], observable: str, resamples: int, rng: 
     x1, x0 = x1[keep], x0[keep]
     kept = [p for p, k in zip(pairs, keep, strict=True) if k]
     clusters = np.array([f"{p['seed']}:{p['probe']}" for p in kept])
-    out: dict[str, Any] = {
+    out: Cell = {
         "pairs": len(kept),
         "clusters": len(set(clusters.tolist())),
         "seeds": len({p["seed"] for p in kept}),
@@ -200,8 +222,8 @@ def auc_cell(pairs: list[dict[str, Any]], observable: str, resamples: int, rng: 
     }
     if np.array_equal(x1, x0):
         # Identical observations: every comparison is a tie, so both AUCs are 0.5 on every resample.
-        return {**out, "paired": 0.5, "paired_lo": 0.5, "paired_hi": 0.5, "pooled": 0.5, "pooled_lo": 0.5,
-                "pooled_hi": 0.5, "ks": 0.0}  # fmt: skip
+        ties = {name: 0.5 for name in ("paired", "paired_lo", "paired_hi", "pooled", "pooled_lo", "pooled_hi")}
+        return {**out, **ties, "ks": 0.0}
     gt = comparison_matrix(x1, x0)
     diagonal = np.diag(gt).copy()
     paired_b: list[np.ndarray] = []
@@ -224,15 +246,16 @@ def auc_cell(pairs: list[dict[str, Any]], observable: str, resamples: int, rng: 
     }
 
 
-def mean_cell(values: np.ndarray, clusters: np.ndarray, resamples: int, rng: np.random.Generator) -> dict[str, Any]:
+def mean_cell(values: np.ndarray, clusters: np.ndarray, resamples: int, rng: np.random.Generator) -> Cell:
     if not len(values):
         return {"mean": math.nan, "lo": math.nan, "hi": math.nan, "n": 0, "clusters": 0}
     boot = [(w @ values) / w.sum(axis=1) for w in common.cluster_weights(clusters, resamples, rng)]
     lo, hi = common.percentile_interval(np.concatenate(boot))
-    return {"mean": float(values.mean()), "lo": lo, "hi": hi, "n": len(values), "clusters": len(set(clusters.tolist()))}
+    clusters_n = len(set(clusters.tolist()))
+    return {"mean": float(values.mean()), "lo": lo, "hi": hi, "n": len(values), "clusters": clusters_n}
 
 
-def ratio_cell(num: np.ndarray, den: np.ndarray, clusters: np.ndarray, resamples: int, rng: np.random.Generator) -> dict[str, Any]:
+def ratio_cell(num: np.ndarray, den: np.ndarray, clusters: np.ndarray, resamples: int, rng: np.random.Generator) -> Cell:
     if not len(num):
         return {"ratio": math.nan, "lo": math.nan, "hi": math.nan, "median_ratio": math.nan, "n": 0}
     boot = [(w @ num) / (w @ den) for w in common.cluster_weights(clusters, resamples, rng)]
@@ -252,13 +275,13 @@ def ratio_cell(num: np.ndarray, den: np.ndarray, clusters: np.ndarray, resamples
 # ---- the cells -----------------------------------------------------------------------------------
 
 
-def padded_pairs(data: Data, store: str, config: str) -> tuple[list[dict[str, Any]], list[dict[str, Any]], float | None]:
+def padded_pairs(data: Data, store: str, config: str) -> tuple[list[Pair], list[Pair], float | None]:
     """Raw and padded latency pairs (W1, W0) on seeds 1 and up, with T from seed 0's largest latency."""
     seed0 = [lat for seed, lat in data.single[(store, config)] if seed == 0]
     if not seed0:
         return [], [], None
     budget = float(math.ceil(max(seed0)))
-    raw = data.pairs(store, config, "W1", "W0", seeds=[s for s in range(1, 1000)])
+    raw = data.pairs(store, config, "W1", "W0", seeds=range(1, 1000))
     padded = []
     for p in raw:
         a = dict(p["a"])
@@ -269,27 +292,26 @@ def padded_pairs(data: Data, store: str, config: str) -> tuple[list[dict[str, An
     return raw, padded, budget
 
 
-def compute_cells(data: Data) -> dict[tuple[Any, ...], dict[str, Any]]:
-    cells: dict[tuple[Any, ...], dict[str, Any]] = {}
+def compute_cells(data: Data) -> dict[Key, Cell]:
+    cells: dict[Key, Cell] = {}
     levels: list[Any] = [*data.levels, "all"]
     pcts: list[Any] = [*data.pcts, "all", *PCT_GROUPS]
     for store, config in data.configs:
-        families: dict[str, tuple[list[dict[str, Any]], tuple[str, ...]]] = {
+        raw, padded, budget = padded_pairs(data, store, config)
+        families: dict[str, tuple[list[Pair], tuple[str, ...]]] = {
             "W": (data.pairs(store, config, "W1", "W0"), ("W1", "W0")),
             "AA": (data.pairs(store, config, "SEPb", "SEPa"), ("SEPb", "SEPa")),
+            "RAW1": (raw, ("W1", "W0")),
+            "PAD": (padded, ("W1", "W0")),
         }
-        raw, padded, budget = padded_pairs(data, store, config)
-        families["RAW1"] = (raw, ("W1", "W0"))
-        families["PAD"] = (padded, ("W1", "W0"))
         for kind, (pairs, slots) in families.items():
             observables = ("latency",) if kind in ("RAW1", "PAD") else OBSERVABLES
             for level in levels:
                 for pct in pcts:
-                    chosen = select(pairs, level, pct)
+                    chosen = select(data, pairs, level, pct)
                     if not chosen:
                         continue
-                    pct_list = data.pcts if pct == "all" else PCT_GROUPS.get(pct, (pct,)) if isinstance(pct, str) else (pct,)
-                    error_rate = data.error_rate(store, config, slots, level, list(pct_list))
+                    error_rate = data.error_rate(store, config, slots, level, pct_values(data, pct))
                     for observable in observables:
                         if observable == "recall" and not has_recall(store, config):
                             continue
@@ -297,8 +319,8 @@ def compute_cells(data: Data) -> dict[tuple[Any, ...], dict[str, Any]]:
                         result = auc_cell(chosen, observable, data.resamples, rng)
                         if result is None:
                             continue
-                        result.update(kind=kind, store=store, config=config, level=level, pct=pct,
-                                      observable=observable, error_rate=error_rate, budget_ms=budget)  # fmt: skip
+                        result.update(kind=kind, store=store, config=config, level=level, pct=pct)
+                        result.update(observable=observable, error_rate=error_rate, budget_ms=budget)
                         cells[(kind, store, config, level, pct, observable)] = result
     return cells
 
@@ -306,36 +328,41 @@ def compute_cells(data: Data) -> dict[tuple[Any, ...], dict[str, Any]]:
 def deltas(data: Data) -> list[dict[str, Any]]:
     """Paired-AUC differences between a configuration and its mitigation, on the same resamples."""
     rows = []
-    comparisons = [("post", "post-const", "W"), ("pre", "pre-exact", "W")]
     for store in sorted({s for s, _ in data.configs}):
-        for base, mitigated, _ in comparisons:
+        for base, mitigated in (("post", "post-const"), ("pre", "pre-exact")):
             if (store, base) not in data.configs or (store, mitigated) not in data.configs:
                 continue
-            a_pairs = {(p["seed"], p["probe"], p["pct"]): p for p in data.pairs(store, base, "W1", "W0")}
-            b_pairs = {(p["seed"], p["probe"], p["pct"]): p for p in data.pairs(store, mitigated, "W1", "W0")}
+            a_pairs = keyed(data.pairs(store, base, "W1", "W0"))
+            b_pairs = keyed(data.pairs(store, mitigated, "W1", "W0"))
             rows += _delta_rows(data, store, f"{base} - {mitigated}", a_pairs, b_pairs)
         for config in sorted(c for s, c in data.configs if s == store):
-            a_pairs = {(p["seed"], p["probe"], p["pct"]): p for p in data.pairs(store, config, "W1", "W0")}
-            b_pairs = {(p["seed"], p["probe"], p["pct"]): p for p in data.pairs(store, config, "SEPb", "SEPa")}
+            a_pairs = keyed(data.pairs(store, config, "W1", "W0"))
+            b_pairs = keyed(data.pairs(store, config, "SEPb", "SEPa"))
             rows += _delta_rows(data, store, f"{config}: shared - separated", a_pairs, b_pairs)
             raw, padded, _ = padded_pairs(data, store, config)
-            rows += _delta_rows(
-                data,
-                store,
-                f"{config}: raw - padded",
-                {(p["seed"], p["probe"], p["pct"]): p for p in raw},
-                {(p["seed"], p["probe"], p["pct"]): p for p in padded},
-                observables=("latency",),
-            )
+            name = f"{config}: raw - padded"
+            rows += _delta_rows(data, store, name, keyed(raw), keyed(padded), observables=("latency",))
     return rows
+
+
+def _win(x1: float, x0: float) -> float:
+    """One comparison of the paired AUC: 1, one half for a tie, or 0."""
+    if math.isnan(x1) or math.isnan(x0):
+        return math.nan
+    return 1.0 if x1 > x0 else 0.5 if x1 == x0 else 0.0
+
+
+def _wins(pairs: dict[tuple[int, int, int], Pair], keys: list[tuple[int, int, int]], observable: str) -> np.ndarray:
+    sign = SIGN[observable]
+    return np.array([_win(sign * pairs[k]["a"][observable], sign * pairs[k]["b"][observable]) for k in keys])
 
 
 def _delta_rows(
     data: Data,
     store: str,
     name: str,
-    a_pairs: dict[tuple[int, int, int], dict[str, Any]],
-    b_pairs: dict[tuple[int, int, int], dict[str, Any]],
+    a_pairs: dict[tuple[int, int, int], Pair],
+    b_pairs: dict[tuple[int, int, int], Pair],
     observables: Sequence[str] = ("latency", "count", "complete"),
 ) -> list[dict[str, Any]]:
     keys = sorted(set(a_pairs) & set(b_pairs))
@@ -346,33 +373,37 @@ def _delta_rows(
             continue
         clusters = np.array([f"{k[0]}:{k[1]}" for k in chosen])
         for observable in observables:
-            sign = SIGN[observable]
-            da = np.array([_win(sign * a_pairs[k]["a"][observable], sign * a_pairs[k]["b"][observable]) for k in chosen])
-            db = np.array([_win(sign * b_pairs[k]["a"][observable], sign * b_pairs[k]["b"][observable]) for k in chosen])
+            da = _wins(a_pairs, chosen, observable)
+            db = _wins(b_pairs, chosen, observable)
             keep = ~(np.isnan(da) | np.isnan(db))
             if not keep.any():
                 continue
-            diff = da[keep] - db[keep]
             rng = common.rng_for(data.seed, "delta", store, name, level, observable)
-            cell = mean_cell(diff, clusters[keep], data.resamples, rng)
-            rows.append({"store": store, "comparison": name, "level": level, "observable": observable,
-                         "delta_paired_auc": cell["mean"], "lo": cell["lo"], "hi": cell["hi"], "pairs": cell["n"],
-                         "clusters": cell["clusters"]})  # fmt: skip
+            cell = mean_cell(da[keep] - db[keep], clusters[keep], data.resamples, rng)
+            rows.append(
+                {
+                    "store": store,
+                    "comparison": name,
+                    "level": level,
+                    "observable": observable,
+                    "delta_paired_auc": cell["mean"],
+                    "lo": cell["lo"],
+                    "hi": cell["hi"],
+                    "pairs": cell["n"],
+                    "clusters": cell["clusters"],
+                }
+            )
     return rows
 
 
-def _win(x1: float, x0: float) -> float:
-    if math.isnan(x1) or math.isnan(x0):
-        return math.nan
-    return 1.0 if x1 > x0 else 0.5 if x1 == x0 else 0.0
+Items = list[tuple[str, float, float]]  # (cluster, numerator ms, denominator ms)
 
 
 def costs(data: Data) -> list[dict[str, Any]]:
     """Each mitigation's latency against the configuration it replaces, paired by (seed, probe, p, slot)."""
     rows = []
-    stores = sorted({s for s, _ in data.configs})
-    for store in stores:
-        specs: list[tuple[str, Callable[[], list[tuple[str, float, float]]]]] = []
+    for store in sorted({s for s, _ in data.configs}):
+        specs: list[tuple[str, Callable[[], Items]]] = []
         for base, mitigated in (("post", "post-const"), ("pre", "pre-exact")):
             if (store, base) in data.configs and (store, mitigated) in data.configs:
                 specs.append((f"M1/M2 {mitigated} / {base}", _config_ratio(data, store, mitigated, base)))
@@ -391,8 +422,8 @@ def costs(data: Data) -> list[dict[str, Any]]:
     return rows
 
 
-def _config_ratio(data: Data, store: str, num: str, den: str) -> Callable[[], list[tuple[str, float, float]]]:
-    def make() -> list[tuple[str, float, float]]:
+def _config_ratio(data: Data, store: str, num: str, den: str) -> Callable[[], Items]:
+    def make() -> Items:
         items = []
         for key, a in data.obs.items():
             if key[0] == store and key[1] == num and key[5] in ("W0", "W1"):
@@ -404,15 +435,16 @@ def _config_ratio(data: Data, store: str, num: str, den: str) -> Callable[[], li
     return make
 
 
-def _slot_ratio(data: Data, store: str, config: str) -> Callable[[], list[tuple[str, float, float]]]:
-    def make() -> list[tuple[str, float, float]]:
-        return [(f"{p['seed']}:{p['probe']}", p["a"]["latency"], p["b"]["latency"]) for p in data.pairs(store, config, "SEPa", "W0")]
+def _slot_ratio(data: Data, store: str, config: str) -> Callable[[], Items]:
+    def make() -> Items:
+        pairs = data.pairs(store, config, "SEPa", "W0")
+        return [(f"{p['seed']}:{p['probe']}", p["a"]["latency"], p["b"]["latency"]) for p in pairs]
 
     return make
 
 
-def _padding_ratio(data: Data, store: str, config: str) -> Callable[[], list[tuple[str, float, float]]]:
-    def make() -> list[tuple[str, float, float]]:
+def _padding_ratio(data: Data, store: str, config: str) -> Callable[[], Items]:
+    def make() -> Items:
         raw, padded, _ = padded_pairs(data, store, config)
         items = []
         for r, p in zip(raw, padded, strict=True):
@@ -424,14 +456,14 @@ def _padding_ratio(data: Data, store: str, config: str) -> Callable[[], list[tup
     return make
 
 
-def list_changes(data: Data) -> dict[tuple[Any, ...], dict[str, Any]]:
-    found: dict[tuple[Any, ...], dict[str, Any]] = {}
+def list_changes(data: Data) -> dict[Key, dict[str, Any]]:
+    found: dict[Key, dict[str, Any]] = {}
     for store, config in data.configs:
         for kind, (a, b) in (("W", ("W1", "W0")), ("AA", ("SEPb", "SEPa"))):
             pairs = data.pairs(store, config, a, b)
             for level in [*data.levels, "all"]:
                 for pct in [*data.pcts, "all"]:
-                    chosen = select(pairs, level, pct)
+                    chosen = select(data, pairs, level, pct)
                     if not chosen:
                         continue
                     changed = np.array([0.0 if p["a"]["ids"] == p["b"]["ids"] else 1.0 for p in chosen])
@@ -440,11 +472,20 @@ def list_changes(data: Data) -> dict[tuple[Any, ...], dict[str, Any]]:
                     rng = common.rng_for(data.seed, "change", kind, store, config, level, pct)
                     cell = mean_cell(changed, clusters, data.resamples, rng)
                     found[(kind, store, config, level, pct)] = {
-                        "kind": kind, "store": store, "config": config, "level": level, "pct": pct,
-                        "deterministic": (store, config) in DETERMINISTIC, "rate": cell["mean"], "lo": cell["lo"],
-                        "hi": cell["hi"], "ids_rate": float(ids_only.mean()), "pairs": cell["n"],
-                        "clusters": cell["clusters"], "seeds": len({p["seed"] for p in chosen}),
-                    }  # fmt: skip
+                        "kind": kind,
+                        "store": store,
+                        "config": config,
+                        "level": level,
+                        "pct": pct,
+                        "deterministic": (store, config) in DETERMINISTIC,
+                        "rate": cell["mean"],
+                        "lo": cell["lo"],
+                        "hi": cell["hi"],
+                        "ids_rate": float(ids_only.mean()),
+                        "pairs": cell["n"],
+                        "clusters": cell["clusters"],
+                        "seeds": len({p["seed"] for p in chosen}),
+                    }
     return found
 
 
@@ -452,7 +493,7 @@ def list_changes(data: Data) -> dict[tuple[Any, ...], dict[str, Any]]:
 
 
 class Judge:
-    def __init__(self, data: Data, cells: dict[tuple[Any, ...], dict[str, Any]], changes: dict[tuple[Any, ...], dict[str, Any]]) -> None:
+    def __init__(self, data: Data, cells: dict[Key, Cell], changes: dict[Key, dict[str, Any]]) -> None:
         self.data = data
         self.cells = cells
         self.changes = changes
@@ -464,11 +505,11 @@ class Judge:
 
     # cells
 
-    def cell(self, kind: str, store: str, config: str, level: Any, pct: Any, observable: str) -> dict[str, Any] | None:
+    def cell(self, kind: str, store: str, config: str, level: Any, pct: Any, observable: str) -> Cell | None:
         return self.cells.get((kind, store, config, level, pct, observable))
 
     @staticmethod
-    def usable(c: dict[str, Any] | None, seeds: int = MIN_SEEDS) -> bool:
+    def usable(c: Cell | None, seeds: int = MIN_SEEDS) -> bool:
         if c is None:
             return False
         rate = c.get("error_rate")
@@ -476,10 +517,11 @@ class Judge:
         return c["clusters"] >= MIN_CLUSTERS and c["seeds"] >= seeds and not bad_rate
 
     @staticmethod
-    def show(c: dict[str, Any] | None, key: str = "paired") -> str:
+    def show(c: Cell | None, key: str = "paired") -> str:
         if c is None:
             return "missing"
-        return f"{c[key]:.3f} [{c[key + '_lo']:.3f}, {c[key + '_hi']:.3f}] ({c['clusters']} clusters, {c['seeds']} seeds)"
+        interval = f"[{c[key + '_lo']:.3f}, {c[key + '_hi']:.3f}]"
+        return f"{c[key]:.3f} {interval} ({c['clusters']} clusters, {c['seeds']} seeds)"
 
     # guards
 
@@ -490,53 +532,55 @@ class Judge:
             self.g1[(store, config)] = ok
             self.guard_rows.append({"guard": "G1", "store": store, "config": config, "passed": ok, "evidence": self.show(c)})
         for store in sorted({s for s, _ in self.data.configs}):
-            exact = [c for s, c in self.data.configs if s == store and ((s, c) in DETERMINISTIC and c in ("pre-exact", "pre"))
-                     and not (s == "memory")]  # fmt: skip
+            if store == "memory":
+                continue  # G2 names pre-exact and FAISS pre only
             results = []
-            for config in exact:
-                change = self.changes.get(("W", store, config, "all", "all"))
+            for s, config in EXACT_CONTROLS:
+                change = self.changes.get(("W", s, config, "all", "all")) if s == store else None
                 if change is not None:
                     results.append((config, change["rate"]))
             ok = None if not results else all(rate <= 0.01 for _, rate in results)
             self.g2[store] = ok
-            self.guard_rows.append({"guard": "G2", "store": store, "config": ",".join(c for c, _ in results),
-                                    "passed": ok, "evidence": "; ".join(f"{c}: change rate {r:.4f}" for c, r in results)})  # fmt: skip
+            evidence = "; ".join(f"{c}: change rate {r:.4f}" for c, r in results)
+            self.guard_rows.append(
+                {"guard": "G2", "store": store, "config": ",".join(c for c, _ in results), "passed": ok, "evidence": evidence}
+            )
 
     def latency_guard(self, store: str, config: str) -> bool:
         return self.g1.get((store, config)) is True
 
-    # parts
+    # the three kinds of rule
 
-    def at_least(self, c: dict[str, Any] | None, threshold: float, falsify_below: float | None) -> str:
-        if not self.usable(c):
+    def at_least(self, c: Cell | None, threshold: float, falsify_below: float | None) -> str:
+        if c is None or not self.usable(c):
             return INCONCLUSIVE
-        assert c is not None
         if falsify_below is not None and c["paired"] < falsify_below:
             return FALSIFIED
         return CONFIRMED if c["paired"] >= threshold else INCONCLUSIVE
 
-    def present(self, c: dict[str, Any] | None, threshold: float, falsify_hi_below: float | None) -> str:
-        if not self.usable(c):
+    def present(self, c: Cell | None, threshold: float, falsify_hi_below: float | None) -> str:
+        if c is None or not self.usable(c):
             return INCONCLUSIVE
-        assert c is not None
         if falsify_hi_below is not None and c["paired_hi"] < falsify_hi_below:
             return FALSIFIED
         return CONFIRMED if c["paired"] >= threshold and c["paired_lo"] > 0.55 else INCONCLUSIVE
 
-    def absent(self, c: dict[str, Any] | None, *, upper: float = 0.60, falsify_lo_above: float = 0.60) -> str:
-        if not self.usable(c):
+    def absent(self, c: Cell | None, *, upper: float = 0.60, falsify_lo_above: float = 0.60) -> str:
+        if c is None or not self.usable(c):
             return INCONCLUSIVE
-        assert c is not None
         if c["paired_lo"] > falsify_lo_above:
             return FALSIFIED
         return CONFIRMED if 0.40 <= c["paired_lo"] and c["paired_hi"] <= upper else INCONCLUSIVE
 
-    def part(self, hypothesis: str, store: str, config: str, label: str, outcome: str, evidence: str, *, latency: bool = False) -> str:
+    def part(
+        self, hypothesis: str, store: str, config: str, label: str, outcome: str, evidence: str, *, latency: bool = False
+    ) -> str:
         if latency and outcome != INCONCLUSIVE and not self.latency_guard(store, config):
             outcome, evidence = INCONCLUSIVE, f"{evidence}; guard G1 did not pass"
         if self.g2.get(store) is False:
             outcome, evidence = INCONCLUSIVE, f"{evidence}; guard G2 failed for {store}"
-        self.rows.append({"hypothesis": hypothesis, "store": store, "config": config, "part": label, "outcome": outcome, "evidence": evidence})
+        row = {"hypothesis": hypothesis, "store": store, "config": config, "part": label}
+        self.rows.append({**row, "outcome": outcome, "evidence": evidence})
         return outcome
 
     def verdict(self, hypothesis: str, scope: str, outcomes: list[str]) -> None:
@@ -548,9 +592,10 @@ class Judge:
             outcome = CONFIRMED
         else:
             outcome = INCONCLUSIVE
+        counts = (outcomes.count(CONFIRMED), outcomes.count(FALSIFIED), outcomes.count(INCONCLUSIVE))
+        evidence = "{} confirmed, {} falsified, {} inconclusive parts".format(*counts)
         self.rows.append({"hypothesis": hypothesis, "store": scope, "config": "", "part": "VERDICT", "outcome": outcome,
-                          "evidence": f"{outcomes.count(CONFIRMED)} confirmed, {outcomes.count(FALSIFIED)} falsified, "
-                                      f"{outcomes.count(INCONCLUSIVE)} inconclusive parts"})  # fmt: skip
+                          "evidence": evidence})  # fmt: skip
 
     def observables(self, store: str, config: str) -> list[str]:
         return [o for o in OBSERVABLES if o != "recall" or has_recall(store, config)]
@@ -559,33 +604,38 @@ class Judge:
 
     def h1(self) -> None:
         outcomes = []
+        config = "post"
         for store in VECTOR_STORES:
-            config = "post"
             for pct in self.data.pcts:
                 c = self.cell("W", store, config, 1000, pct, "count")
-                outcomes.append(self.part("H1", store, config, f"(a) m=1000 p={pct} count >= 0.95", self.at_least(c, 0.95, 0.80), self.show(c)))
+                label = f"(a) m=1000 p={pct} count >= 0.95"
+                outcomes.append(self.part("H1", store, config, label, self.at_least(c, 0.95, 0.80), self.show(c)))
             for pct in (10, 50):
                 c = self.cell("W", store, config, 100, pct, "latency")
                 outcome = self.present(c, 0.75, 0.60 if pct == 50 else None)
-                outcomes.append(self.part("H1", store, config, f"(b) m=100 p={pct} latency >= 0.75", outcome, self.show(c), latency=True))
+                label = f"(b) m=100 p={pct} latency >= 0.75"
+                outcomes.append(self.part("H1", store, config, label, outcome, self.show(c), latency=True))
             for observable in self.observables(store, config):
                 c = self.cell("W", store, config, 1, "all", observable)
-                outcomes.append(self.part("H1", store, config, f"(c) m=1 no channel in {observable}", self.absent(c), self.show(c),
-                                          latency=observable == "latency"))  # fmt: skip
+                label = f"(c) m=1 no channel in {observable}"
+                outcome = self.absent(c)
+                outcomes.append(self.part("H1", store, config, label, outcome, self.show(c), latency=observable == "latency"))
         self.verdict("H1", "vector stores", outcomes)
 
     def h2(self) -> None:
         outcomes = []
+        config = "post-const"
         for store in VECTOR_STORES:
-            config = "post-const"
             c = self.cell("W", store, config, "all", "all", "latency")
-            outcomes.append(self.part("H2", store, config, "(a) no latency channel pooled", self.absent(c), self.show(c), latency=True))
+            label = "(a) no latency channel pooled"
+            outcomes.append(self.part("H2", store, config, label, self.absent(c), self.show(c), latency=True))
             c = self.cell("W", store, config, 1000, "all", "latency")
-            outcomes.append(self.part("H2", store, config, "(a) m=1000 latency upper <= 0.65",
-                                      self.absent(c, upper=0.65), self.show(c), latency=True))  # fmt: skip
+            label = "(a) m=1000 latency upper <= 0.65"
+            outcomes.append(self.part("H2", store, config, label, self.absent(c, upper=0.65), self.show(c), latency=True))
             for pct in (10, 50):
                 c = self.cell("W", store, config, 1000, pct, "count")
-                outcomes.append(self.part("H2", store, config, f"(b) m=1000 p={pct} count >= 0.95", self.at_least(c, 0.95, 0.80), self.show(c)))
+                label = f"(b) m=1000 p={pct} count >= 0.95"
+                outcomes.append(self.part("H2", store, config, label, self.at_least(c, 0.95, 0.80), self.show(c)))
         self.verdict("H2", "vector stores", outcomes)
 
     def h3(self) -> None:
@@ -597,38 +647,44 @@ class Judge:
             for level, pct in cells:
                 c = self.cell("W", store, "pre", level, pct, "latency")
                 falsify = 0.60 if (level, pct) == (1000, 50) else None
-                outcomes.append(self.part(name, store, "pre", f"m={level} p={pct} latency >= 0.75", self.present(c, 0.75, falsify),
-                                          self.show(c), latency=True))  # fmt: skip
+                label = f"m={level} p={pct} latency >= 0.75"
+                outcome = self.present(c, 0.75, falsify)
+                outcomes.append(self.part(name, store, "pre", label, outcome, self.show(c), latency=True))
             self.verdict(name, store, outcomes)
         outcomes = []
         for observable in self.observables("qdrant", "pre"):
             c = self.cell("W", "qdrant", "pre", "all", "low", observable)
-            outcomes.append(self.part("H3c", "qdrant", "pre", f"p in (1, 10): no channel in {observable}", self.absent(c), self.show(c),
-                                      latency=observable == "latency"))  # fmt: skip
+            label = f"p in (1, 10): no channel in {observable}"
+            outcome = self.absent(c)
+            outcomes.append(self.part("H3c", "qdrant", "pre", label, outcome, self.show(c), latency=observable == "latency"))
         self.verdict("H3c", "qdrant", outcomes)
 
     def h4(self) -> None:
-        for store, config in (("pgvector", "pre-exact"), ("qdrant", "pre-exact"), ("elasticsearch", "pre-exact"), ("faiss", "pre"), ("memory", "pre")):
+        for store, config in EXACT_CONTROLS:
             outcomes = []
             for observable in self.observables(store, config):
+                latency = observable == "latency"
                 c = self.cell("W", store, config, "all", "all", observable)
-                outcomes.append(self.part("H4", store, config, f"no channel in {observable} pooled", self.absent(c), self.show(c),
-                                          latency=observable == "latency"))  # fmt: skip
+                label = f"no channel in {observable} pooled"
+                outcomes.append(self.part("H4", store, config, label, self.absent(c), self.show(c), latency=latency))
                 c = self.cell("W", store, config, 1000, "all", observable)
+                label = f"m=1000 {observable} upper <= 0.65"
                 outcome = self.absent(c, upper=0.65, falsify_lo_above=0.65)
-                outcomes.append(self.part("H4", store, config, f"m=1000 {observable} upper <= 0.65", outcome, self.show(c),
-                                          latency=observable == "latency"))  # fmt: skip
+                outcomes.append(self.part("H4", store, config, label, outcome, self.show(c), latency=latency))
             self.verdict("H4", f"{store} {config}", outcomes)
 
     def change(self, store: str, config: str, level: Any) -> dict[str, Any] | None:
         return self.changes.get(("W", store, config, level, "all"))
 
-    def show_change(self, c: dict[str, Any] | None) -> str:
+    @staticmethod
+    def show_change(c: dict[str, Any] | None) -> str:
         if c is None:
             return "missing"
-        return f"change rate {c['rate']:.3f} [{c['lo']:.3f}, {c['hi']:.3f}] ({c['clusters']} clusters, {c['seeds']} seeds)"
+        interval = f"[{c['lo']:.3f}, {c['hi']:.3f}]"
+        return f"change rate {c['rate']:.3f} {interval} ({c['clusters']} clusters, {c['seeds']} seeds)"
 
-    def change_usable(self, c: dict[str, Any] | None) -> bool:
+    @staticmethod
+    def change_usable(c: dict[str, Any] | None) -> bool:
         return c is not None and c["clusters"] >= MIN_CLUSTERS and c["seeds"] >= MIN_SEEDS
 
     def h5(self) -> None:
@@ -637,43 +693,45 @@ class Judge:
             for level in self.data.levels:
                 c = self.cell("W", store, "bm25-pre", level, "all", "score")
                 outcome = self.at_least(c, 0.90, None)
-                if level == 1000 and self.usable(c) and c is not None and c["paired_hi"] < 0.70:
+                if level == 1000 and c is not None and self.usable(c) and c["paired_hi"] < 0.70:
                     outcome = FALSIFIED
                 outcomes.append(self.part("H5a", store, "bm25-pre", f"m={level} score >= 0.90", outcome, self.show(c)))
             self.verdict("H5a", store, outcomes)
         outcomes = []
         c = self.cell("W", "pgvector", "bm25-pre", "all", "all", "score")
         outcomes.append(self.part("H5b", "pgvector", "bm25-pre", "no channel in the score", self.absent(c), self.show(c)))
-        change = self.change("pgvector", "bm25-pre", "all")
-        if not self.change_usable(change):
+        found = self.change("pgvector", "bm25-pre", "all")
+        if found is None or not self.change_usable(found):
             outcome = INCONCLUSIVE
         else:
-            assert change is not None
-            outcome = FALSIFIED if change["rate"] > 0.05 else CONFIRMED if change["rate"] <= 0.01 else INCONCLUSIVE
-        outcomes.append(self.part("H5b", "pgvector", "bm25-pre", "id-list change rate <= 0.01", outcome, self.show_change(change)))
+            outcome = FALSIFIED if found["rate"] > 0.05 else CONFIRMED if found["rate"] <= 0.01 else INCONCLUSIVE
+        label = "id-list change rate <= 0.01"
+        outcomes.append(self.part("H5b", "pgvector", "bm25-pre", label, outcome, self.show_change(found)))
         self.verdict("H5b", "pgvector", outcomes)
-        change = self.change("elasticsearch", "hybrid-exact", 1000)
-        if not self.change_usable(change):
+        found = self.change("elasticsearch", "hybrid-exact", 1000)
+        if found is None or not self.change_usable(found):
             outcome = INCONCLUSIVE
         else:
-            assert change is not None
-            outcome = CONFIRMED if change["rate"] >= 0.25 else FALSIFIED if change["rate"] < 0.05 else INCONCLUSIVE
-        part = self.part("H5c", "elasticsearch", "hybrid-exact", "m=1000 change rate >= 0.25", outcome, self.show_change(change))
+            outcome = CONFIRMED if found["rate"] >= 0.25 else FALSIFIED if found["rate"] < 0.05 else INCONCLUSIVE
+        label = "m=1000 change rate >= 0.25"
+        part = self.part("H5c", "elasticsearch", "hybrid-exact", label, outcome, self.show_change(found))
         self.verdict("H5c", "elasticsearch", [part])
 
     def h6(self) -> None:
         outcomes = []
         for store, config in self.data.configs:
-            complete_seeds = {s for s, _ in self.data.single[(store, config)]}
+            seeds = {s for s, _ in self.data.single[(store, config)]}
             for level in self.data.levels:
                 raw = self.cell("RAW1", store, config, level, "all", "latency")
                 if raw is None or raw["paired"] < 0.75:
                     continue
                 padded = self.cell("PAD", store, config, level, "all", "latency")
-                # T comes from seed 0 and the cells use seeds 1 to 4: the rule needs all five seeds.
-                outcome = self.absent(padded) if len(complete_seeds) >= MIN_SEEDS and self.usable(padded, seeds=MIN_SEEDS - 1) else INCONCLUSIVE
-                outcomes.append(self.part("H6", store, config, f"m={level} padded latency: no channel",
-                                          outcome, f"raw {self.show(raw)}; padded {self.show(padded)}", latency=True))  # fmt: skip
+                # T comes from seed 0 and the cells use seeds 1 to 4, so the rule needs all five seeds.
+                ready = len(seeds) >= MIN_SEEDS and self.usable(padded, seeds=MIN_SEEDS - 1)
+                outcome = self.absent(padded) if ready else INCONCLUSIVE
+                evidence = f"raw {self.show(raw)}; padded {self.show(padded)}"
+                label = f"m={level} padded latency: no channel"
+                outcomes.append(self.part("H6", store, config, label, outcome, evidence, latency=True))
         self.verdict("H6", "every cell with a raw latency channel", outcomes)
 
     def all(self) -> list[dict[str, Any]]:
@@ -695,9 +753,12 @@ def health(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
         store = r.get("store")
         if not store or r.get("exp") != "x6":
             continue
-        h = stores.setdefault(store, {"store": store, "mode": r.get("mode"), "seeds_done": [], "skipped": [], "aborted": [],
-                                      "retrievals": 0, "errors": defaultdict(int), "first_error": {}, "stopped": [],
-                                      "builds": defaultdict(list), "setup_error": None, "leaks": 0, "versions": None})  # fmt: skip
+        h = stores.get(store)
+        if h is None:
+            h = {"store": store, "mode": r.get("mode"), "seeds_done": [], "skipped": [], "aborted": [], "retrievals": 0}
+            h.update(errors=defaultdict(int), first_error={}, stopped=[], builds=defaultdict(list))
+            h.update(setup_error=None, leaks=0, versions=None)
+            stores[store] = h
         kind = r.get("type")
         if kind == "retrieval":
             h["retrievals"] += 1
@@ -722,64 +783,79 @@ def health(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
             h["versions"] = {"image": (r.get("image") or {}).get("image"), "reported": r.get("reported")}
     rows = []
     for h in stores.values():
-        rows.append({
-            **{k: v for k, v in h.items() if k not in ("errors", "builds")},
-            "errors": dict(h["errors"]),
-            "build_s": {w: round(float(np.mean(v)), 1) for w, v in h["builds"].items()},
-        })  # fmt: skip
+        row = {k: v for k, v in h.items() if k not in ("errors", "builds")}
+        row["errors"] = dict(h["errors"])
+        row["build_s"] = {w: round(float(np.mean(v)), 1) for w, v in h["builds"].items()}
+        rows.append(row)
     return rows
 
 
-def report(data: Data, cells: dict[tuple[Any, ...], dict[str, Any]], verdicts: list[dict[str, Any]], judge: Judge,
-           cost_rows: list[dict[str, Any]], changes: dict[tuple[Any, ...], dict[str, Any]], health_rows: list[dict[str, Any]],
-           unreadable: int) -> str:  # fmt: skip
+def interval(c: Cell | None) -> str:
+    if c is None:
+        return ""
+    return f"{c['paired']:.2f} [{c['paired_lo']:.2f}, {c['paired_hi']:.2f}]"
+
+
+def report(
+    data: Data,
+    cells: dict[Key, Cell],
+    verdicts: list[dict[str, Any]],
+    judge: Judge,
+    cost_rows: list[dict[str, Any]],
+    changes: dict[Key, dict[str, Any]],
+    health_rows: list[dict[str, Any]],
+    unreadable: int,
+) -> str:
     lines = ["# X6: side channels of permission-aware retrieval", ""]
-    lines += [f"{len(data.records):,} records ({unreadable} unreadable lines), {data.resamples:,} bootstrap resamples, seed {data.seed}. "
-              "Verdicts follow PREREG_X3_X6.md. AUC: 0.5 means no advantage; the paired AUC is the differencing attacker's.", ""]  # fmt: skip
+    lines += [
+        f"{len(data.records):,} records ({unreadable} unreadable lines), {data.resamples:,} bootstrap resamples, "
+        f"seed {data.seed}. Verdicts follow PREREG_X3_X6.md. AUC 0.5 means no advantage; the paired AUC is "
+        "the differencing attacker's.",
+        "",
+    ]
     lines += ["## Health", ""]
-    lines += common.markdown_table(
-        ["store", "mode", "seeds done", "skipped", "retrievals", "errors", "stopped", "build s", "setup error", "leaks"],
-        [[h["store"], h["mode"], h["seeds_done"], h["skipped"], h["retrievals"], json.dumps(h["errors"]), h["stopped"],
-          json.dumps(h["build_s"]), h["setup_error"], h["leaks"]] for h in health_rows],
-    )  # fmt: skip
+    header = ["store", "mode", "seeds done", "skipped", "retrievals", "errors", "stopped", "build s", "setup error", "leaks"]
+    rows: list[list[Any]] = []
+    for h in health_rows:
+        rows.append([h["store"], h["mode"], h["seeds_done"], h["skipped"], h["retrievals"], json.dumps(h["errors"])])
+        rows[-1] += [h["stopped"], json.dumps(h["build_s"]), h["setup_error"], h["leaks"]]
+    lines += common.markdown_table(header, rows)
     lines += ["## Verdicts", ""]
-    lines += common.markdown_table(
-        ["hypothesis", "scope", "outcome", "evidence"],
-        [[v["hypothesis"], v["store"], v["outcome"], v["evidence"]] for v in verdicts if v["part"] == "VERDICT"],
-    )
+    rows = [[v["hypothesis"], v["store"], v["outcome"], v["evidence"]] for v in verdicts if v["part"] == "VERDICT"]
+    lines += common.markdown_table(["hypothesis", "scope", "outcome", "evidence"], rows)
     lines += ["## Guards", ""]
-    lines += common.markdown_table(["guard", "store", "config", "passed", "evidence"],
-                                   [[g["guard"], g["store"], g["config"], g["passed"], g["evidence"]] for g in judge.guard_rows])  # fmt: skip
+    rows = [[g["guard"], g["store"], g["config"], g["passed"], g["evidence"]] for g in judge.guard_rows]
+    lines += common.markdown_table(["guard", "store", "config", "passed", "evidence"], rows)
     lines += ["## Paired AUC (W1 against W0), pooled over selectivity", ""]
     rows = []
     for store, config in data.configs:
         for level in [*data.levels, "all"]:
             row: list[Any] = [store, config, level]
-            for observable in OBSERVABLES:
-                c = cells.get(("W", store, config, level, "all", observable))
-                row.append("" if c is None else f"{c['paired']:.2f} [{c['paired_lo']:.2f}, {c['paired_hi']:.2f}]")
-            aa = cells.get(("AA", store, config, level, "all", "latency"))
-            row.append("" if aa is None else f"{aa['paired']:.2f} [{aa['paired_lo']:.2f}, {aa['paired_hi']:.2f}]")
+            row += [interval(cells.get(("W", store, config, level, "all", o))) for o in OBSERVABLES]
+            row.append(interval(cells.get(("AA", store, config, level, "all", "latency"))))
             rows.append(row)
     lines += common.markdown_table(["store", "config", "m", *OBSERVABLES, "A/A latency"], rows)
     lines += ["## Mitigation costs (latency, ratio of means)", ""]
-    lines += common.markdown_table(
-        ["store", "mitigation", "ratio", "interval", "median ratio", "pairs"],
-        [[r["store"], r["mitigation"], r["ratio"], f"[{r['lo']:.2f}, {r['hi']:.2f}]", r["median_ratio"], r["n"]] for r in cost_rows],
-    )
+    rows = [
+        [r["store"], r["mitigation"], r["ratio"], f"[{r['lo']:.2f}, {r['hi']:.2f}]", r["median_ratio"], r["n"]]
+        for r in cost_rows
+    ]
+    lines += common.markdown_table(["store", "mitigation", "ratio", "interval", "median ratio", "pairs"], rows)
     lines += ["## Id-list change rate, W1 against W0 (deterministic configurations)", ""]
-    lines += common.markdown_table(
-        ["store", "config", "m", "rate", "interval", "A/A rate", "pairs"],
-        [[c["store"], c["config"], c["level"], c["rate"], f"[{c['lo']:.2f}, {c['hi']:.2f}]",
-          (changes.get(("AA", c["store"], c["config"], c["level"], "all")) or {}).get("rate"), c["pairs"]]
-         for key, c in sorted(changes.items(), key=lambda kv: str(kv[0]))
-         if key[0] == "W" and key[4] == "all" and c["deterministic"]],
-    )  # fmt: skip
+    rows = []
+    for key, c in sorted(changes.items(), key=lambda kv: str(kv[0])):
+        if key[0] != "W" or key[4] != "all" or not c["deterministic"]:
+            continue
+        null = (changes.get(("AA", c["store"], c["config"], c["level"], "all")) or {}).get("rate")
+        rows.append([c["store"], c["config"], c["level"], c["rate"], f"[{c['lo']:.2f}, {c['hi']:.2f}]", null, c["pairs"]])
+    lines += common.markdown_table(["store", "config", "m", "rate", "interval", "A/A rate", "pairs"], rows)
     lines += ["## Every verdict part", ""]
-    lines += common.markdown_table(
-        ["hypothesis", "store", "config", "part", "outcome", "evidence"],
-        [[v["hypothesis"], v["store"], v["config"], v["part"], v["outcome"], v["evidence"]] for v in verdicts if v["part"] != "VERDICT"],
-    )
+    rows = [
+        [v["hypothesis"], v["store"], v["config"], v["part"], v["outcome"], v["evidence"]]
+        for v in verdicts
+        if v["part"] != "VERDICT"
+    ]
+    lines += common.markdown_table(["hypothesis", "store", "config", "part", "outcome", "evidence"], rows)
     return "\n".join(lines) + "\n"
 
 
@@ -789,7 +865,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--out", default="reports")
     parser.add_argument("--resamples", type=int, default=10_000)
     parser.add_argument("--seed", type=int, default=SEED_BASE)
-    parser.add_argument("--annotate", action="store_true", help="also print the health and verdicts as GitHub annotations")
+    parser.add_argument("--annotate", action="store_true", help="also print the health and verdicts as annotations")
     args = parser.parse_args(argv)
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
@@ -806,6 +882,7 @@ def main(argv: list[str] | None = None) -> int:
         common.annotate("warning", "x6 stats", "no X6 retrieval was recorded")
         return 0
     cells = compute_cells(data)
+    common.log(f"x6 stats: {len(cells):,} cells")
     common.write_csv(out / "x6_cells.csv", list(cells.values()))
     common.write_csv(out / "x6_deltas.csv", deltas(data))
     cost_rows = costs(data)
@@ -826,7 +903,7 @@ def main(argv: list[str] | None = None) -> int:
             for observable in ("latency", "count", "score"):
                 c = cells.get(("W", store, config, "all", "all", observable))
                 if c is not None:
-                    headline.append(f"{store} {config} {observable}: paired {c['paired']:.2f} [{c['paired_lo']:.2f},{c['paired_hi']:.2f}] n={c['pairs']}")
+                    headline.append(f"{store} {config} {observable}: paired {interval(c)} n={c['pairs']}")
         common.annotate("notice", "x6 cells (all m, all p)", "\n".join(headline), chunks=4)
     common.log("x6 stats: done")
     return 0

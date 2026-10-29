@@ -39,7 +39,13 @@ UKP = "https://public.ukp.informatik.tu-darmstadt.de/thakur/BEIR/datasets/{name}
 PCTS = (1, 10, 50)
 SIZES: dict[str, dict[str, Any]] = {
     # None keeps every passage or query.
-    "full": {"fiqa": None, "queries": None, "scidocs": 12_000, "levels": {1000: 8, 100: 16, 10: 24, 1: 24}, "zone": 1000},
+    "full": {
+        "fiqa": None,
+        "queries": None,
+        "scidocs": 12_000,
+        "levels": {1000: 8, 100: 16, 10: 24, 1: 24},
+        "zone": 1000,
+    },
     "smoke": {"fiqa": 6_000, "queries": 600, "scidocs": 1_500, "levels": {1000: 1, 100: 2, 10: 2, 1: 2}, "zone": 300},
 }
 
@@ -173,7 +179,8 @@ def load_model() -> tuple[Any, dict[str, Any]]:
         revision = model_info(MODEL).sha
     except Exception as error:
         log(f"  could not read the model's revision: {common.short(error, 200)}")
-    return model, {"model": MODEL, "revision": revision, "max_seq_length": MAX_SEQ_LENGTH, "threads": torch.get_num_threads()}
+    described = {"model": MODEL, "revision": revision, "max_seq_length": MAX_SEQ_LENGTH, "threads": torch.get_num_threads()}
+    return model, described
 
 
 def embed(model: Any, texts: list[str], label: str) -> np.ndarray:
@@ -381,11 +388,15 @@ def run(args: argparse.Namespace) -> int:
     manifest = {
         "experiment": "x3x6-data",
         "mode": args.mode,
-        "sizes": {key: (value if key != "levels" else {str(m): c for m, c in value.items()}) for key, value in sizes.items()},
+        "sizes": {**sizes, "levels": {str(m): c for m, c in sizes["levels"].items()}},
         "seeds": args.seeds,
         "embedding": model_info,
         "sources": {"fiqa": fiqa_source, "scidocs": scidocs_source},
-        "counts": {"fiqa_corpus": len(corpus_items), "fiqa_queries": len(query_items), "scidocs_subset": len(far_items)},
+        "counts": {
+            "fiqa_corpus": len(corpus_items),
+            "fiqa_queries": len(query_items),
+            "scidocs_subset": len(far_items),
+        },
         "tokens": {"fiqa_mean": float(tokens.mean()), "fiqa_median": float(np.median(tokens))},
         "plans": summaries,
         "timings": timings,

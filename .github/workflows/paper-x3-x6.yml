@@ -10,7 +10,9 @@ name: paper-x3-x6
 # X6's plans once, so every store plays the identical game. Then one job per store family and
 # experiment runs in parallel, each well under the 6-hour limit, each target in its own process with
 # its own time budget, and every job uploads what it has, whatever happened. The summary job runs the
-# statistics and writes the reports to its job summary and, as annotations, to the public API.
+# statistics and writes the reports to its job summary. The publish job commits the reports, the
+# tables and the end of every job's log to the branch results/x3-x6, under <run id>-<attempt>/, so
+# they can be read with git alone.
 
 on:
   push:
@@ -31,7 +33,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: paper-x3-x6-${{ github.ref }}
+  group: paper-x3-x6-runs-${{ github.ref }}
   cancel-in-progress: false
 
 env:
@@ -52,17 +54,31 @@ jobs:
       # Not in uv.lock (the library does not use them): pinned by version, the CPU build of torch.
       - name: Install the embedding stack
         run: |
+          mkdir -p logs
+          exec > >(tee -a logs/data.log) 2>&1
           pip install --index-url https://download.pytorch.org/whl/cpu torch==2.8.0
           pip install sentence-transformers==5.0.0 pyarrow==21.0.0
-          python -c "import torch, sentence_transformers; print('torch', torch.__version__, 'sentence-transformers', sentence_transformers.__version__)"
+          python -c "import torch, sentence_transformers as st; print('torch', torch.__version__, 'sentence-transformers', st.__version__)"
       - name: Download, embed and plan
-        run: python benchmarks/paper/x6_data.py --mode "$X3X6_MODE" --seeds "$SEEDS" --out x6data
+        run: |
+          exec > >(tee -a logs/data.log) 2>&1
+          python benchmarks/paper/x6_data.py --mode "$X3X6_MODE" --seeds "$SEEDS" --out x6data
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: x3x6-data
           path: x6data/
           if-no-files-found: error
           retention-days: 30
+      - name: Keep the log and the manifest
+        if: always()
+        run: if [ -f x6data/manifest.json ]; then cp x6data/manifest.json logs/data-manifest.json; fi
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: x3x6-log-data
+          path: logs/
+          if-no-files-found: warn
+          retention-days: 90
 
   run:
     name: ${{ matrix.group }}
@@ -89,6 +105,7 @@ jobs:
           - { group: x3-mongodb, script: x3_filter_scaling.py, targets: mongodb, services: mongodb }
           - { group: x3-embedded, script: x3_filter_scaling.py, targets: "chroma,lancedb,faiss,memory", services: none }
     env:
+      GROUP: ${{ matrix.group }}
       WARDOWL_TEST_DATABASE_URL: postgresql://test:test@localhost:5432/test
       WARDOWL_TEST_REDIS_URL: redis://127.0.0.1:6379/0
       WARDOWL_TEST_CASSANDRA_HOST: 127.0.0.1
@@ -106,59 +123,55 @@ jobs:
 
       # ---- the servers: the conformance campaign's images and versions; they boot while the rest installs
 
-      - name: Start PostgreSQL with pgvector
-        if: contains(matrix.services, 'postgres')
+      - name: Start the servers
+        if: matrix.services != 'none'
+        env:
+          SERVICES: ${{ matrix.services }}
         run: |
-          docker run -d --name postgres --shm-size=1g -p 5432:5432 -e POSTGRES_USER=test -e POSTGRES_PASSWORD=test \
-            -e POSTGRES_DB=test pgvector/pgvector:pg17 \
-            -c shared_buffers=2GB -c maintenance_work_mem=1GB -c max_parallel_maintenance_workers=3
-      - name: Start Redis
-        if: contains(matrix.services, 'redis')
-        run: docker run -d --name redis -p 6379:6379 redis:8.10.2-alpine
-      - name: Start Cassandra
-        if: contains(matrix.services, 'cassandra')
-        run: docker run -d --name cassandra -p 9042:9042 -e MAX_HEAP_SIZE=2G -e HEAP_NEWSIZE=400M cassandra:5.0.9
-      - name: Start Elasticsearch
-        if: contains(matrix.services, 'elasticsearch')
-        run: |
-          docker run -d --name elasticsearch -p 9200:9200 -e discovery.type=single-node \
-            -e xpack.security.enabled=false -e ES_JAVA_OPTS="-Xms2g -Xmx2g" \
-            docker.elastic.co/elasticsearch/elasticsearch:9.5.5
-      - name: Start OpenSearch
-        if: contains(matrix.services, 'opensearch')
-        run: |
-          docker run -d --name opensearch -p 9201:9200 -e discovery.type=single-node \
-            -e DISABLE_SECURITY_PLUGIN=true -e DISABLE_INSTALL_DEMO_CONFIG=true \
-            -e OPENSEARCH_JAVA_OPTS="-Xms2g -Xmx2g" opensearchproject/opensearch:3.9.0
-      - name: Start Vespa
-        if: contains(matrix.services, 'vespa')
-        run: docker run -d --name vespa --hostname vespa-container -p 8090:8080 -p 19071:19071 vespaengine/vespa:8.763.13
-      - name: Start Qdrant
-        if: contains(matrix.services, 'qdrant')
-        run: docker run -d --name qdrant -p 6333:6333 qdrant/qdrant:v1.19.2
-      - name: Start Milvus (standalone, embedded etcd, local storage)
-        if: contains(matrix.services, 'milvus')
-        run: |
-          mkdir -p "$RUNNER_TEMP/milvus"
-          printf '%s\n' 'listen-client-urls: http://0.0.0.0:2379' 'advertise-client-urls: http://0.0.0.0:2379' \
-            'quota-backend-bytes: 4294967296' 'auto-compaction-mode: revision' "auto-compaction-retention: '1000'" \
-            > "$RUNNER_TEMP/milvus/embedEtcd.yaml"
-          touch "$RUNNER_TEMP/milvus/user.yaml"
-          docker run -d --name milvus --security-opt seccomp:unconfined -p 19530:19530 -p 9091:9091 \
-            -e ETCD_USE_EMBED=true -e ETCD_DATA_DIR=/var/lib/milvus/etcd \
-            -e ETCD_CONFIG_PATH=/milvus/configs/embedEtcd.yaml -e COMMON_STORAGETYPE=local -e DEPLOY_MODE=STANDALONE \
-            -v "$RUNNER_TEMP/milvus/embedEtcd.yaml:/milvus/configs/embedEtcd.yaml" \
-            -v "$RUNNER_TEMP/milvus/user.yaml:/milvus/configs/user.yaml" \
-            milvusdb/milvus:v3.0.2 milvus run standalone
-      - name: Start Weaviate
-        if: contains(matrix.services, 'weaviate')
-        run: |
-          docker run -d --name weaviate -p 8079:8080 -p 50051:50051 -e AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED=true \
-            -e PERSISTENCE_DATA_PATH=/var/lib/weaviate -e DEFAULT_VECTORIZER_MODULE=none -e CLUSTER_HOSTNAME=node1 \
-            cr.weaviate.io/semitechnologies/weaviate:1.39.12
-      - name: Start MongoDB Atlas Local
-        if: contains(matrix.services, 'mongodb')
-        run: docker run -d --name mongodb -p 27017:27017 mongodb/mongodb-atlas-local:8.0.30
+          mkdir -p results/logs
+          exec > >(tee -a "results/logs/$GROUP-setup.log") 2>&1
+          for service in $SERVICES; do
+            case "$service" in
+              postgres)
+                docker run -d --name postgres --shm-size=1g -p 5432:5432 -e POSTGRES_USER=test -e POSTGRES_PASSWORD=test \
+                  -e POSTGRES_DB=test pgvector/pgvector:pg17 \
+                  -c shared_buffers=2GB -c maintenance_work_mem=1GB -c max_parallel_maintenance_workers=3 ;;
+              redis) docker run -d --name redis -p 6379:6379 redis:8.10.2-alpine ;;
+              cassandra)
+                docker run -d --name cassandra -p 9042:9042 -e MAX_HEAP_SIZE=2G -e HEAP_NEWSIZE=400M cassandra:5.0.9 ;;
+              elasticsearch)
+                docker run -d --name elasticsearch -p 9200:9200 -e discovery.type=single-node \
+                  -e xpack.security.enabled=false -e ES_JAVA_OPTS="-Xms2g -Xmx2g" \
+                  docker.elastic.co/elasticsearch/elasticsearch:9.5.5 ;;
+              opensearch)
+                docker run -d --name opensearch -p 9201:9200 -e discovery.type=single-node \
+                  -e DISABLE_SECURITY_PLUGIN=true -e DISABLE_INSTALL_DEMO_CONFIG=true \
+                  -e OPENSEARCH_JAVA_OPTS="-Xms2g -Xmx2g" opensearchproject/opensearch:3.9.0 ;;
+              vespa)
+                docker run -d --name vespa --hostname vespa-container -p 8090:8080 -p 19071:19071 \
+                  vespaengine/vespa:8.763.13 ;;
+              qdrant) docker run -d --name qdrant -p 6333:6333 qdrant/qdrant:v1.19.2 ;;
+              milvus)
+                # Standalone, with embedded etcd and local storage, as the conformance campaign runs it.
+                mkdir -p "$RUNNER_TEMP/milvus"
+                printf '%s\n' 'listen-client-urls: http://0.0.0.0:2379' 'advertise-client-urls: http://0.0.0.0:2379' \
+                  'quota-backend-bytes: 4294967296' 'auto-compaction-mode: revision' "auto-compaction-retention: '1000'" \
+                  > "$RUNNER_TEMP/milvus/embedEtcd.yaml"
+                touch "$RUNNER_TEMP/milvus/user.yaml"
+                docker run -d --name milvus --security-opt seccomp:unconfined -p 19530:19530 -p 9091:9091 \
+                  -e ETCD_USE_EMBED=true -e ETCD_DATA_DIR=/var/lib/milvus/etcd \
+                  -e ETCD_CONFIG_PATH=/milvus/configs/embedEtcd.yaml -e COMMON_STORAGETYPE=local -e DEPLOY_MODE=STANDALONE \
+                  -v "$RUNNER_TEMP/milvus/embedEtcd.yaml:/milvus/configs/embedEtcd.yaml" \
+                  -v "$RUNNER_TEMP/milvus/user.yaml:/milvus/configs/user.yaml" \
+                  milvusdb/milvus:v3.0.2 milvus run standalone ;;
+              weaviate)
+                docker run -d --name weaviate -p 8079:8080 -p 50051:50051 -e AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED=true \
+                  -e PERSISTENCE_DATA_PATH=/var/lib/weaviate -e DEFAULT_VECTORIZER_MODULE=none -e CLUSTER_HOSTNAME=node1 \
+                  cr.weaviate.io/semitechnologies/weaviate:1.39.12 ;;
+              mongodb) docker run -d --name mongodb -p 27017:27017 mongodb/mongodb-atlas-local:8.0.30 ;;
+              *) echo "::error::unknown service $service" ;;
+            esac
+          done
 
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with: { python-version: "3.12", cache: pip }
@@ -166,6 +179,8 @@ jobs:
         with: { version: "0.13.1", enable-cache: false }
       - name: Install from uv.lock, by hash
         run: |
+          mkdir -p results/logs
+          exec > >(tee -a "results/logs/$GROUP-setup.log") 2>&1
           uv export --frozen --no-emit-project --all-extras --group integration --group examples -o "$RUNNER_TEMP/requirements.txt"
           pip install --require-hashes --no-deps -r "$RUNNER_TEMP/requirements.txt"
           pip install --require-hashes --no-deps -r .github/requirements/build.txt
@@ -184,6 +199,7 @@ jobs:
         env:
           SERVICES: ${{ matrix.services }}
         run: |
+          exec > >(tee -a "results/logs/$GROUP-setup.log") 2>&1
           ready() {
             local name=$1 tries=$2; shift 2
             for _ in $(seq 1 "$tries"); do "$@" > /dev/null 2>&1 && { echo "$name is ready"; return 0; }; sleep 2; done
@@ -224,7 +240,6 @@ jobs:
         env:
           SCRIPT: benchmarks/paper/${{ matrix.script }}
           TARGETS: ${{ matrix.targets }}
-          GROUP: ${{ matrix.group }}
         run: |
           set +e
           mkdir -p results/logs
@@ -252,7 +267,7 @@ jobs:
         run: |
           mkdir -p results/logs
           for name in $(docker ps -a --format '{{.Names}}'); do
-            docker logs --tail 300 "$name" > "results/logs/$name.log" 2>&1 || true
+            docker logs --tail 300 "$name" > "results/logs/$GROUP-server-$name.log" 2>&1 || true
           done
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
@@ -286,6 +301,7 @@ jobs:
       - name: X3 statistics
         run: |
           mkdir -p reports
+          exec > >(tee -a reports/stats-x3.log) 2>&1
           resamples=10000
           if [ "$X3X6_MODE" = smoke ]; then resamples=200; fi
           python benchmarks/paper/x3_stats.py --in parts --out reports --resamples "$resamples" --annotate
@@ -294,6 +310,7 @@ jobs:
         if: ${{ !cancelled() }}
         run: |
           mkdir -p reports
+          exec > >(tee -a reports/stats-x6.log) 2>&1
           resamples=10000
           if [ "$X3X6_MODE" = smoke ]; then resamples=200; fi
           python benchmarks/paper/x6_stats.py --in parts --out reports --resamples "$resamples" --annotate
@@ -305,3 +322,92 @@ jobs:
           path: reports/
           if-no-files-found: warn
           retention-days: 90
+
+  # Commits what a reader needs to the branch results/x3-x6, under <run id>-<attempt>/: the reports
+  # and tables, the data job's manifest, the result of every job, and the last 200 lines of every log.
+  # The raw JSON lines stay in the artifacts (x3x6-results-*), which are too large for git.
+  publish:
+    name: publish to results/x3-x6
+    needs: [data, run, summary]
+    if: ${{ always() }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        continue-on-error: true
+        with:
+          pattern: x3x6-results-*
+          path: ${{ runner.temp }}/artifacts
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        continue-on-error: true
+        with:
+          pattern: x3x6-log-*
+          path: ${{ runner.temp }}/artifacts
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        continue-on-error: true
+        with:
+          name: x3x6-reports
+          path: ${{ runner.temp }}/artifacts/x3x6-reports
+      - name: Gather the reports, tables and log ends
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          art="$RUNNER_TEMP/artifacts"
+          dest="$RUNNER_TEMP/publish/${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          mkdir -p "$art" "$dest/reports" "$dest/logs"
+          if [ -d "$art/x3x6-reports" ]; then
+            find "$art/x3x6-reports" -maxdepth 1 -type f \( -name '*.md' -o -name '*.csv' \) -exec cp {} "$dest/reports/" \;
+          fi
+          find "$art" -type f -name '*.log' | sort | while read -r file; do
+            relative=${file#"$art"/}
+            tail -n 200 "$file" > "$dest/logs/${relative//\//__}"
+          done
+          find "$art" -type f -name '*.json' -size -2M | sort | while read -r file; do
+            relative=${file#"$art"/}
+            cp "$file" "$dest/logs/${relative//\//__}"
+          done
+          find "$art" -type f -name 'crashes.jsonl' -exec cat {} + > "$dest/crashes.jsonl" 2>/dev/null || true
+          printf '%s\n' "$NEEDS" > "$dest/jobs.json"
+          {
+            echo "run: $RUN_URL"
+            echo "commit: $GITHUB_SHA"
+            echo "mode: $X3X6_MODE"
+            echo "seeds: $SEEDS"
+            echo "published: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo
+            echo "raw result files (in the artifacts x3x6-results-*):"
+            find "$art" -type f -name '*.jsonl' -printf '%s bytes  %P\n' | sort -k3
+          } > "$dest/index.txt"
+          for file in "$art"/*/*.jsonl; do
+            [ -f "$file" ] || continue
+            printf '%s %s\n' "$(wc -l < "$file")" "${file#"$art"/}" >> "$dest/index.txt"
+          done
+          ls -laR "$RUNNER_TEMP/publish" | head -100
+      - name: Commit to results/x3-x6
+        run: |
+          branch=results/x3-x6
+          folder="${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git ls-remote --exit-code --heads origin "$branch" > /dev/null; then
+            git fetch --quiet origin "$branch"
+            git checkout --quiet -B "$branch" FETCH_HEAD
+          else
+            git checkout --quiet --orphan "$branch"
+            git rm -r -f --quiet .
+          fi
+          rm -rf "$folder"
+          cp -r "$RUNNER_TEMP/publish/$folder" "$folder"
+          git add -A "$folder"
+          git commit --quiet -m "results: paper-x3-x6 run $GITHUB_RUN_ID, attempt $GITHUB_RUN_ATTEMPT ($X3X6_MODE)"
+          for attempt in 1 2 3 4 5; do
+            if git push --quiet origin "HEAD:$branch"; then echo "pushed to $branch/$folder"; exit 0; fi
+            sleep $((attempt * 5))
+            { git fetch --quiet origin "$branch" && git rebase --quiet FETCH_HEAD; } || { git rebase --abort || true; }
+          done
+          echo "::error::could not push to $branch"
+          exit 1
