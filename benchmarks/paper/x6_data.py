@@ -1,13 +1,17 @@
 """Experiments X3 and X6, the data job: FiQA and SciDocs, their embeddings, and X6's plans.
 
 Downloads BEIR FiQA-2018 (corpus and queries) and BEIR SciDocs (corpus), embeds them on the CPU with
-sentence-transformers/all-MiniLM-L6-v2, and computes, by exact search, the plan of every X6 seed:
-the probes of each level m, their near sets and zones, the far chunks that replace the near sets in
-W0, the permission buckets, and each probe's exact readable top 10 (see PREREG_X3_X6.md). Every store
-job reads these files, so all stores play the identical game. X3 reads the FiQA embeddings as its
-semantic subset.
+sentence-transformers/all-MiniLM-L6-v2, and computes, by exact search, the plan of every X6 seed
+(PREREG_X3_X6.md with its Amendment 1): 8 groups of probes, each probe's near set (its m nearest
+passages that are not hubs) and zone, the far chunks that replace a group's near sets in its W0, the
+permission buckets, and each probe's exact readable top 10. Every store job reads these files, so all
+stores play the identical game. X3 reads the FiQA embeddings as its semantic subset.
 
-    python x6_data.py --out x6data [--mode full|smoke] [--seeds 5]
+    python x6_data.py --out x6data [--mode full|smoke] [--seeds 5] [--cache x6cache]
+
+With --cache, the texts and embeddings are read from that folder when it holds them for the same
+model and corpus, and written to it otherwise (the workflow keeps it with actions/cache). Smoke and
+full runs use the same corpus and the same plans; a smoke run plans seed 0 only.
 
 Writes to --out: fiqa_corpus.jsonl/.npy, fiqa_queries.jsonl/.npy, scidocs_subset.jsonl/.npy,
 plan_seed<N>.json and manifest.json. Needs numpy, sentence-transformers (with torch) and
@@ -22,6 +26,7 @@ import io
 import json
 import os
 import re
+import shutil
 import sys
 import time
 import urllib.request
@@ -35,19 +40,17 @@ from x3x6_common import DIM, K, SEED_BASE, log
 
 MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 MAX_SEQ_LENGTH = 256
+SCIDOCS_SUBSET = 12_000
 UKP = "https://public.ukp.informatik.tu-darmstadt.de/thakur/BEIR/datasets/{name}.zip"
+EMBEDDED = ("fiqa_corpus", "fiqa_queries", "scidocs_subset")
+EMBEDDING_KEY = f"{MODEL}|max_seq_length={MAX_SEQ_LENGTH}|fiqa=all|scidocs={SCIDOCS_SUBSET}|v1"
 PCTS = (1, 10, 50)
-SIZES: dict[str, dict[str, Any]] = {
-    # None keeps every passage or query.
-    "full": {
-        "fiqa": None,
-        "queries": None,
-        "scidocs": 12_000,
-        "levels": {1000: 8, 100: 16, 10: 24, 1: 24},
-        "zone": 1000,
-    },
-    "smoke": {"fiqa": 6_000, "queries": 600, "scidocs": 1_500, "levels": {1000: 1, 100: 2, 10: 2, 1: 2}, "zone": 300},
-}
+GROUPS = 8
+PER_GROUP = {1000: 1, 100: 2, 10: 3, 1: 3}  # probes per level in each group (8, 16, 24, 24 per seed)
+ZONE = 1000  # a zone reaches 1,000 passages past the m-th near passage
+HUB_SHARE = 0.01  # the share of passages that are hubs
+HUB_DEPTH = 2000  # hubs are counted among each query's 2,000 nearest passages
+DEPTH = 3000  # neighbours kept per query: room for the m-th near passage, hubs skipped, plus the zone
 
 
 # ---- the datasets --------------------------------------------------------------------------------
@@ -159,6 +162,15 @@ def write_texts(folder: Path, name: str, items: list[tuple[str, str]], vectors: 
     np.save(folder / f"{name}.npy", vectors.astype(np.float32))
 
 
+def read_texts(folder: Path, name: str) -> tuple[list[tuple[str, str]], np.ndarray]:
+    items = []
+    with (folder / f"{name}.jsonl").open(encoding="utf-8") as handle:
+        for line in handle:
+            row = json.loads(line)
+            items.append((row["id"], row["text"]))
+    return items, np.load(folder / f"{name}.npy")
+
+
 # ---- embeddings ----------------------------------------------------------------------------------
 
 
@@ -179,8 +191,8 @@ def load_model() -> tuple[Any, dict[str, Any]]:
         revision = model_info(MODEL).sha
     except Exception as error:
         log(f"  could not read the model's revision: {common.short(error, 200)}")
-    described = {"model": MODEL, "revision": revision, "max_seq_length": MAX_SEQ_LENGTH, "threads": torch.get_num_threads()}
-    return model, described
+    described = {"model": MODEL, "revision": revision, "max_seq_length": MAX_SEQ_LENGTH}
+    return model, {**described, "threads": torch.get_num_threads()}
 
 
 def embed(model: Any, texts: list[str], label: str) -> np.ndarray:
@@ -197,6 +209,66 @@ def embed(model: Any, texts: list[str], label: str) -> np.ndarray:
         left = (len(texts) - done) / max(rate, 1e-9) / 60
         log(f"  {label}: {done:,}/{len(texts):,} embedded ({rate:.0f} per s, {left:.1f} min left)")
     return out
+
+
+def cached(cache: Path | None) -> dict[str, Any] | None:
+    """The cache's description, when it holds the texts and embeddings of this model and corpus."""
+    if cache is None or not (cache / "embeddings.json").is_file():
+        return None
+    try:
+        info: dict[str, Any] = json.loads((cache / "embeddings.json").read_text(encoding="utf-8"))
+    except ValueError:
+        return None
+    if info.get("key") != EMBEDDING_KEY:
+        return None
+    for name in EMBEDDED:
+        if not (cache / f"{name}.jsonl").is_file() or not (cache / f"{name}.npy").is_file():
+            return None
+    return info
+
+
+def texts_and_embeddings(out: Path, cache: Path | None) -> dict[str, Any]:
+    """Writes the three embedded tables to `out`, from the cache or computed, and describes them."""
+    found = cached(cache)
+    if found is not None and cache is not None:
+        log(f"  texts and embeddings from the cache ({cache})")
+        for name in EMBEDDED:
+            for suffix in (".jsonl", ".npy"):
+                shutil.copyfile(cache / f"{name}{suffix}", out / f"{name}{suffix}")
+        return {**found, "from_cache": True}
+    clock = time.monotonic()
+    fiqa_rows, fiqa_queries, fiqa_source = fetch("fiqa", need_queries=True)
+    scidocs_rows, _, scidocs_source = fetch("scidocs", need_queries=False)
+    corpus_items = passages(fiqa_rows, "fiqa")
+    query_items = passages(fiqa_queries, "q")
+    far_items = subset([item for item in passages(scidocs_rows, "scid") if item[1]], SCIDOCS_SUBSET, "scidocs")
+    del fiqa_rows, fiqa_queries, scidocs_rows
+    download_s = round(time.monotonic() - clock, 1)
+    log(f"  {len(corpus_items):,} FiQA passages, {len(query_items):,} queries, {len(far_items):,} SciDocs passages")
+    clock = time.monotonic()
+    model, model_info = load_model()
+    tables = {
+        "fiqa_corpus": (corpus_items, embed(model, [t for _, t in corpus_items], "FiQA passages")),
+        "fiqa_queries": (query_items, embed(model, [t for _, t in query_items], "FiQA queries")),
+        "scidocs_subset": (far_items, embed(model, [t for _, t in far_items], "SciDocs passages")),
+    }
+    info = {
+        "key": EMBEDDING_KEY,
+        "embedding": model_info,
+        "sources": {"fiqa": fiqa_source, "scidocs": scidocs_source},
+        "counts": {name: len(items) for name, (items, _) in tables.items()},
+        "timings": {"download_s": download_s, "embed_s": round(time.monotonic() - clock, 1)},
+        "versions": common.versions("sentence-transformers", "torch", "transformers", "huggingface-hub", "tokenizers"),
+    }
+    for name, (items, vectors) in tables.items():
+        write_texts(out, name, items, vectors)
+    if cache is not None:
+        cache.mkdir(parents=True, exist_ok=True)
+        for name in EMBEDDED:
+            for suffix in (".jsonl", ".npy"):
+                shutil.copyfile(out / f"{name}{suffix}", cache / f"{name}{suffix}")
+        (cache / "embeddings.json").write_text(json.dumps(info, indent=2, default=str), encoding="utf-8")
+    return {**info, "from_cache": False}
 
 
 # ---- plans ---------------------------------------------------------------------------------------
@@ -217,80 +289,121 @@ def neighbours(queries: np.ndarray, corpus: np.ndarray, depth: int) -> tuple[np.
     return index, similarity
 
 
+def hub_mask(near_index: np.ndarray, n: int) -> tuple[np.ndarray, dict[str, Any]]:
+    """Hubs: the HUB_SHARE of passages found among the HUB_DEPTH nearest of the most queries."""
+    counts = np.bincount(near_index[:, :HUB_DEPTH].ravel(), minlength=n)
+    take = max(1, round(HUB_SHARE * n))
+    order = np.argsort(-counts, kind="stable")
+    mask = np.zeros(n, dtype=bool)
+    mask[order[:take]] = True
+    expected = near_index.shape[0] * min(HUB_DEPTH, near_index.shape[1]) / n
+    described = {
+        "hubs": int(take),
+        "count_threshold": int(counts[order[take - 1]]),
+        "count_max": int(counts.max()),
+        "count_median": float(np.median(counts)),
+        "count_expected": round(float(expected), 1),
+    }
+    return mask, described
+
+
+class Candidate:
+    """A query's near set (its m nearest passages that are not hubs) and its zone."""
+
+    def __init__(self, q: int, m: int, near_index: np.ndarray, near_similarity: np.ndarray, hubs: np.ndarray) -> None:
+        ranked = near_index[q]
+        positions = np.flatnonzero(~hubs[ranked])[:m]
+        self.ok = len(positions) == m and int(positions[-1]) + 1 + ZONE <= ranked.shape[0]
+        if not self.ok:
+            return
+        depth = int(positions[-1]) + 1 + ZONE  # the zone: up to the m-th near passage, plus ZONE
+        self.near = ranked[positions]
+        self.zone = ranked[:depth]
+        self.tau = float(near_similarity[q, depth - 1])
+        self.rank_m = int(positions[-1]) + 1
+
+
 def make_plan(
     seed: int,
-    sizes: dict[str, Any],
     corpus: np.ndarray,
     queries: np.ndarray,
     query_ids: list[str],
     near_index: np.ndarray,
     near_similarity: np.ndarray,
+    hubs: np.ndarray,
     far_vectors: np.ndarray,
     tokens: np.ndarray,
 ) -> dict[str, Any]:
-    levels: dict[int, int] = sizes["levels"]
-    extra: int = sizes["zone"]
     n = len(corpus)
     rng = np.random.default_rng([SEED_BASE, seed])
-    order = rng.permutation(len(queries))
-    secret = np.zeros(n, dtype=bool)
-    zone = np.zeros(n, dtype=bool)
+    order = [int(q) for q in rng.permutation(len(queries))]
+    claimed = np.zeros(n, dtype=bool)  # every probe's near set: disjoint across the seed
     used: set[int] = set()
     probes: list[dict[str, Any]] = []
-    shortfall: dict[str, int] = {}
-    for m in sorted(levels, reverse=True):
-        depth = m + extra
-        if depth > near_index.shape[1]:
-            raise RuntimeError(f"level {m} needs {depth} neighbours; {near_index.shape[1]} were computed")
-        got = 0
-        for position in order:
-            if got >= levels[m]:
-                break
-            q = int(position)
-            if q in used:
-                continue
-            near = near_index[q, :m]
-            region = near_index[q, :depth]
-            # No probe's near set inside another probe's zone, in either direction.
-            if zone[near].any() or secret[region].any():
-                continue
-            secret[near] = True
-            zone[region] = True
-            used.add(q)
-            got += 1
-            probes.append(
-                {
-                    "qindex": q,
-                    "qid": query_ids[q],
-                    "level": m,
-                    "near": [int(i) for i in near],
-                    "tau": float(near_similarity[q, depth - 1]),
-                }
-            )
-        if got < levels[m]:
-            shortfall[str(m)] = got
-            log(f"  seed {seed}: level {m}: only {got} of {levels[m]} probes could be placed")
+    shortfall: list[dict[str, Any]] = []
+    for group in range(GROUPS):
+        zone = np.zeros(n, dtype=bool)  # the group's zones
+        secret = np.zeros(n, dtype=bool)  # the group's near sets
+        for m in sorted(PER_GROUP, reverse=True):
+            for _ in range(PER_GROUP[m]):
+                chosen: tuple[int, Candidate] | None = None
+                for q in order:
+                    if q in used:
+                        continue
+                    c = Candidate(q, m, near_index, near_similarity, hubs)
+                    # Within the group, no near set inside a mate's zone, in either direction;
+                    # across the seed, no passage in two near sets.
+                    if not c.ok or claimed[c.near].any() or zone[c.near].any() or secret[c.zone].any():
+                        continue
+                    chosen = (q, c)
+                    break
+                if chosen is None:
+                    shortfall.append({"group": group, "level": m})
+                    log(f"  seed {seed}: group {group}: no probe could be placed at level {m}")
+                    continue
+                q, c = chosen
+                used.add(q)
+                claimed[c.near] = True
+                secret[c.near] = True
+                zone[c.zone] = True
+                probes.append(
+                    {
+                        "qindex": q,
+                        "qid": query_ids[q],
+                        "group": group,
+                        "level": m,
+                        "near": [int(i) for i in c.near],
+                        "rank_m": c.rank_m,
+                        "tau": c.tau,
+                    }
+                )
     if not probes:
         raise RuntimeError(f"seed {seed}: no probe could be placed")
-    secret_ids = np.flatnonzero(secret)
 
-    # W0's far chunks: SciDocs passages less similar to every probe than any probe's zone boundary.
+    # Far chunks: SciDocs passages less similar to every probe than any probe's zone boundary,
+    # assigned without replacement across the groups while they last.
     probe_vectors = queries[[p["qindex"] for p in probes]]
     boundary = min(p["tau"] for p in probes)
     closest = (far_vectors @ probe_vectors.T).max(axis=1)
     eligible = np.flatnonzero(closest < boundary)
-    fallback = False
-    if not len(eligible):
-        fallback = True
+    fallback = not len(eligible)
+    if fallback:
         eligible = np.argsort(closest)[: max(1, len(closest) // 2)]
     eligible = eligible[rng.permutation(len(eligible))]
-    near_order = secret_ids[rng.permutation(len(secret_ids))]
-    far = [
-        [int(d), int(eligible[i % len(eligible)]), int(tokens[d])] for i, d in enumerate(near_order)
-    ]  # [near passage, first SciDocs passage, word tokens]
+    used_far = 0
+    groups: list[dict[str, Any]] = []
+    for group in range(GROUPS):
+        members = [p for p in probes if p["group"] == group]
+        near = np.array(sorted(i for p in members for i in p["near"]), dtype=np.int64)
+        near = near[rng.permutation(len(near))]
+        far = []
+        for d in near:
+            far.append([int(d), int(eligible[used_far % len(eligible)]), int(tokens[d])])
+            used_far += 1
+        groups.append({"group": group, "probes": [p["qindex"] for p in members], "far": far})
 
     buckets = rng.integers(0, 100, size=n)
-    readable = ~secret
+    readable = ~claimed
     exact: dict[str, dict[str, Any]] = {}
     for probe in probes:
         similarity = corpus @ queries[probe["qindex"]]
@@ -314,9 +427,11 @@ def make_plan(
             }
         exact[str(probe["qindex"])] = per
 
-    counts = {str(m): sum(1 for p in probes if p["level"] == m) for m in levels}
+    counts = {str(m): sum(1 for p in probes if p["level"] == m) for m in PER_GROUP}
+    secret_ids = np.flatnonzero(claimed)
     notes = {
         "probes": counts,
+        "groups_full": sum(1 for g in groups if len(g["probes"]) == sum(PER_GROUP.values())),
         "shortfall": shortfall,
         "secret": int(len(secret_ids)),
         "far_eligible": int(len(eligible)),
@@ -324,18 +439,19 @@ def make_plan(
         "far_fallback": fallback,
         "boundary": boundary,
         "far_closest_max": float(closest[eligible].max()) if len(eligible) else None,
+        "rank_m_max": {str(m): max((p["rank_m"] for p in probes if p["level"] == m), default=None) for m in PER_GROUP},
     }
-    log(f"  seed {seed}: probes {counts}, {len(secret_ids):,} secrets, {len(eligible):,} eligible far passages")
+    log(f"  seed {seed}: probes {counts}, {notes['groups_full']} full groups, {len(secret_ids):,} secrets")
     return {
         "seed": seed,
         "k": K,
         "pcts": list(PCTS),
-        "levels": {str(m): c for m, c in levels.items()},
-        "zone_extra": extra,
+        "per_group": {str(m): c for m, c in PER_GROUP.items()},
+        "zone_extra": ZONE,
         "buckets": [int(b) for b in buckets],
         "secret": [int(i) for i in secret_ids],
         "probes": probes,
-        "far": far,
+        "groups": groups,
         "exact": exact,
         "notes": notes,
     }
@@ -345,72 +461,46 @@ def make_plan(
 
 
 def run(args: argparse.Namespace) -> int:
-    sizes = SIZES[args.mode]
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
-    timings: dict[str, float] = {}
-    clock = time.monotonic()
-
-    log("== datasets")
-    fiqa_rows, fiqa_queries, fiqa_source = fetch("fiqa", need_queries=True)
-    scidocs_rows, _, scidocs_source = fetch("scidocs", need_queries=False)
-    corpus_items = subset(passages(fiqa_rows, "fiqa"), sizes["fiqa"], "fiqa")
-    query_items = subset(passages(fiqa_queries, "q"), sizes["queries"], "queries")
-    far_items = subset([item for item in passages(scidocs_rows, "scid") if item[1]], sizes["scidocs"], "scidocs")
-    del fiqa_rows, fiqa_queries, scidocs_rows
-    timings["download_s"] = round(time.monotonic() - clock, 1)
-    log(f"  {len(corpus_items):,} FiQA passages, {len(query_items):,} queries, {len(far_items):,} SciDocs passages")
-
-    log("== embeddings")
-    clock = time.monotonic()
-    model, model_info = load_model()
-    corpus = embed(model, [t for _, t in corpus_items], "FiQA passages")
-    queries = embed(model, [t for _, t in query_items], "FiQA queries")
-    far_vectors = embed(model, [t for _, t in far_items], "SciDocs passages")
-    timings["embed_s"] = round(time.monotonic() - clock, 1)
-    write_texts(out, "fiqa_corpus", corpus_items, corpus)
-    write_texts(out, "fiqa_queries", query_items, queries)
-    write_texts(out, "scidocs_subset", far_items, far_vectors)
+    cache = Path(args.cache) if args.cache else None
+    log("== texts and embeddings")
+    described = texts_and_embeddings(out, cache)
+    corpus_items, corpus = read_texts(out, "fiqa_corpus")
+    query_items, queries = read_texts(out, "fiqa_queries")
+    _, far_vectors = read_texts(out, "scidocs_subset")
 
     log("== plans")
     clock = time.monotonic()
-    depth = max(sizes["levels"]) + sizes["zone"]
-    near_index, near_similarity = neighbours(queries, corpus, depth)
+    near_index, near_similarity = neighbours(queries, corpus, DEPTH)
+    hubs, hub_info = hub_mask(near_index, len(corpus))
+    log(f"  hubs: {hub_info}")
     tokens = np.array([common.count_tokens(t) for _, t in corpus_items], dtype=np.int64)
     query_ids = [key for key, _ in query_items]
     summaries = {}
     for seed in range(args.seeds):
-        plan = make_plan(seed, sizes, corpus, queries, query_ids, near_index, near_similarity, far_vectors, tokens)
+        plan = make_plan(seed, corpus, queries, query_ids, near_index, near_similarity, hubs, far_vectors, tokens)
+        plan["hubs"] = hub_info
         common.plan_path(out, seed).write_text(json.dumps(plan), encoding="utf-8")
         summaries[str(seed)] = plan["notes"]
-    timings["plans_s"] = round(time.monotonic() - clock, 1)
+    plans_s = round(time.monotonic() - clock, 1)
 
     manifest = {
         "experiment": "x3x6-data",
         "mode": args.mode,
-        "sizes": {**sizes, "levels": {str(m): c for m, c in sizes["levels"].items()}},
         "seeds": args.seeds,
-        "embedding": model_info,
-        "sources": {"fiqa": fiqa_source, "scidocs": scidocs_source},
-        "counts": {
-            "fiqa_corpus": len(corpus_items),
-            "fiqa_queries": len(query_items),
-            "scidocs_subset": len(far_items),
-        },
+        "design": {"groups": GROUPS, "per_group": {str(m): c for m, c in PER_GROUP.items()}, "zone": ZONE},
+        "hubs": hub_info,
+        **{key: described.get(key) for key in ("key", "embedding", "sources", "counts", "versions", "from_cache")},
         "tokens": {"fiqa_mean": float(tokens.mean()), "fiqa_median": float(np.median(tokens))},
         "plans": summaries,
-        "timings": timings,
-        "versions": common.versions(
-            "sentence-transformers", "torch", "transformers", "huggingface-hub", "tokenizers", "numpy", "pyarrow"
-        ),
+        "timings": {**(described.get("timings") or {}), "plans_s": plans_s},
+        "numpy": np.__version__,
         "host": common.host(),
     }
     (out / "manifest.json").write_text(json.dumps(manifest, indent=2, default=str), encoding="utf-8")
-    common.annotate(
-        "notice",
-        f"x6 data ({args.mode})",
-        json.dumps({k: manifest[k] for k in ("counts", "sources", "timings", "plans", "embedding")}, default=str),
-    )
+    shown = {k: manifest[k] for k in ("counts", "sources", "timings", "hubs", "plans", "from_cache")}
+    common.annotate("notice", f"x6 data ({args.mode})", json.dumps(shown, default=str))
     log("== done")
     return 0
 
@@ -418,8 +508,9 @@ def run(args: argparse.Namespace) -> int:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--out", default="x6data")
-    parser.add_argument("--mode", choices=sorted(SIZES), default="full")
+    parser.add_argument("--mode", choices=("full", "smoke"), default="full")
     parser.add_argument("--seeds", type=int, default=5)
+    parser.add_argument("--cache", default="", help="a folder that keeps the texts and embeddings between runs")
     args = parser.parse_args(argv)
     if args.mode == "smoke":
         args.seeds = min(args.seeds, 1)

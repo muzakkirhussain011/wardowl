@@ -10,15 +10,18 @@ groups per subject G (1 to 40,000), it times the store's own translation of the 
 `Or(In(allowed_users, [u]), In(allowed_groups, G groups + "*"))`, runs a warm-up pass and the timed
 passes of pre-filtered retrievals through wardowl's public API, and records latency, recall@10
 against exact search over the pool, and every error with its message. For pgvector it adds EXPLAIN
-ANALYZE of each level's first query.
+ANALYZE of each level's first query. Each seed runs in a process of its own, so a store that crashes
+the client process (Chroma, at 40,000 groups) loses that seed's remaining levels only; the crash is
+recorded (Amendment 1 of PREREG_X3_X6.md).
 
-Writes <out>/x3-<store>.jsonl. The statistics are x3_stats.py's. Design: PREREG_X3_X6.md.
+Writes <out>/x3-<store>.jsonl. The statistics are x3_stats.py's.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import subprocess
 import sys
 import time
 from pathlib import Path
@@ -182,8 +185,9 @@ def play_seed(
                 reason = "a smaller level timed out"
                 records.write({"type": "level", "seed": seed, "G": level, "run": False, "reason": reason})
                 continue
-            if time.time() > hard_deadline:
+            if hard_deadline and time.time() > hard_deadline:
                 raise TimeoutError("the job's hard deadline passed during the seed")
+            records.write({"type": "level-start", "seed": seed, "G": level})
             subject = Subject(f"reader-{level}", [f"L{level}-{j}" for j in range(level)])
             f = authorizer.filter_for(subject)
             translated = translate(target, f, settings["translate_reps"])
@@ -192,7 +196,9 @@ def play_seed(
             reduced = refused = level_timeout = False
             errors = 0
             for number in range(settings["passes"] + 1):  # pass 0 is the warm-up
-                for qi in range(used):
+                for qi in range(len(queries)):
+                    if qi >= used:  # a slow level runs its first `slow_queries` queries only
+                        break
                     reference = world["exact"][qi]
                     observed = measure(retriever, queries[qi], subject, reference["tstar"], reference["R"])
                     records.write({"type": "retrieval", "seed": seed, "G": level, "pass": number, "warmup": number == 0,
@@ -234,65 +240,100 @@ def play_seed(
             log(f"  seed {seed}: dropping the index failed: {common.short(error, 200)}")
 
 
-def run(args: argparse.Namespace) -> int:
-    data = Path(args.data)
-    out = Path(args.out)
-    base = {"exp": "x3", "store": args.store, "mode": args.mode, "run": common.RUN_ID}
-    records = common.Records(out / f"x3-{args.store}.jsonl", base)
-    deadline = common.deadline_for(args.budget_minutes, args.group_deadline, args.remaining)
-    hard_deadline = (args.group_deadline + 600) if args.group_deadline else deadline + 1800
-    semantic = query_pool = None
-    source = "synthetic-only: the data job's files are missing"
-    if common.data_ready(data):
-        semantic = np.load(data / "fiqa_corpus.npy")
-        query_pool = np.load(data / "fiqa_queries.npy")
-        source = f"{len(semantic):,} FiQA passage embeddings and {len(query_pool):,} FiQA query embeddings"
-    else:
-        common.annotate("warning", f"x3 {args.store}", source)
-    records.write({"type": "start", "args": vars(args), "settings": MODES[args.mode], "levels": list(LEVELS),
-                   "corpus": source, "host": common.host(), "deadline": deadline})  # fmt: skip
+def load(data: Path) -> tuple[np.ndarray | None, np.ndarray | None, str]:
+    """The data job's FiQA passage and query embeddings, or None for both (all synthetic)."""
+    if not common.data_ready(data):
+        return None, None, "synthetic-only: the data job's files are missing"
+    semantic = np.load(data / "fiqa_corpus.npy")
+    query_pool = np.load(data / "fiqa_queries.npy")
+    described = f"{len(semantic):,} FiQA passage embeddings and {len(query_pool):,} FiQA query embeddings"
+    return semantic, query_pool, described
+
+
+def run_seed(args: argparse.Namespace, records: common.Records) -> int:
+    """One seed, in a process of its own (Amendment 1): a store that crashes the process loses that seed's
+    remaining levels only. Exit status 0, 4 when the job's hard deadline passed, 5 on an error."""
+    seed = args.only_seed
+    semantic, query_pool, _ = load(Path(args.data))
     target = common.make_target(args.store)
     try:
         attempts = common.connect(target)
     except Exception as error:
         versions = common.target_versions(target, reachable=False)
-        records.write({"type": "setup-error", "error": common.short(error, 1000), "versions": versions})
+        records.write({"type": "setup-error", "seed": seed, "error": common.short(error, 1000), "versions": versions})
         common.annotate("error", f"x3 {args.store} setup", common.short(error, 1000))
         return 1
-    records.write({"type": "versions", "attempts": attempts, **common.target_versions(target, reachable=True)})
-    durations: list[float] = []
-    outcomes: list[dict[str, Any]] = []
+    versions = common.target_versions(target, reachable=True)
+    records.write({"type": "versions", "seed": seed, "attempts": attempts, **versions})
+    started = time.time()
     status = 0
     try:
-        for seed in range(args.seeds):
-            if durations and time.time() + 1.2 * max(durations) > deadline:
-                records.write({"type": "seed-skipped", "seed": seed, "reason": "not enough time left in the budget"})
-                common.annotate("warning", f"x3 {args.store}", f"seed {seed} skipped: not enough time left")
-                continue
-            started = time.time()
-            log(f"x3 {args.store}: seed {seed}")
-            try:
-                outcome = play_seed(seed, args, target, semantic, query_pool, records, hard_deadline)
-            except TimeoutError as error:
-                records.write({"type": "seed-aborted", "seed": seed, "error": common.short(error)})
-                status = 4
-                break
-            except Exception as error:
-                # A build that fails is recorded, and the next seed is tried on a fresh index.
-                records.write({"type": "seed-error", "seed": seed, "error": common.short(error, 1500)})
-                common.annotate("error", f"x3 {args.store} seed {seed}", common.short(error, 1500))
-                status = 5
-                outcome = {"seed": seed, "complete": False, "error": common.short(error, 300)}
-            outcome["seconds"] = round(time.time() - started, 1)
-            durations.append(time.time() - started)
-            outcomes.append(outcome)
-            records.write({"type": "seed-end", **outcome})
-            log(f"x3 {args.store}: seed {seed} done in {outcome['seconds'] / 60:.1f} min")
+        outcome = play_seed(seed, args, target, semantic, query_pool, records, args.hard_deadline)
+    except TimeoutError as error:
+        records.write({"type": "seed-aborted", "seed": seed, "error": common.short(error)})
+        outcome, status = {"seed": seed, "complete": False, "error": common.short(error, 300)}, 4
+    except Exception as error:
+        # A build or level that fails is recorded, and the next seed is tried on a fresh index.
+        records.write({"type": "seed-error", "seed": seed, "error": common.short(error, 1500)})
+        common.annotate("error", f"x3 {args.store} seed {seed}", common.short(error, 1500))
+        outcome, status = {"seed": seed, "complete": False, "error": common.short(error, 300)}, 5
     finally:
         target.close()
-        records.write({"type": "end", "outcomes": outcomes, "status": status})
-        records.close()
-    common.annotate("notice" if status == 0 else "warning", f"x3 {args.store}", json.dumps(outcomes, default=str))
+    outcome["seconds"] = round(time.time() - started, 1)
+    records.write({"type": "seed-end", **outcome})
+    log(f"x3 {args.store}: seed {seed} done in {outcome['seconds'] / 60:.1f} min")
+    return status
+
+
+def run(args: argparse.Namespace) -> int:
+    out = Path(args.out)
+    base = {"exp": "x3", "store": args.store, "mode": args.mode, "run": common.RUN_ID}
+    records = common.Records(out / f"x3-{args.store}.jsonl", base)
+    if args.only_seed is not None:
+        try:
+            return run_seed(args, records)
+        finally:
+            records.close()
+    deadline = common.deadline_for(args.budget_minutes, args.group_deadline, args.remaining)
+    hard_deadline = (args.group_deadline + 600) if args.group_deadline else deadline + 1800
+    _, _, source = load(Path(args.data))
+    if source.startswith("synthetic-only"):
+        common.annotate("warning", f"x3 {args.store}", source)
+    records.write({"type": "start", "args": vars(args), "settings": MODES[args.mode], "levels": list(LEVELS),
+                   "corpus": source, "host": common.host(), "deadline": deadline})  # fmt: skip
+    durations: list[float] = []
+    statuses: dict[int, int] = {}
+    status = 0
+    for seed in range(args.seeds):
+        if durations and time.time() + 1.2 * max(durations) > deadline:
+            records.write({"type": "seed-skipped", "seed": seed, "reason": "not enough time left in the budget"})
+            common.annotate("warning", f"x3 {args.store}", f"seed {seed} skipped: not enough time left")
+            continue
+        started = time.time()
+        log(f"x3 {args.store}: seed {seed}")
+        command = [sys.executable, str(Path(__file__).resolve()), "--store", args.store, "--data", args.data,
+                   "--out", args.out, "--mode", args.mode, "--seeds", str(args.seeds), "--only-seed", str(seed),
+                   "--hard-deadline", str(hard_deadline)]  # fmt: skip
+        limit = max(60.0, hard_deadline - time.time() + 300)
+        try:
+            code = subprocess.run(command, check=False, timeout=limit).returncode  # noqa: S603
+        except subprocess.TimeoutExpired:
+            code = -999
+        statuses[seed] = code
+        durations.append(time.time() - started)
+        if code not in (0, 1, 4, 5):
+            # The process died (a signal, such as a segmentation fault, or the time limit): the level it
+            # had started is the last `level-start` record of the seed without a `level` record.
+            records.write({"type": "seed-crash", "seed": seed, "returncode": code})
+            common.annotate("warning", f"x3 {args.store}", f"seed {seed}: the process ended with status {code}")
+            status = 6
+        elif code != 0:
+            status = max(status, code)
+        if code == 4:
+            break
+    records.write({"type": "end", "statuses": statuses, "status": status})
+    records.close()
+    common.annotate("notice" if status == 0 else "warning", f"x3 {args.store}", json.dumps(statuses))
     return status
 
 
@@ -306,6 +347,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--budget-minutes", type=float, default=330)
     parser.add_argument("--group-deadline", type=float, default=0)
     parser.add_argument("--remaining", type=int, default=1)
+    parser.add_argument("--only-seed", type=int, default=None, help=argparse.SUPPRESS)  # the per-seed child
+    parser.add_argument("--hard-deadline", type=float, default=0.0, help=argparse.SUPPRESS)
     args = parser.parse_args(argv)
     if args.mode == "smoke":
         args.seeds = min(args.seeds, 1)

@@ -255,7 +255,9 @@ def mean_cell(values: np.ndarray, clusters: np.ndarray, resamples: int, rng: np.
     return {"mean": float(values.mean()), "lo": lo, "hi": hi, "n": len(values), "clusters": clusters_n}
 
 
-def ratio_cell(num: np.ndarray, den: np.ndarray, clusters: np.ndarray, resamples: int, rng: np.random.Generator) -> Cell:
+def ratio_cell(
+    num: np.ndarray, den: np.ndarray, clusters: np.ndarray, resamples: int, rng: np.random.Generator
+) -> Cell:
     if not len(num):
         return {"ratio": math.nan, "lo": math.nan, "hi": math.nan, "median_ratio": math.nan, "n": 0}
     boot = [(w @ num) / (w @ den) for w in common.cluster_weights(clusters, resamples, rng)]
@@ -530,7 +532,8 @@ class Judge:
             c = self.cell("AA", store, config, "all", "all", "latency")
             ok = None if not self.usable(c) else bool(c and 0.40 <= c["paired_lo"] and c["paired_hi"] <= 0.60)
             self.g1[(store, config)] = ok
-            self.guard_rows.append({"guard": "G1", "store": store, "config": config, "passed": ok, "evidence": self.show(c)})
+            row = {"guard": "G1", "store": store, "config": config, "passed": ok}
+            self.guard_rows.append({**row, "evidence": self.show(c)})
         for store in sorted({s for s, _ in self.data.configs}):
             if store == "memory":
                 continue  # G2 names pre-exact and FAISS pre only
@@ -542,9 +545,8 @@ class Judge:
             ok = None if not results else all(rate <= 0.01 for _, rate in results)
             self.g2[store] = ok
             evidence = "; ".join(f"{c}: change rate {r:.4f}" for c, r in results)
-            self.guard_rows.append(
-                {"guard": "G2", "store": store, "config": ",".join(c for c, _ in results), "passed": ok, "evidence": evidence}
-            )
+            row = {"guard": "G2", "store": store, "config": ",".join(c for c, _ in results), "passed": ok}
+            self.guard_rows.append({**row, "evidence": evidence})
 
     def latency_guard(self, store: str, config: str) -> bool:
         return self.g1.get((store, config)) is True
@@ -573,7 +575,15 @@ class Judge:
         return CONFIRMED if 0.40 <= c["paired_lo"] and c["paired_hi"] <= upper else INCONCLUSIVE
 
     def part(
-        self, hypothesis: str, store: str, config: str, label: str, outcome: str, evidence: str, *, latency: bool = False
+        self,
+        hypothesis: str,
+        store: str,
+        config: str,
+        label: str,
+        outcome: str,
+        evidence: str,
+        *,
+        latency: bool = False,
     ) -> str:
         if latency and outcome != INCONCLUSIVE and not self.latency_guard(store, config):
             outcome, evidence = INCONCLUSIVE, f"{evidence}; guard G1 did not pass"
@@ -618,8 +628,8 @@ class Judge:
             for observable in self.observables(store, config):
                 c = self.cell("W", store, config, 1, "all", observable)
                 label = f"(c) m=1 no channel in {observable}"
-                outcome = self.absent(c)
-                outcomes.append(self.part("H1", store, config, label, outcome, self.show(c), latency=observable == "latency"))
+                latency = observable == "latency"
+                outcomes.append(self.part("H1", store, config, label, self.absent(c), self.show(c), latency=latency))
         self.verdict("H1", "vector stores", outcomes)
 
     def h2(self) -> None:
@@ -631,7 +641,8 @@ class Judge:
             outcomes.append(self.part("H2", store, config, label, self.absent(c), self.show(c), latency=True))
             c = self.cell("W", store, config, 1000, "all", "latency")
             label = "(a) m=1000 latency upper <= 0.65"
-            outcomes.append(self.part("H2", store, config, label, self.absent(c, upper=0.65), self.show(c), latency=True))
+            outcome = self.absent(c, upper=0.65)
+            outcomes.append(self.part("H2", store, config, label, outcome, self.show(c), latency=True))
             for pct in (10, 50):
                 c = self.cell("W", store, config, 1000, pct, "count")
                 label = f"(b) m=1000 p={pct} count >= 0.95"
@@ -655,8 +666,8 @@ class Judge:
         for observable in self.observables("qdrant", "pre"):
             c = self.cell("W", "qdrant", "pre", "all", "low", observable)
             label = f"p in (1, 10): no channel in {observable}"
-            outcome = self.absent(c)
-            outcomes.append(self.part("H3c", "qdrant", "pre", label, outcome, self.show(c), latency=observable == "latency"))
+            latency = observable == "latency"
+            outcomes.append(self.part("H3c", "qdrant", "pre", label, self.absent(c), self.show(c), latency=latency))
         self.verdict("H3c", "qdrant", outcomes)
 
     def h4(self) -> None:
@@ -699,7 +710,8 @@ class Judge:
             self.verdict("H5a", store, outcomes)
         outcomes = []
         c = self.cell("W", "pgvector", "bm25-pre", "all", "all", "score")
-        outcomes.append(self.part("H5b", "pgvector", "bm25-pre", "no channel in the score", self.absent(c), self.show(c)))
+        label = "no channel in the score"
+        outcomes.append(self.part("H5b", "pgvector", "bm25-pre", label, self.absent(c), self.show(c)))
         found = self.change("pgvector", "bm25-pre", "all")
         if found is None or not self.change_usable(found):
             outcome = INCONCLUSIVE
@@ -814,7 +826,8 @@ def report(
         "",
     ]
     lines += ["## Health", ""]
-    header = ["store", "mode", "seeds done", "skipped", "retrievals", "errors", "stopped", "build s", "setup error", "leaks"]
+    header = ["store", "mode", "seeds done", "skipped", "retrievals", "errors", "stopped", "build s"]
+    header += ["setup error", "leaks"]
     rows: list[list[Any]] = []
     for h in health_rows:
         rows.append([h["store"], h["mode"], h["seeds_done"], h["skipped"], h["retrievals"], json.dumps(h["errors"])])
@@ -847,7 +860,8 @@ def report(
         if key[0] != "W" or key[4] != "all" or not c["deterministic"]:
             continue
         null = (changes.get(("AA", c["store"], c["config"], c["level"], "all")) or {}).get("rate")
-        rows.append([c["store"], c["config"], c["level"], c["rate"], f"[{c['lo']:.2f}, {c['hi']:.2f}]", null, c["pairs"]])
+        span = f"[{c['lo']:.2f}, {c['hi']:.2f}]"
+        rows.append([c["store"], c["config"], c["level"], c["rate"], span, null, c["pairs"]])
     lines += common.markdown_table(["store", "config", "m", "rate", "interval", "A/A rate", "pairs"], rows)
     lines += ["## Every verdict part", ""]
     rows = [

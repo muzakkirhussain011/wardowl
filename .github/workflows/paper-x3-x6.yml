@@ -51,6 +51,13 @@ jobs:
         with: { persist-credentials: false }
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with: { python-version: "3.12" }
+      # The texts and embeddings of the full corpus, kept between runs: about 50 minutes of CPU time.
+      # The key names the model and corpus; x6_data.py checks it again before using the cache.
+      - uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
+        id: embeddings
+        with:
+          path: x6cache
+          key: x3x6-embeddings-minilm-l6-v2-seq256-fiqa-all-scidocs12000-v1
       # Not in uv.lock (the library does not use them): pinned by version, the CPU build of torch.
       - name: Install the embedding stack
         run: |
@@ -62,7 +69,13 @@ jobs:
       - name: Download, embed and plan
         run: |
           exec > >(tee -a logs/data.log) 2>&1
-          python benchmarks/paper/x6_data.py --mode "$X3X6_MODE" --seeds "$SEEDS" --out x6data
+          python benchmarks/paper/x6_data.py --mode "$X3X6_MODE" --seeds "$SEEDS" --out x6data --cache x6cache
+      # Saved as soon as the embeddings exist, even if planning failed after them.
+      - uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
+        if: always() && steps.embeddings.outputs.cache-hit != 'true' && hashFiles('x6cache/embeddings.json') != ''
+        with:
+          path: x6cache
+          key: x3x6-embeddings-minilm-l6-v2-seq256-fiqa-all-scidocs12000-v1
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: x3x6-data

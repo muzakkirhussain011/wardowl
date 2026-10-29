@@ -31,8 +31,9 @@ in [`PREREG_X3_X6.md`](PREREG_X3_X6.md) (commit 5da58ee, 2026-10-29).
 
 A push to `paper/x3-x6` starts it; the size comes from `X3X6_MODE` at the top of the workflow:
 
-- **smoke**: 6,000 FiQA passages, one seed, one repetition, 3 to 7 queries or probes per level. It
-  exists to find faults in the harness in minutes; its numbers are never analysed or reported.
+- **smoke**: X6 on the full corpus but group 0 of seed 0 and one repetition; X3 on 8,000 vectors,
+  one seed and 3 queries. It exists to find faults in the harness; its numbers are never analysed or
+  reported.
 - **full**: the pre-registered design.
 
 Jobs:
@@ -63,9 +64,9 @@ Jobs:
 
 | Job | Estimate |
 |---|---|
-| data | 30 to 60 min (about 76,000 texts embedded on 4 CPUs) |
-| x6-pgvector, x6-qdrant | about 2 to 2.5 h each (3 builds of about 57,600 chunks per seed, about 26,000 retrievals per seed) |
-| x6-elasticsearch | about 3 h (7 configurations) |
+| data | about 55 min the first time (76,000 texts embedded on 4 CPUs at about 25 per second), a few minutes from the cache |
+| x6-pgvector, x6-qdrant | about 2.5 to 3 h each (10 builds of about 57,600 chunks per seed, about 26,000 retrievals per seed) |
+| x6-elasticsearch | about 3.5 to 4 h (7 configurations) |
 | x6-faiss, x6-memory | about 1.5 to 2 h each (pre-filtering and in-memory search scan the corpus in Python) |
 | x3 jobs | 1 to 3 h each (5 builds of 100,000 vectors; pgvector at 40,000 groups takes seconds per query) |
 | summary | 10 to 30 min (10,000 bootstrap resamples per cell) |
@@ -90,11 +91,19 @@ silently dropped.
 - **Far chunks come from another domain** (SciDocs) and are cut or extended to the same word count as
   the passage they replace, so the corpus size and total length match and BM25's length
   normalisation cannot tell the worlds apart; only the content differs.
-- **Probes are placed so that no probe's secrets lie within another probe's zone** (its m + 1,000
-  nearest passages), so each probe sees exactly its own m secrets within the depth the layer explores.
-- **W0, W1 and SEP are live at once and queried in a fresh random order in every repetition**, so time
-  drift, caches and garbage collection affect every world alike; SEP queried twice gives the A/A null
-  that guards every latency verdict.
+- **Probes come in 8 groups of 9, and W0 is built per group** (Amendment 1). W1 holds every group's
+  secrets; W0_g replaces group g's secrets only, so a probe's two worlds differ in its own group's
+  secrets alone. Within a group, no probe's secrets lie within another's zone (its m nearest
+  passages plus 1,000); across groups, no passage is a secret twice. Hub passages, the 1% that lie
+  among the nearest of most queries, are never secrets. The first smoke run showed why: with one
+  shared W0, a single probe of seven could be placed.
+- **W0_g, W1 and SEP are live at once and queried in a fresh random order in every repetition**, so
+  time drift, caches and garbage collection affect every world alike; SEP queried twice gives the A/A
+  null that guards every latency verdict.
+- **The embeddings are cached between runs** (`actions/cache`, keyed by model and corpus), so only the
+  first run pays the 50 minutes of CPU embedding; smoke runs embed and plan at full scale.
+- **X3 runs each seed in its own process**: in the smoke run, Chroma ended the process with a
+  segmentation fault at 40,000 groups, which would otherwise have lost every later seed.
 - **Exact pre-filtering** is measured with pgvector's index scans off, Qdrant's `exact=True`, and an
   Elasticsearch `script_score` backend written for the harness (a subclass of wardowl's
   `ElasticsearchBackend`): wardowl has no exact switch for Elasticsearch.

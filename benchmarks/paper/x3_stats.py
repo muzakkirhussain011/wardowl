@@ -9,8 +9,8 @@ Reads every x3-<store>.jsonl under --in and writes, to --out:
 * x3_ratios.csv: latency ratios between levels, paired by query (p50 over p50, bootstrapped);
 * x3_recall.csv: recall differences between levels, paired by query;
 * x3_errors.csv: every distinct error message per (store, G);
-* x3_verdicts.csv and x3_report.md: the verdict on each pre-registered hypothesis, by the rules of
-  PREREG_X3_X6.md and nothing else.
+* x3_health.csv, x3_verdicts.csv and x3_report.md: what ran, and the verdict on each pre-registered
+  hypothesis, by the rules of PREREG_X3_X6.md and nothing else.
 
     python x3_stats.py --in parts --out reports [--resamples 10000] [--seed 20261029] [--annotate]
 
@@ -24,6 +24,7 @@ import json
 import math
 import sys
 from collections import defaultdict
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
@@ -44,7 +45,17 @@ PREDICTED = {
     "memory": "accepts",
     "chroma": "refuses",
 }
-RECALL_INVARIANT = ("qdrant", "elasticsearch", "opensearch", "redis", "weaviate", "milvus", "mongodb", "chroma", "vespa")
+RECALL_INVARIANT = (
+    "qdrant",
+    "elasticsearch",
+    "opensearch",
+    "redis",
+    "weaviate",
+    "milvus",
+    "mongodb",
+    "chroma",
+    "vespa",
+)
 EXACT = ("faiss", "lancedb")
 NO_RECALL = ("memory",)  # ranks by words: recall against the dense exact answer is not defined
 MIN_CLUSTERS = 20
@@ -52,24 +63,31 @@ MIN_SEEDS = 5
 MAX_ERROR_RATE = 0.05
 CONFIRMED, FALSIFIED, INCONCLUSIVE = "confirmed", "falsified", "inconclusive"
 
+Row = dict[str, Any]
+Query = tuple[int, int]  # (seed, query)
+
 
 class Data:
-    def __init__(self, records: list[dict[str, Any]], resamples: int, seed: int) -> None:
+    def __init__(self, records: list[Row], resamples: int, seed: int) -> None:
         self.records = [r for r in records if r.get("exp") == "x3"]
         self.resamples = resamples
         self.seed = seed
         self.stores = sorted({r["store"] for r in self.records if r.get("store")})
-        self.translations: dict[tuple[str, int], list[dict[str, Any]]] = defaultdict(list)
-        self.levels: dict[tuple[str, int], dict[int, dict[str, Any]]] = defaultdict(dict)
+        self.translations: dict[tuple[str, int], list[Row]] = defaultdict(list)
+        self.levels: dict[tuple[str, int], dict[int, Row]] = defaultdict(dict)
         # (store, G) -> (seed, query) -> pass -> retrieval
-        self.retrievals: dict[tuple[str, int], dict[tuple[int, int], dict[int, dict[str, Any]]]] = defaultdict(
-            lambda: defaultdict(dict)
-        )
+        self.retrievals: dict[tuple[str, int], dict[Query, dict[int, Row]]] = defaultdict(lambda: defaultdict(dict))
         self.seeds_done: dict[str, set[int]] = defaultdict(set)
+        self.level_starts: dict[tuple[str, int], set[int]] = defaultdict(set)
+        self.crashes: dict[str, dict[int, int]] = defaultdict(dict)  # store -> seed -> exit status
         for r in self.records:
             kind = r.get("type")
             store = r.get("store")
-            if kind == "translate":
+            if kind == "level-start":
+                self.level_starts[(store, int(r["G"]))].add(int(r["seed"]))
+            elif kind == "seed-crash":
+                self.crashes[store][int(r["seed"])] = int(r["returncode"])
+            elif kind == "translate":
                 self.translations[(store, int(r["G"]))].append(r)
             elif kind == "level":
                 self.levels[(store, int(r["G"]))][int(r["seed"])] = r
@@ -78,36 +96,50 @@ class Data:
             elif kind == "seed-end" and r.get("complete"):
                 self.seeds_done[store].add(int(r["seed"]))
 
-    def timed(self, store: str, level: int) -> list[dict[str, Any]]:
-        return [r for by_pass in self.retrievals[(store, level)].values() for p, r in by_pass.items() if p >= 1]
+    def all_retrievals(self, store: str, level: int) -> list[Row]:
+        return [r for by_pass in self.retrievals.get((store, level), {}).values() for r in by_pass.values()]
 
-    def per_query(self, store: str, level: int, field: str) -> dict[tuple[int, int], float]:
+    def timed(self, store: str, level: int) -> list[Row]:
+        by_query = self.retrievals.get((store, level), {})
+        return [r for by_pass in by_query.values() for p, r in by_pass.items() if p >= 1]
+
+    def per_query(self, store: str, level: int, field: str) -> dict[Query, float]:
         """Per (seed, query): the median latency or mean recall over the timed passes without error."""
-        found: dict[tuple[int, int], float] = {}
-        for key, by_pass in self.retrievals[(store, level)].items():
+        found: dict[Query, float] = {}
+        for key, by_pass in self.retrievals.get((store, level), {}).items():
             values = [r.get(field) for p, r in by_pass.items() if p >= 1 and r.get("error") is None]
-            values = [float(v) for v in values if v is not None]
-            if values:
-                found[key] = float(np.median(values)) if field == "latency_ms" else float(np.mean(values))
+            numbers = [float(v) for v in values if v is not None]
+            if numbers:
+                found[key] = float(np.median(numbers)) if field == "latency_ms" else float(np.mean(numbers))
         return found
 
 
-def outcome(data: Data, store: str, level: int) -> dict[str, Any]:
-    """Accepts, refuses, mixed or not run, by the rules of X3-H2, with the evidence."""
-    seeds = data.levels.get((store, level), {})
-    run = {s: r for s, r in seeds.items() if r.get("run")}
+def outcome(data: Data, store: str, level: int) -> Row:
+    """Accepts, refuses, mixed or not run, by the rules of X3-H2, with the evidence. A level whose
+    process crashed counts as a level whose first retrieval failed (Amendment 1)."""
+    finished = data.levels.get((store, level), {})
+    run = {s: r for s, r in finished.items() if r.get("run")}
+    crashed = {
+        s: data.crashes[store][s]
+        for s in data.level_starts.get((store, level), set())
+        if s not in finished and s in data.crashes.get(store, {})
+    }
     timed = data.timed(store, level)
     ok = sum(1 for r in timed if r.get("error") is None)
     share = ok / len(timed) if timed else math.nan
-    firsts = []
+    by_query = data.retrievals.get((store, level), {})
+    firsts = [False] * len(crashed)
     for seed in run:
-        first = data.retrievals[(store, level)].get((seed, 0), {}).get(0)
+        first = by_query.get((seed, 0), {}).get(0)
         if first is not None:
             firsts.append(first.get("error") is None)
-    errors = [r for by_pass in data.retrievals[(store, level)].values() for r in by_pass.values() if r.get("error")]
-    if not run:
+    errors = [r for r in data.all_retrievals(store, level) if r.get("error")]
+    crash_text = None
+    if crashed:
+        crash_text = "the process crashed, exit status " + ", ".join(str(c) for c in sorted(set(crashed.values())))
+    if not run and not crashed:
         result = "not run"
-    elif timed and share >= 0.95:
+    elif timed and share >= 0.95 and not crashed:
         result = "accepts"
     elif firsts and not any(firsts):
         result = "refuses"
@@ -115,26 +147,28 @@ def outcome(data: Data, store: str, level: int) -> dict[str, Any]:
         result = "mixed"
     return {
         "outcome": result,
-        "seeds_run": len(run),
+        "seeds_run": len(run) + len(crashed),
+        "crashed_seeds": len(crashed),
         "timed": len(timed),
         "ok_share": share,
         "timed_out_seeds": sum(1 for r in run.values() if r.get("timed_out")),
         "reduced_seeds": sum(1 for r in run.values() if r.get("reduced")),
-        "first_error": errors[0].get("error") if errors else None,
+        "first_error": errors[0].get("error") if errors else crash_text,
         "first_cause": errors[0].get("cause") if errors else None,
+        "crash": crash_text,
     }
 
 
 def latency_percentiles(data: Data, store: str, level: int) -> dict[str, float]:
-    per_seed: dict[str, list[float]] = defaultdict(list)
+    """p50, p95 and p99 per pass over the queries, the median of the passes, then of the seeds."""
     by_seed_pass: dict[tuple[int, int], list[float]] = defaultdict(list)
-    for (seed, _), by_pass in data.retrievals[(store, level)].items():
+    for (seed, _), by_pass in data.retrievals.get((store, level), {}).items():
         for number, r in by_pass.items():
             if number >= 1 and r.get("error") is None:
                 by_seed_pass[(seed, number)].append(float(r["latency_ms"]))
-    seeds = sorted({s for s, _ in by_seed_pass})
-    for seed in seeds:
-        passes = [v for (s, _), v in by_seed_pass.items() if s == seed]
+    per_seed: dict[str, list[float]] = defaultdict(list)
+    for seed in sorted({s for s, _ in by_seed_pass}):
+        passes = [values for (s, _), values in by_seed_pass.items() if s == seed]
         for name, q in (("p50", 50), ("p95", 95), ("p99", 99)):
             per_seed[name].append(float(np.median([np.percentile(v, q) for v in passes])))
     return {name: float(np.median(values)) for name, values in per_seed.items()}
@@ -150,7 +184,7 @@ def weighted_medians(values: np.ndarray, weights: np.ndarray) -> np.ndarray:
     return ranked[index]
 
 
-def ratio(data: Data, store: str, top: int, bottom: int) -> dict[str, Any] | None:
+def ratio(data: Data, store: str, top: int, bottom: int) -> Row | None:
     a = data.per_query(store, top, "latency_ms")
     b = data.per_query(store, bottom, "latency_ms")
     keys = sorted(set(a) & set(b))
@@ -160,16 +194,24 @@ def ratio(data: Data, store: str, top: int, bottom: int) -> dict[str, Any] | Non
     den = np.array([b[k] for k in keys])
     clusters = np.array([f"{s}:{q}" for s, q in keys])
     rng = common.rng_for(data.seed, "ratio", store, top, bottom)
-    boot = []
-    for weights in common.cluster_weights(clusters, data.resamples, rng):
-        boot.append(weighted_medians(num, weights) / weighted_medians(den, weights))
+    weights = common.cluster_weights(clusters, data.resamples, rng)
+    boot = [weighted_medians(num, w) / weighted_medians(den, w) for w in weights]
     lo, hi = common.percentile_interval(np.concatenate(boot))
-    return {"store": store, "top": top, "bottom": bottom, "ratio": float(np.median(num) / np.median(den)), "lo": lo, "hi": hi,
-            "pairs": len(keys), "seeds": len({s for s, _ in keys}), "p50_top_ms": float(np.median(num)),
-            "p50_bottom_ms": float(np.median(den))}  # fmt: skip
+    return {
+        "store": store,
+        "top": top,
+        "bottom": bottom,
+        "ratio": float(np.median(num) / np.median(den)),
+        "lo": lo,
+        "hi": hi,
+        "pairs": len(keys),
+        "seeds": len({s for s, _ in keys}),
+        "p50_top_ms": float(np.median(num)),
+        "p50_bottom_ms": float(np.median(den)),
+    }
 
 
-def recall_difference(data: Data, store: str, top: int, bottom: int) -> dict[str, Any] | None:
+def recall_difference(data: Data, store: str, top: int, bottom: int) -> Row | None:
     a = data.per_query(store, top, "recall")
     b = data.per_query(store, bottom, "recall")
     keys = sorted(set(a) & set(b))
@@ -180,12 +222,21 @@ def recall_difference(data: Data, store: str, top: int, bottom: int) -> dict[str
     rng = common.rng_for(data.seed, "recall", store, top, bottom)
     boot = [(w @ diff) / w.sum(axis=1) for w in common.cluster_weights(clusters, data.resamples, rng)]
     lo, hi = common.percentile_interval(np.concatenate(boot))
-    return {"store": store, "top": top, "bottom": bottom, "difference": float(diff.mean()), "lo": lo, "hi": hi,
-            "pairs": len(keys), "seeds": len({s for s, _ in keys}), "recall_top": float(np.mean([a[k] for k in keys])),
-            "recall_bottom": float(np.mean([b[k] for k in keys]))}  # fmt: skip
+    return {
+        "store": store,
+        "top": top,
+        "bottom": bottom,
+        "difference": float(diff.mean()),
+        "lo": lo,
+        "hi": hi,
+        "pairs": len(keys),
+        "seeds": len({s for s, _ in keys}),
+        "recall_top": float(np.mean([a[k] for k in keys])),
+        "recall_bottom": float(np.mean([b[k] for k in keys])),
+    }
 
 
-def recall_interval(data: Data, store: str, level: int) -> dict[str, Any]:
+def recall_interval(data: Data, store: str, level: int) -> Row:
     values = data.per_query(store, level, "recall")
     if not values:
         return {"recall": math.nan, "recall_lo": math.nan, "recall_hi": math.nan}
@@ -198,7 +249,7 @@ def recall_interval(data: Data, store: str, level: int) -> dict[str, Any]:
     return {"recall": float(x.mean()), "recall_lo": lo, "recall_hi": hi}
 
 
-def translation(data: Data, store: str, level: int) -> dict[str, Any]:
+def translation(data: Data, store: str, level: int) -> Row:
     rows = data.translations.get((store, level), [])
     if not rows:
         return {"translation": "missing"}
@@ -214,13 +265,16 @@ def translation(data: Data, store: str, level: int) -> dict[str, Any]:
     }
 
 
-def level_rows(data: Data) -> list[dict[str, Any]]:
+def level_rows(data: Data) -> list[Row]:
     rows = []
     for store in data.stores:
         for level in LEVELS:
-            if (store, level) not in data.levels and (store, level) not in data.translations:
+            known = (store, level) in data.levels or (store, level) in data.level_starts
+            if not known and (store, level) not in data.translations:
                 continue
-            row: dict[str, Any] = {"store": store, "G": level, **outcome(data, store, level), **translation(data, store, level)}
+            row: Row = {"store": store, "G": level}
+            row.update(outcome(data, store, level))
+            row.update(translation(data, store, level))
             row.update(latency_percentiles(data, store, level))
             if store not in NO_RECALL:
                 row.update(recall_interval(data, store, level))
@@ -228,32 +282,39 @@ def level_rows(data: Data) -> list[dict[str, Any]]:
     return rows
 
 
-def error_rows(data: Data) -> list[dict[str, Any]]:
-    seen: dict[tuple[str, int, str], dict[str, Any]] = {}
+def error_rows(data: Data) -> list[Row]:
+    seen: dict[tuple[str, int, str], Row] = {}
     for (store, level), by_query in data.retrievals.items():
         for by_pass in by_query.values():
             for r in by_pass.values():
                 message = r.get("error")
                 if message:
                     key = (store, level, message[:200])
-                    row = seen.setdefault(key, {"store": store, "G": level, "error": message, "cause": r.get("cause"), "count": 0})
-                    row["count"] += 1
+                    if key not in seen:
+                        seen[key] = {"store": store, "G": level, "error": message, "cause": r.get("cause"), "count": 0}
+                    seen[key]["count"] += 1
     return sorted(seen.values(), key=lambda r: (r["store"], r["G"]))
 
 
 # ---- verdicts ------------------------------------------------------------------------------------
 
 
+def _error_share(row: Row) -> float:
+    share = row.get("ok_share")
+    return math.nan if share is None else 1 - share
+
+
 class Judge:
-    def __init__(self, data: Data, levels: list[dict[str, Any]]) -> None:
+    def __init__(self, data: Data, levels: list[Row]) -> None:
         self.data = data
         self.levels = {(r["store"], r["G"]): r for r in levels}
-        self.rows: list[dict[str, Any]] = []
-        self.ratios: list[dict[str, Any]] = []
-        self.recalls: list[dict[str, Any]] = []
+        self.rows: list[Row] = []
+        self.ratios: list[Row] = []
+        self.recalls: list[Row] = []
 
     def part(self, hypothesis: str, store: str, label: str, result: str, evidence: str) -> str:
-        self.rows.append({"hypothesis": hypothesis, "store": store, "part": label, "outcome": result, "evidence": evidence})
+        row = {"hypothesis": hypothesis, "store": store, "part": label}
+        self.rows.append({**row, "outcome": result, "evidence": evidence})
         return result
 
     def verdict(self, hypothesis: str, scope: str, outcomes: list[str]) -> None:
@@ -265,12 +326,10 @@ class Judge:
             result = CONFIRMED
         else:
             result = INCONCLUSIVE
-        self.rows.append({"hypothesis": hypothesis, "store": scope, "part": "VERDICT", "outcome": result,
-                          "evidence": f"{outcomes.count(CONFIRMED)} confirmed, {outcomes.count(FALSIFIED)} falsified, "
-                                      f"{outcomes.count(INCONCLUSIVE)} inconclusive parts"})  # fmt: skip
-
-    def enough(self, store: str) -> bool:
-        return len(self.data.seeds_done.get(store, set())) >= MIN_SEEDS
+        counts = (outcomes.count(CONFIRMED), outcomes.count(FALSIFIED), outcomes.count(INCONCLUSIVE))
+        evidence = "{} confirmed, {} falsified, {} inconclusive parts".format(*counts)
+        row = {"hypothesis": hypothesis, "store": scope, "part": "VERDICT"}
+        self.rows.append({**row, "outcome": result, "evidence": evidence})
 
     def h1(self) -> None:
         outcomes = []
@@ -283,15 +342,16 @@ class Judge:
                 if all(r["status"] == "in-process" for r in rows):
                     continue  # FAISS and in-memory evaluate the filter in Python: nothing to translate
                 errors = [r for r in rows if r["status"] == "error"]
-                slow = [float(np.median(r["ms"])) for r in rows if r.get("ms")]
-                median = float(np.median(slow)) if slow else math.nan
+                times = [float(np.median(r["ms"])) for r in rows if r.get("ms")]
+                median = float(np.median(times)) if times else math.nan
                 if errors or (not math.isnan(median) and median >= 5000):
                     result = FALSIFIED
                 elif not math.isnan(median) and median < 1000 and len(rows) >= MIN_SEEDS:
                     result = CONFIRMED
                 else:
                     result = INCONCLUSIVE
-                evidence = f"{len(rows)} seeds, status {sorted({r['status'] for r in rows})}, median {median:.1f} ms"
+                statuses = sorted({r["status"] for r in rows})
+                evidence = f"{len(rows)} seeds, status {statuses}, median {median:.1f} ms"
                 if errors:
                     evidence += f"; {errors[0].get('error')}"
                 outcomes.append(self.part("X3-H1", store, f"G={level}", result, evidence))
@@ -302,8 +362,10 @@ class Judge:
             predicted = PREDICTED.get(store)
             row = self.levels.get((store, TOP))
             observed = outcome(self.data, store, TOP) if row is None else row
-            evidence = (f"observed {observed['outcome']} in {observed['seeds_run']} seeds, ok share {observed['ok_share']:.3f}, "
-                        f"first error {observed.get('first_error')}")  # fmt: skip
+            evidence = (
+                f"observed {observed['outcome']} in {observed['seeds_run']} seeds, "
+                f"ok share {observed['ok_share']:.3f}, first error {observed.get('first_error')}"
+            )
             if predicted is None:
                 self.part("X3-H2", store, "G=40,000 (no prediction)", "reported", evidence)
                 continue
@@ -315,47 +377,50 @@ class Judge:
                 result = FALSIFIED
             else:
                 result = INCONCLUSIVE
-            self.verdict("X3-H2", store, [self.part("X3-H2", store, f"G=40,000 predicted {predicted}", result, evidence)])
+            label = f"G=40,000 predicted {predicted}"
+            self.verdict("X3-H2", store, [self.part("X3-H2", store, label, result, evidence)])
 
-    def ratio_part(self, hypothesis: str, store: str, top: int, bottom: int, rule: Any) -> str:
+    def ratio_part(self, hypothesis: str, store: str, top: int, bottom: int, rule: Callable[[Row], str]) -> str:
         found = ratio(self.data, store, top, bottom)
         if found is not None:
             self.ratios.append(found)
-        top_row = self.levels.get((store, top)) or {}
-        bottom_row = self.levels.get((store, bottom)) or {}
+        label = f"p50 G={top:,} / G={bottom:,}"
+        rows = (self.levels.get((store, top)) or {}, self.levels.get((store, bottom)) or {})
         usable = (
             found is not None
             and found["pairs"] >= MIN_CLUSTERS
             and found["seeds"] >= MIN_SEEDS
-            and all(1 - (r.get("ok_share") if r.get("ok_share") is not None else math.nan) <= MAX_ERROR_RATE
-                    for r in (top_row, bottom_row))
-        )  # fmt: skip
-        if not usable or found is None:
-            return self.part(hypothesis, store, f"p50 G={top:,} / G={bottom:,}", INCONCLUSIVE, f"{found}")
-        result: str = rule(found)
-        evidence = f"ratio {found['ratio']:.2f} [{found['lo']:.2f}, {found['hi']:.2f}], {found['pairs']} queries, {found['seeds']} seeds"
-        return self.part(hypothesis, store, f"p50 G={top:,} / G={bottom:,}", result, evidence)
+            and all(_error_share(r) <= MAX_ERROR_RATE for r in rows)
+        )
+        if found is None or not usable:
+            return self.part(hypothesis, store, label, INCONCLUSIVE, f"{found}")
+        evidence = (
+            f"ratio {found['ratio']:.2f} [{found['lo']:.2f}, {found['hi']:.2f}], "
+            f"{found['pairs']} queries, {found['seeds']} seeds"
+        )
+        return self.part(hypothesis, store, label, rule(found), evidence)
 
     def h3(self) -> None:
-        def pgvector(r: dict[str, Any]) -> str:
+        def pgvector(r: Row) -> str:
             if r["hi"] < 10:
                 return FALSIFIED
             return CONFIRMED if r["ratio"] >= 50 and r["lo"] >= 20 else INCONCLUSIVE
 
-        def control(r: dict[str, Any]) -> str:
+        def control(r: Row) -> str:
             if r["lo"] > 3:
                 return FALSIFIED
             return CONFIRMED if r["ratio"] <= 2 else INCONCLUSIVE
 
-        def cassandra(r: dict[str, Any]) -> str:
+        def cassandra(r: Row) -> str:
             if r["hi"] < 1:
                 return FALSIFIED
             return CONFIRMED if r["lo"] > 1 else INCONCLUSIVE
 
         self.verdict("X3-H3a", "pgvector", [self.ratio_part("X3-H3a", "pgvector", TOP, 1, pgvector)])
-        self.verdict("X3-H3b", "faiss, memory", [self.ratio_part("X3-H3b", s, TOP, 1, control) for s in ("faiss", "memory")])
+        parts = [self.ratio_part("X3-H3b", store, TOP, 1, control) for store in ("faiss", "memory")]
+        self.verdict("X3-H3b", "faiss, memory", parts)
         self.verdict("X3-H3c", "cassandra", [self.ratio_part("X3-H3c", "cassandra", 100, 1_000, cassandra)])
-        for store in self.data.stores:  # every store's ratio, for the report
+        for store in self.data.stores:  # every other store's ratio, for the report
             if store not in ("pgvector", "faiss", "memory"):
                 found = ratio(self.data, store, TOP, 1)
                 if found is not None:
@@ -364,11 +429,15 @@ class Judge:
     def h4(self) -> None:
         for store in RECALL_INVARIANT:
             if store not in self.data.stores:
-                self.verdict("X3-H4", store, [self.part("X3-H4", store, "recall", INCONCLUSIVE, "the store did not run")])
+                part = self.part("X3-H4", store, "recall", INCONCLUSIVE, "the store did not run")
+                self.verdict("X3-H4", store, [part])
                 continue
-            accepted = [g for g in LEVELS if g >= 1_000 and (self.levels.get((store, g)) or {}).get("outcome") == "accepts"]
+            accepted = [
+                g for g in LEVELS if g >= 1_000 and (self.levels.get((store, g)) or {}).get("outcome") == "accepts"
+            ]
             if not accepted or (self.levels.get((store, 1)) or {}).get("outcome") != "accepts":
-                self.verdict("X3-H4", store, [self.part("X3-H4", store, "recall", INCONCLUSIVE, "no accepted level pair")])
+                part = self.part("X3-H4", store, "recall", INCONCLUSIVE, "no accepted level pair")
+                self.verdict("X3-H4", store, [part])
                 continue
             top = TOP if TOP in accepted else max(accepted)
             found = recall_difference(self.data, store, top, 1)
@@ -382,8 +451,12 @@ class Judge:
                 result = CONFIRMED
             else:
                 result = INCONCLUSIVE
-            evidence = "missing" if found is None else (
-                f"recall G={top:,} minus G=1: {found['difference']:.4f} [{found['lo']:.4f}, {found['hi']:.4f}], {found['pairs']} queries")
+            evidence = "missing"
+            if found is not None:
+                evidence = (
+                    f"recall G={top:,} minus G=1: {found['difference']:.4f} "
+                    f"[{found['lo']:.4f}, {found['hi']:.4f}], {found['pairs']} queries"
+                )
             self.verdict("X3-H4", store, [self.part("X3-H4", store, f"G={top:,} vs G=1", result, evidence)])
         for store in ("pgvector", "cassandra"):  # exploratory
             if store in self.data.stores:
@@ -394,10 +467,10 @@ class Judge:
             for level in LEVELS:
                 row = self.levels.get((store, level))
                 if row and not math.isnan(row.get("recall", math.nan)):
-                    ok = row["recall"] >= 0.999
-                    self.part("X3-sanity", store, f"G={level} recall is 1", "passed" if ok else "FAILED", f"{row['recall']:.4f}")
+                    passed = "passed" if row["recall"] >= 0.999 else "FAILED"
+                    self.part("X3-sanity", store, f"G={level} recall is 1", passed, f"{row['recall']:.4f}")
 
-    def all(self) -> list[dict[str, Any]]:
+    def all(self) -> list[Row]:
         self.h1()
         self.h2()
         self.h3()
@@ -405,61 +478,79 @@ class Judge:
         return self.rows
 
 
-def health(data: Data) -> list[dict[str, Any]]:
+# ---- health and report ---------------------------------------------------------------------------
+
+
+def health(data: Data) -> list[Row]:
     rows = []
     for store in data.stores:
         mine = [r for r in data.records if r.get("store") == store]
-        setup = next((r.get("error") for r in mine if r.get("type") == "setup-error"), None)
-        seed_errors = [r.get("error") for r in mine if r.get("type") in ("seed-error", "seed-aborted")]
         builds = [r.get("seconds") for r in mine if r.get("type") == "build"]
         retrievals = [r for r in mine if r.get("type") == "retrieval"]
-        rows.append({
-            "store": store,
-            "mode": next((r.get("mode") for r in mine), None),
-            "seeds_done": sorted(data.seeds_done.get(store, set())),
-            "skipped": [r.get("seed") for r in mine if r.get("type") == "seed-skipped"],
-            "retrievals": len(retrievals),
-            "errors": sum(1 for r in retrievals if r.get("error")),
-            "build_s": round(float(np.mean(builds)), 1) if builds else None,
-            "setup_error": setup,
-            "seed_errors": seed_errors[:3],
-            "corpus": next((r.get("corpus") for r in mine if r.get("type") == "start"), None),
-        })  # fmt: skip
+        rows.append(
+            {
+                "store": store,
+                "mode": next((r.get("mode") for r in mine), None),
+                "seeds_done": sorted(data.seeds_done.get(store, set())),
+                "skipped": [r.get("seed") for r in mine if r.get("type") == "seed-skipped"],
+                "retrievals": len(retrievals),
+                "errors": sum(1 for r in retrievals if r.get("error")),
+                "build_s": round(float(np.mean(builds)), 1) if builds else None,
+                "setup_error": next((r.get("error") for r in mine if r.get("type") == "setup-error"), None),
+                "seed_errors": [r.get("error") for r in mine if r.get("type") in ("seed-error", "seed-aborted")][:3],
+                "crashes": dict(data.crashes.get(store, {})),
+                "corpus": next((r.get("corpus") for r in mine if r.get("type") == "start"), None),
+            }
+        )
     return rows
 
 
-def report(data: Data, rows: list[dict[str, Any]], judge: Judge, verdicts: list[dict[str, Any]], health_rows: list[dict[str, Any]],
-           unreadable: int) -> str:  # fmt: skip
+def report(
+    data: Data, rows: list[Row], judge: Judge, verdicts: list[Row], health_rows: list[Row], unreadable: int
+) -> str:
     lines = ["# X3: filter-size scaling", ""]
-    lines += [f"{len(data.records):,} records ({unreadable} unreadable lines), {data.resamples:,} bootstrap resamples, "
-              f"seed {data.seed}. Verdicts follow PREREG_X3_X6.md.", ""]  # fmt: skip
+    lines += [
+        f"{len(data.records):,} records ({unreadable} unreadable lines), {data.resamples:,} bootstrap resamples, "
+        f"seed {data.seed}. Verdicts follow PREREG_X3_X6.md.",
+        "",
+    ]
     lines += ["## Health", ""]
-    lines += common.markdown_table(
-        ["store", "mode", "seeds done", "skipped", "retrievals", "errors", "build s", "setup error", "seed errors"],
-        [[h["store"], h["mode"], h["seeds_done"], h["skipped"], h["retrievals"], h["errors"], h["build_s"], h["setup_error"],
-          h["seed_errors"]] for h in health_rows],
-    )  # fmt: skip
+    header = ["store", "mode", "seeds done", "skipped", "retrievals", "errors", "build s", "setup error", "seed errors"]
+    keys = ["store", "mode", "seeds_done", "skipped", "retrievals", "errors", "build_s", "setup_error", "seed_errors"]
+    header.append("crashes (seed: status)")
+    keys.append("crashes")
+    lines += common.markdown_table(header, [[h[k] for k in keys] for h in health_rows])
     lines += ["## Verdicts", ""]
-    lines += common.markdown_table(["hypothesis", "scope", "outcome", "evidence"],
-                                   [[v["hypothesis"], v["store"], v["outcome"], v["evidence"]] for v in verdicts if v["part"] == "VERDICT"])  # fmt: skip
+    table = [[v["hypothesis"], v["store"], v["outcome"], v["evidence"]] for v in verdicts if v["part"] == "VERDICT"]
+    lines += common.markdown_table(["hypothesis", "scope", "outcome", "evidence"], table)
     lines += ["## Levels", ""]
-    lines += common.markdown_table(
-        ["store", "G", "outcome", "ok share", "p50 ms", "p95 ms", "p99 ms", "recall", "translation", "translation ms", "size", "first error"],
-        [[r["store"], r["G"], r["outcome"], r["ok_share"], r.get("p50"), r.get("p95"), r.get("p99"), r.get("recall"),
-          r.get("translation"), r.get("translation_ms"), r.get("translation_size"), (r.get("first_error") or "")[:160]] for r in rows],
-    )  # fmt: skip
+    header = ["store", "G", "outcome", "ok share", "p50 ms", "p95 ms", "p99 ms", "recall", "translation"]
+    header += ["translation ms", "size", "first error"]
+    table = []
+    for r in rows:
+        table.append([r["store"], r["G"], r["outcome"], r["ok_share"], r.get("p50"), r.get("p95"), r.get("p99")])
+        table[-1] += [r.get("recall"), r.get("translation"), r.get("translation_ms"), r.get("translation_size")]
+        table[-1].append((r.get("first_error") or "")[:160])
+    lines += common.markdown_table(header, table)
     lines += ["## Latency ratios (p50, paired by query)", ""]
-    lines += common.markdown_table(["store", "G top", "G bottom", "ratio", "interval", "pairs"],
-                                   [[r["store"], r["top"], r["bottom"], r["ratio"], f"[{r['lo']:.2f}, {r['hi']:.2f}]", r["pairs"]]
-                                    for r in judge.ratios])  # fmt: skip
+    table = [
+        [r["store"], r["top"], r["bottom"], r["ratio"], f"[{r['lo']:.2f}, {r['hi']:.2f}]", r["pairs"]]
+        for r in judge.ratios
+    ]
+    lines += common.markdown_table(["store", "G top", "G bottom", "ratio", "interval", "pairs"], table)
     lines += ["## Recall differences (paired by query)", ""]
-    lines += common.markdown_table(["store", "G top", "G bottom", "difference", "interval", "pairs"],
-                                   [[r["store"], r["top"], r["bottom"], r["difference"], f"[{r['lo']:.4f}, {r['hi']:.4f}]",
-                                     r["pairs"]] for r in judge.recalls])  # fmt: skip
+    table = [
+        [r["store"], r["top"], r["bottom"], r["difference"], f"[{r['lo']:.4f}, {r['hi']:.4f}]", r["pairs"]]
+        for r in judge.recalls
+    ]
+    lines += common.markdown_table(["store", "G top", "G bottom", "difference", "interval", "pairs"], table)
     lines += ["## Every verdict part", ""]
-    lines += common.markdown_table(["hypothesis", "store", "part", "outcome", "evidence"],
-                                   [[v["hypothesis"], v["store"], v["part"], v["outcome"], v["evidence"]] for v in verdicts
-                                    if v["part"] != "VERDICT"])  # fmt: skip
+    table = [
+        [v["hypothesis"], v["store"], v["part"], v["outcome"], v["evidence"]]
+        for v in verdicts
+        if v["part"] != "VERDICT"
+    ]
+    lines += common.markdown_table(["hypothesis", "store", "part", "outcome", "evidence"], table)
     return "\n".join(lines) + "\n"
 
 
@@ -469,7 +560,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--out", default="reports")
     parser.add_argument("--resamples", type=int, default=10_000)
     parser.add_argument("--seed", type=int, default=SEED_BASE)
-    parser.add_argument("--annotate", action="store_true", help="also print the health and verdicts as GitHub annotations")
+    parser.add_argument("--annotate", action="store_true", help="also print the health and verdicts as annotations")
     args = parser.parse_args(argv)
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
@@ -493,9 +584,14 @@ def main(argv: list[str] | None = None) -> int:
     if args.annotate:
         summary = [f"{v['hypothesis']} {v['store']}: {v['outcome']}" for v in verdicts if v["part"] == "VERDICT"]
         common.annotate("notice", "x3 verdicts", "\n".join(summary), chunks=2)
-        table = [f"{r['store']} G={r['G']}: {r['outcome']} ok={r['ok_share']:.2f} p50={r.get('p50', math.nan):.1f}ms "
-                 f"recall={r.get('recall', math.nan):.3f} tr={r.get('translation')} err={(r.get('first_error') or '')[:120]}"
-                 for r in rows]  # fmt: skip
+        table = []
+        for r in rows:
+            p50, recall = r.get("p50", math.nan), r.get("recall", math.nan)
+            error = (r.get("first_error") or "")[:120]
+            table.append(
+                f"{r['store']} G={r['G']}: {r['outcome']} ok={r['ok_share']:.2f} p50={p50:.1f}ms "
+                f"recall={recall:.3f} tr={r.get('translation')} err={error}"
+            )
         common.annotate("notice", "x3 levels", "\n".join(table), chunks=5)
     common.log("x3 stats: done")
     return 0
