@@ -1,0 +1,4 @@
+[2026-10-29T21:49:38.258+00:00] x7a cerbos-policy: start
+[2026-10-29T21:49:53.082+00:00] x7a cerbos-policy seed 0: 15 s
+::notice title=x7 a2-x7a-cerbos%3A no harness errors::every call the harness made returned
+::notice title=x7 a2-x7a-cerbos records::7 records, 0 failed paths or targets, in results/x7-a2-x7a-cerbos.jsonl

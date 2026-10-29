@@ -1,0 +1,46 @@
+[2026-10-29T21:54:55.262+00:00] x7b pgvector: start
+error connecting in 'pool-2': connection timeout expired
+discarding closed connection: <psycopg.Connection [BAD] at 0x7f35ba1cfda0>
+error connecting in 'pool-2': connection failed: connection to server at "127.0.0.1", port 15432 failed: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+error connecting in 'pool-2': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-2': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-2': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-2': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-2': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-2': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-2': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-2': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-2': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-1': connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-1': connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-1': connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-1': connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-1': connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-1': connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-1': connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-1': connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-1': connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+discarding closed connection: <psycopg.Connection [BAD] at 0x7f35c96d9790>
+[2026-10-29T21:55:48.690+00:00] x7b pgvector seed 0: 53 s
+::notice title=x7 a2-x7b-pgvector%3A no harness errors::every call the harness made returned
+::notice title=x7 a2-x7b-pgvector records::10 records, 0 failed paths or targets, in results/x7-a2-x7b-pgvector.jsonl

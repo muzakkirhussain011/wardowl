@@ -1,0 +1,5 @@
+VERDICT A2-H3 cerbos-policy nocache: INCONCLUSIVE (1 valid trials, 0 beyond B2 + 1 s (0 never took effect), B2 = 10.000 (D = 10.000))
+VERDICT A2-H1 cerbos-policy ttl30-inv: INCONCLUSIVE (1 valid trials, 0 beyond B2 + 1 s (0 never took effect), B2 = 10.000 (D = 10.000))
+VERDICT A2-H2 cerbos-policy ttl30-inv: INCONCLUSIVE (median 3.876 [3.876, 3.876], limit 4.0; full run median 30.025 [30.019, 30.032], max 30.052)
+VERDICT A2-H1 cerbos-policy ttl30-shared-inv: INCONCLUSIVE (1 valid trials, 0 beyond B2 + 1 s (0 never took effect), B2 = 11.000 (D = 10.000))
+VERDICT A2-H2 cerbos-policy ttl30-shared-inv: INCONCLUSIVE (median 3.890 [3.890, 3.890], limit 5.0; full run median 31.039 [31.026, 31.047], max 31.066)

@@ -1,0 +1,7 @@
+proxy http 127.0.0.1:18443 -> 127.0.0.1:8443, admin 127.0.0.1:19443
+1793311433.545 mode pass -> empty-lookup (0.0 ms)
+1793311439.545 mode empty-lookup -> pass (0.0 ms)
+1793311440.575 mode pass -> pass (0.0 ms)
+1793311442.082 mode pass -> empty (0.0 ms)
+1793311448.082 mode empty -> pass (0.0 ms)
+1793311449.100 mode pass -> pass (0.0 ms)

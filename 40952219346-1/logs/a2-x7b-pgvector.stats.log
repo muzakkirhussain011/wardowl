@@ -1,0 +1,5 @@
+VERDICT A2-H4 pgvector blackhole plain: INCONCLUSIVE (4 requests inside)
+VERDICT A2-H4 pgvector blackhole stmt-timeout: INCONCLUSIVE (0 requests inside)
+VERDICT A2-H5 pgvector lock plain: INCONCLUSIVE (0 requests inside)
+VERDICT A2-H5 pgvector lock stmt-timeout: INCONCLUSIVE (24 requests inside)
+VERDICT A2-H7 store errors: INCONCLUSIVE (55 failures, 55 SearchError with a fixed message, 0 naming a host, 0 leaks)

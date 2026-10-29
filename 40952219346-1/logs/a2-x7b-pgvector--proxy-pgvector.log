@@ -1,0 +1,13 @@
+proxy tcp 127.0.0.1:15432 -> 127.0.0.1:5432, admin 127.0.0.1:15433
+1793310897.322 mode pass -> blackhole (0.0 ms)
+1793310903.322 mode blackhole -> pass (0.0 ms)
+1793310904.629 mode pass -> pass (0.0 ms)
+1793310906.133 mode pass -> refuse (0.0 ms)
+1793310912.133 mode refuse -> pass (0.0 ms)
+1793310913.440 mode pass -> pass (0.0 ms)
+1793310922.252 mode pass -> pass (0.0 ms)
+1793310931.063 mode pass -> pass (0.0 ms)
+1793310939.876 mode pass -> pass (0.0 ms)
+1793310941.379 mode pass -> blackhole (0.0 ms)
+1793310947.380 mode blackhole -> pass (0.0 ms)
+1793310948.688 mode pass -> pass (0.0 ms)
