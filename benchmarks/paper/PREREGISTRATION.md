@@ -182,3 +182,106 @@ so the rules above stay readable as first written.
    the EXPLAINs cover the empty ones first.
 
 Items 1 to 3 change the plan; items 4 to 6 say how the code applies rules already written.
+
+## Amendment 2 (2026-10-29, after run 1, before run 2)
+
+Run 1 (Kaggle notebook `notebook11401c38ff`, 2026-10-26) finished with 12 pgvector items skipped for
+time. It also showed that most of its pgvector searches did not use the HNSW index. Under `p-asrun`,
+PostgreSQL ran the search statement with a generic plan 5,852 times, which is all but about ten
+executions per distinct statement text. For all 50 fixed questions the generic plan had another
+shape than the custom plan EXPLAIN showed. Recall and latency did not move with `ef_search` (40 to
+400), `hnsw.max_scan_tuples` (20,000 to 1,000,000), scan memory or `work_mem`, and `p-asrun` reached
+recall@5 0.998 at a p50 of 391 ms, against 0.691 and 6.5 ms in the original run. The diagnosis is in
+the paper workspace (`investigations/x0-x1-pgvector-gap.md`). In short: after psycopg prepares the
+statement (its 6th execution on a connection) and PostgreSQL has made five custom plans, the
+planner keeps a generic plan whenever its estimated cost is lower. The generic plan cannot see the
+jsonb filter values or the LIMIT, so it assumes a very selective filter and sorts the rows the GIN
+index returns, an exact search. Run 1's P-a to P-c settings therefore measured that exact plan, not
+the HNSW scan that P1 and P2 are about. In Qdrant, the `one-segment` layout ended with two segments.
+
+This amendment is committed on its own, before any code of run 2 is written, with the message
+`bench: amend the pre-registration for X1 run 2`. Run 2 writes to a new folder; run 1's results are
+kept and reported as run 1.
+
+1. **Plan control.** Every pgvector setting of P-a to P-e, and the new setting `pg-custom` described
+   below, sets `plan_cache_mode = force_custom_plan` in the search's own transaction
+   (harness-level), so every search is planned with its own values, as the original run's searches
+   evidently were. `pg-custom` was already pre-registered as `p-asrun` with that plan mode; in run 2
+   it is also the reference for P1 and P2. `p-asrun` keeps the server default (`auto`) and the
+   psycopg default, as the original run did, and remains the reference for P4. `pg-noprepare` and
+   `ph-exact` are unchanged.
+2. **P1 and P2 read `pg-custom` wherever they say `p-asrun`.** In P2 (c) that is `pg-custom` on
+   both index families, so `pg-custom` joins the core grid of `hnsw-m32-efc200` (which keeps
+   `p-asrun`, `pc-ef400`, `pa-t1000k-m8` and `pd-lim10`). P3 and P4 are unchanged. The rules
+   themselves, their thresholds and their wording are otherwise unchanged.
+3. **Executed plans are recorded.** EXPLAIN with the search's values always shows a custom plan, so
+   it cannot show what a prepared search ran. Run 2 loads PostgreSQL's `auto_explain` in each
+   setting's session (log level NOTICE, JSON, plan only) and keeps the plan PostgreSQL executed for
+   every search of the first pass (k=5 and k=10): whether it used the HNSW index, and whether it is
+   a generic plan (parameter symbols left in the plan). After the timed passes, the 50 fixed
+   questions run once more with `auto_explain`'s ANALYZE and BUFFERS (reason `executed`). The
+   EXPLAINs of run 1 stay as they were. **Rule:** a setting meant to search the HNSW graph (every
+   pgvector setting except `ph-exact`) whose captured plans used the HNSW index in fewer than half
+   of its searches is flagged "ran mostly exact" in the log, in its record and in the report, and
+   P1 and P2 do not use it: a criterion that needs it counts as missing. If no plan can be captured,
+   the report says so and nothing is excluded.
+4. **Two replays of the original run (new settings, descriptive).** Both run on the first build of
+   `hnsw-m16-efc64`, before every other setting. `p-x0` replays the original pgvector pass as it
+   was: `enterprise_rag`'s own backend object on the connection pool its load created (at most four
+   connections, psycopg's defaults), started right after the load; the original 1,105 questions in
+   the original order (the seed-7 shuffle); 10 untimed warm-ups; then per question the k=5
+   retrieval (timed) and the k=10 retrieval; one pass, as the original did. `p-x0v` is the same
+   replay on a fresh pool of the same kind after `VACUUM (ANALYZE)` of the table. Both record how
+   often PostgreSQL used generic plans, the executed plans, the table's vacuum and analyze history,
+   and the GIN index's metapage (pending-list pages and entry statistics) before and after. They
+   have no verdict of their own; they enter P5's notes and the gap analysis.
+5. **New hypothesis P5: the plan cache decides whether pgvector searches the graph.** On the
+   original questions (every person type but `probe-*`), and with "HNSW share" the share of captured
+   first-pass plans that used the HNSW index:
+   confirmed when all of (a) the HNSW share is at least 0.9 under `pg-custom` and at most 0.1 under
+   `p-asrun`; (b) recall@5 under `pg-custom` lies within 0.08 of the original run's 0.691; (c) recall@5
+   under `p-asrun` is at least 0.99 and its median latency at least ten times `pg-custom`'s (on the
+   builds and in the shard they share). Falsified when `pg-custom` has an HNSW share of at least 0.9
+   and a recall@5 of at least 0.95 (HNSW plans do not reproduce the original loss), or when `p-asrun`
+   has an HNSW share of at least 0.5 (run 1's reading was wrong). Prediction: confirmed.
+6. **Qdrant's `one-segment` layout, fixed.** The collection is created with
+   `default_segment_number` 1, `max_segment_size` 1,000,000 KB and `indexing_threshold` 0, which
+   turns indexing off (Qdrant 1.19.2, `get_indexing_threshold_kb`), so the upload fills one segment.
+   Then `indexing_threshold` is set back to Qdrant's default, 10,000 KB, and the run waits until
+   every vector is indexed and the collection is green (an empty optimizer update restarts a
+   collection left grey). Qdrant keeps an empty appendable segment beside the optimized one (its
+   merge optimizer's documentation), so `segments_count` stays at 2 by construction. In Q3, "segment
+   count" therefore means the number of segments holding points, read per segment from
+   `/telemetry` (`num_points`) and recorded with every build, for every layout, as `data_segments`,
+   with the whole per-segment list.
+7. **Scope and repetitions: the full design.** Run 2 reruns the whole pgvector grid (every setting
+   on every one of three builds of `hnsw-m16-efc64`; the core grid on three builds of
+   `hnsw-m32-efc200`; `ph-exact` on the first build) and the whole Qdrant grid (five layouts, three
+   builds each), on all 1,489 questions, with three timed passes. Only the two replays run one
+   pass, because the original did. All eight pre-registered verdicts and P5 are judged on run 2's
+   data alone.
+8. **Where it runs (shards).** On Kaggle, account `muzakkirhussain1`. One session with a GPU
+   (`prep`) builds the corpus, embeds the chunks and the questions, and computes the exact
+   baseline and the question table. Three sessions, each attaching `prep`'s output, run the store
+   grids in parallel: shard A, `hnsw-m16-efc64` build 0 (the replays first); shard B,
+   `hnsw-m16-efc64` builds 1 and 2; shard C, `hnsw-m32-efc200` builds 0 to 2, then the Qdrant grid.
+   Every shard uses `prep`'s chunk and query vectors, recomputes the exact baseline from them and
+   checks that its question table matches `prep`'s (same questions, persons and R, the same exact
+   top-10 scores within 1e-4). Each shard starts PostgreSQL and loads the table as the original run
+   did. Builds keep the numbers b0 to b2 whichever shard ran them. The statistics merge the shards'
+   folders and refuse a setting and build that two shards both report. **Latency is compared only
+   within a shard** (paired comparisons and P5 (c) use settings of the same shard); recall, ERR and
+   the other retrieval metrics do not depend on the hardware and are compared across shards. A
+   shard that runs out of session time continues in a further session with `--resume`; the
+   manifests record each session.
+9. **Time guard.** A setting is started only if the time left exceeds the longest earlier run of
+   the same setting in that session, or of any setting of the store if it has not run yet. The
+   guard skips; it never shortens a setting.
+
+Predictions stated now for run 2, beside the pre-registered ones: `pg-custom` gives about the
+original run's recall@5 (0.691) and an ERR near 0.01 (the original had 10 to 12 empties among 1,084
+scorable questions), so P1 has enough events to judge; `p-asrun` runs generic, exact plans again
+(recall@5 about 1.0, P5 (c)); P4 as pre-registered predicted no difference, and run 2 is expected to
+falsify it on recall; `p-x0v` runs generic, exact plans after its first ten executions per
+statement; for `p-x0` no prediction is made, because its plan depends on what autovacuum has done
+to the table when its statements first switch.
