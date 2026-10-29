@@ -488,7 +488,7 @@ def _check_set_metadata(
     set_metadata({**replacements, "not-stored": {"team": "a", "allowed_groups": ["*"]}})
     updated = [Document(d.id, d.text, replacements.get(d.id, d.metadata)) for d in docs]
     by_id = {d.id: d for d in updated}
-    details = {"replaced": _json(replacements)}
+    details: dict[str, Any] = {"replaced": _json(replacements)}
 
     hits = backend.search(query, len(updated))
     problems = _problems(hits, len(updated), set(by_id), by_id, exact)
