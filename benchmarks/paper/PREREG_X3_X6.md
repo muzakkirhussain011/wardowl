@@ -358,3 +358,15 @@ statistic or verdict rule changes.
    vectors, indexes every segment, which is what the design states. A build is ready when the
    collection is green and either its vectors are indexed on two polls in a row or its indexed count
    has not changed for a minute; the indexed count is recorded with every build.
+
+## Amendment 3 (2026-10-29, after the fourth smoke run, before any full result)
+
+Committed on its own, before the full configuration ran. No hypothesis, prediction, threshold,
+statistic or verdict rule changes.
+
+1. **A group that cannot be filled is placed again with another m = 1,000 probe.** In the fourth
+   smoke run every group got its m = 1,000 and m = 100 probes, but one group lacked one m = 10 and
+   three m = 1 probes (68 of 72): its m = 1,000 probe's secrets lay inside the zones of every
+   remaining candidate. Now, when a group cannot be completed, its m = 1,000 probe is set aside and
+   the group is placed again from the next candidate, up to 25 times; the most complete placement is
+   kept, and any shortfall is still recorded.
