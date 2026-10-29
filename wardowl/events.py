@@ -48,11 +48,12 @@ class RetrievalEvent:
     started_at: float = 0.0
     """Unix time when the call started."""
     search_ms: float = 0.0
-    """Time spent in the backend, over every search of this call."""
+    """Time spent in the backend, over every search (and count) of this call."""
     authorize_ms: float = 0.0
     """Time spent in the authorizer: filters, scopes and checks."""
     searches: int = 0
-    """Backend searches made: one when pre-filtering, more when post-filtering fetched again."""
+    """Backend searches made: one when pre-filtering, more when post-filtering fetched again, or
+    when a short result or a recall sample searched again."""
     rerank_ms: float = 0.0
     """Time spent in the reranker."""
     reranked: int = 0
@@ -62,6 +63,18 @@ class RetrievalEvent:
     what the call to the permission service raised, such as "TimeoutError" or
     "ConnectionRefusedError", or "CircuitOpenError" when an open `CircuitBreaker` refused the call.
     None when the error has no cause, as for a malformed answer."""
+    shortfall: str | None = None
+    """Why a pre-filtered search returned fewer hits than were asked for, as
+    `RetrievalResult.shortfall`: "exhausted", "missed" or "unknown". None when it did not."""
+    fallback: str | None = None
+    """What `short_results` did about it, as `RetrievalResult.fallback`: "exact", "widened",
+    "over_limit" or "unsupported". None when it did nothing."""
+    shortfall_ms: float = 0.0
+    """Time spent in the backend on a short result: counting the chunks the filter matches, and
+    searching again. It is part of `search_ms`."""
+    sampled_recall: float | None = None
+    """For a retrieval that `recall_sample_rate` sampled, the share of an exact search's top k that
+    came back, as `RetrievalResult.sampled_recall`."""
 
     def to_dict(self) -> dict[str, Any]:
         data = asdict(self)
