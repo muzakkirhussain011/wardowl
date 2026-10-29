@@ -1,0 +1,307 @@
+name: paper-x3-x6
+
+# The research paper's experiments X3 (filter-size scaling) and X6 (side channels of permission-aware
+# retrieval). Design, predictions and rules: benchmarks/paper/PREREG_X3_X6.md; how to read the
+# results: benchmarks/paper/README_X3_X6.md.
+#
+# A push to paper/x3-x6 runs it at the size X3X6_MODE names below: smoke (small corpus, one seed, one
+# repetition: minutes, to find faults in the harness; its numbers are never analysed) or full (the
+# pre-registered design). The data job downloads FiQA and SciDocs, embeds them on the CPU and computes
+# X6's plans once, so every store plays the identical game. Then one job per store family and
+# experiment runs in parallel, each well under the 6-hour limit, each target in its own process with
+# its own time budget, and every job uploads what it has, whatever happened. The summary job runs the
+# statistics and writes the reports to its job summary and, as annotations, to the public API.
+
+on:
+  push:
+    branches: [paper/x3-x6]
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: smoke (minutes) or full (the pre-registered design)
+        type: choice
+        options: [full, smoke]
+        default: full
+      seeds:
+        description: Seeds (0 to N-1); the design uses 5
+        type: number
+        default: 5
+
+permissions:
+  contents: read
+
+concurrency:
+  group: paper-x3-x6-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  # The size of a push-triggered run.
+  X3X6_MODE: ${{ inputs.mode || 'smoke' }}
+  SEEDS: ${{ inputs.seeds || 5 }}
+
+jobs:
+  data:
+    name: data (FiQA, SciDocs, embeddings, plans)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: { persist-credentials: false }
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with: { python-version: "3.12" }
+      # Not in uv.lock (the library does not use them): pinned by version, the CPU build of torch.
+      - name: Install the embedding stack
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu torch==2.8.0
+          pip install sentence-transformers==5.0.0 pyarrow==21.0.0
+          python -c "import torch, sentence_transformers; print('torch', torch.__version__, 'sentence-transformers', sentence_transformers.__version__)"
+      - name: Download, embed and plan
+        run: python benchmarks/paper/x6_data.py --mode "$X3X6_MODE" --seeds "$SEEDS" --out x6data
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: x3x6-data
+          path: x6data/
+          if-no-files-found: error
+          retention-days: 30
+
+  run:
+    name: ${{ matrix.group }}
+    needs: data
+    # X3 falls back to synthetic vectors when the data job failed, and says so; X6 records that it
+    # cannot run.
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { group: x6-pgvector, script: x6_side_channels.py, targets: pgvector, services: postgres }
+          - { group: x6-qdrant, script: x6_side_channels.py, targets: qdrant, services: qdrant }
+          - { group: x6-elasticsearch, script: x6_side_channels.py, targets: elasticsearch, services: elasticsearch }
+          - { group: x6-faiss, script: x6_side_channels.py, targets: faiss, services: none }
+          - { group: x6-memory, script: x6_side_channels.py, targets: memory, services: none }
+          - { group: x3-pgvector-redis, script: x3_filter_scaling.py, targets: "pgvector,redis", services: "postgres redis" }
+          - { group: x3-cassandra, script: x3_filter_scaling.py, targets: cassandra, services: cassandra }
+          - { group: x3-search, script: x3_filter_scaling.py, targets: "elasticsearch,opensearch", services: "elasticsearch opensearch" }
+          - { group: x3-vespa-qdrant, script: x3_filter_scaling.py, targets: "vespa,qdrant", services: "vespa qdrant" }
+          - { group: x3-milvus-weaviate, script: x3_filter_scaling.py, targets: "milvus,weaviate", services: "milvus weaviate" }
+          - { group: x3-mongodb, script: x3_filter_scaling.py, targets: mongodb, services: mongodb }
+          - { group: x3-embedded, script: x3_filter_scaling.py, targets: "chroma,lancedb,faiss,memory", services: none }
+    env:
+      WARDOWL_TEST_DATABASE_URL: postgresql://test:test@localhost:5432/test
+      WARDOWL_TEST_REDIS_URL: redis://127.0.0.1:6379/0
+      WARDOWL_TEST_CASSANDRA_HOST: 127.0.0.1
+      WARDOWL_TEST_ELASTICSEARCH_URL: http://127.0.0.1:9200
+      WARDOWL_TEST_OPENSEARCH_URL: http://127.0.0.1:9201
+      WARDOWL_TEST_VESPA_URL: http://127.0.0.1:8090
+      WARDOWL_TEST_QDRANT_URL: http://127.0.0.1:6333
+      WARDOWL_TEST_MILVUS_URL: http://127.0.0.1:19530
+      WARDOWL_TEST_WEAVIATE_URL: http://127.0.0.1:8079
+      WARDOWL_TEST_WEAVIATE_GRPC_PORT: "50051"
+      WARDOWL_TEST_MONGODB_URL: mongodb://127.0.0.1:27017/?directConnection=true
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: { persist-credentials: false }
+
+      # ---- the servers: the conformance campaign's images and versions; they boot while the rest installs
+
+      - name: Start PostgreSQL with pgvector
+        if: contains(matrix.services, 'postgres')
+        run: |
+          docker run -d --name postgres --shm-size=1g -p 5432:5432 -e POSTGRES_USER=test -e POSTGRES_PASSWORD=test \
+            -e POSTGRES_DB=test pgvector/pgvector:pg17 \
+            -c shared_buffers=2GB -c maintenance_work_mem=1GB -c max_parallel_maintenance_workers=3
+      - name: Start Redis
+        if: contains(matrix.services, 'redis')
+        run: docker run -d --name redis -p 6379:6379 redis:8.10.2-alpine
+      - name: Start Cassandra
+        if: contains(matrix.services, 'cassandra')
+        run: docker run -d --name cassandra -p 9042:9042 -e MAX_HEAP_SIZE=2G -e HEAP_NEWSIZE=400M cassandra:5.0.9
+      - name: Start Elasticsearch
+        if: contains(matrix.services, 'elasticsearch')
+        run: |
+          docker run -d --name elasticsearch -p 9200:9200 -e discovery.type=single-node \
+            -e xpack.security.enabled=false -e ES_JAVA_OPTS="-Xms2g -Xmx2g" \
+            docker.elastic.co/elasticsearch/elasticsearch:9.5.5
+      - name: Start OpenSearch
+        if: contains(matrix.services, 'opensearch')
+        run: |
+          docker run -d --name opensearch -p 9201:9200 -e discovery.type=single-node \
+            -e DISABLE_SECURITY_PLUGIN=true -e DISABLE_INSTALL_DEMO_CONFIG=true \
+            -e OPENSEARCH_JAVA_OPTS="-Xms2g -Xmx2g" opensearchproject/opensearch:3.9.0
+      - name: Start Vespa
+        if: contains(matrix.services, 'vespa')
+        run: docker run -d --name vespa --hostname vespa-container -p 8090:8080 -p 19071:19071 vespaengine/vespa:8.763.13
+      - name: Start Qdrant
+        if: contains(matrix.services, 'qdrant')
+        run: docker run -d --name qdrant -p 6333:6333 qdrant/qdrant:v1.19.2
+      - name: Start Milvus (standalone, embedded etcd, local storage)
+        if: contains(matrix.services, 'milvus')
+        run: |
+          mkdir -p "$RUNNER_TEMP/milvus"
+          printf '%s\n' 'listen-client-urls: http://0.0.0.0:2379' 'advertise-client-urls: http://0.0.0.0:2379' \
+            'quota-backend-bytes: 4294967296' 'auto-compaction-mode: revision' "auto-compaction-retention: '1000'" \
+            > "$RUNNER_TEMP/milvus/embedEtcd.yaml"
+          touch "$RUNNER_TEMP/milvus/user.yaml"
+          docker run -d --name milvus --security-opt seccomp:unconfined -p 19530:19530 -p 9091:9091 \
+            -e ETCD_USE_EMBED=true -e ETCD_DATA_DIR=/var/lib/milvus/etcd \
+            -e ETCD_CONFIG_PATH=/milvus/configs/embedEtcd.yaml -e COMMON_STORAGETYPE=local -e DEPLOY_MODE=STANDALONE \
+            -v "$RUNNER_TEMP/milvus/embedEtcd.yaml:/milvus/configs/embedEtcd.yaml" \
+            -v "$RUNNER_TEMP/milvus/user.yaml:/milvus/configs/user.yaml" \
+            milvusdb/milvus:v3.0.2 milvus run standalone
+      - name: Start Weaviate
+        if: contains(matrix.services, 'weaviate')
+        run: |
+          docker run -d --name weaviate -p 8079:8080 -p 50051:50051 -e AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED=true \
+            -e PERSISTENCE_DATA_PATH=/var/lib/weaviate -e DEFAULT_VECTORIZER_MODULE=none -e CLUSTER_HOSTNAME=node1 \
+            cr.weaviate.io/semitechnologies/weaviate:1.39.12
+      - name: Start MongoDB Atlas Local
+        if: contains(matrix.services, 'mongodb')
+        run: docker run -d --name mongodb -p 27017:27017 mongodb/mongodb-atlas-local:8.0.30
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with: { python-version: "3.12", cache: pip }
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with: { version: "0.13.1", enable-cache: false }
+      - name: Install from uv.lock, by hash
+        run: |
+          uv export --frozen --no-emit-project --all-extras --group integration --group examples -o "$RUNNER_TEMP/requirements.txt"
+          pip install --require-hashes --no-deps -r "$RUNNER_TEMP/requirements.txt"
+          pip install --require-hashes --no-deps -r .github/requirements/build.txt
+          pip install --no-deps --no-build-isolation -e .
+          python -c "import wardowl; print('wardowl', wardowl.__version__)"
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        continue-on-error: true
+        with:
+          name: x3x6-data
+          path: x6data
+
+      # A server that never answers is not fatal here: its target records a setup error and the
+      # others run.
+      - name: Wait for the servers
+        if: matrix.services != 'none'
+        env:
+          SERVICES: ${{ matrix.services }}
+        run: |
+          ready() {
+            local name=$1 tries=$2; shift 2
+            for _ in $(seq 1 "$tries"); do "$@" > /dev/null 2>&1 && { echo "$name is ready"; return 0; }; sleep 2; done
+            echo "::warning::$name did not answer; its target will record a setup error"; docker logs --tail 50 "$name" || true
+            return 1
+          }
+          mongodb_healthy() { [ "$(docker inspect -f '{{.State.Health.Status}}' mongodb)" = healthy ]; }
+          vespa_up() { curl -sf http://127.0.0.1:19071/state/v1/health | grep -q '"up"'; }
+          probe=http://127.0.0.1:8090/document/v1/wardowl/wardowl/docid/ready
+          vespa_feeds() { curl -sf -X POST -H 'Content-Type: application/json' -d '{"fields":{}}' "$probe"; }
+          for service in $SERVICES; do
+            case "$service" in
+              postgres) ready postgres 60 docker exec postgres pg_isready -U test || true ;;
+              redis) ready redis 60 docker exec redis redis-cli ping || true ;;
+              cassandra) ready cassandra 150 docker exec cassandra cqlsh -e 'SELECT release_version FROM system.local' || true ;;
+              elasticsearch) ready elasticsearch 90 curl -sf "$WARDOWL_TEST_ELASTICSEARCH_URL/_cluster/health?wait_for_status=yellow&timeout=2s" || true ;;
+              opensearch) ready opensearch 90 curl -sf "$WARDOWL_TEST_OPENSEARCH_URL/_cluster/health?wait_for_status=yellow&timeout=2s" || true ;;
+              qdrant) ready qdrant 60 curl -sf "$WARDOWL_TEST_QDRANT_URL/readyz" || true ;;
+              milvus) ready milvus 120 curl -sf http://127.0.0.1:9091/healthz || true ;;
+              weaviate) ready weaviate 60 curl -sf "$WARDOWL_TEST_WEAVIATE_URL/v1/.well-known/ready" || true ;;
+              mongodb) ready mongodb 120 mongodb_healthy || true ;;
+              vespa)
+                # The example application, with vectors of 384 dimensions instead of 16.
+                if ready vespa 90 vespa_up; then
+                  app="$RUNNER_TEMP/vespa-app"
+                  rm -rf "$app" && cp -r examples/vespa/app "$app"
+                  sed -i 's/x\[16\]/x[384]/g' "$app/schemas/wardowl.sd"
+                  grep -c 'x\[384\]' "$app/schemas/wardowl.sd" || echo "::warning::the schema has no 384-dimension tensor"
+                  (cd "$app" && zip -qr - .) | curl -sf --header Content-Type:application/zip --data-binary @- \
+                    http://127.0.0.1:19071/application/v2/tenant/default/prepareandactivate \
+                    || echo "::warning::Vespa did not take the application"
+                  if ready vespa 120 vespa_feeds; then curl -sf -X DELETE "$probe" || true; fi
+                fi ;;
+            esac
+          done
+
+      - name: Run the experiment, one process per target
+        env:
+          SCRIPT: benchmarks/paper/${{ matrix.script }}
+          TARGETS: ${{ matrix.targets }}
+          GROUP: ${{ matrix.group }}
+        run: |
+          set +e
+          mkdir -p results/logs
+          # Each target gets the smaller of its budget and a fair share of what is left of 320 minutes,
+          # so the job ends inside its timeout; targets that finish early leave time to the rest.
+          deadline=$(( $(date +%s) + 320 * 60 ))
+          IFS=, read -r -a targets <<< "$TARGETS"
+          count=${#targets[@]}
+          for i in "${!targets[@]}"; do
+            target=${targets[$i]}
+            echo "::group::$target"
+            python "$SCRIPT" --store "$target" --data x6data --out results --mode "$X3X6_MODE" --seeds "$SEEDS" \
+              --group-deadline "$deadline" --remaining "$((count - i))" 2>&1 | tee "results/logs/$GROUP-$target.log"
+            status=${PIPESTATUS[0]}
+            echo "::endgroup::"
+            if [ "$status" -ne 0 ]; then
+              echo "::error title=$GROUP $target::the driver stopped with exit status $status"
+              printf '{"schema": 1, "type": "crash", "store": "%s", "group": "%s", "exit_status": %d}\n' \
+                "$target" "$GROUP" "$status" >> results/crashes.jsonl
+            fi
+          done
+          ls -la results
+      - name: Keep the servers' logs with the results
+        if: always()
+        run: |
+          mkdir -p results/logs
+          for name in $(docker ps -a --format '{{.Names}}'); do
+            docker logs --tail 300 "$name" > "results/logs/$name.log" 2>&1 || true
+          done
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: x3x6-results-${{ matrix.group }}
+          path: results/
+          if-no-files-found: warn
+          retention-days: 90
+
+  summary:
+    name: summary
+    needs: [data, run]
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: { persist-credentials: false }
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with: { python-version: "3.12" }
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with: { version: "0.13.1", enable-cache: false }
+      - name: Install numpy from uv.lock, by hash
+        run: |
+          uv export --frozen --no-emit-project --extra faiss -o "$RUNNER_TEMP/requirements.txt"
+          pip install --require-hashes --no-deps -r "$RUNNER_TEMP/requirements.txt"
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: x3x6-results-*
+          path: parts
+      - name: X3 statistics
+        run: |
+          mkdir -p reports
+          resamples=10000
+          if [ "$X3X6_MODE" = smoke ]; then resamples=200; fi
+          python benchmarks/paper/x3_stats.py --in parts --out reports --resamples "$resamples" --annotate
+          if [ -f reports/x3_report.md ]; then cat reports/x3_report.md >> "$GITHUB_STEP_SUMMARY"; fi
+      - name: X6 statistics
+        if: ${{ !cancelled() }}
+        run: |
+          mkdir -p reports
+          resamples=10000
+          if [ "$X3X6_MODE" = smoke ]; then resamples=200; fi
+          python benchmarks/paper/x6_stats.py --in parts --out reports --resamples "$resamples" --annotate
+          if [ -f reports/x6_report.md ]; then cat reports/x6_report.md >> "$GITHUB_STEP_SUMMARY"; fi
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: ${{ !cancelled() }}
+        with:
+          name: x3x6-reports
+          path: reports/
+          if-no-files-found: warn
+          retention-days: 90
