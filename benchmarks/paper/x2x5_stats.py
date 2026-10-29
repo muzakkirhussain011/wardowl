@@ -476,11 +476,12 @@ class Analysis:
             elif abs(g) < 0.02 and lo > -0.03 and hi < 0.03:
                 outcome = "no gap"
             per_store[store] = {"G": g, "lo": lo, "hi": hi, "seeds_positive": seeds, "outcome": outcome,
-                                "pairs_u": len(u), "pairs_n": len(n), "boot": boot}  # fmt: skip
+                                "seeds": int(mid["seed"].nunique()), "pairs_u": len(u), "pairs_n": len(n),
+                                "boot": boot}  # fmt: skip
         gaps = [s for s, v in per_store.items() if v["outcome"] == "gap"]
         none = [s for s, v in per_store.items() if v["outcome"] == "no gap"]
         verdict = "confirmed" if len(gaps) >= 6 else "falsified" if len(none) >= 5 else "inconclusive"
-        criteria = [f"{s}: G {v['G']:.4f} [{v['lo']:.4f}, {v['hi']:.4f}], positive in {v['seeds_positive']} of 5 seeds: "
+        criteria = [f"{s}: G {v['G']:.4f} [{v['lo']:.4f}, {v['hi']:.4f}], positive in {v['seeds_positive']} of {v['seeds']} seeds: "
                     f"{v['outcome']}" for s, v in per_store.items()]  # fmt: skip
         criteria.append(f"stores with a gap: {len(gaps)} (confirm at 6); with no gap: {len(none)} (falsify at 5)")
         self.record("H2.1", verdict, criteria, {s: {k: v for k, v in d.items() if k != "boot"} for s, d in per_store.items()})

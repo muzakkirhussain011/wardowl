@@ -43,6 +43,9 @@ jobs:
         include: ${{ fromJSON(inputs.matrix) }}
     env:
       PYTHONUNBUFFERED: "1"
+      # LanceDB logs a deprecation warning for every search that selects columns; errors still show.
+      LANCE_LOG: error
+      RUST_LOG: error
       X2X5_PG_URL: postgresql://bench:bench@127.0.0.1:5432/bench
       X2X5_QDRANT_URL: http://127.0.0.1:6333
       X2X5_ES_URL: http://127.0.0.1:9200

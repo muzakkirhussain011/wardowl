@@ -27,8 +27,9 @@ start() {
   case "$store" in
     pgvector)
       # Only shared_buffers and maintenance_work_mem differ from PostgreSQL's defaults (PREREG
-      # section 4); the shared memory segment is for parallel index builds.
-      docker run -d --name postgres --shm-size=1g -p 5432:5432 -e POSTGRES_USER=bench -e POSTGRES_PASSWORD=bench \
+      # section 4). A parallel HNSW build asks for a shared memory segment of maintenance_work_mem
+      # (2 GB), more than Docker's default /dev/shm (64 MB) holds.
+      docker run -d --name postgres --shm-size=4g -p 5432:5432 -e POSTGRES_USER=bench -e POSTGRES_PASSWORD=bench \
         -e POSTGRES_DB=bench pgvector/pgvector:pg17 -c shared_buffers=3GB -c maintenance_work_mem=2GB
       ;;
     qdrant)
