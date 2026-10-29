@@ -306,3 +306,37 @@ cells the rules name. The rules were fixed before any result. If a rule proves i
 written, the paper reports a deviation rather than changing the rule; any change made before the
 full results exist is committed on its own as a dated amendment below, so the rules stay readable as
 first written. A scope that cannot be run in full is cut only by such an amendment, never silently.
+
+## Amendment 1 (2026-10-29, after the smoke runs, before any full result)
+
+Made the same day, after two smoke runs of the harness (small data, one seed, never analysed) and
+before the full configuration ran. It is committed on its own, so the design above stays readable as
+first written. No hypothesis, prediction, threshold, statistic or verdict rule changes.
+
+1. **X6 probes are placed in groups, and W0 is built per group.** As first written, all probes of a
+   seed shared one W0, and no probe's secrets could lie in any other probe's zone. The smoke run
+   placed one probe of seven, and the rule cannot be met at full scale either: a zone of 1,000 or
+   more passages almost always meets one of thousands of other probes' secrets, through topical
+   overlap and through hub passages, which lie among the nearest neighbours of most queries. Instead,
+   each seed has **8 groups of 9 probes** (one at m = 1,000, two at m = 100, three at m = 10, three at
+   m = 1: still 8, 16, 24 and 24 probes per seed). **W1** is one index holding every group's secrets.
+   For each group g, **W0_g** holds the same chunks except group g's secrets, each replaced by its far
+   chunk at the same insertion position. A probe of group g is compared between W1 and W0_g, which
+   differ only in group g's own secrets; other groups' secrets are unreadable chunks present in both,
+   part of the background. The zone rule applies within a group (no probe's near set meets a group
+   mate's zone, in either direction), and near sets are disjoint across all probes of the seed. SEP is
+   unchanged. A seed builds W1, SEP and the 8 W0_g indexes, each W0_g live while its group is
+   measured, with W1 and SEP; the slots and their random order per repetition are as before (the W0
+   slot is W0_g). Far chunks are drawn without replacement across groups. A group the greedy cannot
+   fill is recorded as such, as before.
+2. **Hub passages are never secrets.** A hub is one of the 1% of passages that appear among the
+   2,000 nearest passages of the most queries (all 6,648). A probe's near set is its m nearest
+   passages that are not hubs; its zone is every passage up to the rank of its m-th near passage,
+   plus 1,000. Hubs stay in the background, with their buckets, in every world.
+3. **X3 runs each seed in its own process**, so a store that crashes the client process (the smoke
+   run's Chroma ended with a segmentation fault at G = 40,000) loses that level only, not the seeds
+   after it. For X3-H2, a level whose process crashed counts as a level whose first retrieval failed,
+   and the report names the crash.
+4. **Smoke runs embed the full corpus** (cached between runs) and plan every seed's groups as the full
+   run does, so they test probe placement at full scale; they measure group 0 of seed 0 only. This
+   changes the smoke procedure, not the full design.
