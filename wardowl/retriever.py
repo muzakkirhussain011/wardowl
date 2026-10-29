@@ -28,7 +28,10 @@ Guarantees
 ----------
 * Fail closed: if the authorizer errors, `AuthorizationError` is raised and nothing is returned.
   Its message is fixed, without the text of the exception behind it, which is kept as its
-  `__cause__`: agent frameworks show tool errors to the model.
+  `__cause__`: agent frameworks show tool errors to the model. If the backend's search or count
+  fails, `SearchError` is raised the same way, with a fixed message and the backend's exception as
+  its `__cause__`; only `InvalidQuery`, which says the query itself cannot be searched, is raised
+  as it is.
 * Defence in depth: pre-filtered results are checked again with the authorizer (`recheck=True`).
   A backend that ignored the filter cannot leak; the rejected hits are counted in `violations`.
   With `recheck=False` there is no second call to the authorizer, but each pre-filtered hit is
@@ -59,7 +62,15 @@ from wardowl.filters import And, Filter, In, Or, matches
 from wardowl.redaction import RedactFunction, Redactor
 from wardowl.types import Hit, InvalidQuery, Query, Subject
 
-__all__ = ["PermissionedRetriever", "Reranker", "RetrievalResult", "SearchBackend", "ShortResults", "Strategy"]
+__all__ = [
+    "PermissionedRetriever",
+    "Reranker",
+    "RetrievalResult",
+    "SearchBackend",
+    "SearchError",
+    "ShortResults",
+    "Strategy",
+]
 
 Strategy = Literal["auto", "prefilter", "postfilter"]
 ShortResults = Literal["report", "count", "exact", "widen"]
@@ -99,6 +110,27 @@ class SearchBackend(Protocol):
     supports_filters: bool
 
     def search(self, query: Any, k: int, filter: Filter | None = None) -> list[Hit]: ...
+
+
+class SearchError(RuntimeError):
+    """The backend's search or count failed, so nothing is returned.
+
+    Its message is fixed ("search failed" or "count failed"), never the text of the backend's
+    exception, which can name hosts, users or credentials and stays its `__cause__` for the logs:
+    agent frameworks show a tool's error to the model. `InvalidQuery` from the backend is raised as
+    it is, since it says the query itself cannot be searched.
+    """
+
+
+@contextmanager
+def _backend_errors(failed: str) -> Iterator[None]:
+    """Raise `SearchError(failed)` for whatever the backend raises inside, but `InvalidQuery`."""
+    try:
+        yield
+    except InvalidQuery:
+        raise
+    except Exception as exc:
+        raise SearchError(failed) from exc
 
 
 @runtime_checkable
@@ -378,9 +410,10 @@ class PermissionedRetriever:
         """Return at most `k` hits the subject may read, best first.
 
         `query` is text, or a `Query` carrying a vector you computed. Raises `AuthorizationError`
-        when the authorizer fails or gives a malformed answer, and `ValueError` or `TypeError`
-        for invalid arguments: `InvalidQuery`, a `ValueError`, when the query or `k` is at fault
-        rather than the configuration. Nothing is returned in any of these cases.
+        when the authorizer fails or gives a malformed answer, `SearchError` when the backend's
+        search or count fails, and `ValueError` or `TypeError` for invalid arguments:
+        `InvalidQuery`, a `ValueError`, when the query or `k` is at fault rather than the
+        configuration. Nothing is returned in any of these cases.
         """
         started, clock, timings = time.time(), time.perf_counter(), _Timings()
         try:
@@ -721,10 +754,13 @@ class PermissionedRetriever:
     def _run(self, op: _Op, subject: Subject) -> Any:
         if isinstance(op, _Search):
             backend, options = self._target(op)
-            return backend.search(op.query, op.k, op.filter, **options)
+            with _backend_errors("search failed"):
+                return backend.search(op.query, op.k, op.filter, **options)
         if isinstance(op, _Count):
             counter: Any = self.backend
-            return self._counted(counter.count(op.filter, op.limit))
+            with _backend_errors("count failed"):
+                counted = counter.count(op.filter, op.limit)
+            return self._counted(counted)
         if isinstance(op, _Rerank):
             rerank: Any = getattr(self.reranker, "rerank", self.reranker)
             return self._reranked(op.hits, rerank(op.query, list(op.hits)))
@@ -747,15 +783,19 @@ class PermissionedRetriever:
         if isinstance(op, _Search):
             backend, options = self._target(op)
             asearch = getattr(backend, "asearch", None)
-            if asearch is not None:
-                return await asearch(op.query, op.k, op.filter, **options)
-            return await asyncio.to_thread(backend.search, op.query, op.k, op.filter, **options)
+            with _backend_errors("search failed"):
+                if asearch is not None:
+                    return await asearch(op.query, op.k, op.filter, **options)
+                return await asyncio.to_thread(backend.search, op.query, op.k, op.filter, **options)
         if isinstance(op, _Count):
             counter: Any = self.backend
             acount = getattr(counter, "acount", None)
-            if acount is not None:
-                return self._counted(await acount(op.filter, op.limit))
-            return self._counted(await asyncio.to_thread(counter.count, op.filter, op.limit))
+            with _backend_errors("count failed"):
+                if acount is not None:
+                    counted = await acount(op.filter, op.limit)
+                else:
+                    counted = await asyncio.to_thread(counter.count, op.filter, op.limit)
+            return self._counted(counted)
         if isinstance(op, _Rerank):
             arerank = getattr(self.reranker, "arerank", None)
             if arerank is not None:

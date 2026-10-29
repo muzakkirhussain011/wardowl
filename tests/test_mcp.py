@@ -21,6 +21,7 @@ from wardowl import (
     InMemoryBackend,
     MetadataACLAuthorizer,
     PermissionedRetriever,
+    SearchError,
     Subject,
 )
 from wardowl.mcp import add_search_tool
@@ -214,7 +215,14 @@ def test_a_failing_store_reveals_nothing_to_the_model():
     with pytest.raises(UnexpectedToolError) as failure:
         call(_server_with(retriever, from_claims), {"query": "leave"}, token("bob", ["eng"]))
     assert not any(s in str(failure.value) for s in SECRETS)
-    assert "hunter2" in str(failure.value.__cause__)  # the server's own log keeps the details
+    # The retriever raised SearchError, with a fixed message; the store's text is its cause, which
+    # the server's own log keeps.
+    causes, error = [], failure.value.__cause__
+    while error is not None:
+        causes.append(error)
+        error = error.__cause__
+    assert any(isinstance(e, SearchError) and str(e) == "search failed" for e in causes)
+    assert any("hunter2" in str(e) for e in causes)
 
     async def over_the_protocol():
         async with Client(_server_with(retriever, Subject("bob", ["eng"]))) as client:
