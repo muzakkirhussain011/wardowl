@@ -67,9 +67,58 @@ through such a field.
 
 `In(field, values)` becomes an `$or` of `$in` on the scalar field (one per value type, since
 Chroma's `$in` lists hold a single type) and an `$eq: true` test on each value's list field.
-`And` and `Or` become `$and` and `$or`. A filter that can match nothing, such as `In(field, [])`,
-skips the query entirely; `filter_to_where` raises `NothingMatches` for it rather than return `{}`,
-which Chroma reads as no filter at all.
+`And` and `Or` become `$and` and `$or`. Each `$and` and `$or` holds at most 16 clauses; more are
+nested as a balanced tree of such nodes (see below). A filter that can match nothing, such as
+`In(field, [])`, skips the query entirely; `filter_to_where` raises `NothingMatches` for it rather
+than return `{}`, which Chroma reads as no filter at all.
+
+## Very large filters
+
+A subject in many groups gives a large filter: one clause for each group. Chroma 1.5 turns a
+`where` into one SQLite statement, and two of its limits matter:
+
+- **Depth.** Chroma writes each `$and` and `$or` as a chain of binary ANDs or ORs, one per clause
+  (`CompositeExpression::eval` in Chroma's
+  [`rust/segment/src/sqlite_metadata.rs`](https://github.com/chroma-core/chroma/blob/1.5.9/rust/segment/src/sqlite_metadata.rs)),
+  so a flat `$or` of n clauses is an expression n levels deep, and SQLite refuses one more than
+  1,000 deep ([SQLite limits](https://sqlite.org/limits.html)). Up to 2.1.0, wardowl sent one flat
+  `$or`, so every search by a subject in about 1,000 or more groups failed with
+  `Expression tree is too large (maximum depth 1000)`. With 40,000 groups, the first search ended
+  the Python process with a segmentation fault, without an exception or a message (chromadb 1.5.9,
+  embedded client).
+- **Parameters.** Chroma binds every value as an SQL parameter, and SQLite allows 32,766 in one
+  statement by default.
+
+wardowl now nests clauses 16 to a node. Chroma keeps a nested `$or` as a subtree of its own (in
+parentheses), so the depth grows with the logarithm of the number of clauses: about 50 levels for
+1,000 groups, 70 for 50,000. And wardowl sends a `where` only within bounds well below what Chroma
+and SQLite refuse, or crashed on:
+
+| Bound | Limit | Why |
+|---|---|---|
+| SQL parameters | 10,000 | SQLite's default limit is 32,766; about three per group |
+| Depth of the SQL expression | 250 | SQLite refuses more than 1,000 |
+| Levels of `$and` and `$or` | 32 | Chroma parses `where` with serde_json, which refuses more than 128 levels of JSON, two per level |
+| Characters of JSON | 500,000 | The `where` that crashed Chroma had 2.66 million |
+
+With `MetadataACLAuthorizer`, the first bound is reached by a subject in about 3,200 groups with
+short names, fewer with long names. Beyond the bounds:
+
+- `ChromaBackend.search` sends only the part of the filter that every match must meet and that
+  fits, or no `where` at all: for `And(In("tenant", ["acme"]), In("allowed_groups", groups))`, the
+  tenant. It asks Chroma for `fallback_candidates` chunks (1,000 by default, or `k` if more), and
+  applies the whole filter to them itself, against the exact JSON copy of each chunk's metadata.
+  It never returns a chunk the filter excludes, but it can return **fewer than `k` hits, or none,
+  though more chunks match**: when the subject may read few of those candidates. The backend does
+  not declare `exact_search`, so the retriever reports such a short result as `complete=False`.
+- `filter_to_where` raises `FilterTooLarge`, a `ValueError`, rather than return a `where` that
+  Chroma would refuse or crash on.
+
+To keep such searches complete, give the authorizer only the groups that grant access to chunks,
+put a condition every match must meet in the filter (a tenant), or raise `fallback_candidates`:
+`ChromaBackend(collection, fallback_candidates=5000)`. The crash was seen with the embedded client;
+a Chroma server on a single node runs the same Rust core and SQLite statement, so the bounds apply
+whichever client you use.
 
 ## Exact or approximate
 

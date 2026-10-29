@@ -206,7 +206,7 @@ what CI tests:
 | pgvector | Up to 100 values: one GIN-indexed containment test per value. Above that: two array parameters, so the query stays small and far below PostgreSQL's limit of 65,535 parameters (the GIN index does not serve that clause; the HNSW scan filters as it goes) | a subject in 40,000 groups |
 | Qdrant | One `MatchAny` per value type | 10,000 groups |
 | Elasticsearch, OpenSearch | One `terms` query, at most `index.max_terms_count` values (65,536 by default) | 10,000 groups |
-| Chroma | `$in`, plus one equality clause per value of a list field: large filters slow every query | 300 values |
+| Chroma | `$in`, plus one equality clause per value of a list field, nested 16 to an `$or`: large filters slow every query. A `where` beyond [conservative bounds](integrations/chroma.md#very-large-filters) (about 3,200 groups) is not sent: the backend searches under the part every match must meet, or none, and filters 1,000 candidates itself | a subject in 1,001 groups and in 40,000 |
 | OpenFGA, SpiceDB | The pre-filter lists documents, up to `list_objects_limit` / `lookup_limit` (1,000); beyond that the retriever post-filters | |
 
 Every backend also runs the conformance kit with filters of 300 values and subjects in hundreds of
