@@ -13,6 +13,7 @@ from __future__ import annotations
 import collections
 import contextlib
 import importlib.metadata
+import importlib.util
 import json
 import math
 import os
@@ -119,7 +120,19 @@ def run_info(experiment: str, profile: str, settings: Mapping[str, Any]) -> dict
         "platform": platform.platform(),
         "cpus": os.cpu_count(),
         "packages": package_versions(),
+        # Amendment 2 measures wardowl installed from another commit: which one, and from where it imports.
+        "wardowl_ref": os.environ.get("X4X7_WARDOWL_REF"),
+        "wardowl_origin": _origin("wardowl"),
     }
+
+
+def _origin(module: str) -> str | None:
+    """Where `module` would be imported from, without importing it."""
+    try:
+        spec = importlib.util.find_spec(module)
+    except (ImportError, ValueError):
+        return None
+    return None if spec is None else spec.origin
 
 
 def package_versions() -> dict[str, str | None]:

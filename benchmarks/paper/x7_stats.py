@@ -321,6 +321,214 @@ def _judge_slow(verdicts: Verdicts, target: str, fault: str, episodes: Sequence[
     verdicts.add(f"X7-H7b {target} {fault} latency rise", verdict, f"median rise {fmt_ci(rise)} s against {delay} s")
 
 
+# ---- Amendment 2: the targeted rerun with the fixed library ----------------------------------------------
+
+# The full run's numbers for the cells amendment 2 runs again (run 40919304635, evidence x4-x7-run1.md).
+RUN1_X7A = {
+    ("spicedb-ml", "nocache"): "median 3.251 [2.994, 3.371], max 8.742; 1 of 40 beyond 6.5 s",
+    ("spicedb-ml", "ttl5"): "median 5.023 [5.021, 5.026], max 6.828",
+    ("spicedb-ml", "ttl30"): "median 30.018 [30.008, 30.031], max 30.044",
+    ("spicedb-ml", "ttl30-inv"): "median 30.042 [30.031, 30.048], max 38.419; 40 of 40 beyond 6.5 s",
+    ("spicedb-ml", "ttl30-shared-inv"): "median 31.048 [31.033, 31.061], max 32.359; 39 of 40 beyond 7.5 s",
+    ("cerbos-policy", "nocache"): "median 2.549 [2.369, 3.219], max 4.035",
+    ("cerbos-policy", "ttl30-inv"): "median 30.025 [30.019, 30.032], max 30.052",
+    ("cerbos-policy", "ttl30-shared-inv"): "median 31.039 [31.026, 31.047], max 31.066",
+}
+RUN1_X7B = {
+    ("spicedb", "empty", "plain"): "4,703 inside, failing 0.000; 4,746 deviating answers, 1 failure",
+    ("pgvector", "down", "plain"): "10 inside, failing 1.000; client classes (psycopg, psycopg_pool)",
+    ("pgvector", "refuse", "plain"): "10 inside, failing 1.000; client classes (psycopg, psycopg_pool)",
+    ("pgvector", "blackhole", "plain"): "0 inside (closed loop): 8 hangs, 5 pool timeouts across its edges",
+    ("qdrant", "down", "plain"): "5,570 inside, failing 1.000; qdrant_client classes",
+    ("qdrant", "refuse", "plain"): "5,683 inside, failing 1.000; qdrant_client classes",
+    ("qdrant", "blackhole", "plain"): "10 inside, failing 1.000; qdrant_client classes",
+    ("qdrant", "http500", "plain"): "5,553 inside, failing 1.000; UnexpectedResponse with the raw response",
+    ("qdrant", "http503", "plain"): "5,550 inside, failing 1.000; UnexpectedResponse with the raw response",
+    ("qdrant", "truncate", "plain"): "5,236 inside, failing 1.000; json.decoder.JSONDecodeError",
+}
+A2_MEDIAN_LIMITS = {"spicedb-ml": (6.0, 7.0), "cerbos-policy": (4.0, 5.0)}  # A2-H2: ttl30-inv, ttl30-shared-inv
+A2_INVALIDATION = ("ttl30-inv", "ttl30-shared-inv")
+SEARCH_ERROR = "wardowl.retriever.SearchError"
+
+
+class _Quiet(Verdicts):
+    """Collects verdicts without printing them: the registered rules' tables are shown for an
+    amendment-2 run, but their verdicts belong to the full run."""
+
+    def add(self, name: str, verdict: str, detail: str) -> None:
+        self.rows.append((name, verdict, detail))
+
+
+def _is_amendment2(records: Iterable[Mapping[str, Any]]) -> bool:
+    return any(r.get("type") == "run-start" and (r.get("settings") or {}).get("amendment") == 2 for r in records)
+
+
+def _within(median: float, limit: float, enough: bool) -> str:
+    """A median against a limit, as X7-H3 judges one: falsified above it by more than 0.5 s."""
+    if math.isnan(median) or not enough:
+        return "inconclusive"
+    if median > limit + 0.5:
+        return "falsified"
+    return "confirmed" if median <= limit else "inconclusive"
+
+
+def a2_revocation(records: Sequence[Mapping[str, Any]], verdicts: Verdicts) -> str:
+    trials = [r for r in records if r.get("type") == "x7a-trial" and r.get("amendment") == 2]
+    order = {c: i for i, c in enumerate(CONDITIONS)}
+    rows = []
+    for (path, condition), recs in sorted(_by(trials, "path", "condition").items(),
+                                          key=lambda kv: (kv[0][0], order.get(kv[0][1], 9))):
+        valid = [r for r in recs if r.get("valid")]
+        effects = [r["effect_s"] for r in valid if r.get("effect_s") is not None]
+        median = boot_stat(effects)
+        top = max(effects) if effects else math.nan
+        declared, bound2 = recs[0].get("declared_staleness_s"), recs[0].get("bound2_s")
+        beyond = sum(1 for r in valid if r.get("violates_bound2"))
+        never = sum(1 for r in valid if r.get("horizon_hit"))
+        enough = len(valid) >= 30 and _seeds(valid) >= SEEDS_REQUIRED
+        rows.append([path, condition, len(valid), fmt(declared), fmt(bound2), fmt_ci(median), fmt(top),
+                     fmt(quantile(effects, 0.95)), beyond, never, sum(r.get("flaps", 0) for r in valid),
+                     RUN1_X7A.get((path, condition), "")])
+        # A2-H1 (after invalidate()) and A2-H3 (no cache, ttl): every valid trial within B2 + 1 s.
+        name = "A2-H1" if condition in A2_INVALIDATION else "A2-H3"
+        detail = (f"{len(valid)} valid trials, {beyond} beyond B2 + 1 s ({never} never took effect), "
+                  f"B2 = {fmt(bound2)} (D = {fmt(declared)})")
+        if bound2 is None:
+            verdict = "inconclusive"  # no declared staleness: not the fixed library
+        elif beyond:
+            verdict = "falsified"
+        else:
+            verdict = "confirmed" if enough else "inconclusive"
+        verdicts.add(f"{name} {path} {condition}", verdict, detail)
+        # A2-H2: after invalidate(), the median is the engine's own delay.
+        if condition in A2_INVALIDATION and path in A2_MEDIAN_LIMITS:
+            limit = A2_MEDIAN_LIMITS[path][A2_INVALIDATION.index(condition)]
+            verdicts.add(f"A2-H2 {path} {condition}", _within(median[0], limit, enough),
+                         f"median {fmt_ci(median)}, limit {limit}; full run {RUN1_X7A.get((path, condition), 'n/a')}")
+        # Replications, judged as first written: X7-H2 (ttl) and X7-H5 (staleness).
+        stale = STALENESS.get(path)
+        if path == "spicedb-ml" and condition in ("ttl5", "ttl30") and stale is not None:
+            ttl, m = TTL[condition], median[0]
+            if math.isnan(m) or not enough:
+                verdict = "inconclusive"
+            elif m < ttl - 2 or m > ttl + stale + 2:
+                verdict = "falsified"
+            elif ttl - 1 <= m <= ttl + stale + 1:
+                verdict = "confirmed"
+            else:
+                verdict = "inconclusive"
+            verdicts.add(f"X7-H2 (replication) {path} {condition}", verdict,
+                         f"median {fmt_ci(median)} against [{ttl - 1}, {ttl + stale + 1}]")
+        if path == "spicedb-ml" and condition == "nocache":
+            m = median[0]
+            if math.isnan(m) or not enough:
+                verdict = "inconclusive"
+            elif m < 0.25 or top > 6.5:
+                verdict = "falsified"
+            elif m >= 0.5:
+                verdict = "confirmed"
+            else:
+                verdict = "inconclusive"
+            verdicts.add("X7-H5 (replication) spicedb-ml staleness", verdict, f"median {fmt_ci(median)}, maximum {fmt(top)}")
+    headers = ["path", "condition", "valid", "D s", "B2 s", "median s [95% CI]", "max s", "p95 s", "beyond B2 + 1 s",
+               "never took effect", "flaps", "full run (comparison)"]
+    return md_table(headers, rows)
+
+
+def _pooled_median(episodes: Sequence[Mapping[str, Any]], key: str) -> float:
+    values = [v for e in episodes for v in e.get(key, [])]
+    return _median(values) if values else math.nan
+
+
+def a2_faults(records: Sequence[Mapping[str, Any]], verdicts: Verdicts) -> str:
+    episodes = [r for r in records if r.get("type") == "x7b-episode" and r.get("amendment") == 2]
+    excluded = [e for e in episodes if e.get("baseline_n", 0) and e["baseline_ok"] / e["baseline_n"] < 0.99]
+    usable = [e for e in episodes if e not in excluded]
+    rows = []
+    for (target, fault, condition), eps in sorted(_by(usable, "target", "fault", "condition").items(), key=str):
+        inside = sum(e["inside_n"] for e in eps)
+        failhang = _share(eps, lambda e: e["inside_fail"] + e["inside_hang"])
+        failing = _share(eps, lambda e: e["inside_fail"])
+        exact = _share(eps, lambda e: e["inside_ok"])
+        deviating = _share(eps, lambda e: e["inside_deviate"])
+        hangs = sum(e["inside_hang"] for e in eps)
+        failhang_s = _pooled_median(eps, "inside_failhang_ms")
+        fail_s = _pooled_median(eps, "inside_fail_ms")
+        classes: collections.Counter[str] = collections.Counter()
+        for e in eps:
+            classes.update(e.get("failure_classes", {}))
+        enough = _seeds(eps) >= SEEDS_REQUIRED and len(eps) >= 10
+        rows.append([target, fault, condition, len(eps), inside, fmt_ci(failhang), fmt_ci(failing), hangs,
+                     fmt_ci(exact), fmt_ci(deviating), fmt(failhang_s), fmt(fail_s),
+                     sum(e.get("failures_all", 0) for e in eps), sum(e.get("failures_search_error", 0) for e in eps),
+                     dict(classes), sum(e.get("failures_all_naming_host", 0) for e in eps), sum(e.get("leaks", 0) for e in eps),
+                     RUN1_X7B.get((target, fault, condition), "")])
+        if target == "pgvector" and fault == "blackhole":
+            if inside < 30 or not enough:
+                verdicts.add(f"A2-H4 pgvector blackhole {condition}", "inconclusive", f"{inside} requests inside")
+            else:
+                _judge_share(verdicts, f"A2-H4b pgvector blackhole {condition}", failhang, 0.99, 0.95, eps, above=True)
+                verdicts.add(f"A2-H4c pgvector blackhole {condition}", "confirmed" if failhang_s >= 4.5 else "falsified",
+                             f"median latency of inside failures and hangs {fmt(failhang_s)} s, at least 4.5 predicted")
+        if target == "pgvector" and fault == "lock":
+            if inside < 30 or not enough:
+                verdicts.add(f"A2-H5 pgvector lock {condition}", "inconclusive", f"{inside} requests inside")
+            elif condition == "stmt-timeout":
+                _judge_share(verdicts, "A2-H5 pgvector lock stmt-timeout failing", failing, 0.99, 0.95, eps, above=True)
+                verdict = "falsified" if hangs or math.isnan(fail_s) or fail_s > 1.5 else "confirmed"
+                verdicts.add("A2-H5 pgvector lock stmt-timeout latency", verdict,
+                             f"{hangs} hangs; median latency of inside failures {fmt(fail_s)} s, at most 1.5 predicted")
+            else:
+                verdicts.add(f"A2-H5 pgvector lock {condition} latency", "confirmed" if failhang_s >= 4.5 else "falsified",
+                             f"median latency of inside failures and hangs {fmt(failhang_s)} s, at least 4.5 predicted")
+        if target == "spicedb" and fault == "empty":
+            estimate, low, high = failhang
+            if math.isnan(estimate) or not enough:
+                verdict = "inconclusive"
+            elif high < 0.99 or deviating[1] > 0.01:
+                verdict = "falsified"
+            elif estimate >= 0.99 and low >= 0.95 and deviating[0] <= 0.01:
+                verdict = "confirmed"
+            else:
+                verdict = "inconclusive"
+            verdicts.add("A2-H6 spicedb empty", verdict,
+                         f"failing {fmt_ci(failhang)}, deviating {fmt_ci(deviating)} over {inside} requests; "
+                         f"full run {RUN1_X7B[('spicedb', 'empty', 'plain')]}")
+        if target == "spicedb" and fault == "empty-lookup":
+            _judge_share(verdicts, "A2-H6 spicedb empty-lookup exact", exact, 0.99, 0.95, eps, above=True)
+    # A2-H7: every store failure is SearchError with its fixed message, none names a host, no leak.
+    stores = [e for e in usable if e.get("kind") == "store"]
+    failures = sum(e.get("failures_all", 0) for e in stores)
+    wrapped = sum(e.get("failures_search_error", 0) for e in stores)
+    naming = sum(e.get("failures_all_naming_host", 0) for e in stores)
+    leaks = sum(e.get("leaks", 0) for e in stores)
+    detail = f"{failures} failures, {wrapped} SearchError with a fixed message, {naming} naming a host, {leaks} leaks"
+    if stores and (wrapped < failures or naming or leaks):
+        verdicts.add("A2-H7 store errors", "falsified", detail)
+    elif stores:
+        enough = failures >= 100 and _seeds(stores) >= SEEDS_REQUIRED
+        verdicts.add("A2-H7 store errors", "confirmed" if enough else "inconclusive", detail)
+    # A2-H8: fail closed on the engine episodes (replication of X7-H6).
+    engines = [e for e in usable if e.get("kind") == "engine"]
+    if engines:
+        leaks = sum(e.get("leaks", 0) for e in engines)
+        not_authz = sum(e.get("failures_not_authz", 0) for e in engines)
+        naming = sum(e.get("failures_naming_host", 0) for e in engines)
+        requests = sum(len(e.get("requests", [])) for e in engines)
+        detail = (f"{requests} requests: {leaks} leaks (one-sided bound {fmt(zero_bound(requests), 6)}), "
+                  f"{not_authz} failures not AuthorizationError, {naming} naming a host")
+        if leaks or not_authz or naming:
+            verdicts.add("A2-H8 fail closed", "falsified", detail)
+        else:
+            verdicts.add("A2-H8 fail closed", "confirmed" if _seeds(engines) >= SEEDS_REQUIRED else "inconclusive", detail)
+    headers = ["target", "fault", "condition", "episodes", "requests inside", "failing or hanging [95% CI]",
+               "failing [95% CI]", "hangs", "exact [95% CI]", "deviating [95% CI]", "median failing or hanging s",
+               "median failing s", "failures", "SearchError, fixed message", "failure classes", "naming a host", "leaks",
+               "full run (comparison)"]
+    note = f"{len(episodes)} episodes; {len(excluded)} excluded by G4 (baseline below 99% exact)."
+    return note + "\n\n" + md_table(headers, rows)
+
+
 # ---- the report -----------------------------------------------------------------------------------------
 
 
@@ -355,8 +563,18 @@ def main(argv: Sequence[str] | None = None) -> int:
     profiles = sorted({r.get("profile") for r in records if r.get("type") == "run-start"})
     sections = [f"# X7: revocation and faults\n\nProfile: {profiles}. Files: {len(files)}; records: {len(records)}."
                 + (" **Smoke data: not analysed for the hypotheses.**" if "smoke" in profiles else "")]
-    sections.append("## X7a: revocation latency\n\n" + x7a(records, verdicts, out))
-    sections.append("## X7b: faults\n\n" + x7b(records, verdicts, out))
+    if _is_amendment2(records):
+        # The targeted rerun: amendment 2's hypotheses only. The registered rules' tables are shown,
+        # without their verdicts, which belong to the full run.
+        refs = sorted({str(r.get("wardowl_ref")) for r in records if r.get("type") == "run-start"})
+        sections[0] += f"\n\nAmendment 2: the targeted rerun, wardowl from {refs}."
+        sections.append("## Amendment 2: revocation\n\n" + a2_revocation(records, verdicts))
+        sections.append("## Amendment 2: faults\n\n" + a2_faults(records, verdicts))
+        sections.append("## X7a tables (registered rules, no verdicts)\n\n" + x7a(records, _Quiet(), out))
+        sections.append("## X7b tables (registered rules, no verdicts)\n\n" + x7b(records, _Quiet(), out))
+    else:
+        sections.append("## X7a: revocation latency\n\n" + x7a(records, verdicts, out))
+        sections.append("## X7b: faults\n\n" + x7b(records, verdicts, out))
     sections.insert(1, "## Verdicts\n\n" + verdicts.markdown())
     sections.append("## Harness\n\n" + harness_section(records))
     report = "\n\n".join(sections) + "\n"

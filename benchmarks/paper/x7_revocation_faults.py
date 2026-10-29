@@ -12,6 +12,10 @@ checked against an oracle.
 
 Every trial and episode is one JSON line in `<out>/x7-<job>.jsonl`. The servers come from
 .github/workflows/paper-x4-x7.yml.
+
+`--amendment 2` runs the targeted rerun of amendment 2 (PREREG_X4_X7.md) against the fixed library:
+`revocation --conditions` picks the cache conditions, `faults --plan amendment2` the faults and
+conditions, and `--open-loop 0.2` starts a store retrieval every 0.2 s whatever is still running.
 """
 
 from __future__ import annotations
@@ -166,6 +170,14 @@ STORE_FAULTS = {
     "pgvector": ("down", "refuse", "blackhole", "slow-200", "slow-1000"),
     "qdrant": ("down", "refuse", "blackhole", "slow-200", "slow-1000", "http500", "http503", "truncate"),
 }
+# Amendment 2: the targeted rerun's (fault, condition) pairs per target.
+A2_PLAN: dict[str, list[tuple[str, str]]] = {
+    "spicedb": [("empty", "plain"), ("empty-lookup", "plain")],
+    "pgvector": [("down", "plain"), ("refuse", "plain"), ("blackhole", "plain"), ("blackhole", "stmt-timeout"),
+                 ("lock", "plain"), ("lock", "stmt-timeout")],
+    "qdrant": [(f, "plain") for f in ("down", "refuse", "blackhole", "http500", "http503", "truncate")],
+}
+STMT_TIMEOUT = 1.0  # seconds, PgVectorBackend(statement_timeout=...) under the stmt-timeout condition
 HOST = re.compile(r"https?://|\b(?:\d{1,3}\.){3}\d{1,3}\b|localhost|\[::1\]|:\d{2,5}\b")
 
 
@@ -176,6 +188,10 @@ class Context:
     errors: Errors
     out: Path
     profile: str
+    amendment: int = 0  # 2: the targeted rerun of amendment 2, against the fixed library
+    conditions: tuple[str, ...] = CONDITIONS  # X7a: the cache conditions run
+    plan: str = "registered"  # X7b: "registered", or "amendment2"
+    open_loop: float = 0.0  # X7b stores: seconds between retrievals started; 0 is the closed loop
 
     def seeds(self) -> range:
         return range(self.settings["seeds"])
@@ -225,6 +241,9 @@ class RevocationPath:
         self.ctx = ctx
         self.backend: Any = None
         self.vectors: dict[str, list[float]] = {}
+        # Amendment 2: passed to CachingAuthorizer(source_staleness=...) when set; otherwise the cache
+        # reads the adapter's own max_staleness (the fixed library) or holds nothing back.
+        self.source_staleness: float | None = None
 
     def setup(self) -> None:
         """Connect; load models or policies."""
@@ -541,6 +560,8 @@ def make_paths(ctx: Context, names: Sequence[str], opa: OpaProcess | None) -> li
             paths.append(OPAPath(ctx, name, opa))
         elif name == "cerbos-policy":
             paths.append(CerbosPath(ctx))
+            if ctx.amendment == 2:
+                paths[-1].source_staleness = UNSTATED_STALENESS  # Cerbos's adapter cannot know its reload delay
         elif name in ("acl-pgvector", "acl-qdrant"):
             paths.append(MetadataPath(ctx, name))
         else:
@@ -569,6 +590,8 @@ def _trials(path: RevocationPath, seed: int, settings: Mapping[str, Any]) -> tup
 def _authorizers(path: RevocationPath, trial: Trial, redis_client: Any) -> tuple[Any, Any | None]:
     """The authorizer the retrieval polls, and the one whose invalidate() is called (None: none)."""
     condition = trial.condition
+    # Only set under amendment 2: the library of the full run has no source_staleness.
+    hold: dict[str, Any] = {} if path.source_staleness is None else {"source_staleness": path.source_staleness}
     if condition == "nocache":
         return path.authorizer(), None
     if condition == "ttl30-shared-inv":
@@ -576,21 +599,39 @@ def _authorizers(path: RevocationPath, trial: Trial, redis_client: Any) -> tuple
 
         namespace = f"x7-{RUN_ID}-{path.name}-{trial.seed}-{trial.index}"
         replica_a = CachingAuthorizer(path.authorizer(), ttl=30, shared=RedisCache(redis_client), namespace=namespace,
-                                      local_ttl=LOCAL_TTL)
+                                      local_ttl=LOCAL_TTL, **hold)
         replica_b = CachingAuthorizer(path.authorizer(), ttl=30, shared=RedisCache(redis_client), namespace=namespace,
-                                      local_ttl=LOCAL_TTL)
+                                      local_ttl=LOCAL_TTL, **hold)
         return replica_b, replica_a
     ttl = 5.0 if condition == "ttl5" else 30.0
-    cache = CachingAuthorizer(path.authorizer(), ttl=ttl)
+    cache = CachingAuthorizer(path.authorizer(), ttl=ttl, **hold)
     return cache, (cache if condition == "ttl30-inv" else None)
+
+
+def _declared(path: RevocationPath, polled: Any) -> float | None:
+    """D, amendment 2's declared staleness: the cache's source_staleness, or without a cache what
+    the path passes or the adapter declares (None with a library that declares nothing)."""
+    held = getattr(polled, "source_staleness", None)
+    if held is not None:
+        return float(held)
+    if path.source_staleness is not None:
+        return path.source_staleness
+    declared = getattr(polled, "max_staleness", None)
+    return None if declared is None else float(declared)
+
+
+def _bound2(condition: str, declared: float | None) -> float | None:
+    """B2 of amendment 2: D after invalidate(), D + local_ttl on the shared replica, D without a
+    cache, and ttl + D under ttl5 and ttl30."""
+    if declared is None:
+        return None
+    return {"ttl5": 5.0, "ttl30": 30.0, "ttl30-shared-inv": LOCAL_TTL}.get(condition, 0.0) + declared
 
 
 def run_trial(ctx: Context, path: RevocationPath, trial: Trial, redis_client: Any) -> None:
     settings = ctx.settings
     bound = path.bound(trial.condition)
     staleness = path.staleness if path.staleness is not None else UNSTATED_STALENESS
-    # Amendment 1: poll until max(B, T + S') + 15 s; the verdict still compares the time with B + 1 s.
-    horizon = max(bound or 0.0, CACHE_TTL[trial.condition] + staleness) + settings["grace"]
     rec: dict[str, Any] = {
         "type": "x7a-trial",
         "path": path.name,
@@ -599,10 +640,17 @@ def run_trial(ctx: Context, path: RevocationPath, trial: Trial, redis_client: An
         "trial": trial.index,
         "bound_s": bound,
         "staleness_s": path.staleness,
-        "horizon_s": horizon,
+        "amendment": ctx.amendment,
     }
     try:
         polled, invalidator = _authorizers(path, trial, redis_client)
+        declared = _declared(path, polled)
+        bound2 = _bound2(trial.condition, declared) if ctx.amendment == 2 else None
+        # Amendment 1: poll until max(B, T + S') + 15 s; the verdict still compares the time with B + 1 s.
+        # Amendment 2: max(B, B2, T + max(S', D)) + 15 s.
+        longest = max(staleness, declared or 0.0) if ctx.amendment == 2 else staleness
+        horizon = max(bound or 0.0, bound2 or 0.0, CACHE_TTL[trial.condition] + longest) + settings["grace"]
+        rec.update({"declared_staleness_s": declared, "bound2_s": bound2, "horizon_s": horizon})
         retriever = PermissionedRetriever(path.backend, polled)
         subject = path.subject(trial)
         noise = random.Random(f"x7a-query-{trial.user}")
@@ -670,6 +718,7 @@ def run_trial(ctx: Context, path: RevocationPath, trial: Trial, redis_client: An
         "poll_errors": poll_errors,
         "first_poll_error": first_error,
         "violates_bound": None if bound is None else (effect is None or effect > bound + 1.0),
+        "violates_bound2": None if bound2 is None else (effect is None or effect > bound2 + 1.0),
     })
     ctx.records.write(rec)
 
@@ -695,7 +744,8 @@ def revocation(ctx: Context, names: Sequence[str]) -> int:
                         batch = [t for t in trials if t.index == i]
                         rng.shuffle(batch)
                         for trial in batch:
-                            run_trial(ctx, path, trial, redis_client)
+                            if trial.condition in ctx.conditions:  # every trial is made, as in the full run
+                                run_trial(ctx, path, trial, redis_client)
                     log(f"x7a {path.name} seed {seed}: {clock() - started:.0f} s")
             except Exception as error:
                 info = ctx.errors.add(f"x7a {path.name}", error)
@@ -728,6 +778,8 @@ class Target:
     start: Callable[[], None]
     ready: Callable[[], bool]
     proxy: ProxyProcess
+    # Faults the target injects itself (amendment 2's pgvector lock): name -> (inject, remove).
+    extra: dict[str, tuple[Callable[[], None], Callable[[], None]]] = field(default_factory=dict)
 
 
 class FaultTarget:
@@ -998,6 +1050,7 @@ class StoreFaultTarget(FaultTarget):
         documents = [Document(d, "", self._metadata(world, d)) for d in docs]
         name = f"x7f_{self.name}_{seed}_{RUN_ID}".replace("-", "_")
         self.made.append(name)
+        extra: dict[str, tuple[Callable[[], None], Callable[[], None]]] = {}
         if self.name == "pgvector":
             from wardowl.backends.pgvector import PgVectorBackend, create_schema
 
@@ -1008,6 +1061,10 @@ class StoreFaultTarget(FaultTarget):
                 False: PgVectorBackend(direct_pool, None, table=name, iterative_scan=None),
                 True: PgVectorBackend(proxied_pool, None, table=name, iterative_scan=None),
             }
+            # Amendment 2: the statement timeout (only the fixed library takes it) and the lock fault.
+            timed = PgVectorBackend(proxied_pool, None, table=name, iterative_scan=None,
+                                    statement_timeout=STMT_TIMEOUT) if self.ctx.plan == "amendment2" else None
+            extra["lock"] = self._lock_fault(name)
         else:
             import qdrant_client
 
@@ -1019,6 +1076,7 @@ class StoreFaultTarget(FaultTarget):
             create_collection(direct, name, settings["dim"])
             QdrantBackend(direct, name).add(documents, embeddings=vectors.corpus)
             backends = {False: QdrantBackend(direct, name), True: QdrantBackend(proxied, name)}
+            timed = None
 
         def readable(uid: str) -> set[str]:
             groups = closure.groups_of(uid) | {"*"}
@@ -1042,6 +1100,10 @@ class StoreFaultTarget(FaultTarget):
             readable_sets.append(can)
 
         def make(proxied: bool, condition: str) -> Any:
+            if condition == "stmt-timeout":
+                if timed is None:
+                    raise ValueError(f"{self.name} has no stmt-timeout condition outside amendment 2")
+                return PermissionedRetriever(timed, MetadataACLAuthorizer())
             return PermissionedRetriever(backends[proxied], MetadataACLAuthorizer())
 
         container = "pgv" if self.name == "pgvector" else "qdrant"
@@ -1054,7 +1116,30 @@ class StoreFaultTarget(FaultTarget):
             return True
 
         return Target(self.name, "store", pairs, expected, readable_sets, make,
-                      lambda: docker("kill", container), lambda: docker("start", container), ready, self.proxy)
+                      lambda: docker("kill", container), lambda: docker("start", container), ready, self.proxy, extra)
+
+    def _lock_fault(self, table: str) -> tuple[Callable[[], None], Callable[[], None]]:
+        """Amendment 2's `lock`: a transaction of the harness's own, on a direct connection, holds
+        ACCESS EXCLUSIVE on the table from the fault's start (once granted) to its removal."""
+        held: dict[str, Any] = {}
+
+        def inject() -> None:
+            import psycopg
+            from psycopg import sql
+
+            conn = psycopg.connect(PG_URL, autocommit=False, connect_timeout=10)
+            conn.execute(sql.SQL("LOCK TABLE {} IN ACCESS EXCLUSIVE MODE").format(sql.Identifier(table)))
+            held["conn"] = conn
+
+        def remove() -> None:
+            conn = held.pop("conn", None)
+            if conn is not None:
+                with contextlib.suppress(Exception):
+                    conn.rollback()
+                with contextlib.suppress(Exception):
+                    conn.close()
+
+        return inject, remove
 
     def close(self) -> None:
         self.proxy.stop()
@@ -1125,6 +1210,8 @@ def run_episode(
             times["fault_on"] = clock()
             if fault == "down":
                 target.kill()
+            elif fault in target.extra:
+                target.extra[fault][0]()
             else:
                 mode, delay = _proxy_mode(fault)
                 target.proxy.set(mode, delay)
@@ -1133,6 +1220,8 @@ def run_episode(
             times["fault_off"] = clock()
             if fault == "down":
                 target.start()
+            elif fault in target.extra:
+                target.extra[fault][1]()
             else:
                 target.proxy.set("pass")
             times["fault_off_done"] = clock()
@@ -1148,32 +1237,86 @@ def run_episode(
     origin = clock()
     controller = threading.Thread(target=control, daemon=True)
     controller.start()
-    i = 0
     limit = settings["recover_max_down"] if fault == "down" else settings["recover_max"]
-    while True:
-        future = pool.submit(_retrieve, retriever, target, i % len(target.pairs))
-        submitted = clock()
-        try:
-            outcomes.append(future.result(timeout=settings["watchdog"]))
-        except FutureTimeout:
-            outcomes.append(Outcome(submitted, clock(), "hang"))
-            future.add_done_callback(lambda f: late.append(f.result()) if not f.cancelled() else None)
-        i += 1
-        if done.is_set():
-            off = times["fault_off"]
-            after = [o for o in outcomes if o.start >= off]
-            if _stable(after, settings["stable"]) or clock() - off > limit:
-                break
-        time.sleep(0.02)
+    if ctx.open_loop > 0 and target.kind == "store":
+        _drive_open(ctx, target, retriever, pool, done, times, limit, outcomes, late)
+    else:
+        i = 0
+        while True:
+            future = pool.submit(_retrieve, retriever, target, i % len(target.pairs))
+            submitted = clock()
+            try:
+                outcomes.append(future.result(timeout=settings["watchdog"]))
+            except FutureTimeout:
+                outcomes.append(Outcome(submitted, clock(), "hang"))
+                future.add_done_callback(lambda f: late.append(f.result()) if not f.cancelled() else None)
+            i += 1
+            if done.is_set():
+                off = times["fault_off"]
+                after = [o for o in outcomes if o.start >= off]
+                if _stable(after, settings["stable"]) or clock() - off > limit:
+                    break
+            time.sleep(0.02)
     controller.join(5)
-    # Leave the target as it was: the proxy passing, the server answering.
+    # Leave the target as it was: the proxy passing, the lock released, the server answering.
     with contextlib.suppress(Exception):
         target.proxy.set("pass")
+    if fault in target.extra:
+        with contextlib.suppress(Exception):
+            target.extra[fault][1]()
     if not _wait_ready(target, 120):
         with contextlib.suppress(Exception):
             target.start()
         _wait_ready(target, 120)
     ctx.records.write(_episode_record(ctx, target, fault, condition, seed, episode, origin, times, outcomes, late))
+
+
+def _drive_open(
+    ctx: Context,
+    target: Target,
+    retriever: Any,
+    pool: ThreadPoolExecutor,
+    done: threading.Event,
+    times: Mapping[str, float],
+    limit: float,
+    outcomes: list[Outcome],
+    late: list[Outcome],
+) -> None:
+    """Amendment 2's open loop: a retrieval starts every `ctx.open_loop` seconds whatever is still
+    running, each under the watchdog, so retrievals are in flight inside the fault window."""
+    watchdog = ctx.settings["watchdog"]
+    pending: list[tuple[float, Any]] = []
+
+    def give_up(started: float, future: Any) -> None:
+        outcomes.append(Outcome(started, clock(), "hang"))
+        future.add_done_callback(lambda f: late.append(f.result()) if not f.cancelled() else None)
+
+    i = 0
+    while True:
+        submitted = clock()
+        pending.append((submitted, pool.submit(_retrieve, retriever, target, i % len(target.pairs))))
+        i += 1
+        running: list[tuple[float, Any]] = []
+        for started, future in pending:
+            if future.done():
+                outcomes.append(future.result())
+            elif clock() - started >= watchdog:
+                give_up(started, future)
+            else:
+                running.append((started, future))
+        pending = running
+        if done.is_set():
+            off = times["fault_off"]
+            after = sorted((o for o in outcomes if o.start >= off), key=lambda o: o.start)
+            if _stable(after, ctx.settings["stable"]) or clock() - off > limit:
+                break
+        time.sleep(max(0.0, submitted + ctx.open_loop - clock()))
+    for started, future in pending:  # each still running gets the rest of its watchdog
+        try:
+            outcomes.append(future.result(timeout=max(0.0, started + watchdog - clock())))
+        except FutureTimeout:
+            give_up(started, future)
+    outcomes.sort(key=lambda o: o.start)
 
 
 def _stable(outcomes: Sequence[Outcome], seconds: float) -> bool:
@@ -1225,6 +1368,12 @@ def _episode_record(
     failures = [o for o in outcomes if o.code in ("authz", "error")]
     errors = collections.Counter((o.error_class, o.error) for o in failures)
     codes = collections.Counter(o.code for o in outcomes)
+    # Amendment 2 (A2-H7): every failure, late ones included, by class, and those that are the fixed
+    # library's SearchError with its fixed message.
+    every_failure = failures + [o for o in late if o.code in ("authz", "error")]
+    classes = collections.Counter(str(o.error_class) for o in every_failure)
+    fixed = sum(o.error_class == "wardowl.retriever.SearchError" and o.error in ("search failed", "count failed")
+                for o in every_failure)
 
     def latencies(items: Sequence[Outcome], codes_wanted: tuple[str, ...]) -> list[float]:
         return sorted(round(o.end - o.start, 4) for o in items if o.code in codes_wanted)
@@ -1258,6 +1407,13 @@ def _episode_record(
         "failures_naming_host": sum(o.names_host for o in failures),
         "errors": [{"class": c, "message": m, "count": n} for (c, m), n in errors.most_common(10)],
         "distinct_errors": len(errors),
+        "amendment": ctx.amendment,
+        "open_loop_s": ctx.open_loop if target.kind == "store" else 0.0,
+        "failures_all": len(every_failure),
+        "failure_classes": dict(classes),
+        "failures_search_error": fixed,
+        "failures_all_naming_host": sum(o.names_host for o in every_failure),
+        "inside_failhang_ms": latencies(inside, ("authz", "error", "hang"))[:400],
         "baseline_ok_ms": latencies(baseline, ("ok",))[:200],
         "inside_ok_ms": latencies(inside, ("ok", "deviate"))[:400],
         "inside_fail_ms": latencies(inside, ("authz", "error"))[:400],
@@ -1277,7 +1433,9 @@ def faults(ctx: Context, names: Sequence[str]) -> int:
             log(f"x7b {name}: start")
             try:
                 runner.setup()
-                if runner.kind == "store":
+                if ctx.plan == "amendment2":
+                    plan = list(A2_PLAN[name])
+                elif runner.kind == "store":
                     plan = [(f, "plain") for f in STORE_FAULTS[name]]
                 else:
                     plan = [(f, "plain") for f in ENGINE_FAULTS]
@@ -1317,20 +1475,37 @@ def main(argv: Sequence[str] | None = None) -> int:
     sub = parser.add_subparsers(dest="command", required=True)
     rev = sub.add_parser("revocation", help="X7a")
     rev.add_argument("--paths", required=True)
+    rev.add_argument("--conditions", default=",".join(CONDITIONS), help="the cache conditions to run (all by default)")
     flt = sub.add_parser("faults", help="X7b")
     flt.add_argument("--targets", required=True)
+    flt.add_argument("--plan", choices=("registered", "amendment2"), default="registered")
+    flt.add_argument("--open-loop", type=float, default=0.0,
+                     help="stores: seconds between retrievals started, whatever is running (0: the closed loop)")
     for p in (rev, flt):
         p.add_argument("--profile", choices=sorted(SETTINGS), default="smoke")
         p.add_argument("--out", default="results")
         p.add_argument("--containers", default="", help="containers whose images to record")
+        p.add_argument("--amendment", type=int, choices=(0, 2), default=0, help="2: amendment 2's targeted rerun")
     args = parser.parse_args(argv)
     settings = SETTINGS[args.profile]
     out = Path(args.out)
     records = Records(out, f"x7-{JOB}")
     errors = Errors()
-    ctx = Context(settings, records, errors, out, args.profile)
+    ctx = Context(settings, records, errors, out, args.profile, amendment=args.amendment)
+    if args.command == "revocation":
+        ctx.conditions = tuple(c.strip() for c in args.conditions.split(",") if c.strip())
+        unknown = [c for c in ctx.conditions if c not in CONDITIONS]
+        if unknown:
+            parser.error(f"unknown conditions {unknown}")
+    else:
+        ctx.plan, ctx.open_loop = args.plan, args.open_loop
     names = [n.strip() for n in (args.paths if args.command == "revocation" else args.targets).split(",") if n.strip()]
-    records.write(run_info("x7", args.profile, {**_settings_for_record(settings), "command": args.command, "names": names}))
+    details = {"command": args.command, "names": names, "amendment": args.amendment}
+    if args.command == "revocation":
+        details["conditions"] = list(ctx.conditions)
+    else:
+        details.update({"plan": ctx.plan, "open_loop_s": ctx.open_loop})
+    records.write(run_info("x7", args.profile, {**_settings_for_record(settings), **details}))
     records.write(versions_record([c for c in args.containers.split(",") if c]))
     if args.command == "revocation":
         failed = revocation(ctx, names)

@@ -17,6 +17,8 @@ returns it; `GET /health` answers 200. Modes:
   the answer (http only): cut in half; an empty body; `{"unexpected": true}`; booleans as strings and
   decision enums as an unknown value; the last element of the answer's list (or the last line of a
   streamed answer) removed; every denial in a check answer turned into an allow.
+* `empty-lookup` (amendment 2): an empty body for the answers to SpiceDB's LookupResources
+  (`POST /v1/permissions/resources`) only; every other answer passes unchanged.
 
 Only the standard library is used. The proxy prints one line per mode change.
 """
@@ -50,8 +52,10 @@ HTTP_MODES = (
     "type-flip",
     "drop-last",
     "allow-all",
+    "empty-lookup",
 )
 TCP_MODES = ("pass", "refuse", "blackhole", "slow")
+LOOKUP_PATHS = ("/v1/permissions/resources",)  # the streamed list answers `empty-lookup` empties
 HOP = {"connection", "keep-alive", "proxy-connection", "transfer-encoding", "te", "trailer", "upgrade", "content-length"}
 # Decision enums of the engines: a type flip turns them into a value no adapter knows.
 ENUM_PREFIXES = ("PERMISSIONSHIP_", "LOOKUP_PERMISSIONSHIP_", "EFFECT_", "KIND_")
@@ -138,7 +142,9 @@ def _lines(body: bytes) -> list[bytes] | None:
     return parts
 
 
-def mutate(mode: str, body: bytes) -> bytes:
+def mutate(mode: str, body: bytes, target: str = "") -> bytes:
+    if mode == "empty-lookup":
+        return b"" if target.split("?", 1)[0].endswith(LOOKUP_PATHS) else body
     if mode == "truncate":
         return body[: len(body) // 2]
     if mode == "empty":
@@ -316,7 +322,7 @@ class Proxy:
                     self._respond(conn, 502, "Bad Gateway", [], b"")
                     continue
                 if status == 200:
-                    answer = mutate(mode, answer)
+                    answer = mutate(mode, answer, target)
                 self._respond(conn, status, reason, kept, answer)
         except OSError:
             return
