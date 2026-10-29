@@ -10,8 +10,11 @@ name: paper-x4-x7
 # the tail of every job's log to the branch results/x4-x7, under <run id>-<run attempt>/, so the
 # results can be read with git alone.
 #
-# A push to paper/x4-x7 runs the configuration named by PROFILE below (smoke while the harness is
-# checked, full for the run the paper reports); workflow_dispatch can choose either.
+# A push to paper/x4-x7 runs the configuration and profile named by CONFIGURATION and PROFILE below
+# (smoke while the harness is checked, full for the run the paper reports); workflow_dispatch can
+# choose either. Configuration `full` is the pre-registered design (the jobs of `experiment`, with
+# this branch's own copy of wardowl); `amendment2` is amendment 2's targeted rerun (the jobs of
+# `experiment-a2`, with wardowl installed from WARDOWL_REF on fix/revocation-faults).
 
 on:
   push:
@@ -23,6 +26,11 @@ on:
         type: choice
         options: [smoke, full]
         default: smoke
+      configuration:
+        description: full (the pre-registered design) or amendment2 (the targeted rerun of amendment 2)
+        type: choice
+        options: [full, amendment2]
+        default: full
 
 permissions:
   contents: read
@@ -32,11 +40,27 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  PROFILE: ${{ inputs.profile || 'full' }}
+  PROFILE: ${{ inputs.profile || 'smoke' }}
+  CONFIGURATION: ${{ inputs.configuration || 'amendment2' }}
+  # The library amendment 2 measures: branch fix/revocation-faults at this commit.
+  WARDOWL_REF: 3c6559f3ecfd850bcd59416f14237d85887ba498
 
 jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      configuration: ${{ steps.pick.outputs.configuration }}
+    steps:
+      - id: pick
+        run: |
+          case "$CONFIGURATION" in full|amendment2) ;; *) echo "::error::unknown configuration $CONFIGURATION"; exit 1 ;; esac
+          echo "configuration=$CONFIGURATION" >> "$GITHUB_OUTPUT"
+          echo "configuration $CONFIGURATION, profile $PROFILE"
+
   experiment:
     name: ${{ matrix.job }}
+    needs: plan
+    if: needs.plan.outputs.configuration == 'full'
     runs-on: ubuntu-latest
     timeout-minutes: 350
     strategy:
@@ -264,9 +288,169 @@ jobs:
           if-no-files-found: warn
           retention-days: 90
 
+  # Amendment 2 (PREREG_X4_X7.md): the targeted rerun of the cells the full run falsified or left
+  # inconclusive, against wardowl installed from WARDOWL_REF, not this branch's copy of the package.
+  experiment-a2:
+    name: ${{ matrix.job }}
+    needs: plan
+    if: needs.plan.outputs.configuration == 'amendment2'
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - job: a2-x7a-spicedb
+            args: revocation --paths spicedb-ml --conditions nocache,ttl5,ttl30,ttl30-inv,ttl30-shared-inv --containers spicedb,enginedb,redis
+            services: enginedb spicedb redis
+          - job: a2-x7a-cerbos
+            args: revocation --paths cerbos-policy --conditions nocache,ttl30-inv,ttl30-shared-inv --containers cerbos,redis
+            services: cerbos-watch redis
+          - job: a2-x7b-spicedb
+            args: faults --targets spicedb --plan amendment2 --containers spicedb,enginedb
+            services: enginedb spicedb
+          - job: a2-x7b-pgvector
+            args: faults --targets pgvector --plan amendment2 --open-loop 0.2 --containers pgv
+            services: pgv
+          - job: a2-x7b-qdrant
+            args: faults --targets qdrant --plan amendment2 --open-loop 0.2 --containers qdrant
+            services: qdrant
+    env:
+      X4X7_JOB: ${{ matrix.job }}
+      SERVICES: ${{ matrix.services }}
+      OPENFGA_DB: postgres://test:test@enginedb:5432/openfga?sslmode=disable
+      SPICEDB_DB: postgres://test:test@enginedb:5432/spicedb?sslmode=disable
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: { persist-credentials: false }
+      - name: Check out the library under test (fix/revocation-faults)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          ref: ${{ env.WARDOWL_REF }}
+          path: wardowl-under-test
+
+      - name: Start the base servers
+        run: |
+          has() { [[ " $SERVICES " == *" $1 "* ]]; }
+          docker network create wo
+          if has enginedb; then
+            docker run -d --name enginedb --network wo -p 5433:5432 -e POSTGRES_USER=test -e POSTGRES_PASSWORD=test \
+              -e POSTGRES_DB=engines pgvector/pgvector:pg17
+          fi
+          if has pgv; then
+            docker run -d --name pgv -p 5432:5432 -e POSTGRES_USER=test -e POSTGRES_PASSWORD=test -e POSTGRES_DB=test \
+              pgvector/pgvector:pg17
+          fi
+          if has qdrant; then docker run -d --name qdrant -p 6333:6333 qdrant/qdrant:v1.19.2; fi
+          if has redis; then docker run -d --name redis -p 6379:6379 redis:8.10.2-alpine; fi
+          if has cerbos-watch; then
+            # X7's policy-change path: an empty directory the harness writes, which Cerbos watches.
+            mkdir -p "$RUNNER_TEMP/cerbos-x7" "$RUNNER_TEMP/cerbos-conf"
+            printf '%s\n' 'server:' '  httpListenAddr: ":3592"' '  grpcListenAddr: ":3593"' 'storage:' '  driver: "disk"' \
+              '  disk:' '    directory: /policies' '    watchForChanges: true' > "$RUNNER_TEMP/cerbos-conf/conf.yaml"
+            docker run -d --name cerbos -p 3592:3592 -v "$RUNNER_TEMP/cerbos-x7:/policies" \
+              -v "$RUNNER_TEMP/cerbos-conf:/conf:ro" ghcr.io/cerbos/cerbos:0.56.0 server --config=/conf/conf.yaml
+          fi
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with: { python-version: "3.12", cache: pip }
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with: { version: "0.13.1", enable-cache: false }
+      - name: Install from uv.lock, by hash, and wardowl from the library under test
+        run: |
+          uv export --frozen --no-emit-project --extra faiss --extra pgvector --extra qdrant --extra redis \
+            -o "$RUNNER_TEMP/requirements.txt"
+          pip install --require-hashes --no-deps -r "$RUNNER_TEMP/requirements.txt"
+          pip install --require-hashes --no-deps -r .github/requirements/build.txt
+          # Not editable, and not this branch's copy: the harness imports the installed package.
+          pip install --no-deps --no-build-isolation ./wardowl-under-test
+          echo "wardowl under test: $(git -C wardowl-under-test rev-parse HEAD)"
+          # Outside the checkout, so that the package installed is the one imported.
+          cd "$RUNNER_TEMP"
+          python -c "import wardowl, wardowl.retriever as r, faiss, numpy; assert hasattr(r, 'SearchError'), wardowl.__file__; print('wardowl', wardowl.__version__, wardowl.__file__)"
+
+      - name: Start SpiceDB on Postgres
+        run: |
+          has() { [[ " $SERVICES " == *" $1 "* ]]; }
+          ready() {
+            local name=$1 tries=$2; shift 2
+            for _ in $(seq 1 "$tries"); do "$@" > /dev/null 2>&1 && { echo "$name is ready"; return 0; }; sleep 2; done
+            echo "::warning::$name did not answer"; docker logs --tail 50 "$name" || true; return 1
+          }
+          if has enginedb; then
+            # Over TCP: during its first start the image runs a temporary server on the socket only.
+            ready enginedb 60 docker exec enginedb pg_isready -h 127.0.0.1 -U test -d engines
+            for _ in $(seq 1 30); do
+              docker exec -e PGPASSWORD=test enginedb psql -h 127.0.0.1 -U test -d engines -c "CREATE DATABASE spicedb" && break
+              docker exec -e PGPASSWORD=test enginedb psql -h 127.0.0.1 -U test -d engines -tAc \
+                "SELECT 1 FROM pg_database WHERE datname = 'spicedb'" | grep -q 1 && break
+              sleep 2
+            done
+          fi
+          if has spicedb; then
+            docker run --rm --network wo authzed/spicedb:v1.56.2 datastore migrate head --datastore-engine postgres \
+              --datastore-conn-uri "$SPICEDB_DB" \
+              || docker run --rm --network wo authzed/spicedb:v1.56.2 migrate head --datastore-engine postgres \
+                --datastore-conn-uri "$SPICEDB_DB"
+            docker run -d --name spicedb --network wo -p 8443:8443 authzed/spicedb:v1.56.2 serve \
+              --grpc-preshared-key wo-test --http-enabled --datastore-engine postgres --datastore-conn-uri "$SPICEDB_DB"
+          fi
+      - name: Wait for every server
+        run: |
+          has() { [[ " $SERVICES " == *" $1 "* ]]; }
+          ready() {
+            local name=$1 tries=$2; shift 2
+            for _ in $(seq 1 "$tries"); do "$@" > /dev/null 2>&1 && { echo "$name is ready"; return 0; }; sleep 2; done
+            echo "::warning::$name did not answer; the harness will record the failure"; docker logs --tail 50 "$name" || true
+          }
+          if has spicedb; then ready spicedb 60 curl -s -o /dev/null http://127.0.0.1:8443/; fi
+          if has cerbos-watch; then ready cerbos 60 curl -sf http://127.0.0.1:3592/_cerbos/health; fi
+          if has pgv; then ready pgv 60 docker exec pgv pg_isready -h 127.0.0.1 -U test -d test; fi
+          if has qdrant; then ready qdrant 60 curl -sf http://127.0.0.1:6333/readyz; fi
+          if has redis; then ready redis 60 docker exec redis redis-cli ping; fi
+          docker ps --format '{{.Names}} {{.Image}} {{.Status}}'
+
+      - name: Run ${{ matrix.job }} (${{ env.PROFILE }})
+        env:
+          X4X7_CERBOS_WATCH_DIR: ${{ runner.temp }}/cerbos-x7
+          X4X7_WARDOWL_REF: ${{ env.WARDOWL_REF }}
+        run: |
+          mkdir -p results/logs
+          set +e
+          python -u benchmarks/paper/x7_revocation_faults.py ${{ matrix.args }} --amendment 2 --profile "$PROFILE" \
+            --out results 2>&1 | tee results/logs/driver.log
+          status=${PIPESTATUS[0]}
+          set -e
+          echo "{\"job\": \"$X4X7_JOB\", \"exit_status\": $status, \"profile\": \"$PROFILE\", \"configuration\": \"amendment2\"}" \
+            > results/status.json
+          if [ "$status" -ne 0 ]; then echo "::error::the driver stopped with exit status $status"; fi
+      - name: Statistics for this job
+        if: always()
+        run: |
+          shopt -s nullglob
+          files=(results/*.jsonl)
+          if [ ${#files[@]} -eq 0 ]; then echo "::error::no records were written"; exit 0; fi
+          python benchmarks/paper/x7_stats.py "${files[@]}" --out results/report 2>&1 | tail -n 120 \
+            | tee results/logs/stats.log || true
+      - name: Keep the servers' logs
+        if: always()
+        run: |
+          mkdir -p results/logs
+          for name in $(docker ps -a --format '{{.Names}}'); do
+            docker logs --tail 300 "$name" > "results/logs/$name.log" 2>&1 || true
+          done
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: x4x7-${{ matrix.job }}
+          path: results/
+          if-no-files-found: warn
+          retention-days: 90
+
   report:
     name: report
-    needs: [experiment]
+    needs: [plan, experiment, experiment-a2]
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -329,6 +513,8 @@ jobs:
             echo "- Commit: ${GITHUB_SHA}"
             echo "- Ref: ${GITHUB_REF_NAME}"
             echo "- Profile: ${PROFILE}"
+            echo "- Configuration: ${CONFIGURATION}"
+            if [ "$CONFIGURATION" = amendment2 ]; then echo "- Library: wardowl from fix/revocation-faults at ${WARDOWL_REF}"; fi
             echo "- Run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
             echo "- Artifacts: $(ls parts | tr '\n' ' ')"
             echo
@@ -354,7 +540,7 @@ jobs:
           fi
           dest="${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           git add "$dest"
-          git commit -q -m "paper-x4-x7: run ${GITHUB_RUN_ID} attempt ${GITHUB_RUN_ATTEMPT} (${PROFILE}) of ${GITHUB_SHA}"
+          git commit -q -m "paper-x4-x7: run ${GITHUB_RUN_ID} attempt ${GITHUB_RUN_ATTEMPT} (${CONFIGURATION}, ${PROFILE}) of ${GITHUB_SHA}"
           for attempt in 1 2 3 4 5; do
             if git push -q origin HEAD:refs/heads/results/x4-x7; then echo "published $dest"; exit 0; fi
             git fetch -q origin results/x4-x7 && git rebase -q FETCH_HEAD || true
