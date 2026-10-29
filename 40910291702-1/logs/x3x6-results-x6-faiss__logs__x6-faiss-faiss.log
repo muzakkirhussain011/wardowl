@@ -1,0 +1,10 @@
+[16:26:22] x6 faiss: loading the data
+[16:26:22] x6 faiss: seed 0
+[16:26:22]   seed 0: building w0 (6,000 chunks)
+[16:26:22]   seed 0: w0 built in 0 s {}
+[16:26:22]   seed 0: building w1 (6,000 chunks)
+[16:26:22]   seed 0: w1 built in 0 s {}
+[16:26:22]   seed 0: building sep (5,000 chunks)
+[16:26:22]   seed 0: sep built in 0 s {}
+[16:26:23] x6 faiss: seed 0 done in 0.0 min
+::notice title=x6 faiss::{"seeds": [0], "minutes": [0.0], "stopped": {}, "first_errors": {}}

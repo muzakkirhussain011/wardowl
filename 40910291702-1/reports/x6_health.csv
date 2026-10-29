@@ -1,0 +1,6 @@
+store,mode,seeds_done,skipped,aborted,retrievals,first_error,stopped,setup_error,leaks,versions,errors,build_s
+elasticsearch,smoke,[0],[],[],168,{},[],,0,"{""image"": ""docker.elastic.co/elasticsearch/elasticsearch:9.5.5"", ""reported"": {""number"": ""9.5.5"", ""lucene_version"": ""10.5.1"", ""build_hash"": ""48acba663b09e70b115dd879329141506c377890""}}",{},"{""w0"": 4.0, ""w1"": 3.7, ""sep"": 2.0}"
+faiss,smoke,[0],[],[],72,{},[],,0,"{""image"": null, ""reported"": {}}",{},"{""w0"": 0.1, ""w1"": 0.0, ""sep"": 0.0}"
+memory,smoke,[0],[],[],16,{},[],,0,"{""image"": null, ""reported"": {}}",{},"{""w0"": 0.0, ""w1"": 0.0, ""sep"": 0.0}"
+pgvector,smoke,[0],[],[],120,{},[],,0,"{""image"": ""pgvector/pgvector:pg17"", ""reported"": {""postgresql"": ""PostgreSQL 17.11 (Debian 17.11-1.pgdg12+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit"", ""pgvector"": ""0.8.7"", ""settings"": {""maintenance_work_mem"": ""1048576"", ""max_parallel_maintenance_workers"": ""3"", ""shared_buffers"": ""262144"", ""work_mem"": ""4096""}}}",{},"{""w0"": 5.0, ""w1"": 4.7, ""sep"": 3.8}"
+qdrant,smoke,[0],[],[],120,{},[],,0,"{""image"": ""qdrant/qdrant:v1.19.2"", ""reported"": {""qdrant"": ""1.19.2""}}",{},"{""w0"": 13.0, ""w1"": 11.9, ""sep"": 11.0}"

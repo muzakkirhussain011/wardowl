@@ -1,0 +1,83 @@
+{
+  "experiment": "x3x6-data",
+  "mode": "smoke",
+  "sizes": {
+    "fiqa": 6000,
+    "queries": 600,
+    "scidocs": 1500,
+    "levels": {
+      "1000": 1,
+      "100": 2,
+      "10": 2,
+      "1": 2
+    },
+    "zone": 300
+  },
+  "seeds": 1,
+  "embedding": {
+    "model": "sentence-transformers/all-MiniLM-L6-v2",
+    "revision": "1110a243fdf4706b3f48f1d95db1a4f5529b4d41",
+    "max_seq_length": 256,
+    "threads": 4
+  },
+  "sources": {
+    "fiqa": "hub:BeIR/fiqa",
+    "scidocs": "hub:BeIR/scidocs"
+  },
+  "counts": {
+    "fiqa_corpus": 6000,
+    "fiqa_queries": 600,
+    "scidocs_subset": 1500
+  },
+  "tokens": {
+    "fiqa_mean": 136.90866666666668,
+    "fiqa_median": 93.0
+  },
+  "plans": {
+    "0": {
+      "probes": {
+        "1000": 1,
+        "100": 0,
+        "10": 0,
+        "1": 0
+      },
+      "shortfall": {
+        "100": 0,
+        "10": 0,
+        "1": 0
+      },
+      "secret": 1000,
+      "far_eligible": 1456,
+      "far_reused": false,
+      "far_fallback": false,
+      "boundary": 0.14444971084594727,
+      "far_closest_max": 0.14378851652145386
+    }
+  },
+  "timings": {
+    "download_s": 6.0,
+    "embed_s": 318.7,
+    "plans_s": 0.3
+  },
+  "versions": {
+    "sentence-transformers": "5.0.0",
+    "torch": "2.8.0+cpu",
+    "transformers": "4.57.6",
+    "huggingface-hub": "0.36.2",
+    "tokenizers": "0.22.2",
+    "numpy": "2.5.4",
+    "pyarrow": "21.0.0"
+  },
+  "host": {
+    "python": "3.12.15",
+    "platform": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+    "cpus": 4,
+    "memory_gib": 15.6,
+    "runner": "GitHub Actions 1000007743",
+    "image_os": "ubuntu24",
+    "image_version": "20261026.354.1",
+    "commit": "e4ec979a7903090540f23aae25ea79601f12bf32",
+    "run_id": "40910291702",
+    "run_attempt": "1"
+  }
+}

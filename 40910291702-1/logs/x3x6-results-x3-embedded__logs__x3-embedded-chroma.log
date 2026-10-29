@@ -1,0 +1,9 @@
+[16:26:18] x3 chroma: seed 0
+[16:26:18]   seed 0: building (8,000 chunks)
+[16:26:22]   seed 0: built in 4 s {}
+[16:26:25]   seed 0: G=1: ok, 0 errors, translation ok
+[16:26:28]   seed 0: G=10: ok, 0 errors, translation ok
+[16:26:33]   seed 0: G=100: ok, 0 errors, translation ok
+[16:26:34]   seed 0: G=1,000: refused, 3 errors, translation ok
+[16:26:36]   seed 0: G=4,000: refused, 3 errors, translation ok
+[16:26:37]   seed 0: G=10,000: refused, 3 errors, translation ok

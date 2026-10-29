@@ -1,0 +1,175 @@
+store,comparison,level,observable,delta_paired_auc,lo,hi,pairs,clusters
+elasticsearch,post - post-const,1000,latency,0.6666666666666666,0.6666666666666666,0.6666666666666666,3,1
+elasticsearch,post - post-const,1000,count,0.0,0.0,0.0,3,1
+elasticsearch,post - post-const,1000,complete,0.0,0.0,0.0,3,1
+elasticsearch,post - post-const,all,latency,0.6666666666666666,0.6666666666666666,0.6666666666666666,3,1
+elasticsearch,post - post-const,all,count,0.0,0.0,0.0,3,1
+elasticsearch,post - post-const,all,complete,0.0,0.0,0.0,3,1
+elasticsearch,pre - pre-exact,1000,latency,-0.3333333333333333,-0.3333333333333333,-0.3333333333333333,3,1
+elasticsearch,pre - pre-exact,1000,count,0.0,0.0,0.0,3,1
+elasticsearch,pre - pre-exact,1000,complete,0.0,0.0,0.0,3,1
+elasticsearch,pre - pre-exact,all,latency,-0.3333333333333333,-0.3333333333333333,-0.3333333333333333,3,1
+elasticsearch,pre - pre-exact,all,count,0.0,0.0,0.0,3,1
+elasticsearch,pre - pre-exact,all,complete,0.0,0.0,0.0,3,1
+elasticsearch,bm25-pre: shared - separated,1000,latency,0.3333333333333333,0.3333333333333333,0.3333333333333333,3,1
+elasticsearch,bm25-pre: shared - separated,1000,count,0.0,0.0,0.0,3,1
+elasticsearch,bm25-pre: shared - separated,1000,complete,0.0,0.0,0.0,3,1
+elasticsearch,bm25-pre: shared - separated,all,latency,0.3333333333333333,0.3333333333333333,0.3333333333333333,3,1
+elasticsearch,bm25-pre: shared - separated,all,count,0.0,0.0,0.0,3,1
+elasticsearch,bm25-pre: shared - separated,all,complete,0.0,0.0,0.0,3,1
+elasticsearch,hybrid-exact: shared - separated,1000,latency,-0.3333333333333333,-0.3333333333333333,-0.3333333333333333,3,1
+elasticsearch,hybrid-exact: shared - separated,1000,count,0.0,0.0,0.0,3,1
+elasticsearch,hybrid-exact: shared - separated,1000,complete,0.0,0.0,0.0,3,1
+elasticsearch,hybrid-exact: shared - separated,all,latency,-0.3333333333333333,-0.3333333333333333,-0.3333333333333333,3,1
+elasticsearch,hybrid-exact: shared - separated,all,count,0.0,0.0,0.0,3,1
+elasticsearch,hybrid-exact: shared - separated,all,complete,0.0,0.0,0.0,3,1
+elasticsearch,hybrid-pre: shared - separated,1000,latency,0.3333333333333333,0.3333333333333333,0.3333333333333333,3,1
+elasticsearch,hybrid-pre: shared - separated,1000,count,0.0,0.0,0.0,3,1
+elasticsearch,hybrid-pre: shared - separated,1000,complete,0.0,0.0,0.0,3,1
+elasticsearch,hybrid-pre: shared - separated,all,latency,0.3333333333333333,0.3333333333333333,0.3333333333333333,3,1
+elasticsearch,hybrid-pre: shared - separated,all,count,0.0,0.0,0.0,3,1
+elasticsearch,hybrid-pre: shared - separated,all,complete,0.0,0.0,0.0,3,1
+elasticsearch,post: shared - separated,1000,latency,0.3333333333333333,0.3333333333333333,0.3333333333333333,3,1
+elasticsearch,post: shared - separated,1000,count,0.5,0.5,0.5,3,1
+elasticsearch,post: shared - separated,1000,complete,0.3333333333333333,0.3333333333333333,0.3333333333333333,3,1
+elasticsearch,post: shared - separated,all,latency,0.3333333333333333,0.3333333333333333,0.3333333333333333,3,1
+elasticsearch,post: shared - separated,all,count,0.5,0.5,0.5,3,1
+elasticsearch,post: shared - separated,all,complete,0.3333333333333333,0.3333333333333333,0.3333333333333333,3,1
+elasticsearch,post-const: shared - separated,1000,latency,-0.3333333333333333,-0.3333333333333333,-0.3333333333333333,3,1
+elasticsearch,post-const: shared - separated,1000,count,0.5,0.5,0.5,3,1
+elasticsearch,post-const: shared - separated,1000,complete,0.3333333333333333,0.3333333333333333,0.3333333333333333,3,1
+elasticsearch,post-const: shared - separated,all,latency,-0.3333333333333333,-0.3333333333333333,-0.3333333333333333,3,1
+elasticsearch,post-const: shared - separated,all,count,0.5,0.5,0.5,3,1
+elasticsearch,post-const: shared - separated,all,complete,0.3333333333333333,0.3333333333333333,0.3333333333333333,3,1
+elasticsearch,pre: shared - separated,1000,latency,0.6666666666666666,0.6666666666666666,0.6666666666666666,3,1
+elasticsearch,pre: shared - separated,1000,count,0.0,0.0,0.0,3,1
+elasticsearch,pre: shared - separated,1000,complete,0.0,0.0,0.0,3,1
+elasticsearch,pre: shared - separated,all,latency,0.6666666666666666,0.6666666666666666,0.6666666666666666,3,1
+elasticsearch,pre: shared - separated,all,count,0.0,0.0,0.0,3,1
+elasticsearch,pre: shared - separated,all,complete,0.0,0.0,0.0,3,1
+elasticsearch,pre-exact: shared - separated,1000,latency,1.0,1.0,1.0,3,1
+elasticsearch,pre-exact: shared - separated,1000,count,0.0,0.0,0.0,3,1
+elasticsearch,pre-exact: shared - separated,1000,complete,0.0,0.0,0.0,3,1
+elasticsearch,pre-exact: shared - separated,all,latency,1.0,1.0,1.0,3,1
+elasticsearch,pre-exact: shared - separated,all,count,0.0,0.0,0.0,3,1
+elasticsearch,pre-exact: shared - separated,all,complete,0.0,0.0,0.0,3,1
+faiss,post - post-const,1000,latency,0.6666666666666666,0.6666666666666666,0.6666666666666666,3,1
+faiss,post - post-const,1000,count,0.0,0.0,0.0,3,1
+faiss,post - post-const,1000,complete,0.0,0.0,0.0,3,1
+faiss,post - post-const,all,latency,0.6666666666666666,0.6666666666666666,0.6666666666666666,3,1
+faiss,post - post-const,all,count,0.0,0.0,0.0,3,1
+faiss,post - post-const,all,complete,0.0,0.0,0.0,3,1
+faiss,post: shared - separated,1000,latency,0.6666666666666666,0.6666666666666666,0.6666666666666666,3,1
+faiss,post: shared - separated,1000,count,0.5,0.5,0.5,3,1
+faiss,post: shared - separated,1000,complete,0.3333333333333333,0.3333333333333333,0.3333333333333333,3,1
+faiss,post: shared - separated,all,latency,0.6666666666666666,0.6666666666666666,0.6666666666666666,3,1
+faiss,post: shared - separated,all,count,0.5,0.5,0.5,3,1
+faiss,post: shared - separated,all,complete,0.3333333333333333,0.3333333333333333,0.3333333333333333,3,1
+faiss,post-const: shared - separated,1000,latency,0.0,0.0,0.0,3,1
+faiss,post-const: shared - separated,1000,count,0.5,0.5,0.5,3,1
+faiss,post-const: shared - separated,1000,complete,0.3333333333333333,0.3333333333333333,0.3333333333333333,3,1
+faiss,post-const: shared - separated,all,latency,0.0,0.0,0.0,3,1
+faiss,post-const: shared - separated,all,count,0.5,0.5,0.5,3,1
+faiss,post-const: shared - separated,all,complete,0.3333333333333333,0.3333333333333333,0.3333333333333333,3,1
+faiss,pre: shared - separated,1000,latency,1.0,1.0,1.0,3,1
+faiss,pre: shared - separated,1000,count,0.0,0.0,0.0,3,1
+faiss,pre: shared - separated,1000,complete,0.0,0.0,0.0,3,1
+faiss,pre: shared - separated,all,latency,1.0,1.0,1.0,3,1
+faiss,pre: shared - separated,all,count,0.0,0.0,0.0,3,1
+faiss,pre: shared - separated,all,complete,0.0,0.0,0.0,3,1
+memory,post: shared - separated,1000,latency,0.0,0.0,0.0,1,1
+memory,post: shared - separated,1000,count,0.0,0.0,0.0,1,1
+memory,post: shared - separated,1000,complete,0.0,0.0,0.0,1,1
+memory,post: shared - separated,all,latency,0.0,0.0,0.0,1,1
+memory,post: shared - separated,all,count,0.0,0.0,0.0,1,1
+memory,post: shared - separated,all,complete,0.0,0.0,0.0,1,1
+memory,pre: shared - separated,1000,latency,-1.0,-1.0,-1.0,1,1
+memory,pre: shared - separated,1000,count,0.0,0.0,0.0,1,1
+memory,pre: shared - separated,1000,complete,0.0,0.0,0.0,1,1
+memory,pre: shared - separated,all,latency,-1.0,-1.0,-1.0,1,1
+memory,pre: shared - separated,all,count,0.0,0.0,0.0,1,1
+memory,pre: shared - separated,all,complete,0.0,0.0,0.0,1,1
+pgvector,post - post-const,1000,latency,0.6666666666666666,0.6666666666666666,0.6666666666666666,3,1
+pgvector,post - post-const,1000,count,0.0,0.0,0.0,3,1
+pgvector,post - post-const,1000,complete,0.0,0.0,0.0,3,1
+pgvector,post - post-const,all,latency,0.6666666666666666,0.6666666666666666,0.6666666666666666,3,1
+pgvector,post - post-const,all,count,0.0,0.0,0.0,3,1
+pgvector,post - post-const,all,complete,0.0,0.0,0.0,3,1
+pgvector,pre - pre-exact,1000,latency,0.3333333333333333,0.3333333333333333,0.3333333333333333,3,1
+pgvector,pre - pre-exact,1000,count,0.0,0.0,0.0,3,1
+pgvector,pre - pre-exact,1000,complete,0.0,0.0,0.0,3,1
+pgvector,pre - pre-exact,all,latency,0.3333333333333333,0.3333333333333333,0.3333333333333333,3,1
+pgvector,pre - pre-exact,all,count,0.0,0.0,0.0,3,1
+pgvector,pre - pre-exact,all,complete,0.0,0.0,0.0,3,1
+pgvector,bm25-pre: shared - separated,1000,latency,0.0,0.0,0.0,3,1
+pgvector,bm25-pre: shared - separated,1000,count,0.0,0.0,0.0,3,1
+pgvector,bm25-pre: shared - separated,1000,complete,0.0,0.0,0.0,3,1
+pgvector,bm25-pre: shared - separated,all,latency,0.0,0.0,0.0,3,1
+pgvector,bm25-pre: shared - separated,all,count,0.0,0.0,0.0,3,1
+pgvector,bm25-pre: shared - separated,all,complete,0.0,0.0,0.0,3,1
+pgvector,post: shared - separated,1000,latency,0.0,0.0,0.0,3,1
+pgvector,post: shared - separated,1000,count,0.5,0.5,0.5,3,1
+pgvector,post: shared - separated,1000,complete,0.3333333333333333,0.3333333333333333,0.3333333333333333,3,1
+pgvector,post: shared - separated,all,latency,0.0,0.0,0.0,3,1
+pgvector,post: shared - separated,all,count,0.5,0.5,0.5,3,1
+pgvector,post: shared - separated,all,complete,0.3333333333333333,0.3333333333333333,0.3333333333333333,3,1
+pgvector,post-const: shared - separated,1000,latency,-0.3333333333333333,-0.3333333333333333,-0.3333333333333333,3,1
+pgvector,post-const: shared - separated,1000,count,0.5,0.5,0.5,3,1
+pgvector,post-const: shared - separated,1000,complete,0.3333333333333333,0.3333333333333333,0.3333333333333333,3,1
+pgvector,post-const: shared - separated,all,latency,-0.3333333333333333,-0.3333333333333333,-0.3333333333333333,3,1
+pgvector,post-const: shared - separated,all,count,0.5,0.5,0.5,3,1
+pgvector,post-const: shared - separated,all,complete,0.3333333333333333,0.3333333333333333,0.3333333333333333,3,1
+pgvector,pre: shared - separated,1000,latency,0.0,0.0,0.0,3,1
+pgvector,pre: shared - separated,1000,count,0.0,0.0,0.0,3,1
+pgvector,pre: shared - separated,1000,complete,0.0,0.0,0.0,3,1
+pgvector,pre: shared - separated,all,latency,0.0,0.0,0.0,3,1
+pgvector,pre: shared - separated,all,count,0.0,0.0,0.0,3,1
+pgvector,pre: shared - separated,all,complete,0.0,0.0,0.0,3,1
+pgvector,pre-exact: shared - separated,1000,latency,0.0,0.0,0.0,3,1
+pgvector,pre-exact: shared - separated,1000,count,0.0,0.0,0.0,3,1
+pgvector,pre-exact: shared - separated,1000,complete,0.0,0.0,0.0,3,1
+pgvector,pre-exact: shared - separated,all,latency,0.0,0.0,0.0,3,1
+pgvector,pre-exact: shared - separated,all,count,0.0,0.0,0.0,3,1
+pgvector,pre-exact: shared - separated,all,complete,0.0,0.0,0.0,3,1
+qdrant,post - post-const,1000,latency,0.6666666666666666,0.6666666666666666,0.6666666666666666,3,1
+qdrant,post - post-const,1000,count,0.0,0.0,0.0,3,1
+qdrant,post - post-const,1000,complete,0.0,0.0,0.0,3,1
+qdrant,post - post-const,all,latency,0.6666666666666666,0.6666666666666666,0.6666666666666666,3,1
+qdrant,post - post-const,all,count,0.0,0.0,0.0,3,1
+qdrant,post - post-const,all,complete,0.0,0.0,0.0,3,1
+qdrant,pre - pre-exact,1000,latency,0.3333333333333333,0.3333333333333333,0.3333333333333333,3,1
+qdrant,pre - pre-exact,1000,count,0.0,0.0,0.0,3,1
+qdrant,pre - pre-exact,1000,complete,0.0,0.0,0.0,3,1
+qdrant,pre - pre-exact,all,latency,0.3333333333333333,0.3333333333333333,0.3333333333333333,3,1
+qdrant,pre - pre-exact,all,count,0.0,0.0,0.0,3,1
+qdrant,pre - pre-exact,all,complete,0.0,0.0,0.0,3,1
+qdrant,bm25-pre: shared - separated,1000,latency,0.3333333333333333,0.3333333333333333,0.3333333333333333,3,1
+qdrant,bm25-pre: shared - separated,1000,count,0.0,0.0,0.0,3,1
+qdrant,bm25-pre: shared - separated,1000,complete,0.0,0.0,0.0,3,1
+qdrant,bm25-pre: shared - separated,all,latency,0.3333333333333333,0.3333333333333333,0.3333333333333333,3,1
+qdrant,bm25-pre: shared - separated,all,count,0.0,0.0,0.0,3,1
+qdrant,bm25-pre: shared - separated,all,complete,0.0,0.0,0.0,3,1
+qdrant,post: shared - separated,1000,latency,0.0,0.0,0.0,3,1
+qdrant,post: shared - separated,1000,count,0.5,0.5,0.5,3,1
+qdrant,post: shared - separated,1000,complete,0.3333333333333333,0.3333333333333333,0.3333333333333333,3,1
+qdrant,post: shared - separated,all,latency,0.0,0.0,0.0,3,1
+qdrant,post: shared - separated,all,count,0.5,0.5,0.5,3,1
+qdrant,post: shared - separated,all,complete,0.3333333333333333,0.3333333333333333,0.3333333333333333,3,1
+qdrant,post-const: shared - separated,1000,latency,-0.3333333333333333,-0.3333333333333333,-0.3333333333333333,3,1
+qdrant,post-const: shared - separated,1000,count,0.5,0.5,0.5,3,1
+qdrant,post-const: shared - separated,1000,complete,0.3333333333333333,0.3333333333333333,0.3333333333333333,3,1
+qdrant,post-const: shared - separated,all,latency,-0.3333333333333333,-0.3333333333333333,-0.3333333333333333,3,1
+qdrant,post-const: shared - separated,all,count,0.5,0.5,0.5,3,1
+qdrant,post-const: shared - separated,all,complete,0.3333333333333333,0.3333333333333333,0.3333333333333333,3,1
+qdrant,pre: shared - separated,1000,latency,0.0,0.0,0.0,3,1
+qdrant,pre: shared - separated,1000,count,0.0,0.0,0.0,3,1
+qdrant,pre: shared - separated,1000,complete,0.0,0.0,0.0,3,1
+qdrant,pre: shared - separated,all,latency,0.0,0.0,0.0,3,1
+qdrant,pre: shared - separated,all,count,0.0,0.0,0.0,3,1
+qdrant,pre: shared - separated,all,complete,0.0,0.0,0.0,3,1
+qdrant,pre-exact: shared - separated,1000,latency,-0.3333333333333333,-0.3333333333333333,-0.3333333333333333,3,1
+qdrant,pre-exact: shared - separated,1000,count,0.0,0.0,0.0,3,1
+qdrant,pre-exact: shared - separated,1000,complete,0.0,0.0,0.0,3,1
+qdrant,pre-exact: shared - separated,all,latency,-0.3333333333333333,-0.3333333333333333,-0.3333333333333333,3,1
+qdrant,pre-exact: shared - separated,all,count,0.0,0.0,0.0,3,1
+qdrant,pre-exact: shared - separated,all,complete,0.0,0.0,0.0,3,1
