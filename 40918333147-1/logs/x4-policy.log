@@ -1,0 +1,31 @@
+[2026-10-29T17:08:21.100+00:00] x4 controls part a: start
+[2026-10-29T17:08:21.110+00:00] x4a control-oracle seed 0: {'subjects': 12, 'with_filter': 12, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:08:21.117+00:00] x4a control-planted seed 0: {'subjects': 12, 'with_filter': 12, 'fa': 22, 'fd': 12, 'co': 0, 'errors': 0}
+[2026-10-29T17:08:21.118+00:00] x4 controls part a: 0 s
+[2026-10-29T17:08:21.118+00:00] x4 controls part b: start
+[2026-10-29T17:08:21.118+00:00] x4 controls part b: 0 s
+[2026-10-29T17:08:21.118+00:00] x4 controls part c: start
+[2026-10-29T17:08:21.118+00:00] x4 controls part c: 0 s
+[2026-10-29T17:08:21.118+00:00] x4 cerbos part a: start
+[2026-10-29T17:08:21.434+00:00] x4a cerbos seed 0: {'subjects': 12, 'with_filter': 12, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:08:21.708+00:00] x4a cerbos-drift seed 0: {'subjects': 12, 'with_filter': 12, 'fa': 2, 'fd': 0, 'co': 2, 'errors': 0}
+[2026-10-29T17:08:21.984+00:00] x4a cerbos-excl seed 0: {'subjects': 12, 'with_filter': 0, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:08:21.985+00:00] x4 cerbos part a: 1 s
+[2026-10-29T17:08:21.985+00:00] x4 cerbos part b: start
+[2026-10-29T17:08:21.985+00:00] x4 cerbos part b: 0 s
+[2026-10-29T17:08:21.985+00:00] x4 cerbos part c: start
+[2026-10-29T17:08:21.985+00:00] x4 cerbos part c: 0 s
+[2026-10-29T17:08:22.292+00:00] x4 opa part a: start
+[2026-10-29T17:08:22.406+00:00] x4a opa-acl-doc seed 0: {'subjects': 12, 'with_filter': 12, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:08:22.508+00:00] x4a opa-acl-doc-drift seed 0: {'subjects': 12, 'with_filter': 12, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:08:22.656+00:00] x4a opa-rel-doc seed 0: {'subjects': 12, 'with_filter': 12, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:08:23.206+00:00] x4a opa-rel-pe seed 0: {'subjects': 12, 'with_filter': 12, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:08:23.809+00:00] x4a opa-rel-pe-excl seed 0: {'subjects': 12, 'with_filter': 0, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:08:23.809+00:00] x4 opa part a: 2 s
+[2026-10-29T17:08:23.809+00:00] x4 opa part b: start
+[2026-10-29T17:08:23.901+00:00] x4 opa part b: 0 s
+[2026-10-29T17:08:23.901+00:00] x4 opa part c: start
+[2026-10-29T17:08:44.062+00:00] x4c opa seed 0 done
+[2026-10-29T17:08:44.064+00:00] x4 opa part c: 20 s
+::notice title=x4 x4-policy%3A no harness errors::every call the harness made returned
+::notice title=x4 x4-policy records::242 records, 0 failed setups or parts, in results/x4-x4-policy.jsonl

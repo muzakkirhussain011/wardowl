@@ -1,0 +1,6 @@
+[2026-10-29T17:08:25.043+00:00] x7a spicedb-fc: start
+[2026-10-29T17:09:07.995+00:00] x7a spicedb-fc seed 0: 43 s
+[2026-10-29T17:09:07.995+00:00] x7a spicedb-ml: start
+[2026-10-29T17:10:25.364+00:00] x7a spicedb-ml seed 0: 77 s
+::notice title=x7 x7a-spicedb%3A no harness errors::every call the harness made returned
+::notice title=x7 x7a-spicedb records::15 records, 0 failed paths or targets, in results/x7-x7a-spicedb.jsonl

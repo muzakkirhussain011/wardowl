@@ -1,0 +1,57 @@
+           _                 _    
+  __ _  __| |_ __ __ _ _ __ | |_  
+ / _` |/ _` | '__/ _` | '_ \| __| 
+| (_| | (_| | | | (_| | | | | |_  
+ \__, |\__,_|_|  \__,_|_| |_|\__| 
+    |_|                           
+
+Version: 1.19.2, build: 016542aa
+Access web UI at http://localhost:6333/dashboard
+Agentic Skills: https://skills.qdrant.tech/
+
+2026-10-29T17:08:03.934759Z  WARN qdrant: There is a potential issue with the filesystem for storage path ./storage. Details: Container filesystem detected - storage might be lost with container re-creation
+2026-10-29T17:08:03.934894Z  INFO storage::content_manager::consensus::persistent: Initializing new raft state at ./storage/raft_state.json
+2026-10-29T17:08:03.938319Z  INFO qdrant: Distributed mode disabled
+2026-10-29T17:08:03.938383Z  INFO qdrant: Telemetry reporting enabled, id: 4645e7a4-ee1f-475f-87bc-475ff3b02c2c
+2026-10-29T17:08:03.957121Z  INFO qdrant::actix: REST transport settings: keep_alive=5s, client_request_timeout=5s, client_disconnect_timeout=5s
+2026-10-29T17:08:03.957138Z  INFO qdrant::actix: TLS disabled for REST API
+2026-10-29T17:08:03.957173Z  INFO qdrant::actix: Qdrant HTTP listening on 6333
+2026-10-29T17:08:03.957179Z  INFO actix_server::builder: starting 3 workers
+2026-10-29T17:08:03.957188Z  INFO actix_server::server: Actix runtime found; starting in Actix runtime
+2026-10-29T17:08:03.957196Z  INFO actix_server::server: starting service: "actix-web-service-0.0.0.0:6333", workers: 3, listening on: 0.0.0.0:6333
+2026-10-29T17:08:03.966383Z  INFO qdrant::tonic: Qdrant gRPC listening on 6334
+2026-10-29T17:08:03.966402Z  INFO qdrant::tonic: TLS disabled for gRPC API
+2026-10-29T17:08:21.556212Z  INFO actix_web::middleware::logger: 172.17.0.1 "GET /collections/x7acl_0_40918333147/exists HTTP/1.1" 200 83 "-" "python-client/1.19.1 python/3.12.15" 0.000195
+2026-10-29T17:08:21.558623Z  INFO storage::content_manager::toc::collection_meta_ops: Creating collection x7acl_0_40918333147
+2026-10-29T17:08:21.573539Z  INFO actix_web::middleware::logger: 172.17.0.1 "PUT /collections/x7acl_0_40918333147 HTTP/1.1" 200 71 "-" "python-client/1.19.1 python/3.12.15" 0.015092
+2026-10-29T17:08:21.591641Z  INFO actix_web::middleware::logger: 172.17.0.1 "PUT /collections/x7acl_0_40918333147/index?wait=true HTTP/1.1" 200 91 "-" "python-client/1.19.1 python/3.12.15" 0.016221
+2026-10-29T17:08:21.608102Z  INFO actix_web::middleware::logger: 172.17.0.1 "PUT /collections/x7acl_0_40918333147/index?wait=true HTTP/1.1" 200 91 "-" "python-client/1.19.1 python/3.12.15" 0.014517
+2026-10-29T17:08:21.624330Z  INFO actix_web::middleware::logger: 172.17.0.1 "PUT /collections/x7acl_0_40918333147/index?wait=true HTTP/1.1" 200 91 "-" "python-client/1.19.1 python/3.12.15" 0.014805
+2026-10-29T17:08:21.630012Z  INFO actix_web::middleware::logger: 172.17.0.1 "PUT /collections/x7acl_0_40918333147/points?wait=true HTTP/1.1" 200 92 "-" "python-client/1.19.1 python/3.12.15" 0.002537
+2026-10-29T17:08:21.633186Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7acl_0_40918333147/points/query HTTP/1.1" 200 441 "-" "python-client/1.19.1 python/3.12.15" 0.001073
+2026-10-29T17:08:21.636040Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7acl_0_40918333147/points/batch?wait=true HTTP/1.1" 200 94 "-" "python-client/1.19.1 python/3.12.15" 0.000792
+2026-10-29T17:08:21.638491Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7acl_0_40918333147/points/query HTTP/1.1" 200 436 "-" "python-client/1.19.1 python/3.12.15" 0.000662
+2026-10-29T17:08:21.691150Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7acl_0_40918333147/points/query HTTP/1.1" 200 437 "-" "python-client/1.19.1 python/3.12.15" 0.000619
+2026-10-29T17:08:21.743748Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7acl_0_40918333147/points/query HTTP/1.1" 200 437 "-" "python-client/1.19.1 python/3.12.15" 0.000630
+2026-10-29T17:08:21.746039Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7acl_0_40918333147/points/query HTTP/1.1" 200 426 "-" "python-client/1.19.1 python/3.12.15" 0.000541
+2026-10-29T17:08:21.748147Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7acl_0_40918333147/points/batch?wait=true HTTP/1.1" 200 94 "-" "python-client/1.19.1 python/3.12.15" 0.000744
+2026-10-29T17:08:21.750027Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7acl_0_40918333147/points/query HTTP/1.1" 200 435 "-" "python-client/1.19.1 python/3.12.15" 0.000514
+2026-10-29T17:08:21.802307Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7acl_0_40918333147/points/query HTTP/1.1" 200 435 "-" "python-client/1.19.1 python/3.12.15" 0.000480
+2026-10-29T17:08:21.854442Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7acl_0_40918333147/points/query HTTP/1.1" 200 435 "-" "python-client/1.19.1 python/3.12.15" 0.000431
+2026-10-29T17:08:21.856654Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7acl_0_40918333147/points/query HTTP/1.1" 200 436 "-" "python-client/1.19.1 python/3.12.15" 0.000398
+2026-10-29T17:08:21.858896Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7acl_0_40918333147/points/batch?wait=true HTTP/1.1" 200 94 "-" "python-client/1.19.1 python/3.12.15" 0.000718
+2026-10-29T17:08:21.860585Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7acl_0_40918333147/points/query HTTP/1.1" 200 427 "-" "python-client/1.19.1 python/3.12.15" 0.000338
+2026-10-29T17:08:21.913057Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7acl_0_40918333147/points/query HTTP/1.1" 200 427 "-" "python-client/1.19.1 python/3.12.15" 0.000605
+2026-10-29T17:08:21.965618Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7acl_0_40918333147/points/query HTTP/1.1" 200 428 "-" "python-client/1.19.1 python/3.12.15" 0.000476
+2026-10-29T17:08:21.968813Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7acl_0_40918333147/points/query HTTP/1.1" 200 437 "-" "python-client/1.19.1 python/3.12.15" 0.000405
+2026-10-29T17:08:21.972075Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7acl_0_40918333147/points/batch?wait=true HTTP/1.1" 200 94 "-" "python-client/1.19.1 python/3.12.15" 0.000845
+2026-10-29T17:08:21.974538Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7acl_0_40918333147/points/query HTTP/1.1" 200 432 "-" "python-client/1.19.1 python/3.12.15" 0.000367
+2026-10-29T17:08:22.027822Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7acl_0_40918333147/points/query HTTP/1.1" 200 432 "-" "python-client/1.19.1 python/3.12.15" 0.000541
+2026-10-29T17:08:22.080698Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7acl_0_40918333147/points/query HTTP/1.1" 200 432 "-" "python-client/1.19.1 python/3.12.15" 0.000547
+2026-10-29T17:08:22.083147Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7acl_0_40918333147/points/query HTTP/1.1" 200 445 "-" "python-client/1.19.1 python/3.12.15" 0.000483
+2026-10-29T17:08:22.085213Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7acl_0_40918333147/points/batch?wait=true HTTP/1.1" 200 94 "-" "python-client/1.19.1 python/3.12.15" 0.000628
+2026-10-29T17:08:22.087057Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7acl_0_40918333147/points/query HTTP/1.1" 200 444 "-" "python-client/1.19.1 python/3.12.15" 0.000503
+2026-10-29T17:08:22.139741Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7acl_0_40918333147/points/query HTTP/1.1" 200 445 "-" "python-client/1.19.1 python/3.12.15" 0.000519
+2026-10-29T17:08:22.192551Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7acl_0_40918333147/points/query HTTP/1.1" 200 444 "-" "python-client/1.19.1 python/3.12.15" 0.000497
+2026-10-29T17:08:22.194224Z  INFO storage::content_manager::toc::collection_meta_ops: Deleting collection x7acl_0_40918333147
+2026-10-29T17:08:22.196524Z  INFO actix_web::middleware::logger: 172.17.0.1 "DELETE /collections/x7acl_0_40918333147 HTTP/1.1" 200 71 "-" "python-client/1.19.1 python/3.12.15" 0.002366

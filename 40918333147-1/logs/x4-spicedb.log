@@ -1,0 +1,7 @@
+[2026-10-29T17:08:30.573+00:00] x4 spicedb part a: start
+[2026-10-29T17:08:30.961+00:00] x4a spicedb seed 0: {'subjects': 12, 'with_filter': 12, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T17:08:30.961+00:00] x4 spicedb part a: 0 s
+[2026-10-29T17:08:30.961+00:00] x4 spicedb part b: start
+[2026-10-29T17:08:37.444+00:00] x4 spicedb part b: 6 s
+::notice title=x4 x4-spicedb%3A no harness errors::every call the harness made returned
+::notice title=x4 x4-spicedb records::46 records, 0 failed setups or parts, in results/x4-x4-spicedb.jsonl
