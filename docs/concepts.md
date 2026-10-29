@@ -146,6 +146,9 @@ candidate as well. `strategy="postfilter"` does not mean an unfiltered search.
 | `examined` | Candidates the authorizer checked |
 | `denied` | Post-filtered candidates the subject may not read |
 | `violations` | Pre-filtered hits the re-check rejected |
+| `shortfall` | Why a pre-filtered search returned fewer than `k` hits: `exhausted`, `missed` or `unknown` ([Short results](#short-results)); `None` when it did not |
+| `fallback` | What `short_results` did about it: `exact`, `widened`, `over_limit` or `unsupported`; `None` when it did nothing |
+| `sampled_recall` | For a retrieval `recall_sample_rate` sampled, the share of an exact search's top `k` that came back |
 
 `violations` should always be 0. Anything else means the backend returned chunks outside the
 filter, and deserves an alert: the re-check removed them, but the backend has a bug.
@@ -159,8 +162,10 @@ filter, and deserves an alert: the re-check removed them, but the backend has a 
   and a scoped post-filtered search whose candidates ran out before k readable chunks were found.
 
 A short result is reported as complete only when it proves that nothing else matches: the backend
-declares `exact_search` (as `InMemoryBackend` does, and `FaissBackend` with a flat index), or
-post-filtering searched without a filter, where a short candidate list means the store ran out.
+declares `exact_search` (as `InMemoryBackend` does, `FaissBackend` with a flat index, and
+`QdrantBackend` with `SearchParams(exact=True)`), a count shows that no more chunks match
+([Short results](#short-results)), or post-filtering searched without a filter, where a short
+candidate list means the store ran out.
 An approximate index (HNSW and similar) can stop early under a selective filter and return fewer
 hits, or none, though the user may read more; wardowl cannot tell that apart from "the user may read
 fewer than k chunks", so it reports `complete=False`. pgvector's iterative index scans, for
@@ -173,7 +178,59 @@ hundreds of chunks ([pgvector](integrations/pgvector.md#iterative-index-scans)).
 `complete=True` with k hits trusts the backend's ranking. An approximate index can return k hits
 that are not the true top k, and `complete` cannot see that. How much each backend misses is
 measured in the [benchmarks](benchmarks.md); for pgvector, keep iterative index scans on (the
-default), and raise their limits for users who may read little.
+default), and raise their limits for users who may read little. `recall_sample_rate` measures it
+in production ([Short results](#short-results)).
+
+## Short results
+
+By default a short pre-filtered result from an approximate index says `complete=False` and
+`shortfall="unknown"`: the index may have stopped early, or the user may read fewer than k
+matching chunks. `short_results` tells the two apart, and can repair the first:
+
+```python
+retriever = PermissionedRetriever(backend, authorizer, short_results="exact", max_exact_rows=10_000)
+```
+
+| `short_results=` | After a short pre-filtered result from an approximate index |
+|---|---|
+| `"report"` (default) | Nothing more runs: `complete=False`, `shortfall="unknown"`, as before |
+| `"count"` | The backend counts the chunks the filter matches. No more than came back: `shortfall="exhausted"` and `complete=True`. More: `shortfall="missed"` and `complete=False` |
+| `"exact"` | Counts; after a miss, searches again exactly under the same filter, if the count is at most `max_exact_rows` (10,000 by default; `None` for no bound). `fallback="exact"`, and the result is complete |
+| `"widen"` | Counts; after a miss, searches again with `wider`, the same store with larger search settings, and keeps the best hits of both searches. `fallback="widened"`; complete only if it found as many as were counted |
+
+The count is cheap: a filter-only query that stops at its limit (pgvector), or the payload index's
+count (Qdrant). A count above the hits proves the index missed readable chunks; a count no larger
+than the hits proves there are no more. Under-retrieval mostly happens when the readable set is
+small, which is when an exact search is cheap too: in wardowl's acceptance run on Kaggle, the users
+pgvector returned nothing to could read about 600 chunks. `max_exact_rows` keeps a large readable
+set from setting off a large scan; above it, the first hits stay, with `fallback="over_limit"`.
+`"widen"` costs one more approximate search, which can still miss chunks; it is there to compare
+with `"exact"`, and for stores whose exact search is too slow.
+
+The guarantees hold on every path. The search run again uses the filter the authorizer gave, and
+its hits are checked again with `check`, together with the first search's hits that it did not
+return, so a backend that ignored the filter either time is counted in `violations`. An error in
+the count or in the search fails the retrieval, as any backend error does. `RetrievalEvent` and
+the [OpenTelemetry hooks](operations.md#audit-events) report the shortfall, the fallback and the
+time they took (`shortfall_ms`).
+
+A backend takes part by offering `count(filter, limit)` and, for `"exact"`, an exact search on
+request (`supports_exact`; see [Extending](extending.md#a-backend)). `PgVectorBackend` and
+`QdrantBackend` do, in vector mode. With a backend that offers neither, as with `RankFusion`,
+`"count"`, `"exact"` and `"widen"` report as `"report"` does, and `fallback="unsupported"` says
+why. A backend whose `exact_search` is True never needs them: its short results are
+`shortfall="exhausted"` already.
+
+`recall_sample_rate` (0 by default) watches what `complete` cannot see. For that share of
+pre-filtered retrievals on a backend that can search exactly, the retriever runs the exact search
+too, after the first, and reports in `sampled_recall` how much of its top k came back. The exact
+hits are never returned, and only those the filter matches are counted. A rate of 0.01 costs one
+more search in a hundred; the `wardowl.sampled_recall` histogram then shows how far the index's
+answers are from the true top k for your users and filters.
+
+OpenSearch takes a similar approach inside the engine: since 3.5, when an approximate filtered
+k-NN search returns fewer than k results, it falls back to an exact search. wardowl does it above
+the store, for stores that do not, with the permission check applied to whatever comes back.
 
 ## The guarantees
 

@@ -31,7 +31,9 @@ modules and need their extra.
    :members: search, asearch
 ```
 
-`Strategy` is `Literal["auto", "prefilter", "postfilter"]`.
+`Strategy` is `Literal["auto", "prefilter", "postfilter"]`. `ShortResults`, the type of
+`short_results`, is `Literal["report", "count", "exact", "widen"]`
+([Short results](concepts.md#short-results)).
 
 ## Subjects, documents, hits and queries
 
@@ -172,7 +174,7 @@ An observer is any callable that takes a `RetrievalEvent`.
 .. autoexception:: wardowl.backends.NothingMatches
 
 .. autoclass:: wardowl.backends.pgvector.PgVectorBackend
-   :members: add, set_metadata, delete, search, asearch
+   :members: add, set_metadata, delete, search, asearch, count, supports_exact
 
 .. autofunction:: wardowl.backends.pgvector.create_schema
 
@@ -198,7 +200,7 @@ An observer is any callable that takes a `RetrievalEvent`.
 .. autofunction:: wardowl.backends.opensearch.permission_terms
 
 .. autoclass:: wardowl.backends.qdrant.QdrantBackend
-   :members: add, set_metadata, delete, search, asearch
+   :members: add, set_metadata, delete, search, asearch, count, exact_search, supports_exact
 
 .. autofunction:: wardowl.backends.qdrant.create_collection
 

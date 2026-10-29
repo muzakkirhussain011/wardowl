@@ -39,6 +39,30 @@ Declare it only when it holds for every search, whatever the index and settings:
 depends on configuration, compute it from that configuration, as `FaissBackend` does from its
 index.
 
+Optionally, let the retriever check and repair a short result from an approximate index
+([Short results](concepts.md#short-results)):
+
+```python
+class MyBackend:
+    supports_filters = True
+    supports_exact = True  # search() and asearch() accept exact=True
+
+    def search(self, query, k, filter=None, *, exact=False):
+        """With exact=True, rank every chunk that matches the filter, as a brute-force scan does."""
+
+    def count(self, filter, limit):
+        """How many chunks match the filter: the true number, or any number of at least limit."""
+```
+
+`count` may stop counting at `limit`, and may return `None` when a count of the filter's chunks
+says nothing about the search, as for a keyword search, which ranks only chunks that contain the
+query's words. An `async def acount(...)` with the same signature is used by `aretrieve` when it is
+there. Both are read with `getattr`, like `exact_search`, and the retriever passes `exact` only to
+a backend whose `supports_exact` is True, so a backend without them keeps working unchanged. The
+retriever takes a count no larger than the hits, and an exact search shorter than k, as proof
+that nothing else matches, so neither may fall short of the truth. The conformance kit checks both
+when they are there.
+
 Optionally, give it `set_metadata(metadata: Mapping[str, Mapping[str, Any]])` to replace stored
 chunks' metadata without re-embedding them ([Changing a document's permissions](operations.md#changing-a-documents-permissions)):
 replace the whole metadata, ignore ids that are not stored, and return once searches see the
@@ -105,7 +129,8 @@ decomposed, and field names with a dot or letters outside ASCII. A backend may r
 such a field name by raising `ValueError`; it may not answer wrongly. For an approximate index that
 may miss matches, pass `exact=False`: a result may then be short, but never wrong. A backend whose
 `exact_search` is True is checked as exact whatever `exact` says, since the retriever takes its
-short results as proof that nothing else matches.
+short results as proof that nothing else matches, and so is every search asked for with
+`exact=True`. `count`, where it returns a number, must count what `matches` selects.
 
 `check_authorizer` checks that `check` returns one boolean per hit, that a hit's answer does not
 depend on the rest of the batch, and that `check` agrees with the filter from `filter_for`. If the

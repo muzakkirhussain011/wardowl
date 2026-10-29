@@ -88,9 +88,13 @@ in CI against a real Qdrant server (v1.19.2) and against Qdrant's local mode.
 ## Search quality and async
 
 `search_params=` takes a `qdrant_client.models.SearchParams`: `SearchParams(hnsw_ef=128)` searches
-deeper for higher recall, `SearchParams(exact=True)` searches by brute force. Pass
-`async_client=AsyncQdrantClient(...)` for a native `aretrieve`; without it, async calls run the sync
-search in a thread.
+deeper for higher recall, `SearchParams(acorn=models.AcornSearchParams(enable=True,
+max_selectivity=1.0))` turns on ACORN ([below](#filters-on-common-values)), and
+`SearchParams(exact=True)` searches by brute force. With `exact=True` (and without
+`indexed_only=True`, which skips segments still being indexed), the backend declares
+`exact_search`, so a result shorter than k proves that the user may read no more and says
+`complete=True`. Pass `async_client=AsyncQdrantClient(...)` for a native `aretrieve`; without it,
+async calls run the sync search in a thread.
 
 ## Filters on common values
 
@@ -129,8 +133,38 @@ What helps:
   corpus that every tenant shares in a collection of its own rather than tagging it with every
   tenant.
 - **Exact search**, `SearchParams(exact=True)`, ranks every point the filter admits, at the cost of
-  scoring every one of them. `QdrantBackend` does not declare `exact_search` yet, even then, so a
-  result shorter than k still says `complete=False`.
+  scoring every one of them. The backend then declares `exact_search`, so a result shorter than k
+  says `complete=True`.
+- **Exact search only when needed**: [`short_results`](#short-results) searches again exactly when
+  a count shows that the graph search missed points the user may read.
+
+## Short results
+
+In vector mode the backend offers what [`short_results`](../concepts.md#short-results) uses:
+
+- `count(filter, limit)` asks Qdrant for an exact count of the points the filter admits
+  (`client.count(..., count_filter=..., exact=True)`). Qdrant counts them all; `limit` is not
+  used. Points that hold only the keyword vector, in a collection created with `text_search=True`,
+  are counted too, which can make a short result look missed but never makes one complete.
+- `search(..., exact=True)` searches with a copy of `search_params` that sets `exact=True` and
+  `indexed_only=False`; the rest, `hnsw_ef` and ACORN included, is kept, and Qdrant ignores it for
+  an exact search.
+
+```python
+retriever = PermissionedRetriever(backend, authorizer, short_results="exact", max_exact_rows=10_000)
+```
+
+Misses that come back as k other chunks, which is how most of Qdrant's misses showed in the
+acceptance run, are not short, so `short_results` does not see them. `recall_sample_rate` does: it
+runs the exact search for a share of retrievals and reports how much of its top k came back
+([Concepts](../concepts.md#short-results)). To compare ACORN with exact search, give
+`short_results="widen"` a second backend on the same collection with ACORN on:
+
+```python
+acorn = models.SearchParams(hnsw_ef=128, acorn=models.AcornSearchParams(enable=True, max_selectivity=1.0))
+wider = QdrantBackend(client, "docs", embed=embed, search_params=acorn)
+retriever = PermissionedRetriever(backend, authorizer, short_results="widen", wider=wider)
+```
 
 ## Keyword search and hybrid search
 
