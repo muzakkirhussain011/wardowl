@@ -22,7 +22,7 @@ bootstrapped the same way. CPU only.
 Run 2 (amendment 2 of PREREGISTRATION.md) is read from several shard folders at once: the first
 folder's question table is used and every other folder's must describe the same questions, and a
 setting and build reported by two folders stops the statistics. Its outputs add plans.csv (the
-plans each pgvector setting executed) and the verdict on P5; P1 and P2 then use `pg-custom` as
+plans each pgvector setting executed) and the verdict on P5; P1 and P2 then use `pg-hnsw` as
 their reference and leave out settings that ran mostly exact.
 
     python x1_stats.py [--in /kaggle/working/x1run2 ...] [--out DIR] [--resamples 10000] [--seed 20261026]
@@ -47,7 +47,8 @@ from paper_common import log
 Key = tuple[str, str, str]  # (store, layout, setting)
 
 PG_REF: Key = ("pgvector", "hnsw-m16-efc64", "p-asrun")
-PG_CUSTOM: Key = ("pgvector", "hnsw-m16-efc64", "pg-custom")  # run 2: the reference of P1 and P2 (amendment 2)
+PG_CUSTOM: Key = ("pgvector", "hnsw-m16-efc64", "pg-custom")  # run 2: the planner's choice with values (P4, P5)
+PG_HNSW: Key = ("pgvector", "hnsw-m16-efc64", "pg-hnsw")  # run 2: the HNSW scan forced, the reference of P1 and P2
 PG_WIDE = "hnsw-m32-efc200"
 Q_REF: Key = ("qdrant", "as-run", "q-asrun")
 X0_RECALL5 = 0.691  # the original run's pgvector recall@5 (results.json of notebookd8377caca8)
@@ -185,7 +186,7 @@ class Data:
         self.keys: set[Key] = set(self.runs[["store", "layout", "setting"]].itertuples(index=False, name=None))
         self.per_question = self._per_question()
         self.grid = self._grid()
-        self.pg_ref = PG_CUSTOM if self.grid == "run2" else PG_REF  # the reference of P1 and P2
+        self.pg_ref = PG_HNSW if self.grid == "run2" else PG_REF  # the reference of P1 and P2 (amendment 2, item 10)
         self.plans = plan_table(self.runs)
         overall = self.plans.to_dict("records") if not self.plans.empty else []
         self.mostly_exact = {
@@ -350,14 +351,14 @@ def interval_table(data: Data) -> pd.DataFrame:
 
 def comparisons(keys: set[Key], pg_ref: Key = PG_REF) -> list[tuple[Key, Key, str]]:
     """Every setting against its store's original-run setting, plus the pairs the predictions need;
-    in run 2 every pgvector setting also against `pg-custom`, the reference of P1 and P2."""
+    in run 2 every pgvector setting also against `pg-hnsw`, the reference of P1 and P2."""
     pairs: list[tuple[Key, Key, str]] = []
     for key in sorted(keys):
         reference = PG_REF if key[0] == "pgvector" else Q_REF
         if key != reference:
             pairs.append((key, reference, "against the original run's setting"))
         if key[0] == "pgvector" and pg_ref != PG_REF and key[2] != pg_ref[2]:
-            pairs.append((key, (pg_ref[0], key[1], pg_ref[2]), "against pg-custom on the same index (amendment 2)"))
+            pairs.append((key, (pg_ref[0], key[1], pg_ref[2]), "against pg-hnsw on the same index (amendment 2)"))
         if key[0] == "qdrant" and key[1] != Q_REF[1] and (key[0], Q_REF[1], key[2]) in keys:
             pairs.append((key, (key[0], Q_REF[1], key[2]), "layout against as-run, same setting"))
         if key[0] == "pgvector" and key[1] == PG_WIDE and (key[0], PG_REF[1], key[2]) in keys:
@@ -736,15 +737,20 @@ def p2(d: Data) -> dict:
 
 
 def p5(d: Data) -> dict:
-    """Amendment 2, item 5: the plan cache decides whether pgvector searches the graph."""
+    """Amendment 2, items 5 and 12: the plan cache decides whether pgvector searches the graph,
+    judged on the original questions only (the HNSW share as well as the recall)."""
 
     def original(f: pd.DataFrame) -> pd.Series:
         return ~f["persona_type"].astype(str).str.startswith("probe")
 
     def share(key: Key) -> float | None:
-        rows = d.plans[(d.plans["setting"] == key[2]) & (d.plans["layout"] == key[1])] if not d.plans.empty else None
-        rows = rows[rows["build"] == "all"] if rows is not None else None
-        return float(rows["hnsw_share"].iloc[0]) if rows is not None and len(rows) else None
+        rows = d.of(key, d.runs)
+        if "plan5" not in rows or rows.empty:
+            return None
+        rows = rows[original(rows)]
+        kinds = pd.concat([rows["plan5"], rows["plan10"]], ignore_index=True)
+        kinds = kinds[kinds != ""]
+        return float((kinds == "hnsw").mean()) if len(kinds) else None
 
     def latency(key: Key, builds: set[str]) -> float | None:
         rows = d.of(key, d.runs)
@@ -872,7 +878,7 @@ def report(data: Data, settings: pd.DataFrame, predictions: list[dict], path_not
         "",
         f"Input: {folders} (grid {data.grid}); {len(data.runs):,} result rows of {len(data.keys)} settings; "
         f"{data.resamples:,} bootstrap resamples, seed {data.seed}. Verdicts follow PREREGISTRATION.md"
-        + (", with amendment 2: P1 and P2 read `pg-custom` where they say `p-asrun`." if data.grid == "run2" else "."),
+        + (", with amendment 2: P1 and P2 read `pg-hnsw` where they say `p-asrun`." if data.grid == "run2" else "."),
         "",
         "## Verdicts",
         "",
