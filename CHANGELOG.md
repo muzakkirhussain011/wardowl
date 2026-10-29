@@ -97,6 +97,8 @@ All notable changes are recorded here. The format follows
   search and ACORN as a wider search. The extending guide and operations describe the new backend
   members, event fields, span attributes and metrics.
 
+## [2.1.0] - 2026-10-24
+
 Fixes found by real-world acceptance scenarios, run against real servers, a real identity provider
 and real models: a SpiceDB setting that let a banned user read through their group, a permission
 service's error text reaching models, Ory Keto's batch limit, stale redaction spans failing every
