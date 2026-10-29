@@ -36,11 +36,12 @@ permissions:
   contents: read
 
 concurrency:
-  group: paper-x4-x7-${{ github.ref }}
+  # Per profile, so that a full run never cancels a smoke run that is still publishing its report.
+  group: paper-x4-x7-${{ github.ref }}-${{ inputs.profile || 'full' }}
   cancel-in-progress: true
 
 env:
-  PROFILE: ${{ inputs.profile || 'smoke' }}
+  PROFILE: ${{ inputs.profile || 'full' }}
   CONFIGURATION: ${{ inputs.configuration || 'amendment2' }}
   # The library amendment 2 measures: branch fix/revocation-faults at this commit.
   WARDOWL_REF: 3c6559f3ecfd850bcd59416f14237d85887ba498
