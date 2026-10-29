@@ -21,7 +21,7 @@ from wardowl import (
     filter_to_dict,
     matches,
 )
-from wardowl.testing import ConformanceError, HashingEmbedder, check_authorizer, check_backend
+from wardowl.testing import QUERY, ConformanceError, HashingEmbedder, check_authorizer, check_backend
 
 
 def test_the_reference_backend_conforms():
@@ -86,6 +86,73 @@ def test_a_backend_that_declares_exact_search_is_checked_as_exact():
     # when the caller asked for the approximate checks.
     with pytest.raises(ConformanceError, match="missed documents"):
         check_backend(_ShortClaimingExactBackend, exact=False)
+
+
+class _CountingBackend(InMemoryBackend):
+    """An approximate index that counts and searches exactly, as pgvector and Qdrant do: under a
+    filter it drops its last hit, unless asked for an exact search."""
+
+    exact_search = False
+    supports_exact = True
+
+    def search(self, query, k, filter=None, *, exact=False):
+        hits = super().search(query, k, filter)
+        return hits if exact or filter is None else hits[:-1]
+
+    def count(self, filter, limit):
+        return min(len(super().search(QUERY, max(len(self), 1), filter)), limit)
+
+
+class _UncountingBackend(_CountingBackend):
+    def count(self, filter, limit):
+        return None  # it cannot count, as a keyword search cannot
+
+
+class _InexactExactBackend(_CountingBackend):
+    def search(self, query, k, filter=None, *, exact=False):
+        return super().search(query, k, filter)  # drops a hit, asked to be exact or not
+
+
+class _OvercountingBackend(_CountingBackend):
+    def count(self, filter, limit):
+        return super().count(filter, limit) + 1
+
+
+class _TextCountBackend(_CountingBackend):
+    def count(self, filter, limit):
+        return str(super().count(filter, limit))
+
+
+class _AsyncCountBackend(_CountingBackend):
+    async def acount(self, filter, limit):
+        return 0
+
+
+class _AsyncInexactBackend(_CountingBackend):
+    async def asearch(self, query, k, filter=None, *, exact=False):
+        return self.search(query, k, filter)  # never exact
+
+
+@pytest.mark.parametrize("backend", [_CountingBackend, _UncountingBackend])
+def test_a_backend_that_counts_and_searches_exactly_conforms(backend):
+    check_backend(backend, exact=False)
+
+
+@pytest.mark.parametrize(
+    ("backend", "problem"),
+    [
+        (_InexactExactBackend, "exact search with a filter"),
+        (_OvercountingBackend, "count with a filter"),
+        (_TextCountBackend, "not a number of documents"),
+        (_AsyncCountBackend, "count with a filter"),
+        (_AsyncInexactBackend, "asearch and search disagree"),
+    ],
+)
+def test_a_wrong_count_or_exact_search_is_caught_even_on_an_approximate_index(backend, problem):
+    # The retriever takes an exact search's short result, and a count no larger than the hits, as
+    # proof that nothing else matches: either one wrong makes a result complete that is not.
+    with pytest.raises(ConformanceError, match=problem):
+        check_backend(backend, exact=False)
 
 
 class _BadAsyncBackend(InMemoryBackend):
