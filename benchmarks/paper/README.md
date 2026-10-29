@@ -19,18 +19,20 @@ Everything runs on Kaggle (2 x T4, 4 CPUs, 31 GB, 12-hour sessions), from
 | [`paper_common.py`](paper_common.py) | Shared helpers: logging to a file, finding the original run's output under `/kaggle/input`, importing `acceptance/kaggle/enterprise_rag.py`, person types, tidy tables, the manifest | | |
 | [`x0_reanalysis.py`](x0_reanalysis.py) | **X0** (section 6.0, items 1 to 3), offline, CPU only: pgvector's empty results; approximate recall@5 per store by category and person type (overlap with FAISS's exact top 5); the share of `kb/` passages in each store's top 5 against FAISS's on targeted questions | `answers.jsonl`, `results.json` of the original run | `/kaggle/working/x0/` |
 | [`x1_underretrieval.py`](x1_underretrieval.py) | **X1** (sections 6.1 to 6.5), retrieval only: the probe set, the alignment variables, the pgvector grid P-a to P-h and the Qdrant grid Q-a to Q-e, every metric per (setting, build, question) | the scenario of `acceptance/kaggle/enterprise_rag.py`; cached embeddings if attached | `/kaggle/working/x1/` (or `x1-smoke/`) |
-| [`x1_stats.py`](x1_stats.py) | Statistics: cluster-bootstrap intervals over persons, paired comparisons, McNemar for the empty-result rate, Wilcoxon on per-question recall, and the verdict on each prediction | `/kaggle/working/x1/` | `/kaggle/working/x1/stats/` |
-| [`x1_underretrieval.ipynb`](x1_underretrieval.ipynb) | The Kaggle notebook: installs the stores and packages as the original notebook does, installs wardowl from this branch, runs X0, X1 smoke (and its statistics), X1 on pgvector, X1 on Qdrant, then the statistics | | |
+| [`x1_stats.py`](x1_stats.py) | Statistics: cluster-bootstrap intervals over persons, paired comparisons, McNemar for the empty-result rate, Wilcoxon on per-question recall, and the verdict on each prediction; reads one folder or several shard folders | `/kaggle/working/x1run2/` (or shards) | `<first folder>/stats/` or `--out` |
+| [`x1_underretrieval.ipynb`](x1_underretrieval.ipynb) | The Kaggle notebook for run 2 in one session (CPU only): installs the stores and packages, installs wardowl from this branch, runs X1 smoke (and its statistics), X1 on pgvector, X1 on Qdrant, then the statistics. Run 1's version is in the branch's history (commit `947fb8f`) | | |
+| [`x1_run2_kaggle.py`](x1_run2_kaggle.py) | Run 2 as parallel Kaggle sessions: one role per session (`smoke`, `prep`, `shard-a`, `shard-b`, `shard-c`, `stats`) | prep's and the shards' outputs, as kernel sources | `/kaggle/working/x1run2`, `x1run2-stats`, `smoke` |
 
 ## Run it on Kaggle
 
 1. **Import the notebook.** On Kaggle, *Create, New Notebook*, then *File, Import Notebook*, and paste
    `https://github.com/muzakkirhussain011/wardowl/blob/paper/x1-underretrieval/benchmarks/paper/x1_underretrieval.ipynb`.
-2. **Settings.** Accelerator *GPU T4 x2*; *Internet on*.
-3. **Input.** *Add Input*, *Your Work*, *Notebooks*: the original run, `notebookd8377caca8`. X0 needs
-   its `answers.jsonl` and `results.json`; X1 copies its cached embeddings (`cache/chunks-*.npy`)
-   and so skips about ten minutes of embedding. Without this input X0 fails (the other steps still
-   run) and X1 embeds the corpus again.
+2. **Settings.** Accelerator *None* (run 2 needs no GPU once the chunk embeddings exist); *Internet
+   on*.
+3. **Input.** *Add Input*, *Your Work*, *Notebooks*: run 1, `notebook11401c38ff`, or the original
+   run, `notebookd8377caca8`. X1 copies their cached embeddings (`cache/chunks-*.npy`) and run 1's
+   query vectors. Without an input X1 embeds the corpus on the CPU, about an hour. (Run 1's notebook,
+   commit `947fb8f`, also ran X0 from the original run's `answers.jsonl` and `results.json`.)
 4. **Run.** *Save Version*, *Save & Run All (Commit)*. The steps run in order; the smoke run is a
    gate: if it or its statistics fail, the notebook stops before the long run.
 5. **Read the results.** In the version's *Output*: `x0/summary.md`, `x1/stats/report.md` (the
@@ -59,6 +61,63 @@ About 6.5 to 7.5 hours in all. These are estimates from the original run's laten
 1000, ACORN at 1.0 and the `tenant-m0` build. `--deadline` (the session's start plus 11.25 h) and
 `--max-hours` (5.5 h for the pgvector cell) stop X1 from starting a setting it cannot finish; what
 is left out is recorded as skipped, never silently dropped.
+
+## Run 2
+
+Run 1 (2026-10-26, notebook `notebook11401c38ff`, output folder `x1/`, `--grid run1`) skipped 12
+pgvector items for time, and showed that most of its pgvector searches ran PostgreSQL's generic
+plan, an exact search that never touches the HNSW index. Amendment 2 of the pre-registration fixes
+run 2 (`--grid run2`, the default, output folder `x1run2/`):
+
+- **Plan control.** `pg-custom` (`plan_cache_mode = force_custom_plan`) is the reference of P1 and
+  P2, and every P-a to P-e setting sets the same plan mode, so every search is planned with its
+  own values. `p-asrun` keeps the defaults and remains the reference of P4.
+- **Executed plans.** `auto_explain` is loaded into each pgvector session with its log level at
+  NOTICE; the plan of every first-pass search arrives with its result and is kept per question
+  (`plan5`, `plan10`: `hnsw`, `gin`, `seq` or `other`; `generic5`, `generic10`). The fixed
+  questions run once more with ANALYZE after the timed passes (EXPLAIN rows with reason
+  `executed`). A setting meant to search the graph whose plans used the HNSW index in fewer than
+  half of its searches is flagged in the log, its record (`ran_mostly_exact`) and the report.
+- **Replays of the original pass.** `p-x0` runs enterprise_rag's own backend on the pool its load
+  created, right after the load, with the original questions in the original order, one pass;
+  `p-x0v` does the same after `VACUUM (ANALYZE)`, on a fresh pool. Both record the generic plans
+  PostgreSQL used, the executed plans, and the table's vacuum history and the GIN index's metapage
+  before and after (`table_state_before`, `table_state_after`). Every other pgvector setting
+  records `table_state` too.
+- **One segment in Qdrant.** `one-segment` uploads with indexing off (`indexing_threshold` 0) into
+  one segment, then turns indexing on at Qdrant's default (10,000 KB) and waits until every vector
+  is indexed. Every build records the points of each segment (`segment_list`) and the number of
+  segments holding points (`data_segments`); Qdrant keeps an empty appendable segment beside them.
+- **P5** (new): the plan cache decides whether pgvector searches the graph.
+
+### Parallel sessions (how run 2 ran)
+
+`x1_run2_kaggle.py` splits run 2 into Kaggle sessions that share one set of vectors:
+
+| Role | Session | Runs |
+|---|---|---|
+| `smoke` | CPU | every role below on the small corpus, then the statistics over its three shard folders |
+| `prep` | GPU | `--prepare-only`: corpus, chunk and query vectors, exact baseline, questions table |
+| `shard-a` | CPU, attaches prep | pgvector `hnsw-m16-efc64` build 0: the replays, then every setting |
+| `shard-b` | CPU, attaches prep | pgvector `hnsw-m16-efc64` builds 1 and 2 |
+| `shard-c` | CPU, attaches prep | pgvector `hnsw-m32-efc200` builds 0 to 2, then the whole Qdrant grid |
+| `stats` | CPU, attaches the shards | `x1_stats.py --in` the three shard folders |
+
+Each shard copies prep's query vectors and question table (`--pin-from`) and its chunk vectors
+(`cache/`), recomputes the exact baseline and checks it against prep's (same questions, persons and
+R; exact top-10 scores within 1e-4; tied hits may come out in another order). No setting starts
+after 8.5 hours of a session; a shard that runs out of time is continued by a kernel that also
+attaches its output (`role.txt` marks whose it is). Latency is compared only within a shard.
+
+A kernel's code file clones this repository at a fixed commit and runs the driver:
+
+```python
+import subprocess, sys
+SRC, COMMIT, ROLE = "/tmp/wardowl-src", "<commit>", "shard-a"
+subprocess.run(["git", "clone", "-q", "https://github.com/muzakkirhussain011/wardowl.git", SRC], check=True)
+subprocess.run(["git", "-C", SRC, "checkout", "-q", COMMIT], check=True)
+sys.exit(subprocess.run([sys.executable, f"{SRC}/benchmarks/paper/x1_run2_kaggle.py", "--role", ROLE, "--src", SRC]).returncode)
+```
 
 ## X1 in detail
 
