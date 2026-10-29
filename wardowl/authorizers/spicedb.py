@@ -28,9 +28,11 @@ Subject ids and group names travel as separate JSON fields, never inside a `type
 string, so a `:` or `#` in one cannot change its type or relation. SpiceDB object ids are 1 to 1024
 letters, digits and `/_|-=+`: store such an id in `resource_field` and use such subject ids. A chunk
 whose resource id is not one is denied without being sent, since SpiceDB would refuse the whole
-request; a subject id or group name that is not one makes requests fail, closed. Every failure
-raises `AuthorizationError`. Connections are reused, transient failures are retried once, and a
-`CircuitBreaker` can pause requests to a failing server; see `wardowl.authorizers`.
+request. A subject id that is not one, or with `group_subjects=True` a group name, raises
+`UnsupportedSubject` (an `AuthorizationError`) before anything is sent, since SpiceDB would refuse
+every request that named it. Every failure raises `AuthorizationError`. Connections are reused,
+transient failures are retried once, and a `CircuitBreaker` can pause requests to a failing server;
+see `wardowl.authorizers`.
 
 Consistency: the default, `{"minimizeLatency": true}`, lets SpiceDB answer from a recent snapshot,
 so a revoked permission can keep granting access for up to the datastore's revision quantization
@@ -46,7 +48,7 @@ from collections.abc import Callable, Mapping, Sequence
 from typing import Any
 
 from wardowl.authorizers._http import DEFAULT_MAX_RESPONSE_BYTES, CircuitBreaker, JsonClient
-from wardowl.authz import AuthorizationError
+from wardowl.authz import AuthorizationError, UnsupportedSubject, _shown
 from wardowl.filters import Filter, In
 from wardowl.types import Hit, Subject
 
@@ -58,6 +60,15 @@ _LOOKUP_HAS = "LOOKUP_PERMISSIONSHIP_HAS_PERMISSION"
 _LOOKUP_CONDITIONAL = "LOOKUP_PERMISSIONSHIP_CONDITIONAL_PERMISSION"
 # ObjectReference.object_id in SpiceDB's API (authzed/api, core.proto), less "*", the subjects' wildcard.
 _OBJECT_ID = re.compile(r"[a-zA-Z0-9/_|\-=+]{1,1024}")
+
+
+def _object_id(kind: str, value: str) -> str:
+    """`value`, checked to be a SpiceDB object id: SpiceDB refuses every request that names another."""
+    if not _OBJECT_ID.fullmatch(value):
+        raise UnsupportedSubject(
+            f"{kind} {_shown(value)} cannot be sent to SpiceDB: object ids are 1 to 1024 letters, digits and /_|-=+"
+        )
+    return value
 
 
 def _key(resource: Mapping[str, Any], subject: Mapping[str, Any]) -> tuple[Any, ...]:
@@ -137,10 +148,16 @@ class SpiceDBAuthorizer:
         return self.permissions[action]
 
     def _subjects(self, subject: Subject) -> list[dict[str, Any]]:
-        refs: list[dict[str, Any]] = [{"object": {"objectType": self.subject_type, "objectId": subject.id}}]
+        """The subjects to ask about: the user, then each group when `group_subjects` is true. Raises
+        `UnsupportedSubject` for an id or group name SpiceDB would refuse, before anything is sent."""
+        user = _object_id("subject id", subject.id)
+        refs: list[dict[str, Any]] = [{"object": {"objectType": self.subject_type, "objectId": user}}]
         if self.group_subjects:
             refs += [
-                {"object": {"objectType": self.group_type, "objectId": g}, "optionalRelation": self.group_relation}
+                {
+                    "object": {"objectType": self.group_type, "objectId": _object_id("group", g)},
+                    "optionalRelation": self.group_relation,
+                }
                 for g in sorted(subject.groups)
             ]
         return refs
@@ -163,10 +180,11 @@ class SpiceDBAuthorizer:
 
     def check(self, subject: Subject, hits: Sequence[Hit], action: str = "read") -> list[bool]:
         permission = self._permission(action)
+        subjects = self._subjects(subject)
         resources = [self._resource(h) for h in hits]
         unique = sorted({r for r in resources if r is not None})
         context = self._context(subject)
-        pairs = [(r, s) for r in unique for s in self._subjects(subject)]
+        pairs = [(r, s) for r in unique for s in subjects]
         allowed = dict.fromkeys(unique, False)
         for start in range(0, len(pairs), self.batch_size):
             batch = pairs[start : start + self.batch_size]

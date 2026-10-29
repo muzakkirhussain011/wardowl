@@ -6,6 +6,13 @@ All notable changes are recorded here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- `wardowl.UnsupportedSubject`, raised by an authorizer when its permission service cannot represent
+  the subject's id or one of its groups, before anything is sent. It is an `AuthorizationError`, so
+  code that catches that and retrieval behave as before (retrieval fails closed), and a
+  `ValueError`, since the subject is at fault rather than the service.
+
 ### Changed
 
 - `RetrievalResult.complete` is no longer True for a short or empty result from an approximate
@@ -31,6 +38,23 @@ All notable changes are recorded here. The format follows
   `exact_search = False`.
 - `check_backend` checks a backend that declares `exact_search` as exact, whatever `exact=` says,
   since the retriever takes its short results as proof that nothing else matches.
+
+### Fixed
+
+- `OpenFGAAuthorizer` no longer sends a request OpenFGA refuses whole with HTTP 400, which surfaced
+  as `AuthorizationError("OpenFGA batch-check returned HTTP 400")`. A subject in more than 100
+  groups (OpenFGA takes at most 100 contextual tuples per check or list), a user longer than 512
+  bytes, a group longer than 256 characters, or an id or group with a control character now raises
+  `UnsupportedSubject` up front, saying which limit it broke; ids with `:`, `#`, `*` or whitespace
+  raise it too, in place of a plain `AuthorizationError`. To check a subject in more groups, store
+  its memberships in OpenFGA and pass `contextual_groups=False`. The paper's conformance campaign
+  found it: 119 of its 140 OpenFGA runs failed with that error, at the rates these limits predict
+  for its subjects (one in five is in 300 groups).
+- `SpiceDBAuthorizer` refuses a subject id that is not a SpiceDB object id (1 to 1024 letters,
+  digits and `/_|-=+`), and with `group_subjects=True` such a group name, with `UnsupportedSubject`
+  before anything is sent. Such a request failed closed before as well, but only after SpiceDB's
+  HTTP 400. The conformance campaign's users `zoë` and `7.0` made 117 and 124 of 140 SpiceDB runs
+  fail that way.
 
 ### Documentation
 
