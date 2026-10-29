@@ -100,12 +100,17 @@ def test_backend_returns_exactly_the_documents_the_filter_matches(factory, docs,
     k=st.integers(min_value=1, max_value=6),
     strategy=st.sampled_from(["auto", "prefilter", "postfilter"]),
 )
-def test_retriever_on_backend_never_leaks_and_is_complete(factory, docs, subject, query, k, strategy):
+def test_retriever_on_backend_never_leaks_and_says_when_it_is_complete(factory, docs, subject, query, k, strategy):
     backend = factory(docs)
     retriever = PermissionedRetriever(backend, MetadataACLAuthorizer(), strategy=strategy, max_candidates=len(docs) + k)
     result = retriever.retrieve(query, subject, k)
     assert all(may_read(subject, hit) for hit in result.hits)
-    assert result.violations == 0 and result.complete
+    assert result.violations == 0
+    # Post-filtering searches without a filter here (MetadataACLAuthorizer has no scope), so running
+    # out proves the end of the store. A short pre-filtered result proves nothing more matches only
+    # when the backend is exact: pgvector (here without an index) and Chroma do not declare it.
+    exact = getattr(backend, "exact_search", False) is True
+    assert result.complete is (exact or result.strategy == "postfilter" or len(result.hits) == k)
     if not isinstance(backend, InMemoryBackend):
         # Vector search ranks every stored chunk, so the subject gets min(k, everything permitted).
         assert len(result.hits) == min(k, sum(may_read(subject, d) for d in docs))

@@ -48,7 +48,14 @@ class RankFusion:
     Filters are supported when every backend supports them. Every backend gets the same query: a
     `Query` with both `text` and `vector` gives keyword backends the text and vector backends the
     vector, so the query is embedded once, by you, however many vector backends there are.
+
+    `exact_search` is False even when every backend is exact, so the retriever reports a fused
+    result shorter than k as possibly incomplete. A short fused list does not prove that the
+    backends ran out: a chunk whose metadata differs between backends is left out after each
+    backend has filled its list, and a `depth` below k cuts each list short.
     """
+
+    exact_search = False
 
     def __init__(
         self,

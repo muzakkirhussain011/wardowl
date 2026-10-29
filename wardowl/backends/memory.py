@@ -38,6 +38,9 @@ class InMemoryBackend:
     """
 
     supports_filters = True
+    exact_search = True
+    """Every chunk the filter admits is scored, so fewer than k hits means no other chunk matches.
+    A subclass that drops hits on purpose, to stand in for an approximate index, sets it to False."""
 
     def __init__(self, documents: Iterable[Document] = ()) -> None:
         self._docs: dict[str, Document] = {}

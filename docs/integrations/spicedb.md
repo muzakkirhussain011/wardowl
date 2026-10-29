@@ -49,8 +49,11 @@ SpiceDB object ids are 1 to 1024 letters, digits and `/_|-=+` (its API's rule; `
 wildcard, which only subjects use). Store such an id in the chunk's `resource_field` and use such
 subject ids (for example a stable user id rather than an email address). A chunk whose resource
 id breaks the rule is denied without being sent, since SpiceDB would refuse the whole request and
-every retrieval that found the chunk would return nothing. A subject id or group name SpiceDB
-rejects makes the request fail, so retrieval fails closed.
+every retrieval that found the chunk would return nothing. A subject id that breaks the rule, or
+with `group_subjects=True` a group name, raises `UnsupportedSubject` before anything is sent, since
+SpiceDB would refuse every request naming it. `UnsupportedSubject` is an `AuthorizationError`, so
+retrieval fails closed, and a `ValueError`, since the subject is at fault. With the default
+`group_subjects=False`, group names are never sent and need not follow the rule.
 
 ## Groups
 

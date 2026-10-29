@@ -18,7 +18,8 @@ Leaks
 
 Complete
 : How often wardowl reported the result as complete (`RetrievalResult.complete`). It is `False`
-  when wardowl knows results may be missing; it cannot see what an approximate index missed.
+  when wardowl knows results may be missing; it cannot see what an approximate index missed when
+  the index still returned k results.
 
 Latency
 : Median and 95th percentile per retrieval. Query embedding is excluded: queries are embedded once,
@@ -137,9 +138,11 @@ and an exact scan over HNSW for filters that selective (the query plans were not
 
 **An approximate index can silently return fewer results.** In those rows the result still said
 `complete=True`, because wardowl cannot tell "the user may read only 2 chunks" from "the index
-stopped after 2". This is the documented meaning of `complete` (see
-[Concepts](concepts.md#what-a-result-tells-you)); measuring recall against exact search, as here, is
-how to see it.
+stopped after 2". These numbers were measured before wardowl changed that: it now reports a result
+shorter than k from an approximate search as `complete=False`, since it cannot rule out the second
+case (see [Concepts](concepts.md#what-a-result-tells-you)). A result of k chunks that are not the
+true top k still says `complete=True`; measuring recall against exact search, as here, is how to
+see that.
 
 **Chroma's pre-filtered search gets slower with every group in the filter.** Its recall was the best
 of the approximate indexes, but filtered queries took 200 to 900 ms against about 18 ms unfiltered,

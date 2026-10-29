@@ -64,8 +64,14 @@ def test_a_backend_that_returns_hits_out_of_order_is_caught():
 
 
 class _ShortBackend(InMemoryBackend):
+    exact_search = False  # it stands in for an approximate index, and says so
+
     def search(self, query, k, filter=None):
         return super().search(query, k, filter)[:-1]
+
+
+class _ShortClaimingExactBackend(_ShortBackend):
+    exact_search = True
 
 
 def test_a_backend_that_misses_matches_is_caught_unless_approximate():
@@ -73,6 +79,13 @@ def test_a_backend_that_misses_matches_is_caught_unless_approximate():
         check_backend(_ShortBackend)
     # An approximate index may miss matches, as long as it never returns a wrong one.
     check_backend(_ShortBackend, exact=False)
+
+
+def test_a_backend_that_declares_exact_search_is_checked_as_exact():
+    # The retriever reports its short results as complete, so missing a match is a failure even
+    # when the caller asked for the approximate checks.
+    with pytest.raises(ConformanceError, match="missed documents"):
+        check_backend(_ShortClaimingExactBackend, exact=False)
 
 
 class _BadAsyncBackend(InMemoryBackend):

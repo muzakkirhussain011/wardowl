@@ -6,10 +6,80 @@ All notable changes are recorded here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- `wardowl.UnsupportedSubject`, raised by an authorizer when its permission service cannot represent
+  the subject's id or one of its groups, before anything is sent. It is an `AuthorizationError`, so
+  code that catches that and retrieval behave as before (retrieval fails closed), and a
+  `ValueError`, since the subject is at fault rather than the service.
+
+### Changed
+
+- `RetrievalResult.complete` is no longer True for a short or empty result from an approximate
+  search. A pre-filtered result with fewer hits than were asked for, an empty one included, is
+  complete only when the backend declares exact search; so is post-filtering that runs out of
+  candidates inside a scope. The acceptance run on Kaggle found pgvector returning no rows at all
+  to least-privileged users who could read several hundred chunks, because its iterative index
+  scan stopped at `hnsw.max_scan_tuples` or at its memory limit, and wardowl reported those empty
+  results as complete. That contradicted the field's documented meaning, "False when wardowl knows
+  results may be missing"; this corrects it. Users who may read fewer than k chunks now get
+  `complete=False` on approximate stores, which cannot tell them apart from an index that stopped
+  early. Nothing else changes: the same searches run, the same hits come back, and the safety
+  guarantees are unchanged. Post-filtering without a filter still reads a short candidate list as
+  the end of the store.
+- Backends can declare `exact_search = True` when `search` ranks every chunk that matches the
+  filter, so a result with fewer than k hits proves nothing else matches. It is optional and read
+  with `getattr`, not a required member of the `SearchBackend` protocol, so existing backends still
+  satisfy it. `InMemoryBackend` declares it, and `FaissBackend` does when its index is flat (the
+  default) or an ID map around a flat index. `RankFusion` does not, even over exact backends: it
+  leaves out chunks whose metadata differs between backends after each has filled its list, so a
+  short fused list proves nothing. Every other built-in backend searches approximately and does
+  not declare it. A subclass of `InMemoryBackend` that drops hits on purpose should set
+  `exact_search = False`.
+- `check_backend` checks a backend that declares `exact_search` as exact, whatever `exact=` says,
+  since the retriever takes its short results as proof that nothing else matches.
+
+### Fixed
+
+- `OpenFGAAuthorizer` no longer sends a request OpenFGA refuses whole with HTTP 400, which surfaced
+  as `AuthorizationError("OpenFGA batch-check returned HTTP 400")`. A subject in more than 100
+  groups (OpenFGA takes at most 100 contextual tuples per check or list), a user longer than 512
+  bytes, a group longer than 256 characters, or an id or group with a control character now raises
+  `UnsupportedSubject` up front, saying which limit it broke; ids with `:`, `#`, `*` or whitespace
+  raise it too, in place of a plain `AuthorizationError`. To check a subject in more groups, store
+  its memberships in OpenFGA and pass `contextual_groups=False`. The paper's conformance campaign
+  found it: 119 of its 140 OpenFGA runs failed with that error, at the rates these limits predict
+  for its subjects (one in five is in 300 groups).
+- `SpiceDBAuthorizer` refuses a subject id that is not a SpiceDB object id (1 to 1024 letters,
+  digits and `/_|-=+`), and with `group_subjects=True` such a group name, with `UnsupportedSubject`
+  before anything is sent. Such a request failed closed before as well, but only after SpiceDB's
+  HTTP 400. The conformance campaign's users `zoë` and `7.0` made 117 and 124 of 140 SpiceDB runs
+  fail that way.
+- `RedisBackend` and `MongoDBBackend` find chunks whose metadata holds a long value. The Redis Query
+  Engine indexes at most 4,096 bytes of a TAG value and Atlas Search at most 8,181 characters of a
+  string; both cut a longer one short at indexing, while a filter names the whole value, so a
+  pre-filtered search missed such chunks, and a value made of the first part of a longer one
+  matched it (the retriever's re-check dropped those). A permission term longer than that, field
+  name and value together (over 2,048 bytes in Redis, whose terms are hex-encoded, and over 8,181
+  UTF-16 code units in MongoDB), is now stored and searched as its SHA-256 digest. Terms within the
+  limits are unchanged, so nothing needs re-indexing except chunks with such long values, which were
+  not found before either. The conformance campaign found it: 26 Redis and 19 MongoDB runs with
+  values of 3,001 to 40,000 characters missed matching chunks.
+
 ### Documentation
 
 - A 47-second film on the documentation's front page, linked from the README: what wardowl does,
   shown with an AI assistant that many companies share.
+- Corrected what the documentation said about filtered approximate search. Concepts said that
+  pgvector's iterative index scans keep a selective filter from cutting results short; they stop
+  at `hnsw.max_scan_tuples` (20,000 by default) or at `work_mem` × `hnsw.scan_mem_multiplier` of
+  memory (4 MB by default), so a selective filter can still return fewer than k rows, or none. The
+  pgvector page names both limits and how to raise them. The Qdrant page explains why filters on
+  common values, such as a tenant shared by most points or a shared corpus readable by everyone,
+  can lose recall in Qdrant's filtered HNSW search, and what helps: ACORN with `max_selectivity`,
+  per-tenant graphs (`is_tenant` with `m=0` and `payload_m`), and exact search. Concepts, the
+  security model, the threat model, operations, production, hybrid search and the store pages
+  describe `complete` as it now behaves.
 
 ## [2.1.0] - 2026-10-24
 

@@ -4,8 +4,9 @@ Strategies
 ----------
 prefilter
     Ask the authorizer for a filter and let the backend apply it inside the search. Results are
-    complete (the top k of what the subject may read) and cost one search. Needs an authorizer that
-    can express its rules as a filter and a backend that supports filters.
+    the top k of what the subject may read, as far as the backend's index finds them, and cost one
+    search. Needs an authorizer that can express its rules as a filter and a backend that supports
+    filters.
 postfilter
     Search without a filter, then check each candidate. Fetches `k * overfetch` candidates and
     widens the search until k permitted hits are found, the backend runs out, or `max_candidates`
@@ -63,6 +64,14 @@ class SearchBackend(Protocol):
     `query` is what the caller passed to `retrieve`, unchanged: a string, or a `Query` when the
     caller supplies a vector. `Query.of(query)` gives a `Query` either way. A backend that takes
     only strings still works with every string query.
+
+    `exact_search` is optional, and is not part of this protocol's required members: the retriever
+    reads it with `getattr`, and anything but `True` counts as False. A backend sets it to True
+    when `search` ranks every chunk that matches the filter, instead of walking an approximate
+    index that can stop early, so a result with fewer than k hits proves that no other chunk
+    matches. The retriever then reports such a result as complete. A backend searched through an
+    approximate index (HNSW, IVF and the like) leaves it out or sets it to False, and its short
+    results are reported with `complete=False`.
     """
 
     supports_filters: bool
@@ -99,9 +108,18 @@ class RetrievalResult:
     """Pre-filtered hits that failed the re-check. Should always be 0; anything else means the
     backend did not apply the filter and deserves an alert."""
     complete: bool
-    """False when wardowl knows results may be missing: post-filtering stopped at
-    `max_candidates`, or the re-check removed pre-filtered hits. It trusts the backend's ranking,
-    so it cannot see results an approximate index failed to return."""
+    """False when wardowl knows results may be missing. True only when:
+
+    * pre-filtering: the re-check removed no hit, and the backend returned as many hits as were
+      asked for (k, or `rerank_depth` with a reranker), or fewer from a backend whose
+      `exact_search` is True, which proves that nothing else matches;
+    * post-filtering: k permitted hits were found, or the backend ran out of candidates before
+      `max_candidates`. A candidate list shorter than asked for counts as running out when the
+      backend's `exact_search` is True or the search had no filter; under a scope, an approximate
+      index may have stopped early, so it does not count.
+
+    A full result trusts the backend's ranking: `complete` cannot see better chunks that an
+    approximate index failed to rank."""
 
 
 # Operations the algorithm asks its driver to perform.
@@ -401,11 +419,20 @@ class PermissionedRetriever:
             scope = yield _ScopeFor()
         return (yield from self._postfilter(query, k, scope))
 
+    def _exact_search(self) -> bool:
+        """Whether the backend declares exact search (see `SearchBackend`). Only True counts."""
+        return getattr(self.backend, "exact_search", False) is True
+
     def _prefilter(self, query: str | Query, k: int, f: Filter) -> _Plan:
         hits: list[Hit] = yield _Search(query, k, f)
         hits = list(hits)[:k]
+        # k hits are taken at the backend's word. Fewer prove that nothing else matches only when
+        # the search was exact: an approximate index can stop early under a selective filter
+        # (pgvector's iterative scan at hnsw.max_scan_tuples, for one) and return few hits or none.
+        # Truncating to k does not change this test: a backend that returned more has k here.
+        settled = len(hits) == k or self._exact_search()
         if not hits:
-            return RetrievalResult(hits, "prefilter", examined=0, denied=0, violations=0, complete=True)
+            return RetrievalResult(hits, "prefilter", examined=0, denied=0, violations=0, complete=settled)
         if self.recheck:
             decisions: list[bool] = yield _Check(hits)
             kept = [h for h, ok in zip(hits, decisions, strict=True) if ok]
@@ -416,7 +443,7 @@ class PermissionedRetriever:
         violations = len(hits) - len(kept)
         examined = len(hits) if self.recheck else 0
         return RetrievalResult(
-            kept, "prefilter", examined=examined, denied=0, violations=violations, complete=violations == 0
+            kept, "prefilter", examined=examined, denied=0, violations=violations, complete=settled and violations == 0
         )
 
     def _postfilter(self, query: str | Query, k: int, scope: Filter | None = None) -> _Plan:
@@ -424,6 +451,16 @@ class PermissionedRetriever:
         seen: set[str] = set()
         kept: list[Hit] = []
         examined = denied = 0
+        # A candidate list shorter than the fetch ends the search, as it always has: asking the same
+        # index again is not expected to find more. Whether it proves the store ran out, and so makes
+        # the result complete, depends on the search. An exact backend has ranked everything in the
+        # scope. An approximate index under a scope can stop early, as under a pre-filter, so its
+        # short list proves nothing. Without a filter, a short list is still read as the end of the
+        # store: with no filter to apply, an approximate index returns min(n, fetch) chunks, as an
+        # HNSW search does when its candidate list (ef) is at least fetch long. pgvector with
+        # iterative scans off is the known exception: its index scan returns at most hnsw.ef_search
+        # rows (40 by default).
+        short_means_exhausted = scope is None or self._exact_search()
         while True:
             candidates: list[Hit] = yield _Search(query, fetch, scope)
             candidates = list(candidates)[:fetch]  # a backend that ignores k must not widen the checks
@@ -437,8 +474,8 @@ class PermissionedRetriever:
                     else:
                         denied += 1
                 examined += len(fresh)
-            exhausted = len(candidates) < fetch
-            if len(kept) >= k or exhausted or fetch >= self.max_candidates:
+            short = len(candidates) < fetch
+            if len(kept) >= k or short or fetch >= self.max_candidates:
                 break
             fetch = min(fetch * self.overfetch, self.max_candidates)
         kept.sort(key=lambda h: h.score, reverse=True)  # stable: equal scores keep backend order
@@ -448,7 +485,7 @@ class PermissionedRetriever:
             examined=examined,
             denied=denied,
             violations=0,
-            complete=len(kept) >= k or exhausted,
+            complete=len(kept) >= k or (short and short_means_exhausted),
         )
 
     # ---- drivers ---------------------------------------------------------------------------

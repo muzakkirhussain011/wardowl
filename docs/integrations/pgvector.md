@@ -75,17 +75,40 @@ since JSON would turn the key `1` into `"1"`, which a filter on the field `"1"` 
 An HNSW index normally returns a fixed number of nearest rows (`hnsw.ef_search`, 40 by default)
 and the filter is applied to those. With a selective filter, few or none of them pass, and the
 query returns fewer than k rows. pgvector 0.8 added iterative index scans, which keep scanning
-until enough rows pass. The backend turns them on for each query (`SET LOCAL
-hnsw.iterative_scan`):
+until enough rows pass, or until a limit stops them. The backend turns them on for each query
+(`SET LOCAL hnsw.iterative_scan`):
 
 | `iterative_scan=` | Behaviour |
 |---|---|
 | `"relaxed_order"` (default) | Keeps scanning; results can be slightly out of order, so the backend re-sorts them by distance |
 | `"strict_order"` | Keeps scanning in exact distance order; slower |
-| `None` | Off, as before pgvector 0.8 |
+| `None` | Off, as before pgvector 0.8: an index scan returns at most `hnsw.ef_search` rows, with or without a filter |
 
 Results are ordered by distance, then by id, so equal scores come back in a stable order. Scores
 are cosine similarity, `1 - cosine distance`.
+
+An iterative scan stops at whichever of two limits it reaches first:
+
+| Setting | Default | What it limits |
+|---|---|---|
+| `hnsw.max_scan_tuples` | 20,000 | Graph elements the scan visits (approximate, and not applied to the initial scan) |
+| `hnsw.scan_mem_multiplier` | 1 | The scan's memory, as a multiple of `work_mem` (4 MB by default in PostgreSQL) |
+
+The scan works outwards from the query through the graph. When the user may read only a few chunks
+and none of them is among the elements visited before a limit is reached, the query returns fewer than
+k rows, or none, and pgvector gives no sign that it stopped early. In wardowl's acceptance run on
+Kaggle, least-privileged users who could read several hundred chunks got no rows at all for
+questions far from those chunks. `PgVectorBackend` does not declare `exact_search`, so wardowl
+reports such a short or empty result as `complete=False`
+([Concepts](../concepts.md#what-a-result-tells-you)).
+
+For users who may read little, raise the limits. The backend does not set them; set them where
+PostgreSQL settings live, for example `ALTER DATABASE app SET hnsw.max_scan_tuples = 100000`.
+pgvector's README suggests raising `hnsw.scan_mem_multiplier` when raising `hnsw.max_scan_tuples`
+does not improve recall. Its other remedies for filters that admit few rows are a partial index
+per filter value, for a few distinct values, and partitioning, for many
+([pgvector: Filtering](https://github.com/pgvector/pgvector#filtering),
+[Iterative index scans](https://github.com/pgvector/pgvector#iterative-index-scans)).
 
 ## Search depth
 

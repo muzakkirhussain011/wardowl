@@ -80,6 +80,8 @@ modules and need their extra.
 
 .. autoexception:: wardowl.AuthorizationError
 
+.. autoexception:: wardowl.UnsupportedSubject
+
 .. autoclass:: wardowl.MetadataACLAuthorizer
 
 .. autoclass:: wardowl.FunctionAuthorizer

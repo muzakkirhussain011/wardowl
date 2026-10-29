@@ -7,8 +7,11 @@ same collection from an `AsyncMongoClient`.
 Permissions are matched on one array field, `wardowl_terms`, holding a type-tagged term for
 every string or integer in the chunk's metadata, as the Elasticsearch and Milvus backends do. A
 filter becomes a BSON document (`$in`, `$and`, `$or`) on that field, so values are data, never
-query syntax, and `1` and `"1"` stay apart. The metadata itself is stored as written, for the
-retriever's re-check. `create_search_index` creates the vector search index with the vector and
+query syntax, and `1` and `"1"` stay apart. Atlas Search indexes at most 8,181 characters of a
+string and cuts a longer one short, while a filter names the whole value, so a term longer than
+that is stored and searched as its SHA-256 digest instead: its chunk is found, and a value that is
+only its first 8,181 characters does not match it. The metadata itself is stored as written, for
+the retriever's re-check. `create_search_index` creates the vector search index with the vector and
 the filter fields.
 
 Atlas Vector Search indexes a write shortly after it happens, not at once. So `add` and `delete`
@@ -31,7 +34,7 @@ from collections.abc import Callable, Iterable, Mapping, Sequence
 from functools import partial
 from typing import Any
 
-from wardowl.backends._engines import _SEP, TERMS_FIELD, tag, terms
+from wardowl.backends._engines import _SEP, TERMS_FIELD, digest, tag, terms
 from wardowl.backends._errors import required
 from wardowl.backends._vectors import document_vectors
 from wardowl.filters import And, Filter, In, Or, _ordered
@@ -56,11 +59,24 @@ WRITE_FIELD = "wardowl_write"
 _BATCH = 500
 _MAX_CANDIDATES = 10_000  # Atlas Vector Search's limit for numCandidates (and so for limit)
 _WORD = re.compile(r"\w")
+# The longest string Atlas Search indexes whole, in Java characters (UTF-16 code units): it cuts
+# longer ones short (the token type's documented limit), and a filter naming the whole string misses it.
+_MAX_TERM = 8181
+
+
+def _term(term: str) -> str:
+    """`term`, or its digest when it is longer than `_MAX_TERM` UTF-16 code units."""
+    units = len(term.encode("utf-16-le", "surrogatepass")) // 2
+    return term if units <= _MAX_TERM else digest(term)
+
+
+def _terms(doc_id: str, metadata: Mapping[str, Any]) -> list[str]:
+    return [_term(t) for t in terms(doc_id, metadata)]
 
 
 def permission_terms(metadata: Mapping[str, Any]) -> list[str]:
     """The value of `wardowl_terms` for a chunk with this metadata, for documents written by other tools."""
-    return terms("metadata", metadata)
+    return _terms("metadata", metadata)
 
 
 def filter_to_mongo(f: Filter) -> dict[str, Any]:
@@ -77,7 +93,7 @@ def _vector_filter(f: Filter) -> dict[str, Any] | None:
         if _SEP in f.field:
             raise ValueError(f"field {f.field!r} may not contain \\x1f")
         values = _ordered(f.values)
-        return {TERMS_FIELD: {"$in": [tag(f.field, v) for v in values]}} if values else None
+        return {TERMS_FIELD: {"$in": [_term(tag(f.field, v)) for v in values]}} if values else None
     if isinstance(f, And):
         parts = [_vector_filter(c) for c in f.clauses]
         if any(p is None for p in parts):
@@ -103,7 +119,7 @@ def _search_operator(f: Filter) -> dict[str, Any] | None:
         if _SEP in f.field:
             raise ValueError(f"field {f.field!r} may not contain \\x1f")
         values = _ordered(f.values)
-        return {"in": {"path": TERMS_FIELD, "value": [tag(f.field, v) for v in values]}} if values else None
+        return {"in": {"path": TERMS_FIELD, "value": [_term(tag(f.field, v)) for v in values]}} if values else None
     if isinstance(f, And):
         parts = [_search_operator(c) for c in f.clauses]
         if any(p is None for p in parts):
@@ -257,7 +273,7 @@ class MongoDBBackend:
             "_id": doc.id,
             self.content_field: doc.text,
             self.metadata_field: dict(doc.metadata),
-            TERMS_FIELD: terms(doc.id, doc.metadata),
+            TERMS_FIELD: _terms(doc.id, doc.metadata),
             WRITE_FIELD: marker,
         }
         if vector is not None:
@@ -310,7 +326,7 @@ class MongoDBBackend:
             changes = [
                 UpdateOne(
                     {"_id": doc_id},
-                    {"$set": {self.metadata_field: dict(new), TERMS_FIELD: terms(doc_id, new), WRITE_FIELD: marker}},
+                    {"$set": {self.metadata_field: dict(new), TERMS_FIELD: _terms(doc_id, new), WRITE_FIELD: marker}},
                 )
                 for doc_id, new in items[start : start + _BATCH]
             ]

@@ -58,9 +58,9 @@ and HNSW; pass `parameters={"m": 16, "ef_construction": 128}` to tune the graph.
 
 Both backends always run an approximate kNN search (HNSW, or a quantized form of it), and neither
 has a switch for exact search. The engines may search exactly on their own when a filter admits few
-documents, but the answer does not say which ran. A result can therefore miss some of the nearest
-chunks the user may read and still say `complete=True`
-([Concepts](../concepts.md#what-a-result-tells-you)). To find more of them:
+documents, but the answer does not say which ran. A result of `k` chunks can therefore miss some of
+the nearest chunks the user may read and still say `complete=True`; a shorter one says
+`complete=False` ([Concepts](../concepts.md#what-a-result-tells-you)). To find more of them:
 
 - **Elasticsearch:** raise `num_candidates` (100 by default), the neighbours each shard considers;
   the backend sends at least the `k` the retriever asks for. Keep full-precision vectors with

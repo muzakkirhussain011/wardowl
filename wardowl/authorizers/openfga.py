@@ -15,11 +15,15 @@ No extra dependency: it calls OpenFGA's HTTP API with the standard library.
   counts at once) or `"MINIMIZE_LATENCY"` (its default, which may answer from the cache when one is
   configured). It is sent with every check and list.
 * The subject's groups (for example from your identity provider) are sent as contextual tuples
-  (`user:<id> member group:<name>`), so they need not be synced into OpenFGA first.
+  (`user:<id> member group:<name>`), so they need not be synced into OpenFGA first. OpenFGA takes
+  at most 100 contextual tuples with a check or a list, so a subject in more than 100 groups
+  raises `UnsupportedSubject`: store such memberships in OpenFGA and set `contextual_groups=False`.
 
 Subject ids and group names are written into OpenFGA's `type:id` strings, where `#` would make a
 userset, `*` a wildcard and `:` another type, so an id or group name that is empty or contains `:`,
-`#`, `*` or whitespace raises `AuthorizationError` instead of being sent.
+`#`, `*`, whitespace or a control character raises `UnsupportedSubject` (an `AuthorizationError`)
+instead of being sent. So do the ids OpenFGA refuses for their length: a user (`user:<id>`) longer
+than 512 bytes in UTF-8, and a group (`group:<name>`) longer than 256 characters.
 
 The resource id is `hit.metadata[resource_field]` (a document id shared by its chunks), or the
 chunk id when `resource_field` is None. A chunk without its resource id, or whose field is not one
@@ -44,23 +48,31 @@ from typing import Any
 from urllib.parse import quote
 
 from wardowl.authorizers._http import DEFAULT_MAX_RESPONSE_BYTES, CircuitBreaker, JsonClient
-from wardowl.authz import AuthorizationError
+from wardowl.authz import AuthorizationError, UnsupportedSubject, _shown
 from wardowl.filters import Filter, In
 from wardowl.types import Hit, Subject
 
 __all__ = ["OpenFGAAuthorizer"]
 
 _CONSISTENCY = ("MINIMIZE_LATENCY", "HIGHER_CONSISTENCY")
-_NOT_IN_IDS = re.compile(r"[:#*\s]")  # would make "user:<id>" another type, a userset or a wildcard
+# Would make "user:<id>" another type, a userset or a wildcard; OpenFGA refuses control characters.
+_NOT_IN_IDS = re.compile(r"[:#*\s\x00-\x1f\x7f-\x9f]")
 # OpenFGA refuses an object ("<type>:<id>") over 256 characters, or whose id is "*" or holds one of these.
 _NOT_IN_OBJECT_IDS = re.compile(r"[:# \x00-\x1f\x7f-\x9f]")
 _MAX_OBJECT = 256
+# OpenFGA's API (openfga/api): a user ("<type>:<id>") is at most 512 bytes, and a check or a list
+# carries at most 100 contextual tuples.
+_MAX_USER_BYTES = 512
+_MAX_CONTEXTUAL = 100
 
 
 def _safe(kind: str, value: str) -> str:
     """`value`, checked to stay one id inside OpenFGA's `type:id` strings."""
     if not value or _NOT_IN_IDS.search(value):
-        raise AuthorizationError(f"{kind} {value!r} cannot be sent to OpenFGA: empty, or has ':', '#', '*' or a space")
+        raise UnsupportedSubject(
+            f"{kind} {_shown(value)} cannot be sent to OpenFGA: empty, or has ':', '#', '*', a space "
+            "or a control character"
+        )
     return value
 
 
@@ -154,14 +166,35 @@ class OpenFGAAuthorizer:
         return self.relations[action]
 
     def _user(self, subject: Subject) -> str:
-        return f"{self.user_type}:{_safe('subject id', subject.id)}"
+        user = f"{self.user_type}:{_safe('subject id', subject.id)}"
+        if len(user.encode("utf-8", "surrogatepass")) > _MAX_USER_BYTES:
+            raise UnsupportedSubject(
+                f"subject id {_shown(subject.id)} cannot be sent to OpenFGA: "
+                f"{self.user_type}:<id> is longer than {_MAX_USER_BYTES} bytes"
+            )
+        return user
+
+    def _group(self, group: str) -> str:
+        obj = f"{self.group_type}:{_safe('group', group)}"
+        if len(obj) > _MAX_OBJECT:
+            raise UnsupportedSubject(
+                f"group {_shown(group)} cannot be sent to OpenFGA: "
+                f"{self.group_type}:<group> is longer than {_MAX_OBJECT} characters"
+            )
+        return obj
 
     def _context(self, subject: Subject) -> dict[str, Any]:
         if not self.contextual_groups or not subject.groups:
             return {}
+        if len(subject.groups) > _MAX_CONTEXTUAL:
+            raise UnsupportedSubject(
+                f"subject {_shown(subject.id)} is in {len(subject.groups):,} groups, which cannot be sent to "
+                f"OpenFGA: it takes at most {_MAX_CONTEXTUAL} contextual tuples per check; store the memberships "
+                "in OpenFGA and set contextual_groups=False"
+            )
         user = self._user(subject)
         keys = [
-            {"user": user, "relation": self.group_relation, "object": f"{self.group_type}:{_safe('group', g)}"}
+            {"user": user, "relation": self.group_relation, "object": self._group(g)}
             for g in sorted(subject.groups)
         ]
         return {"contextual_tuples": {"tuple_keys": keys}}
