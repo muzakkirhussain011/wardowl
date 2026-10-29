@@ -370,3 +370,88 @@ statistic or verdict rule changes.
    remaining candidate. Now, when a group cannot be completed, its m = 1,000 probe is set aside and
    the group is placed again from the next candidate, up to 25 times; the most complete placement is
    kept, and any shortfall is still recorded.
+
+## Amendment 4 (2026-10-30, written AFTER the full run's results were seen)
+
+Written on 2026-10-30, **after** the results of the full run (GitHub Actions run 40940385704, commit
+`a191626`) had been read and analysed, and in the light of them. It is committed on its own, before
+any follow-up code or result. It changes no hypothesis, prediction, threshold, statistic or verdict
+rule of the design above or of amendments 1 to 3, and it withdraws no verdict printed for run
+40940385704. Part A completes the pre-registered scope; part B is exploratory throughout.
+
+### Part A: completing the pre-registered scope (X3 on Chroma)
+
+Run 40940385704 ran X3 on Chroma for seeds 0, 1 and 2 only. The driver gives each target of a job an
+equal share of the job's 320 minutes, and that share skipped seeds 3 and 4, although the job then
+finished about three hours early. The cut was not pre-registered. The follow-up runs Chroma's seeds 3
+and 4 exactly as written: the data of run 40940385704 (its data artifact), the same corpus, levels,
+queries, passes, warm-up, slow-level rule and timeouts, and `x3_filter_scaling.py` unchanged, in a job
+of its own that gives Chroma the whole job's time, so that no share applies. The one addition is
+Python's fault handler (`PYTHONFAULTHANDLER=1`), so that a process killed by a signal prints its
+Python stack; it changes nothing the harness measures. The records of seeds 3 and 4 join those of run
+40940385704, and `x3_stats.py`, unchanged, judges X3-H1, X3-H2 and X3-H4 for Chroma over the five
+seeds as written. The other stores' verdicts are recomputed from the same records of run 40940385704
+and are expected to print as they did; any difference is reported.
+
+### Part B: exploratory analyses (none can change a verdict)
+
+Each analysis below explains a result of run 40940385704. None feeds a verdict of the design, and
+each is reported as exploratory.
+
+1. **FAISS `post` at m = 1 and 10 (H1(c)).** From run 40940385704's raw records (artifact
+   `x3x6-results-x6-faiss`): per (seed, probe, p) and slot, the medians over the timed repetitions of
+   the latency, `search_ms` (time in FAISS), `authorize_ms` (time in the authorizer) and the rest
+   (latency minus both), and the mean number of widening rounds (`searches`); the paired differences
+   W1 minus W0 with 95% cluster-bootstrap intervals and the paired AUC of each component. Reading,
+   fixed now: unequal rounds point to the denial path; equal rounds with the difference in
+   `search_ms` point to the FAISS index object; a difference in `authorize_ms` or in the rest points
+   to the layer's per-candidate work. The component whose paired AUC departs from 0.5 as latency's
+   does (0.667 at m = 1) locates the difference.
+2. **Cross-build A/A.** FAISS (`pre` and `post`) and pgvector, Qdrant and Elasticsearch (`pre-exact`)
+   run again on the plans of run 40940385704, with all five seeds and eight groups, the same probes
+   and attackers, one warm-up and five timed repetitions. Each seed builds W1 and SEP at its start, as
+   the main run does (SEP is kept but not measured, so that the store holds what it held then). For
+   each group g, three more indexes are built in a seeded random order: W1r_g (W1 again), W0a_g and
+   W0b_g (W0_g twice). Each repetition queries the slots W1, W1r, W0a and W0b in a fresh random order.
+   Paired latency AUCs, with the design's statistics, by m and pooled over p:
+   - *replication*: W1 against W0a (the main run's comparison);
+   - *age*: W1 against W1r (the same content, built at the seed's start against just before the
+     group);
+   - *matched content*: W1r against W0a (the main run's difference in content, both built just
+     before the group);
+   - *cross-build A/A*: W0b against W0a (one world built twice, the later build against the earlier).
+
+   Fixed now, for FAISS `post` at m = 1 and for the offsets that did not depend on m (FAISS `pre`,
+   pgvector `pre-exact`, pooled over m): the statement "the main run's offset is a difference between
+   builds, not an effect of the secrets" is **supported** when the matched-content interval lies
+   within [0.40, 0.60] and the age or the cross-build A/A interval lies wholly outside it; it is
+   **refuted** when the matched-content interval lies wholly outside [0.40, 0.60] on the side of 0.5
+   the main run showed, while the age and the cross-build A/A intervals both lie within it. Anything
+   else is inconclusive, including a replication that does not reproduce the main run's offset.
+3. **Hubs (H1(a), H2(b)).** From run 40940385704's data artifact (embeddings and plans): the hub set
+   recomputed as `x6_data.py` computes it; for each m = 1,000 probe, the hubs among its 1,000 nearest
+   passages and, per attacker, the readable ones; against the W1 counts of `post` per (seed, probe,
+   p) from the raw records. Prediction of the hub mechanism, fixed now: FAISS, which is exact, returns
+   in W1 exactly min(10, readable hubs among the 1,000 nearest passages) for every probe and attacker,
+   except where similarities tie at the 1,000th rank.
+4. **pgvector's X3 plans.** The 35 `explain` records of run 40940385704's `x3-pgvector.jsonl`: per
+   seed and G, the node types, index names, rows, rows removed by the filter and execution time.
+5. **pgvector `pre-exact` on W1 and W0_g.** From run 40940385704's X6 records, the main run's
+   `explain` records (first group of each seed); in the cross-build run of item 2, for each pgvector
+   table before and after each group is measured, `pg_class` pages and all-visible pages,
+   `pg_stat_user_tables` (live and dead tuples, last vacuum, autovacuum and autoanalyze, their counts)
+   and the visibility map summary; and EXPLAIN (ANALYZE, BUFFERS) of `pre-exact` for the first probe of
+   each level and each attacker of each seed's first group, on all four tables. The candidate
+   explanation stated after the run (W1's pages all-visible after autovacuum, W0_g's not yet)
+   predicts all-visible pages near the page count for W1 and well below it for the tables built just
+   before the group, and heap scans with more per-tuple work on those.
+6. **Chroma's crash threshold.** With seed 0's X3 corpus (100,000 vectors) and a subject holding the
+   first G of the 40,000-level groups, one retrieval per level in a fresh process with the fault
+   handler on: G = 40,000 first, then a bisection between 10,000 (refused with SQLite's error in run
+   40940385704) and 40,000, to 1,000 groups or at most six levels; and one retrieval at 40,000 under
+   gdb, for the native stack. Each level records its outcome (an answer, an error with its message,
+   or the signal) and the stacks printed.
+
+The follow-up is a configuration of its own in the workflow (`configuration: followup`): first at
+smoke size (never analysed), then full. It reads run 40940385704's artifacts and publishes to
+`results/x3-x6` under its own run id. The full configuration is unchanged.
