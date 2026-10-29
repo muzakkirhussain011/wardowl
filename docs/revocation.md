@@ -16,11 +16,16 @@ stop as soon as it is withdrawn.
 2. **The permission service's own consistency.**
    - OpenFGA with `consistency="MINIMIZE_LATENCY"` (its default) may answer from its cache, when one
      is configured; `"HIGHER_CONSISTENCY"` skips it. See [OpenFGA](integrations/openfga.md).
-   - SpiceDB with `{"minimizeLatency": True}` (the default here) answers from a recent snapshot, up to
-     the datastore's quantization interval (5 seconds by default); `{"fullyConsistent": True}`, or
-     `{"atLeastAsFresh": {"token": zedtoken}}` with the token from your write, answers from current data.
+   - SpiceDB with `{"minimizeLatency": True}` (the default here) answers from a recent snapshot.
+     SpiceDB documents the bound as its revision quantization interval plus 10% of it, 5.5 seconds
+     with its defaults; measured against SpiceDB 1.56 on Postgres it reached 8.7 seconds, and a
+     revoked permission sometimes granted access again after it had stopped. `SpiceDBAuthorizer`
+     therefore declares `max_staleness` of 11 seconds, twice the documented bound.
+     `{"fullyConsistent": True}`, or `{"atLeastAsFresh": {"token": zedtoken}}` with the token from
+     your write, answers from current data. See [SpiceDB](integrations/spicedb.md#consistency-and-revocation).
    - OPA and Cerbos answer from the policies and data they have loaded; bundle polling or a policy
-     reload adds its interval.
+     reload adds its interval (Cerbos reloaded a changed policy file in 2.5 seconds, at most 4,
+     in the same measurements).
    - Keto has no consistency option: `KetoAuthorizer` sends none, as Keto's check API takes none.
      A deleted relationship stops granting access once Keto's checks no longer see it, which
      depends on your Keto deployment and its database, not on wardowl.
@@ -33,8 +38,10 @@ stop as soon as it is withdrawn.
      (`load_policy()`, or a Casbin watcher).
 3. **`CachingAuthorizer`.** A cached decision is used for at most `ttl` seconds. `invalidate()`
    drops decisions at once in its own process, including answers that were still being fetched, and
-   reaches other replicas sharing a Redis within `local_ttl`. See
-   [permission caching](operations.md#permission-caching).
+   reaches other replicas sharing a Redis within `local_ttl`. A service that is itself behind (layer
+   2) may still answer from before the change just after `invalidate()`; for `source_staleness`
+   seconds (the authorizer's declared `max_staleness`) the cache passes such answers on without
+   keeping them, so it never holds one for `ttl`. See [permission caching](operations.md#permission-caching).
 4. **The store's visibility delay**, when permissions live on chunks: some stores show an update
    to searches only after a refresh (Elasticsearch and OpenSearch refresh every second by default).
 5. **Requests already running.** A retrieval that started before the revocation may finish with the
@@ -61,7 +68,22 @@ authorizer = CachingAuthorizer(
 - **Revocations you report** by calling `authorizer.invalidate(user_id)` after the change: no
   retrieval that starts in that process afterwards uses the old decision, and other replicas stop
   within `local_ttl`. The tests revoke a permission under concurrent retrievals, with one and three
-  replicas, and check exactly this.
+  replicas, and check exactly this. With a service that is itself behind by up to S seconds, its
+  own answers can still predate the change for S seconds, cache or not; the cache adds nothing to
+  that when `source_staleness` is at least S. The bound after `invalidate()` is then
+  `source_staleness` in that process and `source_staleness` plus `local_ttl` in the others. If
+  the service is staler than `source_staleness`, an answer it gives after the hold is cached for
+  up to `ttl`, so set it from what the service documents, with a margin.
+
+`source_staleness` comes from the authorizer's `max_staleness` when it declares one:
+`SpiceDBAuthorizer` does, from its consistency (11 seconds, or 0 with `fullyConsistent`). For a
+service whose delay the adapter cannot know, pass it yourself: OpenFGA's check cache TTL under
+`MINIMIZE_LATENCY` (10 seconds when the cache is on), OPA's bundle `max_delay_seconds`, Cerbos's
+store poll interval or its reload delay for a watched directory.
+
+```python
+authorizer = CachingAuthorizer(CerbosAuthorizer(CERBOS_URL), ttl=30, source_staleness=10)
+```
 
 Choose `ttl` as a security decision. 30 seconds removes most repeated calls within a conversation;
 a few seconds still removes many.

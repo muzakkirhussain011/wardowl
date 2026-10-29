@@ -15,6 +15,8 @@ modules and need their extra.
 .. autoclass:: wardowl.SearchBackend
    :members: search
 
+.. autoexception:: wardowl.SearchError
+
 .. autoclass:: wardowl.Redactor
    :members: redact
 
@@ -97,7 +99,7 @@ modules and need their extra.
    :members: scope_for
 
 .. autoclass:: wardowl.CachingAuthorizer
-   :members: invalidate, stats
+   :members: invalidate, stats, max_staleness
 
 .. autoclass:: wardowl.caching.CacheStats
    :members:
@@ -112,6 +114,7 @@ modules and need their extra.
 .. autoclass:: wardowl.authorizers.openfga.OpenFGAAuthorizer
 
 .. autoclass:: wardowl.authorizers.spicedb.SpiceDBAuthorizer
+   :members: max_staleness
 
 .. autoclass:: wardowl.authorizers.cerbos.CerbosAuthorizer
 

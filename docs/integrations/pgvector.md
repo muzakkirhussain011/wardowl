@@ -191,6 +191,38 @@ the configuration into the query as a literal, so PostgreSQL uses that index (CI
 Use the same configuration name in both places. A keyword backend reads the table; write chunks
 with a vector backend, since every row stores its embedding.
 
+## Timeouts
+
+Nothing bounds a search by default: a statement waiting for a lock, or a connection to a database
+that stopped answering, holds the retrieval for as long as that lasts. In wardowl's fault
+experiment, a database behind a connection that never answered held retrievals for the pool's
+5-second timeout, or for longer than 10 seconds when the connection was already open. Bound each
+layer:
+
+| Where | Setting | What it bounds |
+|---|---|---|
+| The statement | `PgVectorBackend(statement_timeout=2.0)` (seconds) | Each search and count, on the server, time waiting for a lock included. Sent as `SET LOCAL statement_timeout` in the statement's transaction, like the scan settings, so other users of the pool keep their own. 0.001 to 2,147,483.647 seconds. |
+| Connecting | `connect_timeout=5` in the connection string (libpq) | Opening a connection, per host address (2 seconds at least) |
+| A network that stops answering | `tcp_user_timeout=5000` (milliseconds, Linux) and `keepalives_idle`, `keepalives_interval`, `keepalives_count` (libpq) | Data sent but never acknowledged, and an idle connection whose peer is gone |
+| A free connection | `ConnectionPool(timeout=...)` (psycopg_pool, 30 seconds by default) | Waiting for the pool to hand out a connection (`PoolTimeout`) |
+
+```python
+pool = ConnectionPool(
+    "postgresql://localhost/app?connect_timeout=5&tcp_user_timeout=5000&keepalives_idle=10"
+    "&keepalives_interval=5&keepalives_count=3",
+    timeout=5,
+    check=ConnectionPool.check_connection,  # a connection that died while idle is not handed out
+)
+backend = PgVectorBackend(pool, embed, statement_timeout=2.0)
+```
+
+A statement that times out raises `SearchError` from the retriever, with the driver's
+`QueryCanceled` as its cause, and the retrieval returns nothing. The server keeps the statement's
+time, so `statement_timeout` cannot help when the statement never reaches it, or its answer never
+comes back. `tcp_user_timeout` and keepalives catch a network that drops packets, but not a peer,
+such as a proxy, that accepts and acknowledges everything and never answers: for that, bound the
+whole retrieval in your application, for example with `asyncio.wait_for` around `aretrieve`.
+
 ## Async
 
 Pass an `AsyncConnectionPool` as `async_pool=` and `aretrieve` uses a native async search.

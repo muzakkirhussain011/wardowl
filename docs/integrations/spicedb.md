@@ -120,6 +120,17 @@ is returned and the retriever post-filters instead; it does the same when a look
 conditional on a caveat. Subjects who may read very many documents are therefore post-filtered,
 which stays correct.
 
+A lookup that finds no document gives no filter either. LookupResources answers as a stream of
+lines with no mark at its end, so a stream that a proxy, a load balancer or a server fault ended
+before its first line looks exactly like a subject who may read nothing, and trusting it would
+return nothing without an error. With no filter, the retriever post-filters, and
+CheckBulkPermissions decides each candidate, or fails closed if it is broken too. The cost falls on
+subjects who truly read nothing: a post-filtered search, checking up to `max_candidates`
+candidates, where an empty filter cost one search. Under `strategy="prefilter"` the retriever has no
+filter to apply for them and raises `ValueError`, as it does for a truncated lookup; pass
+`trust_empty_lookup=True` to take an empty lookup as "nothing is readable", as earlier versions did,
+which can lose results but never return one the subject may not read.
+
 `In` matches a list field when any of its elements is listed, while `check` denies a chunk whose
 resource field is not one string. The retriever's re-check of pre-filtered hits (`recheck=True`,
 the default) drops such a chunk and counts it in `violations`. With `recheck=False` the filter
@@ -128,10 +139,27 @@ alone decides, so the resource field must be one string on every chunk.
 ## Consistency and revocation
 
 The default consistency, `{"minimizeLatency": True}`, lets SpiceDB answer from a recent snapshot.
-A revoked permission can then keep granting access for up to the datastore's revision quantization
-interval, 5 seconds by default. For fresher answers pass `consistency={"fullyConsistent": True}`,
-or `{"atLeastAsFresh": {"token": zedtoken}}` with the ZedToken from your last write. Combined with
-`CachingAuthorizer`, the revocation bound is the cache's `ttl` plus this interval.
+A revoked permission can then keep granting access for a while. SpiceDB rounds the revision such a
+read uses down to `--datastore-revision-quantization-interval` (5 seconds by default) and may pick
+one older still by `--datastore-revision-quantization-max-staleness-percent` of it (10% by
+default), which its documentation gives as the bound: 5.5 seconds with the defaults, plus
+`--datastore-follower-read-delay-duration` when it reads from replicas
+([`spicedb serve` flags](https://authzed.com/docs/spicedb/concepts/commands)). Measured against
+SpiceDB 1.56.2 on Postgres with those defaults, revocations took a median 3.3 seconds and up to
+8.7, and in some a revoked document came back after it had gone, since successive answers can use
+an older revision than the one before.
+
+`SpiceDBAuthorizer` declares this as `max_staleness`: 11 seconds, twice the documented bound, for
+any consistency but `fullyConsistent`, which declares 0. Pass `max_staleness=` for a server with
+other settings (twice the interval times one plus the percentage, plus any follower read delay), or
+0 if you send `atLeastAsFresh` with the token of every change you report to the cache.
+
+For fresher answers pass `consistency={"fullyConsistent": True}`, or `{"atLeastAsFresh": {"token":
+zedtoken}}` with the ZedToken from your last write. Combined with `CachingAuthorizer`, the
+revocation bound is the cache's `ttl` plus the staleness. After `invalidate()`, the cache reads
+`max_staleness` and, for that long, keeps no answer for the subject, so one from the stale snapshot
+is not held for `ttl`; the bound is then the staleness alone, plus `local_ttl` on other replicas
+([Revocation and consistency](../revocation.md#bounded-staleness)).
 
 ## Failures
 
