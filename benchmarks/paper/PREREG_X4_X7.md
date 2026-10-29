@@ -389,3 +389,27 @@ The rules were fixed before any result. If a rule proves impossible to apply as 
 reports a deviation rather than changing the rule; any change made before the full results exist is
 committed on its own as a dated amendment below, so the rules stay readable as first written. A scope
 that cannot be run in full is cut only by such an amendment, never silently.
+
+## Amendments
+
+### Amendment 1 (2026-10-29, after the smoke run, before any full result)
+
+The smoke run (workflow run 40916767636, one seed, never analysed) showed two places where the
+protocol as written could not measure what the rules judge. Both changes concern measurement only;
+no hypothesis, threshold or verdict rule changes.
+
+1. **X7a polling horizon.** After `invalidate()`, the first poll can refill the cache from an engine
+   answer that is itself stale (SpiceDB under `minimizeLatency`, Cerbos before it has reloaded its
+   policy), and the cache then holds that answer for its ttl. Polling stopped at B + 15 s then records
+   no time to effect at all. Polling now continues until max(B, T + S') + 15 s, where T is the cache's
+   ttl (30 s under `ttl30-inv` and `ttl30-shared-inv` as well) and S' is S, or 10 s where no S is
+   stated. A trial still counts against X7-H1 when it takes effect later than B + 1 s, or not by the
+   end of polling.
+2. **X7b: when a fault begins.** Killing a container takes up to a second, during which retrievals
+   still succeed; "the fault begins" is now the moment the injecting command returns (`docker kill`
+   exits, or the proxy confirms the new mode), not the moment it is issued. Retrievals inside the
+   fault are those that start at least 0.1 s after that moment and end before the removal is issued.
+
+A harness fault found by the same run was fixed without changing the protocol: the proxy's `refuse`
+mode closed connections from another thread with `close()` alone, which leaves a socket open while
+its handler thread reads from it, so keep-alive connections kept working; it now shuts them down.
