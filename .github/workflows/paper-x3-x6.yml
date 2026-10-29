@@ -37,8 +37,9 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  # The size of a push-triggered run.
-  X3X6_MODE: ${{ inputs.mode || 'smoke' }}
+  # The size of a push-triggered run: full, the pre-registered design, since the fifth smoke run
+  # (40939098036) ran every job without an error.
+  X3X6_MODE: ${{ inputs.mode || 'full' }}
   SEEDS: ${{ inputs.seeds || 5 }}
 
 jobs:
