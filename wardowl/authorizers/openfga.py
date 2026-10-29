@@ -194,8 +194,7 @@ class OpenFGAAuthorizer:
             )
         user = self._user(subject)
         keys = [
-            {"user": user, "relation": self.group_relation, "object": self._group(g)}
-            for g in sorted(subject.groups)
+            {"user": user, "relation": self.group_relation, "object": self._group(g)} for g in sorted(subject.groups)
         ]
         return {"contextual_tuples": {"tuple_keys": keys}}
 
