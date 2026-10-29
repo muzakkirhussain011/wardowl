@@ -4,7 +4,9 @@ Install with `pip install "wardowl[pgvector]"`. Needs PostgreSQL with pgvector 0
 iterative index scans, which keep an HNSW scan going until enough rows pass a selective filter or
 a scan limit is reached (`hnsw.max_scan_tuples`, or `work_mem` x `hnsw.scan_mem_multiplier` of
 memory). The backend does not declare `exact_search`, since it cannot see whether the table has an
-HNSW index, so the retriever reports a short result as possibly incomplete.
+HNSW index, so the retriever reports a short result as possibly incomplete. It can count the rows
+a filter matches and search exactly on request, so `PermissionedRetriever(short_results=...)` can
+tell a short result's cause and repair it.
 
 Chunks live in one table: `id text`, `content text`, `metadata jsonb`, `embedding vector(n)`.
 Permission metadata is matched with JSON containment, which a GIN (`jsonb_path_ops`) index serves,
@@ -142,12 +144,43 @@ def _vector(values: Sequence[float]) -> str:
 
 
 _CONFIG = re.compile(r"[a-z_][a-z0-9_]*")
+# A PostgreSQL memory setting with its unit, as `work_mem` takes it: "64MB", "1.5GB", "65536kB".
+_MEMORY = re.compile(r"\d+(\.\d+)?\s*(B|kB|MB|GB|TB)")
 
 
 def _text_search_config(config: str) -> str:
     if not _CONFIG.fullmatch(config):
         raise ValueError(f"text search configuration {config!r} must be a plain name, such as 'english'")
     return config
+
+
+def _max_scan_tuples(value: Any) -> int | None:
+    """pgvector's range for `hnsw.max_scan_tuples`: 1 to 2,147,483,647."""
+    if value is None:
+        return None
+    if isinstance(value, int) and not isinstance(value, bool) and 1 <= value <= 2_147_483_647:
+        return value
+    raise ValueError("max_scan_tuples must be None or an integer from 1 to 2,147,483,647")
+
+
+def _scan_mem_multiplier(value: Any) -> float | None:
+    """pgvector's range for `hnsw.scan_mem_multiplier`: 1 to 1000."""
+    if value is None:
+        return None
+    if isinstance(value, (int, float)) and not isinstance(value, bool) and 1 <= value <= 1000:
+        return value
+    raise ValueError("scan_mem_multiplier must be None or a number from 1 to 1000")
+
+
+def _work_mem(value: Any) -> int | str | None:
+    """A `work_mem` setting: kilobytes (at least 64, PostgreSQL's minimum), or text with a unit."""
+    if value is None:
+        return None
+    if isinstance(value, str) and _MEMORY.fullmatch(value):
+        return value
+    if isinstance(value, int) and not isinstance(value, bool) and value >= 64:
+        return value
+    raise ValueError("work_mem must be None, kilobytes (at least 64), or text with a unit, such as '64MB'")
 
 
 def create_schema(
@@ -205,6 +238,17 @@ class PgVectorBackend:
     `AsyncConnectionPool`) for a native `asearch`; otherwise async calls run `search` in a thread.
     `ef_search` sets pgvector's `hnsw.ef_search` (1 to 1000) for each search: higher finds more of
     the true nearest neighbours and takes longer. `None` leaves the server's setting (40 by default).
+    The limits of an iterative scan are set the same way: `max_scan_tuples` (`hnsw.max_scan_tuples`,
+    the graph elements a scan may visit; 20,000 by default), `scan_mem_multiplier`
+    (`hnsw.scan_mem_multiplier`, the scan's memory as a multiple of `work_mem`; 1 to 1000) and
+    `work_mem` (kilobytes, or text such as `"64MB"`; it also sizes the query's sorts). Each is set
+    with `SET LOCAL` in the search's transaction, so other users of the pool keep their own.
+
+    In vector mode the backend also offers what `PermissionedRetriever(short_results=...)` uses to
+    check a short result: `count(filter, limit)` counts the rows the filter matches, up to
+    `limit`, and `search(..., exact=True)` (`supports_exact`) searches without the HNSW index
+    (`SET LOCAL enable_indexscan = off`), so PostgreSQL reads every row the filter matches, through
+    the metadata index or a scan of the table, and sorts them all by distance.
 
     `mode="keyword"` searches the text with PostgreSQL full-text search instead (`websearch_to_tsquery`
     in the `text_search` configuration, ranked by `ts_rank_cd`), under the same permission
@@ -222,6 +266,9 @@ class PgVectorBackend:
         table: str = "wardowl_chunks",
         iterative_scan: str | None = "relaxed_order",
         ef_search: int | None = None,
+        max_scan_tuples: int | None = None,
+        scan_mem_multiplier: float | None = None,
+        work_mem: int | str | None = None,
         mode: str = "vector",
         text_search: str = "english",
         async_pool: Any = None,
@@ -240,8 +287,16 @@ class PgVectorBackend:
         self.table = table
         self.iterative_scan = iterative_scan
         self.ef_search = ef_search
+        self.max_scan_tuples = _max_scan_tuples(max_scan_tuples)
+        self.scan_mem_multiplier = _scan_mem_multiplier(scan_mem_multiplier)
+        self.work_mem = _work_mem(work_mem)
         self.mode = mode
         self.text_search = _text_search_config(text_search)
+
+    @property
+    def supports_exact(self) -> bool:
+        """True in vector mode: `search(..., exact=True)` then ranks every row the filter matches."""
+        return self.mode == "vector"
 
     # ---- writing -----------------------------------------------------------------------------
 
@@ -325,45 +380,95 @@ class PgVectorBackend:
             return None
         return _vector(query.embedded(self.embed))
 
-    def _settings(self) -> list[Any]:
+    def _settings(self, exact: bool = False) -> list[Any]:
         """`SET LOCAL` statements for the search's transaction, so pooled connections keep their own."""
         from psycopg import sql
 
         if self.mode == "keyword":
             return []
-        settings = []
-        if self.iterative_scan:
-            settings.append(sql.SQL("SET LOCAL hnsw.iterative_scan = {}").format(sql.Literal(self.iterative_scan)))
-        if self.ef_search is not None:
-            settings.append(sql.SQL("SET LOCAL hnsw.ef_search = {}").format(sql.Literal(self.ef_search)))
+        settings: list[Any] = []
+        if self.work_mem is not None:
+            settings.append(sql.SQL("SET LOCAL work_mem = {}").format(sql.Literal(self.work_mem)))
+        if exact:
+            # No HNSW index scan, which is what stops early: PostgreSQL reads the rows the filter
+            # matches (through the metadata index, or by scanning the table) and sorts them all.
+            settings.append(sql.SQL("SET LOCAL enable_indexscan = off"))
+            return settings
+        scan: dict[str, Any] = {
+            "hnsw.iterative_scan": self.iterative_scan,
+            "hnsw.ef_search": self.ef_search,
+            "hnsw.max_scan_tuples": self.max_scan_tuples,
+            "hnsw.scan_mem_multiplier": self.scan_mem_multiplier,
+        }
+        for name, value in scan.items():
+            if value is not None:
+                settings.append(sql.SQL("SET LOCAL {} = {}").format(sql.SQL(name), sql.Literal(value)))
         return settings
+
+    def _count_query(self, f: Filter, limit: int) -> tuple[Any, list[Any]]:
+        from psycopg import sql
+
+        condition, params = filter_to_sql(f)
+        # The LIMIT stops the count once it is known to reach `limit`, however many rows match.
+        statement = sql.SQL("SELECT count(*) FROM (SELECT 1 FROM {t} WHERE {cond} LIMIT %s) AS matching").format(
+            t=sql.Identifier(self.table), cond=sql.SQL(condition)
+        )
+        return statement, [*params, limit]
+
+    def count(self, filter: Filter, limit: int) -> int | None:
+        """How many chunks match `filter`, counting no further than `limit`.
+
+        `PermissionedRetriever(short_results=...)` compares it with a short result: a vector search
+        ranks every row, so more matching rows than hits means the index missed some. None in
+        keyword mode, which ranks only the rows that contain the query's words.
+        """
+        if self.mode == "keyword":
+            return None
+        statement, params = self._count_query(filter, limit)
+        with self.pool.connection() as conn:
+            row = conn.execute(statement, params).fetchone()
+        return int(row[0])
+
+    async def acount(self, filter: Filter, limit: int) -> int | None:
+        if self.async_pool is None:
+            return await asyncio.to_thread(self.count, filter, limit)
+        if self.mode == "keyword":
+            return None
+        statement, params = self._count_query(filter, limit)
+        async with self.async_pool.connection() as conn:
+            cursor = await conn.execute(statement, params)
+            row = await cursor.fetchone()
+        return int(row[0])
 
     def _hits(self, rows: Iterable[Sequence[Any]]) -> list[Hit]:
         if self.mode == "keyword":  # ts_rank_cd: higher is better
             return [Hit(r[0], r[1], float(r[3]), r[2] or {}) for r in rows]
         return [Hit(r[0], r[1], 1.0 - float(r[3]), r[2] or {}) for r in rows]
 
-    def search(self, query: str | Query, k: int, filter: Filter | None = None) -> list[Hit]:
+    def search(self, query: str | Query, k: int, filter: Filter | None = None, *, exact: bool = False) -> list[Hit]:
+        """The k nearest chunks the filter matches; with `exact`, without the HNSW index."""
         if k < 1:
             return []
         q = Query.of(query)
         statement, params = self._statement(q, self._query_vector(q), k, filter)
         with self.pool.connection() as conn, conn.transaction():
-            for setting in self._settings():
+            for setting in self._settings(exact):
                 conn.execute(setting)
             rows = conn.execute(statement, params).fetchall()
         return self._hits(rows)
 
-    async def asearch(self, query: str | Query, k: int, filter: Filter | None = None) -> list[Hit]:
+    async def asearch(
+        self, query: str | Query, k: int, filter: Filter | None = None, *, exact: bool = False
+    ) -> list[Hit]:
         if self.async_pool is None:
-            return await asyncio.to_thread(self.search, query, k, filter)
+            return await asyncio.to_thread(self.search, query, k, filter, exact=exact)
         if k < 1:
             return []
         q = Query.of(query)
         vector = await asyncio.to_thread(self._query_vector, q)
         statement, params = self._statement(q, vector, k, filter)
         async with self.async_pool.connection() as conn, conn.transaction():
-            for setting in self._settings():
+            for setting in self._settings(exact):
                 await conn.execute(setting)
             cursor = await conn.execute(statement, params)
             rows = await cursor.fetchall()
