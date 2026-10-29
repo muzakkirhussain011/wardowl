@@ -146,6 +146,7 @@ def _vector(values: Sequence[float]) -> str:
 _CONFIG = re.compile(r"[a-z_][a-z0-9_]*")
 # A PostgreSQL memory setting with its unit, as `work_mem` takes it: "64MB", "1.5GB", "65536kB".
 _MEMORY = re.compile(r"\d+(\.\d+)?\s*(B|kB|MB|GB|TB)")
+_BIGINT = 2**63 - 1  # the largest LIMIT PostgreSQL takes
 
 
 def _text_search_config(config: str) -> str:
@@ -409,11 +410,12 @@ class PgVectorBackend:
         from psycopg import sql
 
         condition, params = filter_to_sql(f)
-        # The LIMIT stops the count once it is known to reach `limit`, however many rows match.
+        # The LIMIT stops the count once it is known to reach `limit`, however many rows match. It is
+        # a bigint, so a larger limit (max_exact_rows of sys.maxsize, say) counts every row instead.
         statement = sql.SQL("SELECT count(*) FROM (SELECT 1 FROM {t} WHERE {cond} LIMIT %s) AS matching").format(
             t=sql.Identifier(self.table), cond=sql.SQL(condition)
         )
-        return statement, [*params, limit]
+        return statement, [*params, min(limit, _BIGINT)]
 
     def count(self, filter: Filter, limit: int) -> int | None:
         """How many chunks match `filter`, counting no further than `limit`.

@@ -508,11 +508,13 @@ def test_pgvector_counts_the_rows_a_filter_matches_no_further_than_a_limit():
     )
     assert params == ['{"allowed_groups": "hr"}', '{"allowed_groups": ["hr"]}', 11]
     assert asyncio.run(backend.acount(In("allowed_groups", ["hr"]), 11)) == 3  # in a thread, with no async pool
+    backend.count(In("allowed_groups", ["hr"]), 2**70)  # past a bigint: every row is counted instead
+    assert pool.statements[-1][1][-1] == 2**63 - 1
     # A keyword search ranks only rows that contain the query's words: a count says nothing about it.
     keyword = PgVectorBackend(pool, None, mode="keyword", async_pool=AsyncRecorder([(3,)]))
     assert keyword.count(In("allowed_groups", ["hr"]), 11) is None
     assert asyncio.run(keyword.acount(In("allowed_groups", ["hr"]), 11)) is None
-    assert len(pool.statements) == 2 and backend.supports_exact and not keyword.supports_exact
+    assert len(pool.statements) == 3 and backend.supports_exact and not keyword.supports_exact
 
 
 def test_pgvector_native_async_paths_send_what_the_sync_ones_send():
