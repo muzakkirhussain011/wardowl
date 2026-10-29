@@ -173,20 +173,20 @@ class Worlds:
             metadata = {"allowed_users": [f"owner{b:02d}"], "allowed_groups": [f"g{b:02d}"]}
             self.background_doc[int(i)] = Document(fiqa.ids[int(i)], fiqa.texts[int(i)], metadata)
         self.secret_doc = {int(d): Document(fiqa.ids[int(d)], fiqa.texts[int(d)], secret_metadata()) for d in secrets}
-        self.group_of: dict[int, int] = {}
+        # A secret may belong to several groups (Amendment 2): it is replaced in each of their W0.
+        self.groups_of: dict[int, set[int]] = {}
+        for group in plan["groups"]:
+            for near in group["secrets"]:
+                self.groups_of.setdefault(int(near), set()).add(int(group["group"]))
         self.far_doc: dict[int, Any] = {}
         self.far_source: dict[int, int] = {}
-        number = 0
-        for group in plan["groups"]:
-            for near, source, n_tokens in group["far"]:
-                number += 1
-                text = common.far_text(scid.texts, source, n_tokens)
-                self.far_doc[near] = Document(f"far-{number}-{scid.ids[source]}", text, secret_metadata())
-                self.far_source[near] = source
-                self.group_of[near] = group["group"]
-        missing = set(self.secret_doc) - set(self.far_doc)
+        for number, (near, source, n_tokens) in enumerate(plan["far"], 1):
+            text = common.far_text(scid.texts, source, n_tokens)
+            self.far_doc[near] = Document(f"far-{number}-{scid.ids[source]}", text, secret_metadata())
+            self.far_source[near] = source
+        missing = set(self.secret_doc) - (set(self.far_doc) & set(self.groups_of))
         if missing:
-            raise ValueError(f"{len(missing)} secrets have no far chunk")
+            raise ValueError(f"{len(missing)} secrets have no far chunk or no group")
         self.readable = {
             pct: {fiqa.ids[int(i)] for i in background if buckets[int(i)] < pct} for pct in plan["pcts"]
         }
@@ -200,7 +200,7 @@ class Worlds:
                 rows.append(self.fiqa.vectors[i])
             elif world == "sep":
                 continue
-            elif world == "w0" and self.group_of[i] == group:
+            elif world == "w0" and group in self.groups_of[i]:
                 docs.append(self.far_doc[i])
                 rows.append(self.scid.vectors[self.far_source[i]])
             else:
@@ -429,7 +429,7 @@ def run(args: argparse.Namespace) -> int:
     fiqa = common.Texts(data, "fiqa_corpus")
     queries = common.Texts(data, "fiqa_queries")
     scid = common.Texts(data, "scidocs_subset")
-    seeds = [s for s in range(args.seeds) if common.plan_path(data, s).is_file()]
+    seeds = [s for s in common.seed_list(args.seeds, args.seed_list) if common.plan_path(data, s).is_file()]
     keep = ("mode", "embedding", "sources", "counts", "design", "hubs", "versions", "from_cache")
     records.write(
         {
@@ -500,6 +500,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--budget-minutes", type=float, default=330)
     parser.add_argument("--group-deadline", type=float, default=0)
     parser.add_argument("--remaining", type=int, default=1)
+    parser.add_argument("--seed-list", default="", help='the seeds this job runs, such as "0-2" (default: all)')
     args = parser.parse_args(argv)
     try:
         return run(args)

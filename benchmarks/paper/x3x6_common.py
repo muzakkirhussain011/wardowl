@@ -184,6 +184,22 @@ def deadline_for(budget_minutes: float, group_deadline: float, remaining: int) -
     return deadline
 
 
+def seed_list(count: int, chosen: str) -> list[int]:
+    """The seeds a job runs: those of `chosen` ("0,1,2" or "3-4"), or 0 to count - 1 when it is empty,
+    so that a slow store's seeds can be shared between jobs without leaving one out."""
+    if not chosen.strip():
+        return list(range(count))
+    seeds: list[int] = []
+    for part in chosen.split(","):
+        part = part.strip()
+        if "-" in part:
+            first, last = part.split("-", 1)
+            seeds += range(int(first), int(last) + 1)
+        elif part:
+            seeds.append(int(part))
+    return sorted(set(seeds))
+
+
 def connect(target: Target, timeout: float = 600.0) -> int:
     """Set the target up, trying again while its server boots. Returns the number of attempts."""
     started = time.monotonic()
@@ -445,8 +461,8 @@ class Qdrant(Target):
         self.made.append(base)
         create_collection(self.client, base, DIM, text_search=keyword)
         # Every segment HNSW-indexed, as in a production collection (a stated deviation from the
-        # default indexing threshold, which leaves small segments unindexed).
-        self.client.update_collection(base, optimizers_config=models.OptimizersConfigDiff(indexing_threshold=1000))
+        # default indexing threshold, which leaves small segments unindexed). 10 KB is a few vectors.
+        self.client.update_collection(base, optimizers_config=models.OptimizersConfigDiff(indexing_threshold=10))
         QdrantBackend(self.client, base, text_search=keyword).add(docs, vectors)
         info = self._wait(base)
         vector = QdrantBackend(self.client, base)
@@ -458,12 +474,15 @@ class Qdrant(Target):
         return built
 
     def _wait(self, name: str, timeout: float = 1800.0) -> dict[str, Any]:
-        """Wait until the collection is green, with its vectors indexed, on two polls in a row: the
-        optimizer may not have started when the last upsert returns, and a collection with sparse
-        vectors counts those as indexed at once."""
+        """Wait until the optimizer is done: the collection green, and either its vectors indexed on two
+        polls in a row, or its indexed count unchanged for a minute (a last appendable segment can stay
+        below the threshold). The optimizer may not have started when the last upsert returns, and a
+        collection with sparse vectors counts those as indexed at once. The indexed count is recorded."""
         started = time.monotonic()
         time.sleep(5)
         settled = 0
+        stable_since = time.monotonic()
+        last = -1
         while True:
             info = self.client.get_collection(name)
             points = info.points_count or 0
@@ -478,11 +497,16 @@ class Qdrant(Target):
                 "optimizer": optimizer,
                 "wait_s": round(time.monotonic() - started, 1),
             }
-            settled = settled + 1 if status == "green" and indexed >= 0.99 * points else 0
+            green = status == "green"
+            if indexed != last or not green:
+                stable_since, last = time.monotonic(), indexed
+            settled = settled + 1 if green and indexed >= 0.99 * points else 0
             if settled >= 2:
                 return state
+            if green and time.monotonic() - stable_since >= 60:
+                return {**state, "stable": True}
             if time.monotonic() - started > timeout:
-                log(f"  qdrant {name}: not fully indexed after {timeout:.0f} s: {state}")
+                log(f"  qdrant {name}: not settled after {timeout:.0f} s: {state}")
                 return {**state, "timed_out": True}
             time.sleep(3)
 

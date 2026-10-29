@@ -253,6 +253,8 @@ jobs:
         env:
           SCRIPT: benchmarks/paper/${{ matrix.script }}
           TARGETS: ${{ matrix.targets }}
+          # A slow store's seeds can be shared between jobs (empty: every seed).
+          SEED_LIST: ${{ matrix.seed_list }}
         run: |
           set +e
           mkdir -p results/logs
@@ -265,7 +267,8 @@ jobs:
             target=${targets[$i]}
             echo "::group::$target"
             python "$SCRIPT" --store "$target" --data x6data --out results --mode "$X3X6_MODE" --seeds "$SEEDS" \
-              --group-deadline "$deadline" --remaining "$((count - i))" 2>&1 | tee "results/logs/$GROUP-$target.log"
+              --seed-list "$SEED_LIST" --group-deadline "$deadline" --remaining "$((count - i))" 2>&1 \
+              | tee "results/logs/$GROUP-$target.log"
             status=${PIPESTATUS[0]}
             echo "::endgroup::"
             if [ "$status" -ne 0 ]; then

@@ -337,7 +337,10 @@ def make_plan(
     n = len(corpus)
     rng = np.random.default_rng([SEED_BASE, seed])
     order = [int(q) for q in rng.permutation(len(queries))]
-    claimed = np.zeros(n, dtype=bool)  # every probe's near set: disjoint across the seed
+    # Every secret of the seed. Near sets of different groups may share passages (Amendment 2): a
+    # shared passage is replaced in the W0 of each group it belongs to, so every probe's two worlds
+    # still differ in its own group's secrets only.
+    claimed = np.zeros(n, dtype=bool)
     used: set[int] = set()
     probes: list[dict[str, Any]] = []
     shortfall: list[dict[str, Any]] = []
@@ -351,9 +354,8 @@ def make_plan(
                     if q in used:
                         continue
                     c = Candidate(q, m, near_index, near_similarity, hubs)
-                    # Within the group, no near set inside a mate's zone, in either direction;
-                    # across the seed, no passage in two near sets.
-                    if not c.ok or claimed[c.near].any() or zone[c.near].any() or secret[c.zone].any():
+                    # Within the group, no near set inside a mate's zone, in either direction.
+                    if not c.ok or zone[c.near].any() or secret[c.zone].any():
                         continue
                     chosen = (q, c)
                     break
@@ -380,8 +382,9 @@ def make_plan(
     if not probes:
         raise RuntimeError(f"seed {seed}: no probe could be placed")
 
-    # Far chunks: SciDocs passages less similar to every probe than any probe's zone boundary,
-    # assigned without replacement across the groups while they last.
+    # Far chunks: SciDocs passages less similar to every probe than any probe's zone boundary, one
+    # per secret passage, without replacement while they last. A secret's far chunk replaces it in
+    # the W0 of every group whose near sets hold it.
     probe_vectors = queries[[p["qindex"] for p in probes]]
     boundary = min(p["tau"] for p in probes)
     closest = (far_vectors @ probe_vectors.T).max(axis=1)
@@ -390,17 +393,15 @@ def make_plan(
     if fallback:
         eligible = np.argsort(closest)[: max(1, len(closest) // 2)]
     eligible = eligible[rng.permutation(len(eligible))]
-    used_far = 0
+    secret_ids = np.flatnonzero(claimed)
+    shuffled = secret_ids[rng.permutation(len(secret_ids))]
+    far = [[int(d), int(eligible[i % len(eligible)]), int(tokens[d])] for i, d in enumerate(shuffled)]
     groups: list[dict[str, Any]] = []
     for group in range(GROUPS):
         members = [p for p in probes if p["group"] == group]
-        near = np.array(sorted(i for p in members for i in p["near"]), dtype=np.int64)
-        near = near[rng.permutation(len(near))]
-        far = []
-        for d in near:
-            far.append([int(d), int(eligible[used_far % len(eligible)]), int(tokens[d])])
-            used_far += 1
-        groups.append({"group": group, "probes": [p["qindex"] for p in members], "far": far})
+        own = sorted({int(i) for p in members for i in p["near"]})
+        groups.append({"group": group, "probes": [p["qindex"] for p in members], "secrets": own})
+    shared = int(sum(len(g["secrets"]) for g in groups) - len(secret_ids))
 
     buckets = rng.integers(0, 100, size=n)
     readable = ~claimed
@@ -428,12 +429,12 @@ def make_plan(
         exact[str(probe["qindex"])] = per
 
     counts = {str(m): sum(1 for p in probes if p["level"] == m) for m in PER_GROUP}
-    secret_ids = np.flatnonzero(claimed)
     notes = {
         "probes": counts,
         "groups_full": sum(1 for g in groups if len(g["probes"]) == sum(PER_GROUP.values())),
         "shortfall": shortfall,
         "secret": int(len(secret_ids)),
+        "secret_extra_group_memberships": shared,
         "far_eligible": int(len(eligible)),
         "far_reused": bool(len(eligible) < len(secret_ids)),
         "far_fallback": fallback,
@@ -452,6 +453,7 @@ def make_plan(
         "secret": [int(i) for i in secret_ids],
         "probes": probes,
         "groups": groups,
+        "far": far,  # [secret passage, first SciDocs passage, word tokens]
         "exact": exact,
         "notes": notes,
     }

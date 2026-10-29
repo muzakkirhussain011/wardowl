@@ -304,7 +304,7 @@ def run(args: argparse.Namespace) -> int:
     durations: list[float] = []
     statuses: dict[int, int] = {}
     status = 0
-    for seed in range(args.seeds):
+    for seed in common.seed_list(args.seeds, args.seed_list):
         if durations and time.time() + 1.2 * max(durations) > deadline:
             records.write({"type": "seed-skipped", "seed": seed, "reason": "not enough time left in the budget"})
             common.annotate("warning", f"x3 {args.store}", f"seed {seed} skipped: not enough time left")
@@ -347,6 +347,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--budget-minutes", type=float, default=330)
     parser.add_argument("--group-deadline", type=float, default=0)
     parser.add_argument("--remaining", type=int, default=1)
+    parser.add_argument("--seed-list", default="", help='the seeds this job runs, such as "0-2" (default: all)')
     parser.add_argument("--only-seed", type=int, default=None, help=argparse.SUPPRESS)  # the per-seed child
     parser.add_argument("--hard-deadline", type=float, default=0.0, help=argparse.SUPPRESS)
     args = parser.parse_args(argv)
