@@ -11,6 +11,7 @@ import pytest
 
 qdrant_client = pytest.importorskip("qdrant_client")
 from qdrant_client import models  # noqa: E402
+from qdrant_client.http import models as rest_models  # noqa: E402
 
 from wardowl import (  # noqa: E402
     And,
@@ -234,7 +235,9 @@ class Recording:
 
     def query_points(self, **request):
         self.calls.append(("query_points", request))
-        return models.QueryResponse(points=[])
+        # qdrant_client.models also exports fastembed's QueryResponse under that name; query_points
+        # answers with the REST model.
+        return rest_models.QueryResponse(points=[])
 
     def count(self, collection_name, **options):
         self.calls.append(("count", {"collection_name": collection_name, **options}))
