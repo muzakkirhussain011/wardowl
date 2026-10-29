@@ -260,10 +260,13 @@ kept and reported as run 1.
    builds each), on all 1,489 questions, with three timed passes. Only the two replays run one
    pass, because the original did. All eight pre-registered verdicts and P5 are judged on run 2's
    data alone.
-8. **Where it runs (shards).** On Kaggle, account `muzakkirhussain1`. One session with a GPU
-   (`prep`) builds the corpus, embeds the chunks and the questions, and computes the exact
-   baseline and the question table. Three sessions, each attaching `prep`'s output, run the store
-   grids in parallel: shard A, `hnsw-m16-efc64` build 0 (the replays first); shard B,
+8. **Where it runs (shards).** On Kaggle, account `muzakkirhussain1`. One session (`prep`) builds
+   the corpus, embeds the chunks and the questions, and computes the exact baseline and the
+   question table; it runs on the CPU when no GPU session is free (bge-base in float32 instead of
+   float16; every shard uses `prep`'s vectors, so all of run 2 searches and scores with the same
+   ones, and the manifest records which device embedded them). Three sessions, each attaching
+   `prep`'s output, run the store grids in parallel: shard A, `hnsw-m16-efc64` build 0 (the
+   replays first); shard B,
    `hnsw-m16-efc64` builds 1 and 2; shard C, `hnsw-m32-efc200` builds 0 to 2, then the Qdrant grid.
    Every shard uses `prep`'s chunk and query vectors, recomputes the exact baseline from them and
    checks that its question table matches `prep`'s (same questions, persons and R, the same exact
