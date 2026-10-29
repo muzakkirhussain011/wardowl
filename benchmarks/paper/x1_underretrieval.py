@@ -26,8 +26,10 @@ Added to the scenario:
 
 Run 2 (amendment 2 of PREREGISTRATION.md, `--grid run2`, the default) adds:
 
-* plan control: the P-a to P-e settings and `pg-custom` plan every search with its own values
-  (plan_cache_mode = force_custom_plan); `p-asrun` keeps PostgreSQL's and psycopg's defaults;
+* plan control: `pg-custom` plans every search with its own values (plan_cache_mode =
+  force_custom_plan); `pg-hnsw` and the P-a to P-e settings also turn sequential and bitmap scans
+  off, which leaves the HNSW scan as the only plan; `p-asrun` keeps PostgreSQL's and psycopg's
+  defaults; every invocation vacuums the table once, after the replays;
 * the plan PostgreSQL executed for every first-pass search, from auto_explain, and a flag on any
   setting meant to search the HNSW graph that mostly did not;
 * `p-x0` and `p-x0v`, replays of the original run's pgvector pass, with the table's vacuum history
@@ -121,10 +123,13 @@ PG_GUCS: dict[str, str] = {
     "scan_mem_multiplier": "hnsw.scan_mem_multiplier",
     "work_mem": "work_mem",
     "enable_indexscan": "enable_indexscan",
+    "enable_seqscan": "enable_seqscan",
+    "enable_bitmapscan": "enable_bitmapscan",
     "plan_cache_mode": "plan_cache_mode",
 }
 PG_ASRUN: dict[str, Any] = {"ef_search": 100, "iterative_scan": "relaxed_order"}  # the original run
-PG_CUSTOM: dict[str, Any] = {"plan_cache_mode": "force_custom_plan"}  # run 2: every search planned with its values
+# Run 2 (amendment 2, item 10): every search planned with its values, and the HNSW scan the only plan left.
+PG_HNSW: dict[str, Any] = {"plan_cache_mode": "force_custom_plan", "enable_seqscan": "off", "enable_bitmapscan": "off"}
 PG_DEFAULT_FAMILY = "hnsw-m16-efc64"
 PG_FAMILIES = ((PG_DEFAULT_FAMILY, 16, 64, False), ("hnsw-m32-efc200", 32, 200, True))  # name, m, efc, core grid
 GRIDS = ("run1", "run2")  # run 1 as pre-registered; run 2 as amendment 2 changes it
@@ -203,12 +208,13 @@ class Setting:
 def pg_settings(core: bool, grid_name: str = "run2") -> list[Setting]:
     """Section 6.2's query-time grid; `core` is the subset run on the second index family.
 
-    Run 2 (amendment 2) adds the replays `p-x0` and `p-x0v` first, makes `pg-custom` the second
-    setting (the reference of P1 and P2), and plans every P-a to P-e search with its own values.
+    Run 2 (amendment 2) adds the replays `p-x0` and `p-x0v` first, then `pg-custom` (the planner's
+    own choice with the values: P4, P5) and `pg-hnsw` (the HNSW scan forced: the reference of P1 and
+    P2), and plans every P-a to P-e search with its values and the HNSW index as the only plan.
     """
     run2 = grid_name == "run2"
-    plan = dict(PG_CUSTOM) if run2 else {}
-    planned = ("plan_cache_mode",) if run2 else ()
+    plan = dict(PG_HNSW) if run2 else {}
+    planned = tuple(PG_HNSW) if run2 else ()
     scan = ("max_scan_tuples", "scan_mem_multiplier", *planned)
     every = ("as run", "P-a", "P-b", "P-c", "P-d", "P-e", "P-f", "P-g", "P-h")
     grid: list[Setting] = []
@@ -220,7 +226,8 @@ def pg_settings(core: bool, grid_name: str = "run2") -> list[Setting]:
     grid.append(Setting("p-asrun", (*every, "P5") if run2 else every, dict(PG_ASRUN)))
     custom = {**PG_ASRUN, "plan_cache_mode": "force_custom_plan"}
     if run2:
-        grid.append(Setting("pg-custom", ("P-g", "P1", "P2", "P4", "P5"), custom, ("plan_cache_mode",)))
+        grid.append(Setting("pg-custom", ("P-g", "P4", "P5"), custom, ("plan_cache_mode",)))
+        grid.append(Setting("pg-hnsw", ("P1", "P2"), {**PG_ASRUN, **plan}, planned))
     limits = ((20_000, 8), (100_000, 1), (100_000, 8), (1_000_000, 1), (1_000_000, 8), (1_000_000, 16))
     for tuples, multiplier in limits:
         params = {**PG_ASRUN, **plan, "max_scan_tuples": tuples, "scan_mem_multiplier": float(multiplier)}
@@ -239,7 +246,7 @@ def pg_settings(core: bool, grid_name: str = "run2") -> list[Setting]:
     exact = {**PG_ASRUN, "enable_indexscan": "off"}
     grid.append(Setting("ph-exact", ("P-h", "P3"), exact, ("enable_indexscan",), first_build_only=True))
     if core:
-        keep = {"p-asrun", "pc-ef400", "pa-t1000k-m8", "pd-lim10"} | ({"pg-custom"} if run2 else set())
+        keep = {"p-asrun", "pc-ef400", "pa-t1000k-m8", "pd-lim10"} | ({"pg-custom", "pg-hnsw"} if run2 else set())
         grid = [s for s in grid if s.id in keep]
     return grid
 
@@ -1550,11 +1557,24 @@ class PgVectorStage:
             store.stop()
 
     def estimate_once(self) -> None:
-        """P3's filter estimates, once per invocation: after the replays, which must come first."""
-        if not self.estimated:
-            self.estimated = True
-            with self.x.manifest.stage("pgvector: filter estimates"):
-                self.filter_estimates()
+        """Once per invocation, after the replays, which must come first: in run 2, VACUUM (ANALYZE) of
+        the table, so every later setting of every shard sees the same index state (amendment 2,
+        item 11); then P3's filter estimates."""
+        import psycopg
+        from psycopg import sql
+
+        if self.estimated:
+            return
+        self.estimated = True
+        if self.x.args.grid == "run2":
+            with self.x.manifest.stage("pgvector: vacuum") as record:
+                record["before"] = self.table_state()
+                with psycopg.connect(self.url, autocommit=True) as conn:
+                    conn.execute(sql.SQL("VACUUM (ANALYZE) {}").format(sql.Identifier(NAME)))
+                record["after"] = self.table_state()
+                log(f"pgvector: VACUUM (ANALYZE); GIN metapage after it: {record['after'].get('gin_metapage')}")
+        with self.x.manifest.stage("pgvector: filter estimates"):
+            self.filter_estimates()
 
     def table_state(self) -> dict[str, Any]:
         """The table's vacuum and analyze history and the GIN index's metapage: its pending list, which
