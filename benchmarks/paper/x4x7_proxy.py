@@ -68,9 +68,16 @@ def _address(text: str) -> tuple[str, int]:
 
 
 def _abort(sock: socket.socket) -> None:
-    """Close with a reset, so the peer sees the connection fail at once."""
+    """End the connection now, so the peer sees it fail at once.
+
+    shutdown() first: close() alone does not close a socket another thread is reading through a
+    file from makefile() (Python keeps it open until that file is closed too), and the connection
+    would go on serving requests. shutdown() acts on the connection itself, whoever holds it.
+    """
     with contextlib.suppress(OSError):
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_LINGER, struct.pack("ii", 1, 0))
+    with contextlib.suppress(OSError):
+        sock.shutdown(socket.SHUT_RDWR)
     with contextlib.suppress(OSError):
         sock.close()
 

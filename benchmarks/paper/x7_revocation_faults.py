@@ -124,7 +124,7 @@ SETTINGS: dict[str, dict[str, Any]] = {
         "grace": 15.0,
         "episodes": 1,
         "baseline": 1.5,
-        "fault": 3.0,
+        "fault": 6.0,
         "recover_max": 10.0,
         "recover_max_down": 60.0,
         "stable": 1.0,
@@ -139,6 +139,10 @@ CONDITIONS = ("nocache", "ttl5", "ttl30", "ttl30-inv", "ttl30-shared-inv")
 CONDITION_CODES = {"nocache": "n", "ttl5": "a", "ttl30": "b", "ttl30-inv": "c", "ttl30-shared-inv": "d"}
 # The cache's part of the stated bound: its ttl, nothing after invalidate(), local_ttl for a replica.
 CACHE_BOUND = {"nocache": 0.0, "ttl5": 5.0, "ttl30": 30.0, "ttl30-inv": 0.0, "ttl30-shared-inv": 1.0}
+# The cache's ttl itself: after invalidate() the cache can refill from a stale answer and hold it
+# this long (PREREG_X4_X7.md, amendment 1), so polling lasts at least this plus the staleness.
+CACHE_TTL = {"nocache": 0.0, "ttl5": 5.0, "ttl30": 30.0, "ttl30-inv": 30.0, "ttl30-shared-inv": 30.0}
+UNSTATED_STALENESS = 10.0  # S' where the engine states none (Cerbos's reload)
 LOCAL_TTL = 1.0
 
 ENGINE_FAULTS = (
@@ -584,8 +588,9 @@ def _authorizers(path: RevocationPath, trial: Trial, redis_client: Any) -> tuple
 def run_trial(ctx: Context, path: RevocationPath, trial: Trial, redis_client: Any) -> None:
     settings = ctx.settings
     bound = path.bound(trial.condition)
-    ttl = CACHE_BOUND[trial.condition]
-    horizon = (bound if bound is not None else ttl + 10.0) + settings["grace"]
+    staleness = path.staleness if path.staleness is not None else UNSTATED_STALENESS
+    # Amendment 1: poll until max(B, T + S') + 15 s; the verdict still compares the time with B + 1 s.
+    horizon = max(bound or 0.0, CACHE_TTL[trial.condition] + staleness) + settings["grace"]
     rec: dict[str, Any] = {
         "type": "x7a-trial",
         "path": path.name,
@@ -1199,8 +1204,12 @@ def _episode_record(
     outcomes: Sequence[Outcome],
     late: Sequence[Outcome],
 ) -> dict[str, Any]:
-    on, off = times.get("fault_on", origin), times.get("fault_off", origin)
-    baseline = [o for o in outcomes if o.end <= on]
+    # The fault begins when the injecting command has returned (amendment 1); it ends when its
+    # removal is issued, the moment recovery is measured from.
+    on = times.get("fault_on_done", times.get("fault_on", origin))
+    off = times.get("fault_off", origin)
+    issued = times.get("fault_on", on)
+    baseline = [o for o in outcomes if o.end <= issued]
     # Inside the fault: started at least 0.1 s after it began and ended before it was removed; a
     # hang (the watchdog's 10 s) counts when it started inside.
     inside = [o for o in outcomes if o.start >= on + 0.1 and (o.end <= off or (o.code == "hang" and o.start <= off))]
@@ -1230,7 +1239,7 @@ def _episode_record(
         "episode": episode,
         "fault_on_s": on - origin,
         "fault_off_s": off - origin,
-        "inject_s": times.get("fault_on_done", on) - on,
+        "inject_s": on - issued,
         "remove_s": times.get("fault_off_done", off) - off,
         "control_error": "control_error" in times,
         "codes": dict(codes),
