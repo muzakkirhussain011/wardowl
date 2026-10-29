@@ -254,5 +254,7 @@ class OpenFGAAuthorizer:
             # The server may have stopped at its deadline and sent what it had found. It started
             # after we sent the request, so it cannot have run longer than we waited.
             return None
+        # An empty list is taken at its word, unlike SpiceDB's empty stream: it came in one JSON
+        # document, which a cut or emptied answer would have broken, and within the deadline.
         prefix = f"{self.object_type}:"
         return In(self.resource_field, [o[len(prefix) :] for o in objects if o.startswith(prefix)])

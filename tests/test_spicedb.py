@@ -15,6 +15,7 @@ from hypothesis import strategies as st
 
 from wardowl import (
     AuthorizationError,
+    CachingAuthorizer,
     Document,
     Hit,
     In,
@@ -167,6 +168,40 @@ def test_a_possibly_truncated_or_conditional_lookup_gives_no_filter(server):
         {"result": {"resourceObjectId": "d1", "permissionship": "LOOKUP_PERMISSIONSHIP_CONDITIONAL_PERMISSION"}}
     )
     assert SpiceDBAuthorizer(server.url).filter_for(ANN) is None
+
+
+def test_an_empty_lookup_gives_no_filter_so_the_check_decides(server):
+    # SpiceDB marks no end to the stream: a stream cut off before its first result, by a proxy or
+    # a fault, reads exactly as a subject who may read nothing.
+    def respond(path, payload):
+        if path == "/v1/permissions/resources":
+            return 200, b""
+        return _bulk({("d2", "ann")})(path, payload)
+
+    server.responder = respond
+    assert SpiceDBAuthorizer(server.url).filter_for(ANN) is None
+    assert SpiceDBAuthorizer(server.url, trust_empty_lookup=True).filter_for(ANN) == In("doc_id", [])
+    backend = InMemoryBackend([Document("c1", "leave", {"doc_id": "d1"}), Document("c2", "leave", {"doc_id": "d2"})])
+    result = PermissionedRetriever(backend, SpiceDBAuthorizer(server.url)).retrieve("leave", ANN)
+    assert [h.id for h in result.hits] == ["c2"] and result.strategy == "postfilter"
+    # strategy="prefilter" has no filter to apply; trusting the empty lookup gives one that matches nothing.
+    with pytest.raises(ValueError, match="prefilter"):
+        PermissionedRetriever(backend, SpiceDBAuthorizer(server.url), strategy="prefilter").retrieve("leave", ANN)
+    trusting = SpiceDBAuthorizer(server.url, trust_empty_lookup=True)
+    assert PermissionedRetriever(backend, trusting, strategy="prefilter").retrieve("leave", ANN).hits == []
+
+
+def test_max_staleness_follows_the_consistency_unless_it_is_given():
+    # Read by CachingAuthorizer, which keeps nothing for that long after invalidate().
+    assert SpiceDBAuthorizer("http://127.0.0.1:1").max_staleness == 11.0  # minimizeLatency, twice SpiceDB's 5.5 s
+    assert SpiceDBAuthorizer("http://127.0.0.1:1", consistency={"fullyConsistent": True}).max_staleness == 0.0
+    token = {"atLeastAsFresh": {"token": "GhUKEzE2NjE"}}
+    assert SpiceDBAuthorizer("http://127.0.0.1:1", consistency=token).max_staleness == 11.0
+    assert SpiceDBAuthorizer("http://127.0.0.1:1", consistency=token, max_staleness=0).max_staleness == 0.0
+    assert CachingAuthorizer(SpiceDBAuthorizer("http://127.0.0.1:1", max_staleness=3)).source_staleness == 3.0
+    for bad in (-1, float("nan"), float("inf"), True):
+        with pytest.raises(ValueError, match="staleness"):
+            SpiceDBAuthorizer("http://127.0.0.1:1", max_staleness=bad)
 
 
 @pytest.mark.parametrize(
@@ -330,8 +365,10 @@ def _authorizer(**options):
 def test_spicedb_gives_exactly_the_reference_answer(docs, subject, query, k, strategy):
     _relationships_for(docs)
     stored = [Document(d.id, d.text, {**d.metadata, "doc_id": d.id}) for d in docs]
+    # Pre-filtering needs a filter for every subject, also one whose lookup finds nothing.
+    authorizer = _authorizer(trust_empty_lookup=strategy == "prefilter")
     retriever = PermissionedRetriever(
-        InMemoryBackend(stored), _authorizer(), strategy=strategy, max_candidates=len(docs) + k
+        InMemoryBackend(stored), authorizer, strategy=strategy, max_candidates=len(docs) + k
     )
     assert [h.id for h in retriever.retrieve(query, subject, k).hits] == oracle_top_k(docs, subject, query, k)
 
@@ -388,7 +425,10 @@ def test_a_banned_member_of_a_permitted_group_is_denied_by_default():
         mallory, ann = Subject("mallory", ["wo-eng"]), Subject("ann", ["wo-eng"])
         assert default.check(ann, hits) == [True] and default.check(mallory, hits) == [False]
         backend = InMemoryBackend([Document("c1", "launch plan", {"doc_id": "wo-plan"})])
-        for strategy in ("prefilter", "postfilter"):  # LookupResources applies the exclusion too
+        # LookupResources applies the exclusion too: it finds the plan for ann, and nothing for
+        # mallory, which gives no filter, so "auto" post-filters her and the check denies her.
+        assert default.filter_for(ann) == In("doc_id", ["wo-plan"]) and default.filter_for(mallory) is None
+        for strategy in ("auto", "postfilter"):
             retriever = PermissionedRetriever(backend, default, strategy=strategy)
             assert retriever.retrieve("plan", mallory).hits == []
             assert [h.id for h in retriever.retrieve("plan", ann).hits] == ["c1"]
