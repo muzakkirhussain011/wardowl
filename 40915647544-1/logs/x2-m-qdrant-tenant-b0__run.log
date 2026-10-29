@@ -1,0 +1,21 @@
+[17:05:53] data: 8 files match checksums.json
+[17:05:53] corpus m: 20,000 chunks, 248 pairs (0 s)
+[17:05:54] == qdrant tenant build 0: loading 20,000 chunks
+[17:05:57]   loaded 5,000 of 20,000 chunks (2 s)
+[17:05:59]   loaded 10,000 of 20,000 chunks (5 s)
+[17:06:02]   loaded 15,000 of 20,000 chunks (7 s)
+[17:06:04]   loaded 20,000 of 20,000 chunks (10 s)
+[17:06:19]    loaded: {'load_s': 9.9, 'index_s': 15.2, 'points': 20000, 'indexed_vectors': 13584, 'segments': 2, 'server': {'title': 'qdrant - vector search engine', 'version': '1.19.2', 'commit': '016542aa5deb6c66380bb137badf73d54f742bde'}, 'layout': 'tenant field is_tenant=true, hnsw m 0 and payload_m 16 (harness-level), other fields as as-run', 'keyword_fields': ['u0', 'u1', 'c0', 'c1'], 'seconds': 25.2}
+[17:06:19] -- qdrant tenant b0 ef128: {'hnsw_ef': 128} (budget 4.9 min)
+[17:06:21]   qdrant tenant b0 ef128: 120 of 120 pairs, 3 passes, 0 errors, 1 s (cut: none)
+[17:06:21]    qdrant tenant b0 ef128: {'pairs': 120, 'recall10': 1.0, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 2.61915, 'p95_ms': 4.8557, 'p99_ms': 5.057887, 'qps': 324.79527747666555}
+[17:06:21] -- qdrant tenant b0 ef512: {'hnsw_ef': 512} (budget 6.5 min)
+[17:06:22]   qdrant tenant b0 ef512: 120 of 120 pairs, 3 passes, 0 errors, 1 s (cut: none)
+[17:06:22]    qdrant tenant b0 ef512: {'pairs': 120, 'recall10': 1.0, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 2.5293, 'p95_ms': 4.711650000000001, 'p99_ms': 4.824517999999999, 'qps': 336.2442747407136}
+[17:06:22] -- qdrant tenant b0 acorn-max: {'hnsw_ef': 512, 'acorn': 1.0} (budget 9.8 min)
+[17:06:23]   qdrant tenant b0 acorn-max: 120 of 120 pairs, 3 passes, 0 errors, 1 s (cut: none)
+[17:06:23]    qdrant tenant b0 acorn-max: {'pairs': 120, 'recall10': 1.0, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 2.55905, 'p95_ms': 4.7643, 'p99_ms': 4.9005540000000005, 'qps': 331.03914013686807}
+[17:06:23] -- qdrant tenant b0 exact: {'exact': True} (budget 19.5 min)
+[17:06:24]   qdrant tenant b0 exact: 120 of 120 pairs, 3 passes, 0 errors, 1 s (cut: none)
+[17:06:24]    qdrant tenant b0 exact: {'pairs': 120, 'recall10': 1.0, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 2.5362, 'p95_ms': 4.4917549999999995, 'p99_ms': 4.7979590000000005, 'qps': 337.1355669875729}
+[17:06:24] X2 x2-m-qdrant-tenant-b0: done

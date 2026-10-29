@@ -1,0 +1,30 @@
+[17:06:01] data: 8 files match checksums.json
+[17:06:01] corpus m: 20,000 chunks, 248 pairs (0 s)
+[17:06:01] == opensearch default build 0: loading 20,000 chunks
+[17:06:06]   loaded 5,000 of 20,000 chunks (5 s)
+[17:06:10]   loaded 10,000 of 20,000 chunks (9 s)
+[17:06:14]   loaded 15,000 of 20,000 chunks (12 s)
+[17:06:18]   loaded 20,000 of 20,000 chunks (16 s)
+[17:06:18]    loaded: {'load_s': 16.3, 'refresh_s': 0.0, 'documents': 20000, 'bytes': 42175507, 'segments': 7, 'version': '3.9.0', 'seconds': 16.5}
+[17:06:18] -- opensearch default b0 default: {} (budget 2.8 min)
+[17:06:22]   opensearch default b0 default: 248 of 248 pairs, 3 passes, 0 errors, 5 s (cut: none)
+[17:06:22]    opensearch default b0 default: {'pairs': 248, 'recall10': 1.0, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 4.43795, 'p95_ms': 7.376964999999997, 'p99_ms': 8.424373000000001, 'qps': 209.09220595312487}
+[17:06:22] -- opensearch default b0 ef32: {'ef_search': 32} (budget 3.3 min)
+[17:06:25]   opensearch default b0 ef32: 248 of 248 pairs, 3 passes, 0 errors, 3 s (cut: none)
+[17:06:25]    opensearch default b0 ef32: {'pairs': 248, 'recall10': 0.9987903225806452, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 3.245, 'p95_ms': 5.152064999999999, 'p99_ms': 6.0951770000000005, 'qps': 290.81285829052933}
+[17:06:25] -- opensearch default b0 ef64: {'ef_search': 64} (budget 3.9 min)
+[17:06:28]   opensearch default b0 ef64: 248 of 248 pairs, 3 passes, 0 errors, 2 s (cut: none)
+[17:06:28]    opensearch default b0 ef64: {'pairs': 248, 'recall10': 0.9995967741935484, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 2.55735, 'p95_ms': 4.606794999999999, 'p99_ms': 5.083197, 'qps': 346.8581920632132}
+[17:06:28] -- opensearch default b0 ef128: {'ef_search': 128} (budget 4.9 min)
+[17:06:30]   opensearch default b0 ef128: 248 of 248 pairs, 3 passes, 0 errors, 2 s (cut: none)
+[17:06:30]    opensearch default b0 ef128: {'pairs': 248, 'recall10': 1.0, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 2.3974, 'p95_ms': 4.62497, 'p99_ms': 5.203982, 'qps': 365.9058382637178}
+[17:06:30] -- opensearch default b0 ef256: {'ef_search': 256} (budget 6.5 min)
+[17:06:32]   opensearch default b0 ef256: 248 of 248 pairs, 3 passes, 0 errors, 2 s (cut: none)
+[17:06:32]    opensearch default b0 ef256: {'pairs': 248, 'recall10': 1.0, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 2.3103, 'p95_ms': 4.503185, 'p99_ms': 4.83108, 'qps': 371.95038181906534}
+[17:06:32] -- opensearch default b0 ef512: {'ef_search': 512} (budget 9.7 min)
+[17:06:34]   opensearch default b0 ef512: 248 of 248 pairs, 3 passes, 0 errors, 2 s (cut: none)
+[17:06:34]    opensearch default b0 ef512: {'pairs': 248, 'recall10': 1.0, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 2.2738500000000004, 'p95_ms': 3.6327149999999993, 'p99_ms': 3.862235, 'qps': 405.64792769521966}
+[17:06:34] -- opensearch default b0 exact: {'exact': True} (budget 19.4 min)
+[17:06:37]   opensearch default b0 exact: 248 of 248 pairs, 3 passes, 0 errors, 3 s (cut: none)
+[17:06:37]    opensearch default b0 exact: {'pairs': 248, 'recall10': 1.0, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 2.6492, 'p95_ms': 6.1884049999999995, 'p99_ms': 11.786290000000001, 'qps': 281.0176328366384}
+[17:06:37] X2 x2-m-opensearch-b0: done

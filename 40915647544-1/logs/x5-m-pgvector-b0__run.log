@@ -1,0 +1,20 @@
+[17:05:15] data: 8 files match checksums.json
+[17:05:15] corpus m: 20,000 chunks, 248 pairs (0 s)
+[17:05:15] == pgvector default build 0: loading 20,000 chunks
+[17:05:16] Traceback (most recent call last):
+  File "/home/runner/work/wardowl/wardowl/benchmarks/paper/x5_mitigation.py", line 237, in main
+    run_unit(job, corpus, deadline, layout, build, len(units) - index - 1)
+  File "/home/runner/work/wardowl/wardowl/benchmarks/paper/x5_mitigation.py", line 128, in run_unit
+    unit["load"] = store.load(build)
+                   ^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/wardowl/wardowl/benchmarks/paper/x2x5_stores.py", line 218, in load
+    create_schema(pool, corpus.dim, table=NAME, hnsw=True)  # wardowl's HNSW index, pgvector's defaults
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/wardowl/wardowl/wardowl/backends/pgvector.py", line 230, in create_schema
+    conn.execute(statement)
+  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/psycopg/connection.py", line 304, in execute
+    raise ex.with_traceback(None)
+psycopg.errors.DiskFull: could not resize shared memory segment "/PostgreSQL.3804461704" to 2144374208 bytes: No space left on device
+
+[17:05:16] FAILED pgvector default build 0: DiskFull: could not resize shared memory segment "/PostgreSQL.3804461704" to 2144374208 bytes: No space left on device
+[17:05:16] X5 x5-m-pgvector-b0: done with failures

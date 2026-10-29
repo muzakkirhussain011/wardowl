@@ -1,0 +1,16 @@
+[17:00:59] x2x5_prepare prepare m: {'python': '3.12.15', 'platform': 'Linux-7.0.0-1017-azure-x86_64-with-glibc2.39', 'cpus': 4, 'runner': 'GitHub Actions 1000007814', 'run': '40915647544', 'job': 'prepare-m', 'sha': 'c1e20f84bad6b7e9c1c9b9a85b113fd06c391dd6', 'memory_gib': 15.6, 'cpu_model': 'AMD EPYC 7763 64-Core Processor', 'wardowl': '2.1.0', 'numpy': '2.5.4', 'torch': '2.15.0+cpu', 'sentence-transformers': '6.2.0', 'transformers': '5.22.0', 'datasets': '5.1.0', 'faiss-cpu': '1.15.1', 'wardowl_path': '/home/runner/work/wardowl/wardowl/wardowl'}
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[17:01:09] M: 20,000 passages, 384 dimensions
+Generating queries split:   0%|          | 0/509962 [00:00<?, ? examples/s]Generating queries split: 100%|██████████| 509962/509962 [00:00<00:00, 2619838.44 examples/s]Generating queries split: 100%|██████████| 509962/509962 [00:00<00:00, 2612548.99 examples/s]
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]Loading weights: 100%|██████████| 199/199 [00:00<00:00, 4033.76it/s]
+[17:01:39]   embedded 2,000 of 2,000 (16 s)
+[17:01:39]   neighbours of 64 pool queries (0 s)
+[17:01:40]   clustered layout 0: 0 s
+[17:01:40]   clustered layout 1: 0 s
+[17:01:40]   layout u0: 22 subjects so far, 44 pairs (0 s)
+[17:01:40]   layout u1: 44 subjects so far, 88 pairs (0 s)
+[17:01:41]   layout c0: 64 subjects so far, 168 pairs (1 s)
+[17:01:41]   layout c1: 84 subjects so far, 248 pairs (1 s)
+[17:01:42] M data written to data-m: 248 pairs, 84 subjects, 76 selection fallbacks
+[17:01:42] checksums: {'config.json': 'ac1546cacb86e855139b2aa27bc4ee294365cbbb7f586ec19fd79f36cf7c0712', 'layout.npz': 'ad610f3d0c0dacde2c8508bcd65b35573ce1b1ffb462f30d6937b6173a18ca17', 'pairs.csv': '361df8b7015bc3c0a8c4b48276be92d7df0d0b9bee64883f6d5e98e879a6e4dd', 'passages.jsonl.gz': '4bcd3f2759122ff124699fa2045abf956a00b0df153377383cd5591d30fc4c21', 'queries.json': '666084b19bd72289d7174587d59533f9244ed8f5139e7cc51f225d1f6869c133', 'query_vectors.npy': 'd3566e4556ecc0cbbc6ed30605428306149f96617057026e303a901060824ad2', 'subjects.json': '5b123019ffb8b542275e1eafc4a8fe9f69cc67f74429ed535dd3c5c354f2f9d7', 'vectors.npy': '4c7990ad998e5445a37c15bad6c9e93d45568cabba99426bd55b7a6c0566ef53'}
+[17:01:42] done in 42 s

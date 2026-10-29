@@ -1,0 +1,8 @@
+[16:52:28] x2x5_prepare embed m: {'python': '3.12.15', 'platform': 'Linux-7.0.0-1017-azure-x86_64-with-glibc2.39', 'cpus': 4, 'runner': 'GitHub Actions 1000007793', 'run': '40915647544', 'job': 'embed-m', 'sha': 'c1e20f84bad6b7e9c1c9b9a85b113fd06c391dd6', 'memory_gib': 15.6, 'cpu_model': 'AMD EPYC 9V45 96-Core Processor', 'wardowl': '2.1.0', 'numpy': '2.5.4', 'torch': '2.15.0+cpu', 'sentence-transformers': '6.2.0', 'transformers': '5.22.0', 'datasets': '5.1.0', 'faiss-cpu': None, 'wardowl_path': '/home/runner/work/wardowl/wardowl/wardowl'}
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[16:52:38] M shard 1 of 2: passages 10,000 to 20,000 of 20,000
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]Loading weights: 100%|██████████| 199/199 [00:00<00:00, 8641.25it/s]
+[16:55:16]   embedded 5,000 of 10,000 (151 s)
+[16:57:42]   embedded 10,000 of 10,000 (298 s)
+[16:57:42] wrote shards/m-01.npy (10,000 x 384), SHA-256 bc7befbebeab2da57d95632d2c98cdfa1ca94491dd5d72d74f108a1e74c31c6d
+[16:57:42] done in 315 s

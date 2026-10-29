@@ -1,0 +1,80 @@
+[17:25:14] 37,116 rows from results, 25 sampled-recall records
+[17:25:19] H2.1: falsified
+[17:25:19]    qdrant: G 0.0000 [0.0000, 0.0000], positive in 0 of 5 seeds: no gap
+[17:25:19]    elasticsearch: G 0.0875 [0.0458, 0.1312], positive in 2 of 5 seeds: unclear
+[17:25:19]    opensearch: G 0.0000 [0.0000, 0.0000], positive in 0 of 5 seeds: no gap
+[17:25:19]    weaviate: G 0.0000 [0.0000, 0.0000], positive in 0 of 5 seeds: no gap
+[17:25:19]    redis: G 0.0000 [0.0000, 0.0000], positive in 0 of 5 seeds: no gap
+[17:25:19]    milvus: G 0.2396 [0.1646, 0.3104], positive in 2 of 5 seeds: unclear
+[17:25:19]    mongodb: G 0.0000 [0.0000, 0.0000], positive in 0 of 5 seeds: no gap
+[17:25:19]    lancedb: G 0.2042 [0.1562, 0.2521], positive in 2 of 5 seeds: unclear
+[17:25:19]    chroma: G -0.0023 [-0.0047, 0.0000], positive in 0 of 5 seeds: no gap
+[17:25:19]    stores with a gap: 0 (confirm at 6); with no gap: 6 (falsify at 5)
+[17:25:20] H2.2: falsified
+[17:25:20]    qdrant: D nan [nan, nan], 0 pairs below 1: not assessable
+[17:25:20]    elasticsearch: D -0.4143 [-0.4408, -0.3822], 96 pairs below 1: not assessable
+[17:25:20]    opensearch: D nan [nan, nan], 0 pairs below 1: not assessable
+[17:25:20]    weaviate: D nan [nan, nan], 0 pairs below 1: not assessable
+[17:25:20]    redis: D nan [nan, nan], 0 pairs below 1: not assessable
+[17:25:20]    milvus: D 0.3148 [0.2543, 0.3790], 180 pairs below 1: local
+[17:25:20]    mongodb: D nan [nan, nan], 0 pairs below 1: not assessable
+[17:25:20]    lancedb: D -0.4345 [-0.4709, -0.4001], 241 pairs below 1: global
+[17:25:20]    chroma: D -0.0057 [-0.0107, -0.0033], 1 pairs below 1: not assessable
+[17:25:20]    assessable 2, local 1, global 1
+[17:25:20] H2.3: inconclusive
+[17:25:20]    stores with a gap and a sweep: 0; narrowed and remaining: 0; closed: 0
+[17:25:20] H2.4: falsified
+[17:25:20]    qdrant: V 0.0000 [0.0000, 0.0000], 0 seeds: monotone
+[17:25:20]    elasticsearch: V 0.1625 [0.1250, 0.2000], 2 seeds: neither
+[17:25:20]    opensearch: V 0.0000 [0.0000, 0.0000], 0 seeds: monotone
+[17:25:20]    weaviate: V 0.0000 [0.0000, 0.0000], 0 seeds: monotone
+[17:25:20]    redis: V 0.0000 [0.0000, 0.0000], 0 seeds: monotone
+[17:25:20]    milvus: V 0.5375 [0.4500, 0.6875], 2 seeds: neither
+[17:25:20]    mongodb: V 0.0000 [0.0000, 0.0000], 0 seeds: monotone
+[17:25:20]    lancedb: V 0.4750 [0.4000, 0.5625], 2 seeds: neither
+[17:25:20]    chroma: V 0.0000 [0.0000, 0.0000], 0 seeds: monotone
+[17:25:20]    U-shaped 0 (confirm at 5), monotone 6 (falsify at 5)
+[17:25:20] H5.1: inconclusive
+[17:25:20]    e pgvector: 0 truly short first searches (< 10): not judged
+[17:25:20]    e qdrant: 0 truly short first searches (< 10): not judged
+[17:25:20]    m qdrant: 0 truly short first searches (< 10): not judged
+[17:25:20] H5.2: inconclusive
+[17:25:20]    pgvector e: report has 0 short results (< 10) or no exact-inf: not judged
+[17:25:20]    pgvector m: report has 0 short results (< 10) or no exact-inf: not judged
+[17:25:20]    qdrant e: report has 0 short results (< 10) or no exact-inf: not judged
+[17:25:20]    qdrant m: report has 0 short results (< 10) or no exact-inf: not judged
+[17:25:20] H5.3: confirmed
+[17:25:20]    e pgvector b0 count: median latency ratio on 132 untriggered pairs 1.0365
+[17:25:20]    e pgvector b0 exact-1k: median latency ratio on 132 untriggered pairs 1.0236
+[17:25:20]    e pgvector b0 exact-10k: median latency ratio on 132 untriggered pairs 0.9785
+[17:25:20]    e pgvector b0 exact-inf: median latency ratio on 132 untriggered pairs 1.0138
+[17:25:20]    e pgvector b0 widen: median latency ratio on 132 untriggered pairs 1.0148
+[17:25:20]    e qdrant b0 count: median latency ratio on 132 untriggered pairs 1.0114
+[17:25:20]    e qdrant b0 exact-1k: median latency ratio on 132 untriggered pairs 0.9949
+[17:25:20]    e qdrant b0 exact-10k: median latency ratio on 132 untriggered pairs 0.9867
+[17:25:20]    e qdrant b0 exact-inf: median latency ratio on 132 untriggered pairs 0.9926
+[17:25:20]    e qdrant b0 widen: median latency ratio on 132 untriggered pairs 0.9880
+[17:25:20]    m qdrant b0 count: median latency ratio on 244 untriggered pairs 0.9749
+[17:25:20]    m qdrant b0 exact-1k: median latency ratio on 244 untriggered pairs 0.9980
+[17:25:20]    m qdrant b0 exact-10k: median latency ratio on 244 untriggered pairs 0.9838
+[17:25:20]    m qdrant b0 exact-inf: median latency ratio on 244 untriggered pairs 0.9954
+[17:25:20]    m qdrant b0 widen: median latency ratio on 244 untriggered pairs 0.9957
+[17:25:20] H5.4: falsified
+[17:25:20]    report: false-completeness 0.0000 (confirm needs >= 0.20)
+[17:25:20]    count: 0.0000, minus report 0.0000 [0.0000, 0.0000]
+[17:25:20]    exact-1k: 0.0000, minus report 0.0000 [0.0000, 0.0000]
+[17:25:20]    exact-10k: 0.0000, minus report 0.0000 [0.0000, 0.0000]
+[17:25:20]    exact-inf: 0.0000, minus report 0.0000 [0.0000, 0.0000]
+[17:25:20]    widen: 0.0000, minus report 0.0000 [0.0000, 0.0000]
+[17:25:20] H5.5: confirmed
+[17:25:20]    (a) x5-e-pgvector default b0: 5 of 676 sampled: inside the 99.9% interval
+[17:25:20]    (a) x5-e-qdrant as-run b0: 9 of 676 sampled: inside the 99.9% interval
+[17:25:20]    (a) x5-m-qdrant-b0 as-run b0: 11 of 992 sampled: inside the 99.9% interval
+[17:25:20]    (b) agreement within 0.1 on 25 sampled retrievals: 1.0000
+[17:25:20]    (c) Qdrant e: mean sampled 1.0000 on 9, population 1.0000, difference 0.0000
+[17:25:20]    (c) Qdrant m: mean sampled 1.0000 on 11, population 1.0000, difference 0.0000
+[17:25:20] H5.6: falsified
+[17:25:20]    exact-inf minus widen on 37 triggered pairs: 0.0000 [0.0000, 0.0000], Wilcoxon p nan
+[17:25:20] H5.7: falsified
+[17:25:20]    per-tenant layout recall@10 1.0000; best library arm 1.0000
+[17:25:20] statistics done in 6 s

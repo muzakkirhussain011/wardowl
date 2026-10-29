@@ -1,0 +1,30 @@
+[17:06:24] data: 8 files match checksums.json
+[17:06:24] corpus m: 20,000 chunks, 248 pairs (0 s)
+[17:06:24] == elasticsearch default build 0: loading 20,000 chunks
+[17:06:29]   loaded 5,000 of 20,000 chunks (4 s)
+[17:06:31]   loaded 10,000 of 20,000 chunks (7 s)
+[17:06:34]   loaded 15,000 of 20,000 chunks (9 s)
+[17:06:37]   loaded 20,000 of 20,000 chunks (13 s)
+[17:06:37]    loaded: {'load_s': 12.6, 'refresh_s': 0.0, 'documents': 20000, 'bytes': 23542847, 'segments': 11, 'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'version': '9.5.5', 'seconds': 12.8}
+[17:06:37] -- elasticsearch default b0 default: {'num_candidates': 15} (budget 2.8 min)
+[17:06:43]   elasticsearch default b0 default: 248 of 248 pairs, 3 passes, 0 errors, 6 s (cut: none)
+[17:06:43]    elasticsearch default b0 default: {'pairs': 248, 'recall10': 0.9298387096774194, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 5.07695, 'p95_ms': 7.854785000000001, 'p99_ms': 9.351578000000002, 'qps': 187.9576304090587}
+[17:06:43] -- elasticsearch default b0 nc50: {'num_candidates': 50} (budget 3.3 min)
+[17:06:45]   elasticsearch default b0 nc50: 248 of 248 pairs, 3 passes, 0 errors, 2 s (cut: none)
+[17:06:45]    elasticsearch default b0 nc50: {'pairs': 248, 'recall10': 0.9217741935483872, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 3.02865, 'p95_ms': 3.7582849999999994, 'p99_ms': 4.1001590000000006, 'qps': 328.1309581238742}
+[17:06:45] -- elasticsearch default b0 nc100: {'num_candidates': 100} (budget 3.9 min)
+[17:06:47]   elasticsearch default b0 nc100: 248 of 248 pairs, 3 passes, 0 errors, 2 s (cut: none)
+[17:06:47]    elasticsearch default b0 nc100: {'pairs': 248, 'recall10': 0.9221774193548387, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 2.4542, 'p95_ms': 3.3016499999999978, 'p99_ms': 3.5040270000000002, 'qps': 389.76790107313474}
+[17:06:47] -- elasticsearch default b0 nc500: {'num_candidates': 500} (budget 4.9 min)
+[17:06:49]   elasticsearch default b0 nc500: 248 of 248 pairs, 3 passes, 0 errors, 2 s (cut: none)
+[17:06:49]    elasticsearch default b0 nc500: {'pairs': 248, 'recall10': 0.9274193548387096, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 2.12325, 'p95_ms': 2.6654599999999995, 'p99_ms': 3.1998770000000003, 'qps': 459.1948869389976}
+[17:06:49] -- elasticsearch default b0 nc2000: {'num_candidates': 2000} (budget 6.5 min)
+[17:06:51]   elasticsearch default b0 nc2000: 248 of 248 pairs, 3 passes, 0 errors, 2 s (cut: none)
+[17:06:51]    elasticsearch default b0 nc2000: {'pairs': 248, 'recall10': 0.9274193548387096, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 2.09575, 'p95_ms': 2.7544249999999995, 'p99_ms': 2.9668270000000003, 'qps': 455.4176427692993}
+[17:06:51] -- elasticsearch default b0 nc10000: {'num_candidates': 10000} (budget 9.8 min)
+[17:06:53]   elasticsearch default b0 nc10000: 248 of 248 pairs, 3 passes, 0 errors, 2 s (cut: none)
+[17:06:53]    elasticsearch default b0 nc10000: {'pairs': 248, 'recall10': 0.9274193548387096, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 2.044, 'p95_ms': 3.6171499999999996, 'p99_ms': 3.8229360000000003, 'qps': 425.3428168773971}
+[17:06:53] -- elasticsearch default b0 exact: {'exact': True} (budget 19.5 min)
+[17:06:55]   elasticsearch default b0 exact: 248 of 248 pairs, 3 passes, 0 errors, 2 s (cut: none)
+[17:06:55]    elasticsearch default b0 exact: {'pairs': 248, 'recall10': 1.0, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 2.40925, 'p95_ms': 4.29601, 'p99_ms': 6.164809000000003, 'qps': 379.0162541426248}
+[17:06:55] X2 x2-m-elasticsearch-b0: done

@@ -1,0 +1,64 @@
+{
+ "experiment": "x2",
+ "label": "x2-m-pgvector-b0",
+ "corpus": {
+  "name": "m",
+  "chunks": 20000,
+  "dim": 384,
+  "pairs": 248
+ },
+ "store": "pgvector",
+ "layouts": [
+  "default"
+ ],
+ "builds": [
+  0
+ ],
+ "minutes": 25.0,
+ "started": "2026-10-29T17:07:10+0000",
+ "environment": {
+  "python": "3.12.15",
+  "platform": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+  "cpus": 4,
+  "runner": "GitHub Actions 1000007830",
+  "run": "40915647544",
+  "job": "store",
+  "sha": "c1e20f84bad6b7e9c1c9b9a85b113fd06c391dd6",
+  "memory_gib": 15.6,
+  "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+  "wardowl": "2.1.0",
+  "numpy": "2.5.4",
+  "psycopg": "3.3.6",
+  "psycopg-pool": "3.3.3",
+  "pgvector": "0.5.1",
+  "qdrant-client": "1.19.1",
+  "elasticsearch": "9.5.1",
+  "opensearch-py": "3.2.0",
+  "weaviate-client": "4.23.1",
+  "redis": "8.1.0",
+  "pymilvus": "3.0.2",
+  "pymongo": "4.19.0",
+  "lancedb": "0.40.0",
+  "pyarrow": "26.0.0",
+  "chromadb": "1.5.9",
+  "faiss-cpu": "1.15.1",
+  "wardowl_path": "/home/runner/work/wardowl/wardowl/wardowl"
+ },
+ "units": [
+  {
+   "layout": "default",
+   "build": 0,
+   "settings": []
+  }
+ ],
+ "failures": [
+  {
+   "what": "pgvector default build 0",
+   "error": "DiskFull: could not resize shared memory segment \"/PostgreSQL.4089129664\" to 2144374208 bytes: No space left on device",
+   "trace": "Traceback (most recent call last):\n  File \"/home/runner/work/wardowl/wardowl/benchmarks/paper/x2_frontiers.py\", line 236, in main\n    run_unit(job, corpus, deadline, layout, build, len(units) - index - 1)\n  File \"/home/runner/work/wardowl/wardowl/benchmarks/paper/x2_frontiers.py\", line 93, in run_unit\n    unit[\"load\"] = store.load(build)\n                   ^^^^^^^^^^^^^^^^^\n  File \"/home/runner/work/wardowl/wardowl/benchmarks/paper/x2x5_stores.py\", line 218, in load\n    create_schema(pool, corpus.dim, table=NAME, hnsw=True)  # wardowl's HNSW index, pgvector's defaults\n    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/runner/work/wardowl/wardowl/wardowl/backends/pgvector.py\", line 230, in create_schema\n    conn.execute(statement)\n  File \"/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/psycopg/connection.py\", line 304, in execute\n    raise ex.with_traceback(None)\npsycopg.errors.DiskFull: could not resize shared memory segment \"/PostgreSQL.4089129664\" to 2144374208 bytes: No space left on device\n"
+  }
+ ],
+ "skipped": [],
+ "status": "done with failures",
+ "finished": "2026-10-29T17:07:11+0000"
+}

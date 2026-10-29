@@ -1,0 +1,33 @@
+[17:05:00] data: 8 files match checksums.json
+[17:05:00] corpus m: 20,000 chunks, 248 pairs (0 s)
+[17:05:00] == redis default build 0: loading 20,000 chunks
+[17:05:00]   loaded 5,000 of 20,000 chunks (0 s)
+[17:05:01]   loaded 10,000 of 20,000 chunks (1 s)
+[17:05:02]   loaded 15,000 of 20,000 chunks (2 s)
+[17:05:02]   loaded 20,000 of 20,000 chunks (2 s)
+[17:05:02]    loaded: {'load_s': 2.1, 'index_s': 0.0, 'documents': 20000, 'used_memory': '102.52M', 'config': {'search-on-timeout': 'fail', 'search-timeout': '60000'}, 'version': '8.10.2', 'seconds': 2.2}
+[17:05:02] -- redis default b0 default: {} (budget 2.5 min)
+[17:05:03]   redis default b0 default: 248 of 248 pairs, 3 passes, 0 errors, 1 s (cut: none)
+[17:05:03]    redis default b0 default: {'pairs': 248, 'recall10': 1.0, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 0.5746, 'p95_ms': 2.245165, 'p99_ms': 2.969177, 'qps': 1072.4899410822463}
+[17:05:03] -- redis default b0 ef50: {'ef_runtime': 50} (budget 2.8 min)
+[17:05:04]   redis default b0 ef50: 248 of 248 pairs, 3 passes, 0 errors, 1 s (cut: none)
+[17:05:04]    redis default b0 ef50: {'pairs': 248, 'recall10': 1.0, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 0.5567, 'p95_ms': 2.2441549999999997, 'p99_ms': 2.895899, 'qps': 1093.29847709694}
+[17:05:04] -- redis default b0 ef100: {'ef_runtime': 100} (budget 3.3 min)
+[17:05:04]   redis default b0 ef100: 248 of 248 pairs, 3 passes, 0 errors, 1 s (cut: none)
+[17:05:04]    redis default b0 ef100: {'pairs': 248, 'recall10': 1.0, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 0.55865, 'p95_ms': 2.3253749999999997, 'p99_ms': 3.212756, 'qps': 1062.235886611459}
+[17:05:04] -- redis default b0 ef200: {'ef_runtime': 200} (budget 4.0 min)
+[17:05:05]   redis default b0 ef200: 248 of 248 pairs, 3 passes, 0 errors, 1 s (cut: none)
+[17:05:05]    redis default b0 ef200: {'pairs': 248, 'recall10': 1.0, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 0.5790500000000001, 'p95_ms': 2.19258, 'p99_ms': 2.829562, 'qps': 1092.7574853887747}
+[17:05:05] -- redis default b0 ef500: {'ef_runtime': 500} (budget 5.0 min)
+[17:05:06]   redis default b0 ef500: 248 of 248 pairs, 3 passes, 0 errors, 1 s (cut: none)
+[17:05:06]    redis default b0 ef500: {'pairs': 248, 'recall10': 1.0, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 0.5966, 'p95_ms': 2.46258, 'p99_ms': 3.364439, 'qps': 989.7319303085051}
+[17:05:06] -- redis default b0 ef1000: {'ef_runtime': 1000} (budget 6.6 min)
+[17:05:07]   redis default b0 ef1000: 248 of 248 pairs, 3 passes, 0 errors, 1 s (cut: none)
+[17:05:07]    redis default b0 ef1000: {'pairs': 248, 'recall10': 1.0, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 0.5422, 'p95_ms': 2.1145849999999995, 'p99_ms': 2.782814, 'qps': 1134.4299489506523}
+[17:05:07] -- redis default b0 batches: {'ef_runtime': 100, 'policy': 'BATCHES'} (budget 9.9 min)
+[17:05:09]   redis default b0 batches: 248 of 248 pairs, 3 passes, 0 errors, 2 s (cut: none)
+[17:05:09]    redis default b0 batches: {'pairs': 248, 'recall10': 0.9915322580645162, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 1.9304000000000001, 'p95_ms': 8.609129999999999, 'p99_ms': 9.617500999999999, 'qps': 333.9000658644807}
+[17:05:09] -- redis default b0 exact: {'policy': 'ADHOC_BF'} (budget 19.8 min)
+[17:05:10]   redis default b0 exact: 248 of 248 pairs, 3 passes, 0 errors, 1 s (cut: none)
+[17:05:10]    redis default b0 exact: {'pairs': 248, 'recall10': 1.0, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 0.57045, 'p95_ms': 2.22172, 'p99_ms': 3.116391, 'qps': 1068.8719909421718}
+[17:05:10] X2 x2-m-redis-b0: done

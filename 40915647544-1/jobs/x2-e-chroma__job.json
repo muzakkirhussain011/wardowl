@@ -1,0 +1,405 @@
+{
+ "experiment": "x2",
+ "label": "x2-e-chroma",
+ "corpus": {
+  "name": "e",
+  "chunks": 2980,
+  "dim": 768,
+  "pairs": 169
+ },
+ "store": "chroma",
+ "layouts": [
+  "default"
+ ],
+ "builds": [
+  0
+ ],
+ "minutes": 25.0,
+ "started": "2026-10-29T17:02:14+0000",
+ "environment": {
+  "python": "3.12.15",
+  "platform": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+  "cpus": 4,
+  "runner": "GitHub Actions 1000007821",
+  "run": "40915647544",
+  "job": "store",
+  "sha": "c1e20f84bad6b7e9c1c9b9a85b113fd06c391dd6",
+  "memory_gib": 15.6,
+  "cpu_model": "AMD EPYC 7763 64-Core Processor",
+  "wardowl": "2.1.0",
+  "numpy": "2.5.4",
+  "psycopg": "3.3.6",
+  "psycopg-pool": "3.3.3",
+  "pgvector": "0.5.1",
+  "qdrant-client": "1.19.1",
+  "elasticsearch": "9.5.1",
+  "opensearch-py": "3.2.0",
+  "weaviate-client": "4.23.1",
+  "redis": "8.1.0",
+  "pymilvus": "3.0.2",
+  "pymongo": "4.19.0",
+  "lancedb": "0.40.0",
+  "pyarrow": "26.0.0",
+  "chromadb": "1.5.9",
+  "faiss-cpu": "1.15.1",
+  "wardowl_path": "/home/runner/work/wardowl/wardowl/wardowl"
+ },
+ "units": [
+  {
+   "layout": "default",
+   "build": 0,
+   "settings": [
+    {
+     "id": "default",
+     "kind": "default",
+     "params": {
+      "ef_search": 100
+     },
+     "level": null,
+     "asrun": true,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 199.4,
+     "effective": {
+      "configuration": {
+       "hnsw": {
+        "space": "cosine",
+        "ef_construction": 100,
+        "ef_search": 100,
+        "max_neighbors": 16,
+        "resize_factor": 1.2,
+        "sync_threshold": 1000
+       },
+       "spann": null,
+       "embedding_function": "<chromadb.api.types.DefaultEmbeddingFunction object at 0x7f2cd62567e0>"
+      }
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 169,
+      "pairs_run": 169,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 507,
+      "sampled": 0,
+      "pass1_seconds": 4.9,
+      "seconds": 13.5,
+      "budget_seconds": 199.4
+     },
+     "summary": {
+      "pairs": 169,
+      "recall10": 0.9898648648648649,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 25.4511,
+      "p95_ms": 33.185559999999995,
+      "p99_ms": 33.590923999999994,
+      "qps": 39.647375770695724
+     }
+    },
+    {
+     "id": "ef10",
+     "kind": "sweep",
+     "params": {
+      "ef_search": 10
+     },
+     "level": 1,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [
+      "collection configuration"
+     ],
+     "budget_seconds": 236.5,
+     "effective": {
+      "configuration": {
+       "hnsw": {
+        "space": "cosine",
+        "ef_construction": 100,
+        "ef_search": 10,
+        "max_neighbors": 16,
+        "resize_factor": 1.2,
+        "sync_threshold": 1000
+       },
+       "spann": null,
+       "embedding_function": "<chromadb.api.types.DefaultEmbeddingFunction object at 0x7f2cd62f2300>"
+      }
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 169,
+      "pairs_run": 169,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 507,
+      "sampled": 0,
+      "pass1_seconds": 4.7,
+      "seconds": 13.3,
+      "budget_seconds": 236.5
+     },
+     "summary": {
+      "pairs": 169,
+      "recall10": 0.9898648648648649,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 25.3605,
+      "p95_ms": 32.954,
+      "p99_ms": 33.530144,
+      "qps": 39.96609928837167
+     }
+    },
+    {
+     "id": "ef50",
+     "kind": "sweep",
+     "params": {
+      "ef_search": 50
+     },
+     "level": 2,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [
+      "collection configuration"
+     ],
+     "budget_seconds": 292.3,
+     "effective": {
+      "configuration": {
+       "hnsw": {
+        "space": "cosine",
+        "ef_construction": 100,
+        "ef_search": 50,
+        "max_neighbors": 16,
+        "resize_factor": 1.2,
+        "sync_threshold": 1000
+       },
+       "spann": null,
+       "embedding_function": "<chromadb.api.types.DefaultEmbeddingFunction object at 0x7f2cd73eaa20>"
+      }
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 169,
+      "pairs_run": 169,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 507,
+      "sampled": 0,
+      "pass1_seconds": 4.7,
+      "seconds": 13.2,
+      "budget_seconds": 292.3
+     },
+     "summary": {
+      "pairs": 169,
+      "recall10": 0.9898648648648649,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 25.2423,
+      "p95_ms": 32.79136,
+      "p99_ms": 33.736556,
+      "qps": 40.04604489502854
+     }
+    },
+    {
+     "id": "ef200",
+     "kind": "sweep",
+     "params": {
+      "ef_search": 200
+     },
+     "level": 3,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [
+      "collection configuration"
+     ],
+     "budget_seconds": 385.4,
+     "effective": {
+      "configuration": {
+       "hnsw": {
+        "space": "cosine",
+        "ef_construction": 100,
+        "ef_search": 200,
+        "max_neighbors": 16,
+        "resize_factor": 1.2,
+        "sync_threshold": 1000
+       },
+       "spann": null,
+       "embedding_function": "<chromadb.api.types.DefaultEmbeddingFunction object at 0x7f2cd62f2150>"
+      }
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 169,
+      "pairs_run": 169,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 507,
+      "sampled": 0,
+      "pass1_seconds": 4.8,
+      "seconds": 13.4,
+      "budget_seconds": 385.4
+     },
+     "summary": {
+      "pairs": 169,
+      "recall10": 0.9898648648648649,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 25.6381,
+      "p95_ms": 33.2281,
+      "p99_ms": 33.76556,
+      "qps": 39.73609309042715
+     }
+    },
+    {
+     "id": "ef500",
+     "kind": "sweep",
+     "params": {
+      "ef_search": 500
+     },
+     "level": 4,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [
+      "collection configuration"
+     ],
+     "budget_seconds": 571.4,
+     "effective": {
+      "configuration": {
+       "hnsw": {
+        "space": "cosine",
+        "ef_construction": 100,
+        "ef_search": 500,
+        "max_neighbors": 16,
+        "resize_factor": 1.2,
+        "sync_threshold": 1000
+       },
+       "spann": null,
+       "embedding_function": "<chromadb.api.types.DefaultEmbeddingFunction object at 0x7f2cd5009eb0>"
+      }
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 169,
+      "pairs_run": 169,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 507,
+      "sampled": 0,
+      "pass1_seconds": 4.8,
+      "seconds": 13.4,
+      "budget_seconds": 571.4
+     },
+     "summary": {
+      "pairs": 169,
+      "recall10": 0.9898648648648649,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 25.5835,
+      "p95_ms": 33.38318,
+      "p99_ms": 34.085448,
+      "qps": 39.818348224178244
+     }
+    },
+    {
+     "id": "ef1000",
+     "kind": "sweep",
+     "params": {
+      "ef_search": 1000
+     },
+     "level": 5,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [
+      "collection configuration"
+     ],
+     "budget_seconds": 1129.3,
+     "effective": {
+      "configuration": {
+       "hnsw": {
+        "space": "cosine",
+        "ef_construction": 100,
+        "ef_search": 1000,
+        "max_neighbors": 16,
+        "resize_factor": 1.2,
+        "sync_threshold": 1000
+       },
+       "spann": null,
+       "embedding_function": "<chromadb.api.types.DefaultEmbeddingFunction object at 0x7f2cd7361a60>"
+      }
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 169,
+      "pairs_run": 169,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 507,
+      "sampled": 0,
+      "pass1_seconds": 4.8,
+      "seconds": 13.4,
+      "budget_seconds": 1129.3
+     },
+     "summary": {
+      "pairs": 169,
+      "recall10": 0.9898648648648649,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 25.5644,
+      "p95_ms": 33.08466,
+      "p99_ms": 33.896476,
+      "qps": 39.75178234407887
+     }
+    }
+   ],
+   "load": {
+    "load_s": 2.9,
+    "records": 2980,
+    "version": "1.5.9",
+    "config": {
+     "hnsw": {
+      "space": "cosine",
+      "ef_construction": 100,
+      "ef_search": 100,
+      "max_neighbors": 16,
+      "resize_factor": 1.2,
+      "sync_threshold": 1000
+     },
+     "spann": null,
+     "embedding_function": "<chromadb.api.types.DefaultEmbeddingFunction object at 0x7f2cd852e780>"
+    },
+    "seconds": 3.7
+   }
+  }
+ ],
+ "failures": [],
+ "skipped": [],
+ "status": "done",
+ "finished": "2026-10-29T17:03:38+0000"
+}

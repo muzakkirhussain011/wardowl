@@ -1,0 +1,292 @@
+{
+ "experiment": "x2",
+ "label": "x2-m-qdrant-tenant-b0",
+ "corpus": {
+  "name": "m",
+  "chunks": 20000,
+  "dim": 384,
+  "pairs": 248
+ },
+ "store": "qdrant",
+ "layouts": [
+  "tenant"
+ ],
+ "builds": [
+  0
+ ],
+ "minutes": 25.0,
+ "started": "2026-10-29T17:05:53+0000",
+ "environment": {
+  "python": "3.12.15",
+  "platform": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+  "cpus": 4,
+  "runner": "GitHub Actions 1000007838",
+  "run": "40915647544",
+  "job": "store",
+  "sha": "c1e20f84bad6b7e9c1c9b9a85b113fd06c391dd6",
+  "memory_gib": 15.6,
+  "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+  "wardowl": "2.1.0",
+  "numpy": "2.5.4",
+  "psycopg": "3.3.6",
+  "psycopg-pool": "3.3.3",
+  "pgvector": "0.5.1",
+  "qdrant-client": "1.19.1",
+  "elasticsearch": "9.5.1",
+  "opensearch-py": "3.2.0",
+  "weaviate-client": "4.23.1",
+  "redis": "8.1.0",
+  "pymilvus": "3.0.2",
+  "pymongo": "4.19.0",
+  "lancedb": "0.40.0",
+  "pyarrow": "26.0.0",
+  "chromadb": "1.5.9",
+  "faiss-cpu": "1.15.1",
+  "wardowl_path": "/home/runner/work/wardowl/wardowl/wardowl"
+ },
+ "units": [
+  {
+   "layout": "tenant",
+   "build": 0,
+   "settings": [
+    {
+     "id": "ef128",
+     "kind": "sweep",
+     "params": {
+      "hnsw_ef": 128
+     },
+     "level": 2,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [
+      "layout"
+     ],
+     "budget_seconds": 293.4,
+     "effective": {
+      "search_params": {
+       "hnsw_ef": 128,
+       "exact": false,
+       "indexed_only": false
+      }
+     },
+     "qdrant_counters": {
+      "filtered_small_cardinality": 380,
+      "filtered_plain": 380
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 120,
+      "pairs_run": 120,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 360,
+      "sampled": 0,
+      "pass1_seconds": 0.5,
+      "seconds": 1.2,
+      "budget_seconds": 293.4
+     },
+     "summary": {
+      "pairs": 120,
+      "recall10": 1.0,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 2.61915,
+      "p95_ms": 4.8557,
+      "p99_ms": 5.057887,
+      "qps": 324.79527747666555
+     }
+    },
+    {
+     "id": "ef512",
+     "kind": "sweep",
+     "params": {
+      "hnsw_ef": 512
+     },
+     "level": 4,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [
+      "layout"
+     ],
+     "budget_seconds": 390.8,
+     "effective": {
+      "search_params": {
+       "hnsw_ef": 512,
+       "exact": false,
+       "indexed_only": false
+      }
+     },
+     "qdrant_counters": {
+      "filtered_small_cardinality": 380,
+      "filtered_plain": 380
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 120,
+      "pairs_run": 120,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 360,
+      "sampled": 0,
+      "pass1_seconds": 0.4,
+      "seconds": 1.2,
+      "budget_seconds": 390.8
+     },
+     "summary": {
+      "pairs": 120,
+      "recall10": 1.0,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 2.5293,
+      "p95_ms": 4.711650000000001,
+      "p99_ms": 4.824517999999999,
+      "qps": 336.2442747407136
+     }
+    },
+    {
+     "id": "acorn-max",
+     "kind": "specific",
+     "params": {
+      "hnsw_ef": 512,
+      "acorn": 1.0
+     },
+     "level": null,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [
+      "layout"
+     ],
+     "budget_seconds": 585.6,
+     "effective": {
+      "search_params": {
+       "hnsw_ef": 512,
+       "exact": false,
+       "indexed_only": false,
+       "acorn": {
+        "enable": true,
+        "max_selectivity": 1.0
+       }
+      }
+     },
+     "qdrant_counters": {
+      "filtered_small_cardinality": 380,
+      "filtered_plain": 380
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 120,
+      "pairs_run": 120,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 360,
+      "sampled": 0,
+      "pass1_seconds": 0.4,
+      "seconds": 1.2,
+      "budget_seconds": 585.6
+     },
+     "summary": {
+      "pairs": 120,
+      "recall10": 1.0,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 2.55905,
+      "p95_ms": 4.7643,
+      "p99_ms": 4.9005540000000005,
+      "qps": 331.03914013686807
+     }
+    },
+    {
+     "id": "exact",
+     "kind": "exact",
+     "params": {
+      "exact": true
+     },
+     "level": null,
+     "asrun": false,
+     "build0": true,
+     "harness_level": [
+      "layout"
+     ],
+     "budget_seconds": 1170.0,
+     "effective": {
+      "search_params": {
+       "exact": true,
+       "indexed_only": false
+      }
+     },
+     "qdrant_counters": {
+      "filtered_small_cardinality": 0,
+      "filtered_exact": 380,
+      "filtered_plain": 380
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 120,
+      "pairs_run": 120,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 360,
+      "sampled": 0,
+      "pass1_seconds": 0.4,
+      "seconds": 1.2,
+      "budget_seconds": 1170.0
+     },
+     "summary": {
+      "pairs": 120,
+      "recall10": 1.0,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 2.5362,
+      "p95_ms": 4.4917549999999995,
+      "p99_ms": 4.7979590000000005,
+      "qps": 337.1355669875729
+     }
+    }
+   ],
+   "load": {
+    "load_s": 9.9,
+    "index_s": 15.2,
+    "points": 20000,
+    "indexed_vectors": 13584,
+    "segments": 2,
+    "server": {
+     "title": "qdrant - vector search engine",
+     "version": "1.19.2",
+     "commit": "016542aa5deb6c66380bb137badf73d54f742bde"
+    },
+    "layout": "tenant field is_tenant=true, hnsw m 0 and payload_m 16 (harness-level), other fields as as-run",
+    "keyword_fields": [
+     "u0",
+     "u1",
+     "c0",
+     "c1"
+    ],
+    "seconds": 25.2
+   }
+  }
+ ],
+ "failures": [],
+ "skipped": [],
+ "status": "done",
+ "finished": "2026-10-29T17:06:24+0000"
+}

@@ -1,0 +1,2 @@
+CONTAINER ID   NAME       CPU %     MEM USAGE / LIMIT   MEM %     NET I/O           BLOCK I/O       PIDS
+a8c75aeb7937   weaviate   0.19%     252MiB / 15.61GiB   1.58%     61.3MB / 43.9MB   135kB / 280MB   12

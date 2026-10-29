@@ -1,0 +1,12 @@
+[17:05:36] data: 8 files match checksums.json
+[17:05:36] corpus m: 20,000 chunks, 248 pairs (0 s)
+[17:05:36] == faiss default build 0: loading 20,000 chunks
+[17:05:37]   loaded 5,000 of 20,000 chunks (0 s)
+[17:05:37]   loaded 10,000 of 20,000 chunks (0 s)
+[17:05:37]   loaded 15,000 of 20,000 chunks (1 s)
+[17:05:37]   loaded 20,000 of 20,000 chunks (1 s)
+[17:05:37]    loaded: {'load_s': 1.0, 'rows': 20000, 'detail': 'IndexFlatIP (exact), metadata matched in Python', 'seconds': 1.1}
+[17:05:37] -- faiss default b0 exact: {} (budget 20.0 min)
+[17:06:01]   faiss default b0 exact: 248 of 248 pairs, 3 passes, 0 errors, 24 s (cut: none)
+[17:06:01]    faiss default b0 exact: {'pairs': 248, 'recall10': 1.0, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 27.0269, 'p95_ms': 39.300185, 'p99_ms': 39.771708, 'qps': 32.406515272400085}
+[17:06:01] X2 x2-m-faiss: done

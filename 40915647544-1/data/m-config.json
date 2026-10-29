@@ -1,0 +1,152 @@
+{
+ "corpus": "m",
+ "smoke": true,
+ "model": "BAAI/bge-small-en-v1.5",
+ "query_prefix": "Represent this sentence for searching relevant passages: ",
+ "chunks": 20000,
+ "dim": 384,
+ "pool": 2000,
+ "divisions": 10,
+ "seeds": 2,
+ "subjects_per_cell": 2,
+ "queries_per_subject": 2,
+ "subjects": 84,
+ "pairs": 248,
+ "query_selection_fallbacks": 76,
+ "group_sizes": {
+  "u0": {
+   "division": {
+    "min": 2000,
+    "median": 2000.0,
+    "max": 2000,
+    "empty": 0
+   },
+   "department": {
+    "min": 200,
+    "median": 200.0,
+    "max": 200,
+    "empty": 0
+   },
+   "team": {
+    "min": 20,
+    "median": 20.0,
+    "max": 20,
+    "empty": 0
+   }
+  },
+  "u1": {
+   "division": {
+    "min": 2000,
+    "median": 2000.0,
+    "max": 2000,
+    "empty": 0
+   },
+   "department": {
+    "min": 200,
+    "median": 200.0,
+    "max": 200,
+    "empty": 0
+   },
+   "team": {
+    "min": 20,
+    "median": 20.0,
+    "max": 20,
+    "empty": 0
+   }
+  },
+  "c0": {
+   "division": {
+    "min": 1144,
+    "median": 2004.0,
+    "max": 2514,
+    "empty": 0
+   },
+   "department": {
+    "min": 26,
+    "median": 195.0,
+    "max": 387,
+    "empty": 0
+   },
+   "team": {
+    "min": 1,
+    "median": 17.0,
+    "max": 89,
+    "empty": 0
+   }
+  },
+  "c1": {
+   "division": {
+    "min": 1428,
+    "median": 1950.5,
+    "max": 2459,
+    "empty": 0
+   },
+   "department": {
+    "min": 66,
+    "median": 188.5,
+    "max": 370,
+    "empty": 0
+   },
+   "team": {
+    "min": 1,
+    "median": 17.0,
+    "max": 76,
+    "empty": 0
+   }
+  }
+ },
+ "tenant_a_share": 0.4974,
+ "vectors_sha256": "4c7990ad998e5445a37c15bad6c9e93d45568cabba99426bd55b7a6c0566ef53",
+ "shards": [
+  {
+   "shard": 0,
+   "start": 0,
+   "end": 10000,
+   "sha256": "0bff6ddfe435d3fa418ae1bb89c40bb8a2c2a756e42d62e26283fe771974cca3"
+  },
+  {
+   "shard": 1,
+   "start": 10000,
+   "end": 20000,
+   "sha256": "bc7befbebeab2da57d95632d2c98cdfa1ca94491dd5d72d74f108a1e74c31c6d"
+  }
+ ],
+ "embedding_environment": {
+  "python": "3.12.15",
+  "platform": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+  "cpus": 4,
+  "runner": "GitHub Actions 1000007796",
+  "run": "40915647544",
+  "job": "embed-m",
+  "sha": "c1e20f84bad6b7e9c1c9b9a85b113fd06c391dd6",
+  "memory_gib": 15.6,
+  "cpu_model": "AMD EPYC 7763 64-Core Processor",
+  "wardowl": "2.1.0",
+  "numpy": "2.5.4",
+  "torch": "2.15.0+cpu",
+  "sentence-transformers": "6.2.0",
+  "transformers": "5.22.0",
+  "datasets": "5.1.0",
+  "faiss-cpu": null,
+  "wardowl_path": "/home/runner/work/wardowl/wardowl/wardowl"
+ },
+ "environment": {
+  "python": "3.12.15",
+  "platform": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+  "cpus": 4,
+  "runner": "GitHub Actions 1000007814",
+  "run": "40915647544",
+  "job": "prepare-m",
+  "sha": "c1e20f84bad6b7e9c1c9b9a85b113fd06c391dd6",
+  "memory_gib": 15.6,
+  "cpu_model": "AMD EPYC 7763 64-Core Processor",
+  "wardowl": "2.1.0",
+  "numpy": "2.5.4",
+  "torch": "2.15.0+cpu",
+  "sentence-transformers": "6.2.0",
+  "transformers": "5.22.0",
+  "datasets": "5.1.0",
+  "faiss-cpu": "1.15.1",
+  "wardowl_path": "/home/runner/work/wardowl/wardowl/wardowl"
+ }
+}

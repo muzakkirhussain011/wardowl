@@ -1,0 +1,19 @@
+[17:00:35] x2x5_prepare prepare e: {'python': '3.12.15', 'platform': 'Linux-7.0.0-1017-azure-x86_64-with-glibc2.39', 'cpus': 4, 'runner': 'GitHub Actions 1000007813', 'run': '40915647544', 'job': 'prepare-e', 'sha': 'c1e20f84bad6b7e9c1c9b9a85b113fd06c391dd6', 'memory_gib': 15.6, 'cpu_model': 'AMD EPYC 7763 64-Core Processor', 'wardowl': '2.1.0', 'numpy': '2.5.4', 'torch': '2.15.0+cpu', 'sentence-transformers': '6.2.0', 'transformers': '5.22.0', 'datasets': '5.1.0', 'faiss-cpu': '1.15.1', 'wardowl_path': '/home/runner/work/wardowl/wardowl/wardowl'}
+
+== corpus, people and questions
+  [PASS] the oracle agrees with enterprise.can_read on enterprise.py's corpus
+  [PASS] the leak detector finds exactly the canaries Report.no_leaks does, in any case or spacing
+[17:00:36] 960 company documents; reading the shared knowledge base (BEIR FiQA)
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Generating corpus split:   0%|          | 0/57638 [00:00<?, ? examples/s]Generating corpus split: 100%|██████████| 57638/57638 [00:00<00:00, 488575.96 examples/s]Generating corpus split: 100%|██████████| 57638/57638 [00:00<00:00, 476218.35 examples/s]
+  [PASS] every chunk id is unique
+  [PASS] every non-public document carries its own canary once, and public ones none
+  note: corpus: 2,980 chunks (960 company documents in 20 tenants, 20 injected notices, 2,000 shared FiQA passages); 189 people ask 1,105 questions ({'generic': 108, 'targeted': 376, 'forbidden': 189, 'redteam': 432})
+Generating queries split:   0%|          | 0/6648 [00:00<?, ? examples/s]Generating queries split: 100%|██████████| 6648/6648 [00:00<00:00, 1436935.48 examples/s]
+[17:00:39] probe set: 24 people, 384 questions
+[17:00:39] E: 2,980 chunks, 11 people, 169 questions (105 original)
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]Loading weights: 100%|██████████| 199/199 [00:00<00:00, 3799.26it/s]
+[17:00:52]   embedded 94 of 94 (4 s)
+[17:00:52] E: exact baseline and axes of 169 pairs in 0 s
+[17:00:52] E data written to data-e: {'config.json': '5854dc2c5bd723f03ccc1c4af806d3d1910096dbf6af91d2ac740cef6798f5dc', 'docs.jsonl.gz': '9da6671e7a449d491886ebcbb9ad2bc15f5d429df36d54aaf2a34e8730aea1c3', 'pairs.csv': '9338a5b6cb139a3760c576872fc5d089169e35507bf3fbc4b6b7943ecceeb9a9', 'people.json': '2d85b3e1c87dc519a015489ea940e42208defcfbb673ae753f1badf4eefa3400', 'query_vectors.npy': 'b5df3d54cb9507799d56eebc47eeafc9b213c6f19a71ee3dadbb754bc51994a6', 'vectors.npy': '5c7af00e7d2f354c384b6367ba91a219ae6f81df563b9f03ef115959a8f3e74b'}
+[17:00:52] done in 18 s

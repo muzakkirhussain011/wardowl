@@ -1,0 +1,8 @@
+{
+ "config.json": "5854dc2c5bd723f03ccc1c4af806d3d1910096dbf6af91d2ac740cef6798f5dc",
+ "docs.jsonl.gz": "9da6671e7a449d491886ebcbb9ad2bc15f5d429df36d54aaf2a34e8730aea1c3",
+ "pairs.csv": "9338a5b6cb139a3760c576872fc5d089169e35507bf3fbc4b6b7943ecceeb9a9",
+ "people.json": "2d85b3e1c87dc519a015489ea940e42208defcfbb673ae753f1badf4eefa3400",
+ "query_vectors.npy": "b5df3d54cb9507799d56eebc47eeafc9b213c6f19a71ee3dadbb754bc51994a6",
+ "vectors.npy": "5c7af00e7d2f354c384b6367ba91a219ae6f81df563b9f03ef115959a8f3e74b"
+}

@@ -1,0 +1,32 @@
+[17:04:22] data: 8 files match checksums.json
+[17:04:22] corpus m: 20,000 chunks, 248 pairs (0 s)
+[17:04:23] == qdrant as-run build 0: loading 20,000 chunks
+[17:04:26]   loaded 5,000 of 20,000 chunks (2 s)
+[17:04:28]   loaded 10,000 of 20,000 chunks (5 s)
+[17:04:31]   loaded 15,000 of 20,000 chunks (7 s)
+[17:04:34]   loaded 20,000 of 20,000 chunks (10 s)
+[17:04:49] -- qdrant as-run b0 report: {'id': 'report', 'short_results': 'report', 'max_exact_rows': 10000, 'widen': False, 'recall_sample_rate': 0.0, 'base_overrides': {}} (budget 2.4 min)
+[17:04:52]   qdrant as-run b0 report: 248 of 248 pairs, 3 passes, 0 errors, 3 s (cut: none)
+[17:04:52]    qdrant as-run b0 report: {'pairs': 248, 'recall10': 1.0, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 2.54185, 'p95_ms': 4.909824999999999, 'p99_ms': 5.136358, 'qps': 344.18921857805725}
+[17:04:52] -- qdrant as-run b0 count: {'id': 'count', 'short_results': 'count', 'max_exact_rows': 10000, 'widen': False, 'recall_sample_rate': 0.0, 'base_overrides': {}} (budget 2.8 min)
+[17:04:55]   qdrant as-run b0 count: 248 of 248 pairs, 3 passes, 0 errors, 3 s (cut: none)
+[17:04:55]    qdrant as-run b0 count: {'pairs': 248, 'recall10': 1.0, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 2.5221999999999998, 'p95_ms': 4.706659999999999, 'p99_ms': 5.077778, 'qps': 350.77505729090205}
+[17:04:55] -- qdrant as-run b0 exact-1k: {'id': 'exact-1k', 'short_results': 'exact', 'max_exact_rows': 1000, 'widen': False, 'recall_sample_rate': 0.0, 'base_overrides': {}} (budget 3.2 min)
+[17:04:58]   qdrant as-run b0 exact-1k: 248 of 248 pairs, 3 passes, 0 errors, 3 s (cut: none)
+[17:04:58]    qdrant as-run b0 exact-1k: {'pairs': 248, 'recall10': 1.0, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 2.5589500000000003, 'p95_ms': 4.9771, 'p99_ms': 5.416024, 'qps': 341.44644976923445}
+[17:04:58] -- qdrant as-run b0 exact-10k: {'id': 'exact-10k', 'short_results': 'exact', 'max_exact_rows': 10000, 'widen': False, 'recall_sample_rate': 0.0, 'base_overrides': {}} (budget 3.9 min)
+[17:05:01]   qdrant as-run b0 exact-10k: 248 of 248 pairs, 3 passes, 0 errors, 3 s (cut: none)
+[17:05:01]    qdrant as-run b0 exact-10k: {'pairs': 248, 'recall10': 1.0, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 2.51855, 'p95_ms': 4.731515, 'p99_ms': 5.0228150000000005, 'qps': 347.94047299701333}
+[17:05:01] -- qdrant as-run b0 exact-inf: {'id': 'exact-inf', 'short_results': 'exact', 'max_exact_rows': None, 'widen': False, 'recall_sample_rate': 0.0, 'base_overrides': {}} (budget 4.8 min)
+[17:05:04]   qdrant as-run b0 exact-inf: 248 of 248 pairs, 3 passes, 0 errors, 3 s (cut: none)
+[17:05:04]    qdrant as-run b0 exact-inf: {'pairs': 248, 'recall10': 1.0, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 2.55855, 'p95_ms': 4.929545, 'p99_ms': 5.245465, 'qps': 341.0838213490966}
+[17:05:04] -- qdrant as-run b0 widen: {'id': 'widen', 'short_results': 'widen', 'max_exact_rows': 10000, 'widen': True, 'recall_sample_rate': 0.0, 'base_overrides': {}} (budget 6.4 min)
+[17:05:07]   qdrant as-run b0 widen: 248 of 248 pairs, 3 passes, 0 errors, 3 s (cut: none)
+[17:05:07]    qdrant as-run b0 widen: {'pairs': 248, 'recall10': 1.0, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 2.5580499999999997, 'p95_ms': 4.830044999999999, 'p99_ms': 5.372732, 'qps': 341.4367659109533}
+[17:05:07] -- qdrant as-run b0 monitor: {'id': 'monitor', 'short_results': 'report', 'max_exact_rows': 10000, 'widen': False, 'recall_sample_rate': 0.01, 'base_overrides': {}} (budget 9.6 min)
+[17:05:10]   qdrant as-run b0 monitor: 248 of 248 pairs, 3 passes, 0 errors, 3 s (cut: none)
+[17:05:10]    qdrant as-run b0 monitor: {'pairs': 248, 'recall10': 1.0, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 2.55285, 'p95_ms': 4.965679999999999, 'p99_ms': 5.472955, 'qps': 341.4680759017442}
+[17:05:10] -- qdrant as-run b0 native-acorn: {'id': 'native-acorn', 'short_results': 'report', 'max_exact_rows': 10000, 'widen': False, 'recall_sample_rate': 0.0, 'base_overrides': {'acorn': 1.0}} (budget 19.2 min)
+[17:05:13]   qdrant as-run b0 native-acorn: 248 of 248 pairs, 3 passes, 0 errors, 3 s (cut: none)
+[17:05:13]    qdrant as-run b0 native-acorn: {'pairs': 248, 'recall10': 1.0, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 2.56825, 'p95_ms': 5.017855, 'p99_ms': 5.376565, 'qps': 339.80404268158003}
+[17:05:13] X5 x5-m-qdrant-b0: done

@@ -1,0 +1,24 @@
+[17:02:14] data: 6 files match checksums.json
+[17:02:14] corpus e: 2,980 chunks, 169 pairs (0 s)
+[17:02:14] == chroma default build 0: loading 2,980 chunks
+[17:02:18]   loaded 2,980 of 2,980 chunks (3 s)
+[17:02:18]    loaded: {'load_s': 2.9, 'records': 2980, 'version': '1.5.9', 'config': {'hnsw': {'space': 'cosine', 'ef_construction': 100, 'ef_search': 100, 'max_neighbors': 16, 'resize_factor': 1.2, 'sync_threshold': 1000}, 'spann': None, 'embedding_function': '<chromadb.api.types.DefaultEmbeddingFunction object at 0x7f2cd852e780>'}, 'seconds': 3.7}
+[17:02:18] -- chroma default b0 default: {'ef_search': 100} (budget 3.3 min)
+[17:02:31]   chroma default b0 default: 169 of 169 pairs, 3 passes, 0 errors, 14 s (cut: none)
+[17:02:31]    chroma default b0 default: {'pairs': 169, 'recall10': 0.9898648648648649, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 25.4511, 'p95_ms': 33.185559999999995, 'p99_ms': 33.590923999999994, 'qps': 39.647375770695724}
+[17:02:31] -- chroma default b0 ef10: {'ef_search': 10} (budget 3.9 min)
+[17:02:45]   chroma default b0 ef10: 169 of 169 pairs, 3 passes, 0 errors, 13 s (cut: none)
+[17:02:45]    chroma default b0 ef10: {'pairs': 169, 'recall10': 0.9898648648648649, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 25.3605, 'p95_ms': 32.954, 'p99_ms': 33.530144, 'qps': 39.96609928837167}
+[17:02:45] -- chroma default b0 ef50: {'ef_search': 50} (budget 4.9 min)
+[17:02:58]   chroma default b0 ef50: 169 of 169 pairs, 3 passes, 0 errors, 13 s (cut: none)
+[17:02:58]    chroma default b0 ef50: {'pairs': 169, 'recall10': 0.9898648648648649, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 25.2423, 'p95_ms': 32.79136, 'p99_ms': 33.736556, 'qps': 40.04604489502854}
+[17:02:58] -- chroma default b0 ef200: {'ef_search': 200} (budget 6.4 min)
+[17:03:11]   chroma default b0 ef200: 169 of 169 pairs, 3 passes, 0 errors, 13 s (cut: none)
+[17:03:11]    chroma default b0 ef200: {'pairs': 169, 'recall10': 0.9898648648648649, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 25.6381, 'p95_ms': 33.2281, 'p99_ms': 33.76556, 'qps': 39.73609309042715}
+[17:03:11] -- chroma default b0 ef500: {'ef_search': 500} (budget 9.5 min)
+[17:03:25]   chroma default b0 ef500: 169 of 169 pairs, 3 passes, 0 errors, 13 s (cut: none)
+[17:03:25]    chroma default b0 ef500: {'pairs': 169, 'recall10': 0.9898648648648649, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 25.5835, 'p95_ms': 33.38318, 'p99_ms': 34.085448, 'qps': 39.818348224178244}
+[17:03:25] -- chroma default b0 ef1000: {'ef_search': 1000} (budget 18.8 min)
+[17:03:38]   chroma default b0 ef1000: 169 of 169 pairs, 3 passes, 0 errors, 13 s (cut: none)
+[17:03:38]    chroma default b0 ef1000: {'pairs': 169, 'recall10': 0.9898648648648649, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 25.5644, 'p95_ms': 33.08466, 'p99_ms': 33.896476, 'qps': 39.75178234407887}
+[17:03:38] X2 x2-e-chroma: done

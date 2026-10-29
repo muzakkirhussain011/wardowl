@@ -1,0 +1,32 @@
+[17:02:33] data: 6 files match checksums.json
+[17:02:33] corpus e: 2,980 chunks, 169 pairs (0 s)
+[17:02:33] == pgvector default build 0: loading 2,980 chunks
+[17:02:34]    loaded: {'rows': 2980, 'copy_s': 0.2, 'hnsw_index_s': 0.8, 'bytes': 29491200, 'server': {'server_version': '17.11 (Debian 17.11-1.pgdg12+2)', 'shared_buffers': '3GB', 'work_mem': '4MB', 'maintenance_work_mem': '2GB', 'effective_cache_size': '4GB', 'max_parallel_maintenance_workers': '2', 'hnsw.ef_search': '40', 'hnsw.iterative_scan': 'off', 'hnsw.max_scan_tuples': '20000', 'hnsw.scan_mem_multiplier': '1', 'plan_cache_mode': 'auto', 'pgvector': '0.8.7'}, 'index': "HNSW (vector_cosine_ops) with pgvector's defaults (m 16, ef_construction 64), GIN jsonb_path_ops", 'seconds': 1.2}
+[17:02:34] -- pgvector default b0 default: {'iterative_scan': None} (budget 2.2 min)
+[17:02:39]   pgvector default b0 default: 169 of 169 pairs, 3 passes, 0 errors, 4 s (cut: none)
+[17:02:39]    pgvector default b0 default: {'pairs': 169, 'recall10': 1.0, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 10.3783, 'p95_ms': 11.82036, 'p99_ms': 12.219016, 'qps': 136.4852212752517}
+[17:02:39] -- pgvector default b0 ef40: {'iterative_scan': 'relaxed_order', 'ef_search': 40} (budget 2.5 min)
+[17:02:43]   pgvector default b0 ef40: 169 of 169 pairs, 3 passes, 0 errors, 4 s (cut: none)
+[17:02:43]    pgvector default b0 ef40: {'pairs': 169, 'recall10': 1.0, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 10.9108, 'p95_ms': 12.0536, 'p99_ms': 12.406092, 'qps': 130.02673549722954}
+[17:02:43] -- pgvector default b0 ef100: {'iterative_scan': 'relaxed_order', 'ef_search': 100} (budget 2.8 min)
+[17:02:45]   pgvector default b0 ef100: 169 of 169 pairs, 3 passes, 0 errors, 2 s (cut: none)
+[17:02:45]    pgvector default b0 ef100: {'pairs': 169, 'recall10': 0.9547297297297298, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 2.7782, 'p95_ms': 3.5527599999999997, 'p99_ms': 3.714912, 'qps': 362.47768295685694}
+[17:02:45] -- pgvector default b0 ef200: {'iterative_scan': 'relaxed_order', 'ef_search': 200} (budget 3.3 min)
+[17:02:49]   pgvector default b0 ef200: 169 of 169 pairs, 3 passes, 0 errors, 4 s (cut: none)
+[17:02:50]    pgvector default b0 ef200: {'pairs': 169, 'recall10': 1.0, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 11.1403, 'p95_ms': 12.157340000000001, 'p99_ms': 12.341688, 'qps': 128.82433917115947}
+[17:02:50] -- pgvector default b0 ef400: {'iterative_scan': 'relaxed_order', 'ef_search': 400} (budget 3.9 min)
+[17:02:54]   pgvector default b0 ef400: 169 of 169 pairs, 3 passes, 0 errors, 4 s (cut: none)
+[17:02:54]    pgvector default b0 ef400: {'pairs': 169, 'recall10': 1.0, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 10.873, 'p95_ms': 12.0451, 'p99_ms': 12.313956, 'qps': 129.85362499840565}
+[17:02:54] -- pgvector default b0 ef1000: {'iterative_scan': 'relaxed_order', 'ef_search': 1000} (budget 4.9 min)
+[17:02:59]   pgvector default b0 ef1000: 169 of 169 pairs, 3 passes, 0 errors, 4 s (cut: none)
+[17:02:59]    pgvector default b0 ef1000: {'pairs': 169, 'recall10': 1.0, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 11.041, 'p95_ms': 12.44178, 'p99_ms': 12.728971999999999, 'qps': 127.16489773271007}
+[17:02:59] -- pgvector default b0 scan1m: {'iterative_scan': 'relaxed_order', 'ef_search': 100, 'max_scan_tuples': 1000000, 'scan_mem_multiplier': 16} (budget 6.5 min)
+[17:03:01]   pgvector default b0 scan1m: 169 of 169 pairs, 3 passes, 0 errors, 2 s (cut: none)
+[17:03:01]    pgvector default b0 scan1m: {'pairs': 169, 'recall10': 0.9547297297297298, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 3.1506, 'p95_ms': 3.99734, 'p99_ms': 4.148187999999999, 'qps': 318.29889019159145}
+[17:03:01] -- pgvector default b0 strict: {'iterative_scan': 'strict_order', 'ef_search': 100} (budget 9.8 min)
+[17:03:03]   pgvector default b0 strict: 169 of 169 pairs, 3 passes, 0 errors, 2 s (cut: none)
+[17:03:03]    pgvector default b0 strict: {'pairs': 169, 'recall10': 0.8648648648648648, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 2.8452, 'p95_ms': 3.6305799999999997, 'p99_ms': 3.861684, 'qps': 358.01034374500847}
+[17:03:03] -- pgvector default b0 exact: {'exact': True} (budget 19.5 min)
+[17:03:07]   pgvector default b0 exact: 169 of 169 pairs, 3 passes, 0 errors, 4 s (cut: none)
+[17:03:07]    pgvector default b0 exact: {'pairs': 169, 'recall10': 1.0, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 10.8837, 'p95_ms': 11.9986, 'p99_ms': 12.350956, 'qps': 132.51466972678847}
+[17:03:07] X2 x2-e-pgvector: done

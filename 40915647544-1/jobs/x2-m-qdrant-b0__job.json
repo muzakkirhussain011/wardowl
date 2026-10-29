@@ -1,0 +1,543 @@
+{
+ "experiment": "x2",
+ "label": "x2-m-qdrant-b0",
+ "corpus": {
+  "name": "m",
+  "chunks": 20000,
+  "dim": 384,
+  "pairs": 248
+ },
+ "store": "qdrant",
+ "layouts": [
+  "as-run"
+ ],
+ "builds": [
+  0
+ ],
+ "minutes": 25.0,
+ "started": "2026-10-29T17:07:14+0000",
+ "environment": {
+  "python": "3.12.15",
+  "platform": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+  "cpus": 4,
+  "runner": "GitHub Actions 1000007836",
+  "run": "40915647544",
+  "job": "store",
+  "sha": "c1e20f84bad6b7e9c1c9b9a85b113fd06c391dd6",
+  "memory_gib": 15.6,
+  "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+  "wardowl": "2.1.0",
+  "numpy": "2.5.4",
+  "psycopg": "3.3.6",
+  "psycopg-pool": "3.3.3",
+  "pgvector": "0.5.1",
+  "qdrant-client": "1.19.1",
+  "elasticsearch": "9.5.1",
+  "opensearch-py": "3.2.0",
+  "weaviate-client": "4.23.1",
+  "redis": "8.1.0",
+  "pymilvus": "3.0.2",
+  "pymongo": "4.19.0",
+  "lancedb": "0.40.0",
+  "pyarrow": "26.0.0",
+  "chromadb": "1.5.9",
+  "faiss-cpu": "1.15.1",
+  "wardowl_path": "/home/runner/work/wardowl/wardowl/wardowl"
+ },
+ "units": [
+  {
+   "layout": "as-run",
+   "build": 0,
+   "settings": [
+    {
+     "id": "default",
+     "kind": "default",
+     "params": {},
+     "level": null,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 130.6,
+     "effective": {
+      "search_params": null
+     },
+     "qdrant_counters": {
+      "filtered_small_cardinality": 740,
+      "filtered_large_cardinality": 24,
+      "filtered_plain": 764
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 248,
+      "pairs_run": 248,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 744,
+      "sampled": 0,
+      "pass1_seconds": 1.1,
+      "seconds": 2.4,
+      "budget_seconds": 130.6
+     },
+     "summary": {
+      "pairs": 248,
+      "recall10": 1.0,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 2.25535,
+      "p95_ms": 4.65297,
+      "p99_ms": 5.092139,
+      "qps": 382.6116578069441
+     }
+    },
+    {
+     "id": "ef64",
+     "kind": "sweep",
+     "params": {
+      "hnsw_ef": 64
+     },
+     "level": 1,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 146.6,
+     "effective": {
+      "search_params": {
+       "hnsw_ef": 64,
+       "exact": false,
+       "indexed_only": false
+      }
+     },
+     "qdrant_counters": {
+      "filtered_small_cardinality": 740,
+      "filtered_large_cardinality": 24,
+      "filtered_plain": 764
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 248,
+      "pairs_run": 248,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 744,
+      "sampled": 0,
+      "pass1_seconds": 0.8,
+      "seconds": 2.1,
+      "budget_seconds": 146.6
+     },
+     "summary": {
+      "pairs": 248,
+      "recall10": 1.0,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 2.3177,
+      "p95_ms": 4.73693,
+      "p99_ms": 5.000193,
+      "qps": 376.00288915768385
+     }
+    },
+    {
+     "id": "ef128",
+     "kind": "sweep",
+     "params": {
+      "hnsw_ef": 128
+     },
+     "level": 2,
+     "asrun": true,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 167.2,
+     "effective": {
+      "search_params": {
+       "hnsw_ef": 128,
+       "exact": false,
+       "indexed_only": false
+      }
+     },
+     "qdrant_counters": {
+      "filtered_small_cardinality": 740,
+      "filtered_large_cardinality": 24,
+      "filtered_plain": 764
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 248,
+      "pairs_run": 248,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 744,
+      "sampled": 0,
+      "pass1_seconds": 0.8,
+      "seconds": 2.1,
+      "budget_seconds": 167.2
+     },
+     "summary": {
+      "pairs": 248,
+      "recall10": 1.0,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 2.28125,
+      "p95_ms": 4.579289999999999,
+      "p99_ms": 4.864929999999999,
+      "qps": 380.4887224216634
+     }
+    },
+    {
+     "id": "ef256",
+     "kind": "sweep",
+     "params": {
+      "hnsw_ef": 256
+     },
+     "level": 3,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 194.8,
+     "effective": {
+      "search_params": {
+       "hnsw_ef": 256,
+       "exact": false,
+       "indexed_only": false
+      }
+     },
+     "qdrant_counters": {
+      "filtered_small_cardinality": 740,
+      "filtered_large_cardinality": 24,
+      "filtered_plain": 764
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 248,
+      "pairs_run": 248,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 744,
+      "sampled": 0,
+      "pass1_seconds": 0.8,
+      "seconds": 2.1,
+      "budget_seconds": 194.8
+     },
+     "summary": {
+      "pairs": 248,
+      "recall10": 1.0,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 2.2966499999999996,
+      "p95_ms": 4.787364999999999,
+      "p99_ms": 5.226873,
+      "qps": 371.6679889854393
+     }
+    },
+    {
+     "id": "ef512",
+     "kind": "sweep",
+     "params": {
+      "hnsw_ef": 512
+     },
+     "level": 4,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 233.3,
+     "effective": {
+      "search_params": {
+       "hnsw_ef": 512,
+       "exact": false,
+       "indexed_only": false
+      }
+     },
+     "qdrant_counters": {
+      "filtered_small_cardinality": 740,
+      "filtered_large_cardinality": 24,
+      "filtered_plain": 764
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 248,
+      "pairs_run": 248,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 744,
+      "sampled": 0,
+      "pass1_seconds": 0.8,
+      "seconds": 2.1,
+      "budget_seconds": 233.3
+     },
+     "summary": {
+      "pairs": 248,
+      "recall10": 1.0,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 2.20405,
+      "p95_ms": 4.581185,
+      "p99_ms": 4.882352,
+      "qps": 385.5856875568078
+     }
+    },
+    {
+     "id": "ef1024",
+     "kind": "sweep",
+     "params": {
+      "hnsw_ef": 1024
+     },
+     "level": 5,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 291.1,
+     "effective": {
+      "search_params": {
+       "hnsw_ef": 1024,
+       "exact": false,
+       "indexed_only": false
+      }
+     },
+     "qdrant_counters": {
+      "filtered_small_cardinality": 740,
+      "filtered_large_cardinality": 24,
+      "filtered_plain": 764
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 248,
+      "pairs_run": 248,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 744,
+      "sampled": 0,
+      "pass1_seconds": 0.7,
+      "seconds": 2.1,
+      "budget_seconds": 291.1
+     },
+     "summary": {
+      "pairs": 248,
+      "recall10": 1.0,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 2.2443,
+      "p95_ms": 4.624039999999999,
+      "p99_ms": 5.635323,
+      "qps": 380.81386064178196
+     }
+    },
+    {
+     "id": "acorn",
+     "kind": "specific",
+     "params": {
+      "hnsw_ef": null,
+      "acorn": "default"
+     },
+     "level": null,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 387.4,
+     "effective": {
+      "search_params": {
+       "exact": false,
+       "indexed_only": false,
+       "acorn": {
+        "enable": true
+       }
+      }
+     },
+     "qdrant_counters": {
+      "filtered_small_cardinality": 740,
+      "filtered_large_cardinality": 24,
+      "filtered_plain": 764
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 248,
+      "pairs_run": 248,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 744,
+      "sampled": 0,
+      "pass1_seconds": 0.7,
+      "seconds": 2.0,
+      "budget_seconds": 387.4
+     },
+     "summary": {
+      "pairs": 248,
+      "recall10": 1.0,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 2.2177499999999997,
+      "p95_ms": 4.433475,
+      "p99_ms": 4.767063,
+      "qps": 391.3355160808127
+     }
+    },
+    {
+     "id": "acorn-max",
+     "kind": "specific",
+     "params": {
+      "hnsw_ef": 512,
+      "acorn": 1.0
+     },
+     "level": null,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 580.1,
+     "effective": {
+      "search_params": {
+       "hnsw_ef": 512,
+       "exact": false,
+       "indexed_only": false,
+       "acorn": {
+        "enable": true,
+        "max_selectivity": 1.0
+       }
+      }
+     },
+     "qdrant_counters": {
+      "filtered_small_cardinality": 740,
+      "filtered_large_cardinality": 0,
+      "filtered_acorn": 24,
+      "filtered_plain": 764
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 248,
+      "pairs_run": 248,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 744,
+      "sampled": 0,
+      "pass1_seconds": 0.8,
+      "seconds": 2.1,
+      "budget_seconds": 580.1
+     },
+     "summary": {
+      "pairs": 248,
+      "recall10": 1.0,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 2.3003,
+      "p95_ms": 4.69384,
+      "p99_ms": 4.998681,
+      "qps": 373.92173335641195
+     }
+    },
+    {
+     "id": "exact",
+     "kind": "exact",
+     "params": {
+      "exact": true
+     },
+     "level": null,
+     "asrun": false,
+     "build0": true,
+     "harness_level": [],
+     "budget_seconds": 1158.1,
+     "effective": {
+      "search_params": {
+       "exact": true,
+       "indexed_only": false
+      }
+     },
+     "qdrant_counters": {
+      "filtered_small_cardinality": 0,
+      "filtered_large_cardinality": 0,
+      "filtered_acorn": 0,
+      "filtered_exact": 764,
+      "filtered_plain": 764
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 248,
+      "pairs_run": 248,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 744,
+      "sampled": 0,
+      "pass1_seconds": 0.8,
+      "seconds": 2.1,
+      "budget_seconds": 1158.1
+     },
+     "summary": {
+      "pairs": 248,
+      "recall10": 1.0,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 2.32425,
+      "p95_ms": 5.08013,
+      "p99_ms": 5.389085,
+      "qps": 365.7458915528037
+     }
+    }
+   ],
+   "load": {
+    "load_s": 8.9,
+    "index_s": 15.0,
+    "points": 20000,
+    "indexed_vectors": 13584,
+    "segments": 2,
+    "server": {
+     "title": "qdrant - vector search engine",
+     "version": "1.19.2",
+     "commit": "016542aa5deb6c66380bb137badf73d54f742bde"
+    },
+    "layout": "wardowl's create_collection, keyword indexes on the permission fields",
+    "keyword_fields": [
+     "tenant",
+     "u0",
+     "u1",
+     "c0",
+     "c1"
+    ],
+    "seconds": 24.0
+   }
+  }
+ ],
+ "failures": [],
+ "skipped": [],
+ "status": "done",
+ "finished": "2026-10-29T17:07:58+0000"
+}

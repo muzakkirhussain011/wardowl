@@ -1,0 +1,10 @@
+store,V,lo,hi,seeds_positive,status,recall_level0,recall_level1,recall_level2,recall_level3
+qdrant,0.0,0.0,0.0,0,monotone,1.0,1.0,1.0,1.0
+elasticsearch,0.16249999999999998,0.125,0.20000000000000007,2,neither,1.0,0.9125,0.85,0.8375
+opensearch,0.0,0.0,0.0,0,monotone,1.0,1.0,1.0,1.0
+weaviate,0.0,0.0,0.0,0,monotone,1.0,1.0,1.0,1.0
+redis,0.0,0.0,0.0,0,monotone,1.0,1.0,1.0,1.0
+milvus,0.5375000000000001,0.44999999999999996,0.6875,2,neither,0.9125000000000001,0.38749999999999996,0.375,0.5
+mongodb,0.0,0.0,0.0,0,monotone,1.0,1.0,1.0,1.0
+lancedb,0.475,0.4,0.5625,2,neither,0.825,0.5,0.38749999999999996,0.35
+chroma,0.0,0.0,0.0,0,monotone,1.0,1.0,1.0,1.0

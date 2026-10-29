@@ -1,0 +1,26 @@
+[17:02:53] data: 6 files match checksums.json
+[17:02:54] corpus e: 2,980 chunks, 169 pairs (0 s)
+[17:02:54] == mongodb default build 0: loading 2,980 chunks
+[17:02:57]    loaded: {'bulk_s': 0.0, 'index_s': 0.6, 'settle_s': 2.5, 'documents': 2980, 'version': '8.0.30', 'seconds': 3.2}
+[17:02:57] -- mongodb default b0 default: {'num_candidates': 100} (budget 2.8 min)
+[17:03:00]   mongodb default b0 default: 169 of 169 pairs, 3 passes, 0 errors, 3 s (cut: none)
+[17:03:00]    mongodb default b0 default: {'pairs': 169, 'recall10': 1.0, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 5.1109, 'p95_ms': 6.81492, 'p99_ms': 8.957367999999992, 'qps': 201.69772194954572}
+[17:03:00] -- mongodb default b0 nc20: {'num_candidates': 20} (budget 3.3 min)
+[17:03:02]   mongodb default b0 nc20: 169 of 169 pairs, 3 passes, 0 errors, 2 s (cut: none)
+[17:03:02]    mongodb default b0 nc20: {'pairs': 169, 'recall10': 0.9648648648648649, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 2.9791, 'p95_ms': 3.67312, 'p99_ms': 3.808632, 'qps': 349.9496610872128}
+[17:03:02] -- mongodb default b0 nc50: {'num_candidates': 50} (budget 4.0 min)
+[17:03:03]   mongodb default b0 nc50: 169 of 169 pairs, 3 passes, 0 errors, 2 s (cut: none)
+[17:03:03]    mongodb default b0 nc50: {'pairs': 169, 'recall10': 0.9945945945945948, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 2.9195, 'p95_ms': 4.291, 'p99_ms': 4.591488, 'qps': 339.5893460574179}
+[17:03:03] -- mongodb default b0 nc200: {'num_candidates': 200} (budget 5.0 min)
+[17:03:05]   mongodb default b0 nc200: 169 of 169 pairs, 3 passes, 0 errors, 2 s (cut: none)
+[17:03:05]    mongodb default b0 nc200: {'pairs': 169, 'recall10': 1.0, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 3.4287, 'p95_ms': 4.55674, 'p99_ms': 4.905004, 'qps': 320.86138180757735}
+[17:03:05] -- mongodb default b0 nc1000: {'num_candidates': 1000} (budget 6.6 min)
+[17:03:07]   mongodb default b0 nc1000: 169 of 169 pairs, 3 passes, 0 errors, 2 s (cut: none)
+[17:03:07]    mongodb default b0 nc1000: {'pairs': 169, 'recall10': 1.0, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 3.552, 'p95_ms': 3.9487, 'p99_ms': 4.2122199999999985, 'qps': 340.7598137314107}
+[17:03:07] -- mongodb default b0 nc10000: {'num_candidates': 10000} (budget 9.9 min)
+[17:03:08]   mongodb default b0 nc10000: 169 of 169 pairs, 3 passes, 0 errors, 2 s (cut: none)
+[17:03:08]    mongodb default b0 nc10000: {'pairs': 169, 'recall10': 1.0, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 3.1577, 'p95_ms': 3.5645, 'p99_ms': 3.9142239999999995, 'qps': 372.69458626931396}
+[17:03:08] -- mongodb default b0 exact: {'exact': True} (budget 19.8 min)
+[17:03:09]   mongodb default b0 exact: 169 of 169 pairs, 3 passes, 0 errors, 1 s (cut: none)
+[17:03:09]    mongodb default b0 exact: {'pairs': 169, 'recall10': 1.0, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 2.2689, 'p95_ms': 2.64884, 'p99_ms': 2.9932399999999983, 'qps': 472.68800326238636}
+[17:03:09] X2 x2-e-mongodb: done

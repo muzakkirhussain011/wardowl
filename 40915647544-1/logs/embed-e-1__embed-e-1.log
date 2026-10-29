@@ -1,0 +1,18 @@
+[16:52:39] x2x5_prepare embed e: {'python': '3.12.15', 'platform': 'Linux-7.0.0-1017-azure-x86_64-with-glibc2.39', 'cpus': 4, 'runner': 'GitHub Actions 1000007794', 'run': '40915647544', 'job': 'embed-e', 'sha': 'c1e20f84bad6b7e9c1c9b9a85b113fd06c391dd6', 'memory_gib': 15.6, 'cpu_model': 'AMD EPYC 7763 64-Core Processor', 'wardowl': '2.1.0', 'numpy': '2.5.4', 'torch': '2.15.0+cpu', 'sentence-transformers': '6.2.0', 'transformers': '5.22.0', 'datasets': '5.1.0', 'faiss-cpu': None, 'wardowl_path': '/home/runner/work/wardowl/wardowl/wardowl'}
+
+== corpus, people and questions
+  [PASS] the oracle agrees with enterprise.can_read on enterprise.py's corpus
+  [PASS] the leak detector finds exactly the canaries Report.no_leaks does, in any case or spacing
+[16:52:40] 960 company documents; reading the shared knowledge base (BEIR FiQA)
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Generating corpus split:   0%|          | 0/57638 [00:00<?, ? examples/s]Generating corpus split: 100%|██████████| 57638/57638 [00:00<00:00, 491676.21 examples/s]Generating corpus split: 100%|██████████| 57638/57638 [00:00<00:00, 482143.91 examples/s]
+  [PASS] every chunk id is unique
+  [PASS] every non-public document carries its own canary once, and public ones none
+  note: corpus: 2,980 chunks (960 company documents in 20 tenants, 20 injected notices, 2,000 shared FiQA passages); 189 people ask 1,105 questions ({'generic': 108, 'targeted': 376, 'forbidden': 189, 'redteam': 432})
+Generating queries split:   0%|          | 0/6648 [00:00<?, ? examples/s]Generating queries split: 100%|██████████| 6648/6648 [00:00<00:00, 1531231.91 examples/s]
+[16:52:43] probe set: 24 people, 384 questions
+[16:52:43] E shard 1 of 2: chunks 1,490 to 2,980 of 2,980
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]Loading weights: 100%|██████████| 199/199 [00:00<00:00, 3833.39it/s]
+[16:59:18]   embedded 1,490 of 1,490 (388 s)
+[16:59:18] wrote shards/e-01.npy (1,490 x 768), SHA-256 716e64e7cc676c2ef0e99d7ac76257ad13197d5697b2041cf6f0e99ebd3a4d6d
+[16:59:18] done in 400 s

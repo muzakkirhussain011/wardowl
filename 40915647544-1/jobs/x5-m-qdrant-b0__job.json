@@ -1,0 +1,430 @@
+{
+ "experiment": "x5",
+ "label": "x5-m-qdrant-b0",
+ "corpus": {
+  "name": "m",
+  "chunks": 20000,
+  "dim": 384,
+  "pairs": 248
+ },
+ "store": "qdrant",
+ "layouts": [
+  "as-run"
+ ],
+ "builds": [
+  0
+ ],
+ "minutes": 25.0,
+ "started": "2026-10-29T17:04:22+0000",
+ "environment": {
+  "python": "3.12.15",
+  "platform": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+  "cpus": 4,
+  "runner": "GitHub Actions 1000007829",
+  "run": "40915647544",
+  "job": "store",
+  "sha": "c1e20f84bad6b7e9c1c9b9a85b113fd06c391dd6",
+  "memory_gib": 15.6,
+  "cpu_model": "AMD EPYC 7763 64-Core Processor",
+  "wardowl": "2.1.0",
+  "numpy": "2.5.4",
+  "psycopg": "3.3.6",
+  "psycopg-pool": "3.3.3",
+  "pgvector": "0.5.1",
+  "qdrant-client": "1.19.1",
+  "elasticsearch": "9.5.1",
+  "opensearch-py": "3.2.0",
+  "weaviate-client": "4.23.1",
+  "redis": "8.1.0",
+  "pymilvus": "3.0.2",
+  "pymongo": "4.19.0",
+  "lancedb": "0.40.0",
+  "pyarrow": "26.0.0",
+  "chromadb": "1.5.9",
+  "faiss-cpu": "1.15.1",
+  "wardowl_path": "/home/runner/work/wardowl/wardowl/wardowl"
+ },
+ "units": [
+  {
+   "layout": "as-run",
+   "build": 0,
+   "settings": [
+    {
+     "id": "report",
+     "short_results": "report",
+     "max_exact_rows": 10000,
+     "widen": false,
+     "recall_sample_rate": 0.0,
+     "base_overrides": {},
+     "budget_seconds": 146.7,
+     "effective": {
+      "search_params": {
+       "hnsw_ef": 128,
+       "exact": false,
+       "indexed_only": false
+      }
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 248,
+      "pairs_run": 248,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 992,
+      "sampled": 0,
+      "pass1_seconds": 1.7,
+      "seconds": 3.2,
+      "budget_seconds": 146.7
+     },
+     "summary": {
+      "pairs": 248,
+      "recall10": 1.0,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 2.54185,
+      "p95_ms": 4.909824999999999,
+      "p99_ms": 5.136358,
+      "qps": 344.18921857805725
+     }
+    },
+    {
+     "id": "count",
+     "short_results": "count",
+     "max_exact_rows": 10000,
+     "widen": false,
+     "recall_sample_rate": 0.0,
+     "base_overrides": {},
+     "budget_seconds": 167.2,
+     "effective": {
+      "search_params": {
+       "hnsw_ef": 128,
+       "exact": false,
+       "indexed_only": false
+      }
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 248,
+      "pairs_run": 248,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 992,
+      "sampled": 0,
+      "pass1_seconds": 1.5,
+      "seconds": 3.0,
+      "budget_seconds": 167.2
+     },
+     "summary": {
+      "pairs": 248,
+      "recall10": 1.0,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 2.5221999999999998,
+      "p95_ms": 4.706659999999999,
+      "p99_ms": 5.077778,
+      "qps": 350.77505729090205
+     }
+    },
+    {
+     "id": "exact-1k",
+     "short_results": "exact",
+     "max_exact_rows": 1000,
+     "widen": false,
+     "recall_sample_rate": 0.0,
+     "base_overrides": {},
+     "budget_seconds": 194.5,
+     "effective": {
+      "search_params": {
+       "hnsw_ef": 128,
+       "exact": false,
+       "indexed_only": false
+      }
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 248,
+      "pairs_run": 248,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 992,
+      "sampled": 0,
+      "pass1_seconds": 1.5,
+      "seconds": 3.0,
+      "budget_seconds": 194.5
+     },
+     "summary": {
+      "pairs": 248,
+      "recall10": 1.0,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 2.5589500000000003,
+      "p95_ms": 4.9771,
+      "p99_ms": 5.416024,
+      "qps": 341.44644976923445
+     }
+    },
+    {
+     "id": "exact-10k",
+     "short_results": "exact",
+     "max_exact_rows": 10000,
+     "widen": false,
+     "recall_sample_rate": 0.0,
+     "base_overrides": {},
+     "budget_seconds": 232.8,
+     "effective": {
+      "search_params": {
+       "hnsw_ef": 128,
+       "exact": false,
+       "indexed_only": false
+      }
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 248,
+      "pairs_run": 248,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 992,
+      "sampled": 0,
+      "pass1_seconds": 1.5,
+      "seconds": 3.0,
+      "budget_seconds": 232.8
+     },
+     "summary": {
+      "pairs": 248,
+      "recall10": 1.0,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 2.51855,
+      "p95_ms": 4.731515,
+      "p99_ms": 5.0228150000000005,
+      "qps": 347.94047299701333
+     }
+    },
+    {
+     "id": "exact-inf",
+     "short_results": "exact",
+     "max_exact_rows": null,
+     "widen": false,
+     "recall_sample_rate": 0.0,
+     "base_overrides": {},
+     "budget_seconds": 290.3,
+     "effective": {
+      "search_params": {
+       "hnsw_ef": 128,
+       "exact": false,
+       "indexed_only": false
+      }
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 248,
+      "pairs_run": 248,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 992,
+      "sampled": 0,
+      "pass1_seconds": 1.5,
+      "seconds": 3.0,
+      "budget_seconds": 290.3
+     },
+     "summary": {
+      "pairs": 248,
+      "recall10": 1.0,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 2.55855,
+      "p95_ms": 4.929545,
+      "p99_ms": 5.245465,
+      "qps": 341.0838213490966
+     }
+    },
+    {
+     "id": "widen",
+     "short_results": "widen",
+     "max_exact_rows": 10000,
+     "widen": true,
+     "recall_sample_rate": 0.0,
+     "base_overrides": {},
+     "budget_seconds": 386.1,
+     "effective": {
+      "search_params": {
+       "hnsw_ef": 128,
+       "exact": false,
+       "indexed_only": false
+      }
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 248,
+      "pairs_run": 248,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 992,
+      "sampled": 0,
+      "pass1_seconds": 1.5,
+      "seconds": 3.0,
+      "budget_seconds": 386.1
+     },
+     "summary": {
+      "pairs": 248,
+      "recall10": 1.0,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 2.5580499999999997,
+      "p95_ms": 4.830044999999999,
+      "p99_ms": 5.372732,
+      "qps": 341.4367659109533
+     }
+    },
+    {
+     "id": "monitor",
+     "short_results": "report",
+     "max_exact_rows": 10000,
+     "widen": false,
+     "recall_sample_rate": 0.01,
+     "base_overrides": {},
+     "budget_seconds": 577.6,
+     "effective": {
+      "search_params": {
+       "hnsw_ef": 128,
+       "exact": false,
+       "indexed_only": false
+      }
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 248,
+      "pairs_run": 248,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 992,
+      "sampled": 11,
+      "pass1_seconds": 1.6,
+      "seconds": 3.1,
+      "budget_seconds": 577.6
+     },
+     "summary": {
+      "pairs": 248,
+      "recall10": 1.0,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 2.55285,
+      "p95_ms": 4.965679999999999,
+      "p99_ms": 5.472955,
+      "qps": 341.4680759017442
+     }
+    },
+    {
+     "id": "native-acorn",
+     "short_results": "report",
+     "max_exact_rows": 10000,
+     "widen": false,
+     "recall_sample_rate": 0.0,
+     "base_overrides": {
+      "acorn": 1.0
+     },
+     "budget_seconds": 1152.1,
+     "effective": {
+      "search_params": {
+       "hnsw_ef": 128,
+       "exact": false,
+       "indexed_only": false,
+       "acorn": {
+        "enable": true,
+        "max_selectivity": 1.0
+       }
+      }
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 248,
+      "pairs_run": 248,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 992,
+      "sampled": 0,
+      "pass1_seconds": 1.5,
+      "seconds": 3.0,
+      "budget_seconds": 1152.1
+     },
+     "summary": {
+      "pairs": 248,
+      "recall10": 1.0,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 2.56825,
+      "p95_ms": 5.017855,
+      "p99_ms": 5.376565,
+      "qps": 339.80404268158003
+     }
+    }
+   ],
+   "load": {
+    "load_s": 10.2,
+    "index_s": 15.0,
+    "points": 20000,
+    "indexed_vectors": 13584,
+    "segments": 2,
+    "server": {
+     "title": "qdrant - vector search engine",
+     "version": "1.19.2",
+     "commit": "016542aa5deb6c66380bb137badf73d54f742bde"
+    },
+    "layout": "wardowl's create_collection, keyword indexes on the permission fields",
+    "keyword_fields": [
+     "tenant",
+     "u0",
+     "u1",
+     "c0",
+     "c1"
+    ],
+    "seconds": 25.4
+   }
+  }
+ ],
+ "failures": [],
+ "skipped": [],
+ "status": "done",
+ "finished": "2026-10-29T17:05:13+0000"
+}

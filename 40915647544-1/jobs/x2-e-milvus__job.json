@@ -1,0 +1,306 @@
+{
+ "experiment": "x2",
+ "label": "x2-e-milvus",
+ "corpus": {
+  "name": "e",
+  "chunks": 2980,
+  "dim": 768,
+  "pairs": 169
+ },
+ "store": "milvus",
+ "layouts": [
+  "default"
+ ],
+ "builds": [
+  0
+ ],
+ "minutes": 25.0,
+ "started": "2026-10-29T17:03:13+0000",
+ "environment": {
+  "python": "3.12.15",
+  "platform": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+  "cpus": 4,
+  "runner": "GitHub Actions 1000007827",
+  "run": "40915647544",
+  "job": "store",
+  "sha": "c1e20f84bad6b7e9c1c9b9a85b113fd06c391dd6",
+  "memory_gib": 15.6,
+  "cpu_model": "Intel(R) Xeon(R) Platinum 8370C CPU @ 2.80GHz",
+  "wardowl": "2.1.0",
+  "numpy": "2.5.4",
+  "psycopg": "3.3.6",
+  "psycopg-pool": "3.3.3",
+  "pgvector": "0.5.1",
+  "qdrant-client": "1.19.1",
+  "elasticsearch": "9.5.1",
+  "opensearch-py": "3.2.0",
+  "weaviate-client": "4.23.1",
+  "redis": "8.1.0",
+  "pymilvus": "3.0.2",
+  "pymongo": "4.19.0",
+  "lancedb": "0.40.0",
+  "pyarrow": "26.0.0",
+  "chromadb": "1.5.9",
+  "faiss-cpu": "1.15.1",
+  "wardowl_path": "/home/runner/work/wardowl/wardowl/wardowl"
+ },
+ "units": [
+  {
+   "layout": "default",
+   "build": 0,
+   "settings": [
+    {
+     "id": "default",
+     "kind": "default",
+     "params": {
+      "server_default": true
+     },
+     "level": null,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 199.2,
+     "effective": {},
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 169,
+      "pairs_run": 169,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 507,
+      "sampled": 0,
+      "pass1_seconds": 1.0,
+      "seconds": 2.7,
+      "budget_seconds": 199.2
+     },
+     "summary": {
+      "pairs": 169,
+      "recall10": 1.0,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 4.9898,
+      "p95_ms": 5.444500000000001,
+      "p99_ms": 5.785487999999999,
+      "qps": 209.4010411568454
+     }
+    },
+    {
+     "id": "ef32",
+     "kind": "sweep",
+     "params": {
+      "ef": 32
+     },
+     "level": 1,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 238.5,
+     "effective": {},
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 169,
+      "pairs_run": 169,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 507,
+      "sampled": 0,
+      "pass1_seconds": 0.9,
+      "seconds": 2.5,
+      "budget_seconds": 238.5
+     },
+     "summary": {
+      "pairs": 169,
+      "recall10": 1.0,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 4.8518,
+      "p95_ms": 5.211600000000001,
+      "p99_ms": 5.576847999999999,
+      "qps": 215.49382769572577
+     }
+    },
+    {
+     "id": "ef64",
+     "kind": "sweep",
+     "params": {
+      "ef": 64
+     },
+     "level": 2,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 297.5,
+     "effective": {},
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 169,
+      "pairs_run": 169,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 507,
+      "sampled": 0,
+      "pass1_seconds": 0.9,
+      "seconds": 2.6,
+      "budget_seconds": 297.5
+     },
+     "summary": {
+      "pairs": 169,
+      "recall10": 1.0,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 5.0937,
+      "p95_ms": 5.4168,
+      "p99_ms": 5.517156,
+      "qps": 206.52292263907947
+     }
+    },
+    {
+     "id": "ef100",
+     "kind": "sweep",
+     "params": {
+      "ef": 100
+     },
+     "level": 3,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 395.8,
+     "effective": {},
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 169,
+      "pairs_run": 169,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 507,
+      "sampled": 0,
+      "pass1_seconds": 1.0,
+      "seconds": 2.7,
+      "budget_seconds": 395.8
+     },
+     "summary": {
+      "pairs": 169,
+      "recall10": 1.0,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 5.2617,
+      "p95_ms": 5.6922,
+      "p99_ms": 5.902855999999999,
+      "qps": 198.8994153887183
+     }
+    },
+    {
+     "id": "ef256",
+     "kind": "sweep",
+     "params": {
+      "ef": 256
+     },
+     "level": 4,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 592.3,
+     "effective": {},
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 169,
+      "pairs_run": 169,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 507,
+      "sampled": 0,
+      "pass1_seconds": 0.9,
+      "seconds": 2.3,
+      "budget_seconds": 592.3
+     },
+     "summary": {
+      "pairs": 169,
+      "recall10": 1.0,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 4.7538,
+      "p95_ms": 5.13094,
+      "p99_ms": 5.2710479999999995,
+      "qps": 220.36619123638857
+     }
+    },
+    {
+     "id": "ef512",
+     "kind": "sweep",
+     "params": {
+      "ef": 512
+     },
+     "level": 5,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 1182.3,
+     "effective": {},
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 169,
+      "pairs_run": 169,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 507,
+      "sampled": 0,
+      "pass1_seconds": 0.6,
+      "seconds": 1.5,
+      "budget_seconds": 1182.3
+     },
+     "summary": {
+      "pairs": 169,
+      "recall10": 1.0,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 3.0099,
+      "p95_ms": 3.2199,
+      "p99_ms": 3.2767199999999996,
+      "qps": 356.7182930206483
+     }
+    }
+   ],
+   "load": {
+    "load_s": 0.7,
+    "index_s": 0.0,
+    "rows": 2980,
+    "index": "HNSW (M 16, efConstruction 200)",
+    "seconds": 4.3
+   }
+  }
+ ],
+ "failures": [],
+ "skipped": [],
+ "status": "done",
+ "finished": "2026-10-29T17:03:33+0000"
+}

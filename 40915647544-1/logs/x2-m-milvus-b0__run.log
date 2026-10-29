@@ -1,0 +1,27 @@
+[17:05:35] data: 8 files match checksums.json
+[17:05:35] corpus m: 20,000 chunks, 248 pairs (0 s)
+[17:05:36] == milvus default build 0: loading 20,000 chunks
+[17:05:38]   loaded 5,000 of 20,000 chunks (1 s)
+[17:05:39]   loaded 10,000 of 20,000 chunks (2 s)
+[17:05:40]   loaded 15,000 of 20,000 chunks (2 s)
+[17:05:41]   loaded 20,000 of 20,000 chunks (3 s)
+[17:05:46]    loaded: {'load_s': 3.0, 'index_s': 4.0, 'rows': 20000, 'index': 'HNSW (M 16, efConstruction 200)', 'seconds': 10.7}
+[17:05:46] -- milvus default b0 default: {'server_default': True} (budget 3.3 min)
+[17:05:51]   milvus default b0 default: 248 of 248 pairs, 3 passes, 0 errors, 5 s (cut: none)
+[17:05:51]    milvus default b0 default: {'pairs': 248, 'recall10': 0.7266129032258064, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 7.0705, 'p95_ms': 8.25099, 'p99_ms': 8.543498, 'qps': 150.9617633940977}
+[17:05:51] -- milvus default b0 ef32: {'ef': 32} (budget 3.9 min)
+[17:05:55]   milvus default b0 ef32: 248 of 248 pairs, 3 passes, 0 errors, 3 s (cut: none)
+[17:05:55]    milvus default b0 ef32: {'pairs': 248, 'recall10': 0.7520161290322581, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 3.1225500000000004, 'p95_ms': 4.025704999999999, 'p99_ms': 4.827609000000001, 'qps': 309.23125110974115}
+[17:05:55] -- milvus default b0 ef64: {'ef': 64} (budget 4.9 min)
+[17:05:57]   milvus default b0 ef64: 248 of 248 pairs, 3 passes, 0 errors, 2 s (cut: none)
+[17:05:57]    milvus default b0 ef64: {'pairs': 248, 'recall10': 0.996774193548387, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 3.02555, 'p95_ms': 4.150204999999999, 'p99_ms': 4.42473, 'qps': 320.07805774569545}
+[17:05:57] -- milvus default b0 ef100: {'ef': 100} (budget 6.5 min)
+[17:05:59]   milvus default b0 ef100: 248 of 248 pairs, 3 passes, 0 errors, 2 s (cut: none)
+[17:05:59]    milvus default b0 ef100: {'pairs': 248, 'recall10': 0.9987903225806452, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 2.9341, 'p95_ms': 4.10512, 'p99_ms': 4.7921700000000005, 'qps': 318.55405232866866}
+[17:05:59] -- milvus default b0 ef256: {'ef': 256} (budget 9.8 min)
+[17:06:02]   milvus default b0 ef256: 248 of 248 pairs, 3 passes, 0 errors, 3 s (cut: none)
+[17:06:02]    milvus default b0 ef256: {'pairs': 248, 'recall10': 1.0, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 2.83255, 'p95_ms': 5.2019449999999985, 'p99_ms': 5.545123, 'qps': 299.95561140750544}
+[17:06:02] -- milvus default b0 ef512: {'ef': 512} (budget 19.5 min)
+[17:06:05]   milvus default b0 ef512: 248 of 248 pairs, 3 passes, 0 errors, 3 s (cut: none)
+[17:06:05]    milvus default b0 ef512: {'pairs': 248, 'recall10': 1.0, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 2.7041, 'p95_ms': 6.039349999999997, 'p99_ms': 6.370866, 'qps': 281.4024736185181}
+[17:06:06] X2 x2-m-milvus-b0: done

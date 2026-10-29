@@ -1,0 +1,103 @@
+{
+ "experiment": "x2",
+ "label": "x2-m-faiss",
+ "corpus": {
+  "name": "m",
+  "chunks": 20000,
+  "dim": 384,
+  "pairs": 248
+ },
+ "store": "faiss",
+ "layouts": [
+  "default"
+ ],
+ "builds": [
+  0
+ ],
+ "minutes": 25.0,
+ "started": "2026-10-29T17:05:36+0000",
+ "environment": {
+  "python": "3.12.15",
+  "platform": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+  "cpus": 4,
+  "runner": "GitHub Actions 1000007835",
+  "run": "40915647544",
+  "job": "store",
+  "sha": "c1e20f84bad6b7e9c1c9b9a85b113fd06c391dd6",
+  "memory_gib": 15.6,
+  "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+  "wardowl": "2.1.0",
+  "numpy": "2.5.4",
+  "psycopg": "3.3.6",
+  "psycopg-pool": "3.3.3",
+  "pgvector": "0.5.1",
+  "qdrant-client": "1.19.1",
+  "elasticsearch": "9.5.1",
+  "opensearch-py": "3.2.0",
+  "weaviate-client": "4.23.1",
+  "redis": "8.1.0",
+  "pymilvus": "3.0.2",
+  "pymongo": "4.19.0",
+  "lancedb": "0.40.0",
+  "pyarrow": "26.0.0",
+  "chromadb": "1.5.9",
+  "faiss-cpu": "1.15.1",
+  "wardowl_path": "/home/runner/work/wardowl/wardowl/wardowl"
+ },
+ "units": [
+  {
+   "layout": "default",
+   "build": 0,
+   "settings": [
+    {
+     "id": "exact",
+     "kind": "exact",
+     "params": {},
+     "level": null,
+     "asrun": true,
+     "build0": true,
+     "harness_level": [],
+     "budget_seconds": 1198.8,
+     "effective": {},
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 248,
+      "pairs_run": 248,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 744,
+      "sampled": 0,
+      "pass1_seconds": 8.4,
+      "seconds": 23.5,
+      "budget_seconds": 1198.8
+     },
+     "summary": {
+      "pairs": 248,
+      "recall10": 1.0,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 27.0269,
+      "p95_ms": 39.300185,
+      "p99_ms": 39.771708,
+      "qps": 32.406515272400085
+     }
+    }
+   ],
+   "load": {
+    "load_s": 1.0,
+    "rows": 20000,
+    "detail": "IndexFlatIP (exact), metadata matched in Python",
+    "seconds": 1.1
+   }
+  }
+ ],
+ "failures": [],
+ "skipped": [],
+ "status": "done",
+ "finished": "2026-10-29T17:06:01+0000"
+}

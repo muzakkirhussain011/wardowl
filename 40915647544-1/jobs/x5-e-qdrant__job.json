@@ -1,0 +1,496 @@
+{
+ "experiment": "x5",
+ "label": "x5-e-qdrant",
+ "corpus": {
+  "name": "e",
+  "chunks": 2980,
+  "dim": 768,
+  "pairs": 169
+ },
+ "store": "qdrant",
+ "layouts": [
+  "as-run",
+  "tenant"
+ ],
+ "builds": [
+  0
+ ],
+ "minutes": 25.0,
+ "started": "2026-10-29T17:02:16+0000",
+ "environment": {
+  "python": "3.12.15",
+  "platform": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+  "cpus": 4,
+  "runner": "GitHub Actions 1000007822",
+  "run": "40915647544",
+  "job": "store",
+  "sha": "c1e20f84bad6b7e9c1c9b9a85b113fd06c391dd6",
+  "memory_gib": 15.6,
+  "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+  "wardowl": "2.1.0",
+  "numpy": "2.5.4",
+  "psycopg": "3.3.6",
+  "psycopg-pool": "3.3.3",
+  "pgvector": "0.5.1",
+  "qdrant-client": "1.19.1",
+  "elasticsearch": "9.5.1",
+  "opensearch-py": "3.2.0",
+  "weaviate-client": "4.23.1",
+  "redis": "8.1.0",
+  "pymilvus": "3.0.2",
+  "pymongo": "4.19.0",
+  "lancedb": "0.40.0",
+  "pyarrow": "26.0.0",
+  "chromadb": "1.5.9",
+  "faiss-cpu": "1.15.1",
+  "wardowl_path": "/home/runner/work/wardowl/wardowl/wardowl"
+ },
+ "units": [
+  {
+   "layout": "as-run",
+   "build": 0,
+   "settings": [
+    {
+     "id": "report",
+     "short_results": "report",
+     "max_exact_rows": 10000,
+     "widen": false,
+     "recall_sample_rate": 0.0,
+     "base_overrides": {},
+     "budget_seconds": 78.7,
+     "effective": {
+      "search_params": {
+       "hnsw_ef": 128,
+       "exact": false,
+       "indexed_only": false
+      }
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 169,
+      "pairs_run": 169,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 676,
+      "sampled": 0,
+      "pass1_seconds": 1.2,
+      "seconds": 2.2,
+      "budget_seconds": 78.7
+     },
+     "summary": {
+      "pairs": 169,
+      "recall10": 1.0,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 3.1931,
+      "p95_ms": 3.3823999999999996,
+      "p99_ms": 3.5390159999999997,
+      "qps": 324.4362919427494
+     }
+    },
+    {
+     "id": "count",
+     "short_results": "count",
+     "max_exact_rows": 10000,
+     "widen": false,
+     "recall_sample_rate": 0.0,
+     "base_overrides": {},
+     "budget_seconds": 84.2,
+     "effective": {
+      "search_params": {
+       "hnsw_ef": 128,
+       "exact": false,
+       "indexed_only": false
+      }
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 169,
+      "pairs_run": 169,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 676,
+      "sampled": 0,
+      "pass1_seconds": 1.3,
+      "seconds": 2.5,
+      "budget_seconds": 84.2
+     },
+     "summary": {
+      "pairs": 169,
+      "recall10": 1.0,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 3.2894,
+      "p95_ms": 4.34732,
+      "p99_ms": 4.454447999999999,
+      "qps": 290.6185911292201
+     }
+    },
+    {
+     "id": "exact-1k",
+     "short_results": "exact",
+     "max_exact_rows": 1000,
+     "widen": false,
+     "recall_sample_rate": 0.0,
+     "base_overrides": {},
+     "budget_seconds": 90.5,
+     "effective": {
+      "search_params": {
+       "hnsw_ef": 128,
+       "exact": false,
+       "indexed_only": false
+      }
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 169,
+      "pairs_run": 169,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 676,
+      "sampled": 0,
+      "pass1_seconds": 1.3,
+      "seconds": 2.4,
+      "budget_seconds": 90.5
+     },
+     "summary": {
+      "pairs": 169,
+      "recall10": 1.0,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 3.2446,
+      "p95_ms": 4.3557,
+      "p99_ms": 4.526432,
+      "qps": 295.06951069443653
+     }
+    },
+    {
+     "id": "exact-10k",
+     "short_results": "exact",
+     "max_exact_rows": 10000,
+     "widen": false,
+     "recall_sample_rate": 0.0,
+     "base_overrides": {},
+     "budget_seconds": 97.8,
+     "effective": {
+      "search_params": {
+       "hnsw_ef": 128,
+       "exact": false,
+       "indexed_only": false
+      }
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 169,
+      "pairs_run": 169,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 676,
+      "sampled": 0,
+      "pass1_seconds": 1.2,
+      "seconds": 2.4,
+      "budget_seconds": 97.8
+     },
+     "summary": {
+      "pairs": 169,
+      "recall10": 1.0,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 3.2269,
+      "p95_ms": 4.32896,
+      "p99_ms": 4.486331999999999,
+      "qps": 296.938719930562
+     }
+    },
+    {
+     "id": "exact-inf",
+     "short_results": "exact",
+     "max_exact_rows": null,
+     "widen": false,
+     "recall_sample_rate": 0.0,
+     "base_overrides": {},
+     "budget_seconds": 106.5,
+     "effective": {
+      "search_params": {
+       "hnsw_ef": 128,
+       "exact": false,
+       "indexed_only": false
+      }
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 169,
+      "pairs_run": 169,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 676,
+      "sampled": 0,
+      "pass1_seconds": 1.2,
+      "seconds": 2.4,
+      "budget_seconds": 106.5
+     },
+     "summary": {
+      "pairs": 169,
+      "recall10": 1.0,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 3.2072,
+      "p95_ms": 4.33956,
+      "p99_ms": 4.444311999999999,
+      "qps": 296.32502612131407
+     }
+    },
+    {
+     "id": "widen",
+     "short_results": "widen",
+     "max_exact_rows": 10000,
+     "widen": true,
+     "recall_sample_rate": 0.0,
+     "base_overrides": {},
+     "budget_seconds": 116.9,
+     "effective": {
+      "search_params": {
+       "hnsw_ef": 128,
+       "exact": false,
+       "indexed_only": false
+      }
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 169,
+      "pairs_run": 169,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 676,
+      "sampled": 0,
+      "pass1_seconds": 1.2,
+      "seconds": 2.4,
+      "budget_seconds": 116.9
+     },
+     "summary": {
+      "pairs": 169,
+      "recall10": 1.0,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 3.2206,
+      "p95_ms": 4.29094,
+      "p99_ms": 4.341684,
+      "qps": 297.5945730019738
+     }
+    },
+    {
+     "id": "monitor",
+     "short_results": "report",
+     "max_exact_rows": 10000,
+     "widen": false,
+     "recall_sample_rate": 0.01,
+     "base_overrides": {},
+     "budget_seconds": 129.6,
+     "effective": {
+      "search_params": {
+       "hnsw_ef": 128,
+       "exact": false,
+       "indexed_only": false
+      }
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 169,
+      "pairs_run": 169,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 676,
+      "sampled": 9,
+      "pass1_seconds": 1.1,
+      "seconds": 2.2,
+      "budget_seconds": 129.6
+     },
+     "summary": {
+      "pairs": 169,
+      "recall10": 1.0,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 3.1348,
+      "p95_ms": 3.32976,
+      "p99_ms": 3.362924,
+      "qps": 330.0578187084193
+     }
+    },
+    {
+     "id": "native-acorn",
+     "short_results": "report",
+     "max_exact_rows": 10000,
+     "widen": false,
+     "recall_sample_rate": 0.0,
+     "base_overrides": {
+      "acorn": 1.0
+     },
+     "budget_seconds": 145.6,
+     "effective": {
+      "search_params": {
+       "hnsw_ef": 128,
+       "exact": false,
+       "indexed_only": false,
+       "acorn": {
+        "enable": true,
+        "max_selectivity": 1.0
+       }
+      }
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 169,
+      "pairs_run": 169,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 676,
+      "sampled": 0,
+      "pass1_seconds": 1.1,
+      "seconds": 2.2,
+      "budget_seconds": 145.6
+     },
+     "summary": {
+      "pairs": 169,
+      "recall10": 1.0,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 3.1541,
+      "p95_ms": 3.35252,
+      "p99_ms": 3.4091959999999997,
+      "qps": 327.40332932377265
+     }
+    }
+   ],
+   "load": {
+    "load_s": 2.7,
+    "index_s": 15.0,
+    "points": 2980,
+    "indexed_vectors": 0,
+    "segments": 2,
+    "server": {
+     "title": "qdrant - vector search engine",
+     "version": "1.19.2",
+     "commit": "016542aa5deb6c66380bb137badf73d54f742bde"
+    },
+    "layout": "wardowl's create_collection, keyword indexes on the permission fields",
+    "keyword_fields": [
+     "allowed_users",
+     "allowed_groups",
+     "tenant"
+    ],
+    "seconds": 17.8
+   }
+  },
+  {
+   "layout": "tenant",
+   "build": 0,
+   "settings": [
+    {
+     "id": "native-tenant",
+     "short_results": "report",
+     "max_exact_rows": 10000,
+     "widen": false,
+     "recall_sample_rate": 0.0,
+     "base_overrides": {},
+     "budget_seconds": 1144.5,
+     "effective": {
+      "search_params": {
+       "hnsw_ef": 128,
+       "exact": false,
+       "indexed_only": false
+      }
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 169,
+      "pairs_run": 169,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 676,
+      "sampled": 0,
+      "pass1_seconds": 1.2,
+      "seconds": 2.4,
+      "budget_seconds": 1144.5
+     },
+     "summary": {
+      "pairs": 169,
+      "recall10": 1.0,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 3.4376,
+      "p95_ms": 3.66568,
+      "p99_ms": 3.8066879999999994,
+      "qps": 301.542918389461
+     }
+    }
+   ],
+   "load": {
+    "load_s": 2.6,
+    "index_s": 15.0,
+    "points": 2980,
+    "indexed_vectors": 0,
+    "segments": 2,
+    "server": {
+     "title": "qdrant - vector search engine",
+     "version": "1.19.2",
+     "commit": "016542aa5deb6c66380bb137badf73d54f742bde"
+    },
+    "layout": "tenant field is_tenant=true, hnsw m 0 and payload_m 16 (harness-level), other fields as as-run",
+    "keyword_fields": [
+     "allowed_users",
+     "allowed_groups"
+    ],
+    "seconds": 17.8
+   }
+  }
+ ],
+ "failures": [],
+ "skipped": [],
+ "status": "done",
+ "finished": "2026-10-29T17:03:14+0000"
+}

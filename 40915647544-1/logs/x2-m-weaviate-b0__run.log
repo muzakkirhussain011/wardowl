@@ -1,0 +1,42 @@
+[17:06:42] data: 8 files match checksums.json
+[17:06:42] corpus m: 20,000 chunks, 248 pairs (0 s)
+[17:06:43] == weaviate default build 0: loading 20,000 chunks
+[17:06:44]   loaded 2,000 of 20,000 chunks (1 s)
+[17:06:45]   loaded 4,000 of 20,000 chunks (2 s)
+[17:06:46]   loaded 6,000 of 20,000 chunks (2 s)
+[17:06:47]   loaded 8,000 of 20,000 chunks (3 s)
+[17:06:48]   loaded 10,000 of 20,000 chunks (4 s)
+[17:06:49]   loaded 12,000 of 20,000 chunks (5 s)
+[17:06:50]   loaded 14,000 of 20,000 chunks (6 s)
+[17:06:51]   loaded 16,000 of 20,000 chunks (7 s)
+[17:06:52]   loaded 18,000 of 20,000 chunks (8 s)
+[17:06:53]   loaded 20,000 of 20,000 chunks (9 s)
+[17:06:53]    loaded: {'load_s': 9.3, 'objects': 20000, 'config': {'ef': -1, 'flat_search_cutoff': 40000, 'filter_strategy': 'acorn', 'dynamic_ef': [100, 500, 8]}, 'version': '1.39.12', 'seconds': 9.5}
+[17:06:53] -- weaviate default b0 default: {'ef': -1, 'strategy': 'acorn', 'cutoff': 40000} (budget 2.2 min)
+[17:06:55]   weaviate default b0 default: 248 of 248 pairs, 3 passes, 0 errors, 2 s (cut: none)
+[17:06:55]    weaviate default b0 default: {'pairs': 248, 'recall10': 1.0, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 2.09965, 'p95_ms': 4.361585, 'p99_ms': 6.458374, 'qps': 385.09472243210917}
+[17:06:55] -- weaviate default b0 ef64: {'ef': 64, 'strategy': 'acorn', 'cutoff': 40000} (budget 2.5 min)
+[17:06:57]   weaviate default b0 ef64: 248 of 248 pairs, 3 passes, 0 errors, 2 s (cut: none)
+[17:06:57]    weaviate default b0 ef64: {'pairs': 248, 'recall10': 1.0, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 2.1788499999999997, 'p95_ms': 4.441889999999999, 'p99_ms': 6.447570000000001, 'qps': 375.7163608113292}
+[17:06:57] -- weaviate default b0 ef128: {'ef': 128, 'strategy': 'acorn', 'cutoff': 40000} (budget 2.8 min)
+[17:06:59]   weaviate default b0 ef128: 248 of 248 pairs, 3 passes, 0 errors, 2 s (cut: none)
+[17:06:59]    weaviate default b0 ef128: {'pairs': 248, 'recall10': 1.0, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 2.18965, 'p95_ms': 4.469384999999999, 'p99_ms': 6.67633, 'qps': 372.1729860038946}
+[17:06:59] -- weaviate default b0 ef256: {'ef': 256, 'strategy': 'acorn', 'cutoff': 40000} (budget 3.3 min)
+[17:07:01]   weaviate default b0 ef256: 248 of 248 pairs, 3 passes, 0 errors, 2 s (cut: none)
+[17:07:01]    weaviate default b0 ef256: {'pairs': 248, 'recall10': 1.0, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 1.9707, 'p95_ms': 4.103275, 'p99_ms': 6.192041000000001, 'qps': 405.28133878807154}
+[17:07:01] -- weaviate default b0 ef512: {'ef': 512, 'strategy': 'acorn', 'cutoff': 40000} (budget 3.9 min)
+[17:07:03]   weaviate default b0 ef512: 248 of 248 pairs, 3 passes, 0 errors, 2 s (cut: none)
+[17:07:03]    weaviate default b0 ef512: {'pairs': 248, 'recall10': 1.0, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 1.9695, 'p95_ms': 4.05354, 'p99_ms': 6.089898, 'qps': 405.00646785530614}
+[17:07:03] -- weaviate default b0 ef1024: {'ef': 1024, 'strategy': 'acorn', 'cutoff': 40000} (budget 4.9 min)
+[17:07:05]   weaviate default b0 ef1024: 248 of 248 pairs, 3 passes, 0 errors, 2 s (cut: none)
+[17:07:05]    weaviate default b0 ef1024: {'pairs': 248, 'recall10': 1.0, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 1.9837500000000001, 'p95_ms': 4.0883449999999995, 'p99_ms': 6.120934999999999, 'qps': 406.64277203130695}
+[17:07:05] -- weaviate default b0 sweeping: {'ef': -1, 'strategy': 'sweeping', 'cutoff': 40000} (budget 6.5 min)
+[17:07:07]   weaviate default b0 sweeping: 248 of 248 pairs, 3 passes, 0 errors, 2 s (cut: none)
+[17:07:07]    weaviate default b0 sweeping: {'pairs': 248, 'recall10': 1.0, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 2.0562, 'p95_ms': 4.3387199999999995, 'p99_ms': 6.3329629999999995, 'qps': 395.2409168696792}
+[17:07:07] -- weaviate default b0 noflat: {'ef': -1, 'strategy': 'acorn', 'cutoff': 0} (budget 9.8 min)
+[17:07:10]   weaviate default b0 noflat: 248 of 248 pairs, 3 passes, 0 errors, 3 s (cut: none)
+[17:07:10]    weaviate default b0 noflat: {'pairs': 248, 'recall10': 0.9362903225806453, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 3.2576, 'p95_ms': 4.610869999999999, 'p99_ms': 4.851407, 'qps': 298.86888971292075}
+[17:07:10] -- weaviate default b0 exact: {'ef': -1, 'strategy': 'acorn', 'cutoff': 100000000} (budget 19.5 min)
+[17:07:12]   weaviate default b0 exact: 248 of 248 pairs, 3 passes, 0 errors, 2 s (cut: none)
+[17:07:12]    weaviate default b0 exact: {'pairs': 248, 'recall10': 1.0, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 2.22515, 'p95_ms': 4.53703, 'p99_ms': 6.969388, 'qps': 369.17501739067393}
+[17:07:12] X2 x2-m-weaviate-b0: done
