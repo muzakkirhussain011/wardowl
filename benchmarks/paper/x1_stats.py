@@ -19,7 +19,13 @@ then bootstrapped by resampling persons (10,000 resamples by default, seeded, pe
 A difference between two settings is taken per (question, replicate), averaged per question and
 bootstrapped the same way. CPU only.
 
-    python x1_stats.py [--in /kaggle/working/x1] [--resamples 10000] [--seed 20261026]
+Run 2 (amendment 2 of PREREGISTRATION.md) is read from several shard folders at once: the first
+folder's question table is used and every other folder's must describe the same questions, and a
+setting and build reported by two folders stops the statistics. Its outputs add plans.csv (the
+plans each pgvector setting executed) and the verdict on P5; P1 and P2 then use `pg-custom` as
+their reference and leave out settings that ran mostly exact.
+
+    python x1_stats.py [--in /kaggle/working/x1run2 ...] [--out DIR] [--resamples 10000] [--seed 20261026]
 """
 
 from __future__ import annotations
@@ -41,8 +47,11 @@ from paper_common import log
 Key = tuple[str, str, str]  # (store, layout, setting)
 
 PG_REF: Key = ("pgvector", "hnsw-m16-efc64", "p-asrun")
+PG_CUSTOM: Key = ("pgvector", "hnsw-m16-efc64", "pg-custom")  # run 2: the reference of P1 and P2 (amendment 2)
 PG_WIDE = "hnsw-m32-efc200"
 Q_REF: Key = ("qdrant", "as-run", "q-asrun")
+X0_RECALL5 = 0.691  # the original run's pgvector recall@5 (results.json of notebookd8377caca8)
+HNSW_SHARE_FLOOR = 0.5  # amendment 2, item 3: below this, a setting meant to search the graph ran mostly exact
 
 METRICS = [
     "recall5",
@@ -144,28 +153,85 @@ def excludes_zero(interval: dict[str, Any] | None) -> bool | None:
 class Data:
     """x1's outputs, joined with the question table, and the estimates the rules ask for."""
 
-    def __init__(self, folder: Path, resamples: int, seed: int) -> None:
-        self.folder, self.resamples, self.seed = folder, resamples, seed
-        questions = pc.read_table(folder / "questions")
+    def __init__(self, folders: Sequence[Path], resamples: int, seed: int) -> None:
+        self.folders, self.resamples, self.seed = list(folders), resamples, seed
+        self.folder = self.folders[0]
+        questions = pc.read_table(self.folder / "questions")
         if questions is None:
-            raise FileNotFoundError(f"{folder} has no questions table: run x1_underretrieval.py first")
+            raise FileNotFoundError(f"{self.folder} has no questions table: run x1_underretrieval.py first")
         self.questions = questions
-        runs = pc.read_tables(folder / "runs")
+        for other in self.folders[1:]:
+            self._same_questions(other)
+        runs = self._tables("runs")
         if runs.empty:
-            raise FileNotFoundError(f"{folder / 'runs'} holds no results: run x1_underretrieval.py first")
+            raise FileNotFoundError(f"{self.folders} hold no results: run x1_underretrieval.py first")
+        twice = runs.duplicated(["store", "layout", "build", "setting", "qid"])
+        if twice.any():
+            clash = runs.loc[twice, ["store", "layout", "build", "setting"]].drop_duplicates()
+            first = clash.head(5).to_dict("records")
+            raise RuntimeError(f"settings and builds reported by more than one folder: {first}")
         runs["error"] = runs["error"].fillna("").astype(str)
-        for column in ("hits5", "hits10"):
-            runs[column] = runs[column].fillna("").astype(str)
+        for column in ("hits5", "hits10", "plan5", "plan10"):
+            if column in runs:
+                runs[column] = runs[column].fillna("").astype(str)
         self.runs = runs.merge(questions[QUESTION_COLUMNS].drop(columns="person"), on="qid", how="left")
         self.runs["rho_bin"] = pd.cut(self.runs["rho100"], RHO_BINS, labels=RHO_LABELS, right=False).astype(str)
-        self.explain = pc.read_tables(folder / "explain")
-        self.telemetry = pc.read_tables(folder / "telemetry")
-        self.estimates = pc.read_table(folder / "pg_filter_estimates")
-        self.metas = [json.loads(p.read_text(encoding="utf-8")) for p in sorted((folder / "meta").glob("*.json"))]
-        self.builds = [json.loads(p.read_text(encoding="utf-8")) for p in sorted((folder / "builds").glob("*.json"))]
+        self.explain = self._tables("explain")
+        self.telemetry = self._tables("telemetry")
+        estimates = [pc.read_table(f / "pg_filter_estimates") for f in self.folders]
+        self.estimates = next((e for e in estimates if e is not None and not e.empty), None)
+        self.metas = self._records("meta")
+        self.builds = self._records("builds")
         self.keys: set[Key] = set(self.runs[["store", "layout", "setting"]].itertuples(index=False, name=None))
         self.per_question = self._per_question()
-        log(f"{len(self.runs):,} result rows of {len(self.keys)} settings; {len(self.metas)} setting records")
+        self.grid = self._grid()
+        self.pg_ref = PG_CUSTOM if self.grid == "run2" else PG_REF  # the reference of P1 and P2
+        self.plans = plan_table(self.runs)
+        overall = self.plans.to_dict("records") if not self.plans.empty else []
+        self.mostly_exact = {
+            (r["store"], r["layout"], r["setting"])
+            for r in overall
+            if r["build"] == "all" and r["meant_for_graph"] and r["hnsw_share"] < HNSW_SHARE_FLOOR
+        }
+        log(
+            f"{len(self.runs):,} result rows of {len(self.keys)} settings from {len(self.folders)} folders; "
+            f"{len(self.metas)} setting records; grid {self.grid}; P1 and P2 reference {name(self.pg_ref)}"
+        )
+
+    def _tables(self, kind: str) -> pd.DataFrame:
+        frames = [pc.read_tables(f / kind) for f in self.folders]
+        frames = [f for f in frames if not f.empty]
+        return pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
+
+    def _records(self, kind: str) -> list[dict[str, Any]]:
+        paths = [p for f in self.folders for p in sorted((f / kind).glob("*.json"))]
+        return [json.loads(p.read_text(encoding="utf-8")) for p in paths]
+
+    def _same_questions(self, other: Path) -> None:
+        """A shard's question table must describe this one's questions, persons and readable counts."""
+        theirs = pc.read_table(other / "questions")
+        if theirs is None:
+            raise FileNotFoundError(f"{other} has no questions table")
+        key = ["qid", "person", "question", "R"]
+        a, b = self.questions[key].reset_index(drop=True), theirs[key].reset_index(drop=True)
+        if len(a) != len(b) or not a.astype(str).equals(b.astype(str)):
+            raise RuntimeError(f"{other} describes other questions than {self.folder}")
+
+    def _grid(self) -> str:
+        """run1 or run2, from the option every invocation of x1_underretrieval.py recorded (run1 before it)."""
+        grids = set()
+        for folder in self.folders:
+            path = folder / "manifest.json"
+            if path.is_file():
+                for entry in json.loads(path.read_text(encoding="utf-8")).get("invocations", []):
+                    grids.add((entry.get("options") or {}).get("grid") or "run1")
+        if len(grids) > 1:
+            raise RuntimeError(f"the folders mix grids {sorted(grids)}: analyse run 1 and run 2 separately")
+        return grids.pop() if grids else "run1"
+
+    def usable(self, key: Key) -> bool:
+        """Amendment 2, item 3: P1 and P2 leave out a setting that was meant to search the graph and mostly did not."""
+        return key not in self.mostly_exact
 
     def _per_question(self) -> pd.DataFrame:
         """Each (setting, question)'s metrics averaged over the builds the setting ran on."""
@@ -282,13 +348,16 @@ def interval_table(data: Data) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def comparisons(keys: set[Key]) -> list[tuple[Key, Key, str]]:
-    """Every setting against its store's original-run setting, plus the pairs the predictions need."""
+def comparisons(keys: set[Key], pg_ref: Key = PG_REF) -> list[tuple[Key, Key, str]]:
+    """Every setting against its store's original-run setting, plus the pairs the predictions need;
+    in run 2 every pgvector setting also against `pg-custom`, the reference of P1 and P2."""
     pairs: list[tuple[Key, Key, str]] = []
     for key in sorted(keys):
         reference = PG_REF if key[0] == "pgvector" else Q_REF
         if key != reference:
             pairs.append((key, reference, "against the original run's setting"))
+        if key[0] == "pgvector" and pg_ref != PG_REF and key[2] != pg_ref[2]:
+            pairs.append((key, (pg_ref[0], key[1], pg_ref[2]), "against pg-custom on the same index (amendment 2)"))
         if key[0] == "qdrant" and key[1] != Q_REF[1] and (key[0], Q_REF[1], key[2]) in keys:
             pairs.append((key, (key[0], Q_REF[1], key[2]), "layout against as-run, same setting"))
         if key[0] == "pgvector" and key[1] == PG_WIDE and (key[0], PG_REF[1], key[2]) in keys:
@@ -304,7 +373,7 @@ def comparisons(keys: set[Key]) -> list[tuple[Key, Key, str]]:
 
 def paired_table(data: Data) -> pd.DataFrame:
     rows = []
-    for a, b, why in comparisons(data.keys):
+    for a, b, why in comparisons(data.keys, data.pg_ref):
         merged = data.paired_rows(a, b, PAIRED_METRICS)
         for metric in PAIRED_METRICS:
             row: dict[str, Any] = {"a": name(a), "b": name(b), "why": why, "metric": metric}
@@ -351,6 +420,38 @@ def explain_summary(explain: pd.DataFrame) -> pd.DataFrame:
                 "scan_nodes": json.dumps(g["scan_node"].value_counts().to_dict()),
             }
         )
+    return pd.DataFrame(rows)
+
+
+def plan_table(runs: pd.DataFrame) -> pd.DataFrame:
+    """Amendment 2, item 3: per pgvector setting, over its builds ("all") and per build, how many
+    first-pass searches had their executed plan captured, and the shares that searched the HNSW
+    graph, the GIN index or the whole table, and that ran a generic plan."""
+    if "plan5" not in runs:
+        return pd.DataFrame()
+    rows = []
+    pg = runs[runs["store"] == "pgvector"]
+    for (store, layout, setting), g in pg.groupby(["store", "layout", "setting"], sort=True):
+        for build, part in [("all", g), *g.groupby("build", sort=True)]:
+            kinds = pd.concat([part["plan5"], part["plan10"]], ignore_index=True)
+            kinds = kinds[kinds != ""]
+            generic = pd.concat([part["generic5"], part["generic10"]], ignore_index=True).dropna()
+            if not len(kinds):
+                continue
+            rows.append(
+                {
+                    "store": store,
+                    "layout": layout,
+                    "setting": setting,
+                    "build": build,
+                    "captured": len(kinds),
+                    "hnsw_share": float((kinds == "hnsw").mean()),
+                    "gin_share": float((kinds == "gin").mean()),
+                    "seq_share": float((kinds == "seq").mean()),
+                    "generic_share": float(generic.mean()) if len(generic) else math.nan,
+                    "meant_for_graph": setting != "ph-exact",
+                }
+            )
     return pd.DataFrame(rows)
 
 
@@ -497,10 +598,13 @@ def q2(d: Data, engagement: pd.DataFrame, method: str) -> dict:
 
 
 def segments_of(d: Data, layout: str) -> set[Any]:
+    """The segment counts a layout's builds ended with: in run 2, the segments holding points
+    (amendment 2, item 6); in run 1, Qdrant's segments_count."""
     found = set()
     for build in d.builds:
         if build.get("store") == "qdrant" and build.get("layout") == layout:
-            found.add(json.dumps(build.get("segments"), sort_keys=True))
+            counted = build.get("data_segments") if d.grid == "run2" else None
+            found.add(json.dumps(counted if counted is not None else build.get("segments"), sort_keys=True))
     return found
 
 
@@ -537,24 +641,32 @@ def q4(d: Data) -> dict:
     )
 
 
+def excluded_note(d: Data, keys: Sequence[Key]) -> str:
+    left_out = [name(k) for k in keys if not d.usable(k)]
+    return f"; left out, ran mostly exact (amendment 2): {left_out}" if left_out else ""
+
+
 def p1(d: Data) -> dict:
-    base = d.estimate(PG_REF, "empty5")
+    ref = d.pg_ref
+    base = d.estimate(ref, "empty5") if d.usable(ref) else None
     if base is None or base["mean"] == 0:
-        reproduced = {"p-asrun reproduces empty results": None if base is None else False}
-        return judged("P1", "the iterative scan's budget runs out", reproduced, {}, "no empty result under p-asrun")
-    rows = d.of(PG_REF, d.runs)
+        reproduced = {f"{ref[2]} reproduces empty results": None if base is None else False}
+        why = f"no empty result under {ref[2]}" + excluded_note(d, [ref])
+        return judged("P1", "the iterative scan's budget runs out", reproduced, {}, why)
+    rows = d.of(ref, d.runs)
     empties = rows[rows["empty5"] == 1]
     explain = d.explain
     reach_rows = None
     if not explain.empty:
-        e = explain[(explain["store"] == PG_REF[0]) & (explain["layout"] == PG_REF[1])]
-        e = e[(e["setting"] == PG_REF[2]) & (e["reason"] == "short") & (e["k"] == 5) & (e["n_hits"] == 0)]
+        e = explain[(explain["store"] == ref[0]) & (explain["layout"] == ref[1])]
+        e = e[(e["setting"] == ref[2]) & (e["reason"] == "short") & (e["k"] == 5) & (e["n_hits"] == 0)]
         e = e[e["error"].fillna("") == ""]
         if len(e):
             reach_rows = float(e["rows_emitted"].median())
     reach = reach_rows if reach_rows is not None else 10_000.0
     share = float((empties["r1"] > reach / 2).mean()) if len(empties) else None
-    errs = {s: value(d.estimate((PG_REF[0], PG_REF[1], s), "empty5")) for s in RAISED}
+    raised = [(ref[0], ref[1], s) for s in RAISED]
+    errs = {k[2]: value(d.estimate(k, "empty5")) if d.usable(k) else None for k in raised}
     lowest = min((v for v in errs.values() if v is not None), default=None)
     top = errs.get("pa-t1000k-m16")
     tuples_only = [errs[s] for s in ("pa-t100k-m1", "pa-t1000k-m1") if errs.get(s) is not None]
@@ -569,7 +681,7 @@ def p1(d: Data) -> dict:
         f"{'' if reach_rows is not None else ', no EXPLAIN: 10,000 assumed'}) {pc.cell(share)} >= 0.95": None
         if share is None
         else share >= 0.95,
-        f"(b) lowest ERR of a raised limit {pc.cell(lowest)} <= 10% of p-asrun's {base['mean']:.4f}": None
+        f"(b) lowest ERR of a raised limit {pc.cell(lowest)} <= 10% of {ref[2]}'s {base['mean']:.4f}": None
         if lowest is None
         else lowest <= 0.1 * base["mean"],
         f"(c) median rows emitted on empties {pc.cell(reach_rows)} in [10000, 25000]": None
@@ -577,20 +689,28 @@ def p1(d: Data) -> dict:
         else 10_000 <= reach_rows <= 25_000,
     }
     falsify = {
-        f"ERR at 1M tuples and 16x memory {pc.cell(top)} >= half of p-asrun's": None
+        f"ERR at 1M tuples and 16x memory {pc.cell(top)} >= half of {ref[2]}'s": None
         if top is None
         else top >= 0.5 * base["mean"]
     }
-    notes = f"ERR by raised limit: {json.dumps({k: v for k, v in errs.items() if v is not None})}; binding: "
+    notes = f"reference {name(ref)}; empty results under it: {len(empties)}; "
+    notes += f"ERR by raised limit: {json.dumps({k: v for k, v in errs.items() if v is not None})}; binding: "
     notes += ", ".join(binding) if binding else "no single-limit raise removed 90% of the empties"
+    notes += excluded_note(d, raised)
     return judged("P1", "the iterative scan's budget runs out", confirm, falsify, notes)
 
 
 def p2(d: Data) -> dict:
-    a = d.difference((PG_REF[0], PG_REF[1], "pc-ef1000"), PG_REF, "recall10")
-    b = d.difference((PG_REF[0], PG_REF[1], "pd-lim10"), PG_REF, "recall10")
-    c = d.difference((PG_REF[0], PG_WIDE, PG_REF[2]), PG_REF, "recall10")
-    ref = d.of(PG_REF).dropna(subset=["recall10", "rho100"])
+    base = d.pg_ref
+    wide = (base[0], PG_WIDE, base[2])
+    ef1000, lim10 = (base[0], base[1], "pc-ef1000"), (base[0], base[1], "pd-lim10")
+    usable = d.usable(base)
+
+    def diff(key: Key, against: Key) -> dict[str, Any] | None:
+        return d.difference(key, against, "recall10") if usable and d.usable(key) and d.usable(against) else None
+
+    a, b, c = diff(ef1000, base), diff(lim10, base), diff(wide, base)
+    ref = d.of(base).dropna(subset=["recall10", "rho100"]) if usable else d.of(base).iloc[0:0]
     low, high = ref[ref["rho100"] < 0.1], ref[ref["rho100"] >= 0.1]
     loss_low = float((1 - low["recall10"]).mean()) if len(low) else None
     loss_high = float((1 - high["recall10"]).mean()) if len(high) else None
@@ -611,7 +731,65 @@ def p2(d: Data) -> dict:
         if a is None
         else abs(a["mean"]) < 0.01 and a["low"] <= 0 <= a["high"]
     }
-    return judged("P2", "mis-retrieval from shallow, relaxed scans", confirm, falsify)
+    notes = f"reference {name(base)}" + excluded_note(d, [base, ef1000, lim10, wide])
+    return judged("P2", "mis-retrieval from shallow, relaxed scans", confirm, falsify, notes)
+
+
+def p5(d: Data) -> dict:
+    """Amendment 2, item 5: the plan cache decides whether pgvector searches the graph."""
+
+    def original(f: pd.DataFrame) -> pd.Series:
+        return ~f["persona_type"].astype(str).str.startswith("probe")
+
+    def share(key: Key) -> float | None:
+        rows = d.plans[(d.plans["setting"] == key[2]) & (d.plans["layout"] == key[1])] if not d.plans.empty else None
+        rows = rows[rows["build"] == "all"] if rows is not None else None
+        return float(rows["hnsw_share"].iloc[0]) if rows is not None and len(rows) else None
+
+    def latency(key: Key, builds: set[str]) -> float | None:
+        rows = d.of(key, d.runs)
+        rows = rows[rows["build"].isin(builds)]["latency_ms"].dropna()
+        return float(rows.median()) if len(rows) else None
+
+    custom, auto = PG_CUSTOM, PG_REF
+    rc, ra = d.estimate(custom, "recall5", original), d.estimate(auto, "recall5", original)
+    sc, sa = share(custom), share(auto)
+    shared = set(d.of(custom, d.runs)["build"]) & set(d.of(auto, d.runs)["build"])  # one shard per build
+    lc, la = latency(custom, shared), latency(auto, shared)
+    confirm = {
+        f"(a) HNSW share under pg-custom {pc.cell(sc)} >= 0.9 and under p-asrun {pc.cell(sa)} <= 0.1": None
+        if sc is None or sa is None
+        else sc >= 0.9 and sa <= 0.1,
+        f"(b) pg-custom recall@5 on the original questions {show(rc)} within 0.08 of {X0_RECALL5}": None
+        if rc is None
+        else abs(rc["mean"] - X0_RECALL5) <= 0.08,
+        f"(c) p-asrun recall@5 on the original questions {show(ra)} >= 0.99, and its median latency "
+        f"{pc.cell(la)} ms at least 10x pg-custom's {pc.cell(lc)} ms on builds {sorted(shared)}": None
+        if ra is None or la is None or lc is None
+        else ra["mean"] >= 0.99 and la >= 10 * lc,
+    }
+    falsify = {
+        f"pg-custom HNSW share {pc.cell(sc)} >= 0.9 with recall@5 {show(rc)} >= 0.95": None
+        if sc is None or rc is None
+        else sc >= 0.9 and rc["mean"] >= 0.95,
+        f"p-asrun HNSW share {pc.cell(sa)} >= 0.5": None if sa is None else sa >= 0.5,
+    }
+    replays = []
+    for setting in ("p-x0", "p-x0v"):
+        key = (PG_REF[0], PG_REF[1], setting)
+        recall = d.estimate(key, "recall5", original)
+        metas = [m for m in d.metas if m.get("setting") == setting and m.get("status") == "done"]
+        generic = sum(int((m.get("prepared_statements") or {}).get("search_generic_plans") or 0) for m in metas)
+        pending = []
+        for m in metas:
+            gin = (m.get("table_state_before") or {}).get("gin_metapage")
+            pending.append(gin.get("n_pending_pages") if isinstance(gin, dict) else None)
+        replays.append(
+            f"{setting}: recall@5 {show(recall)}, HNSW share {pc.cell(share(key))}, generic plans {generic}, "
+            f"GIN pending pages before {pending}"
+        )
+    notes = "; ".join(replays)
+    return judged("P5", "the plan cache decides whether pgvector searches the graph", confirm, falsify, notes)
 
 
 def p3(d: Data) -> dict:
@@ -688,11 +866,13 @@ def p4(d: Data) -> dict:
 
 def report(data: Data, settings: pd.DataFrame, predictions: list[dict], path_note: str | None) -> str:
     missing = [m for m in data.metas if m.get("status") in ("unsupported", "failed")]
+    folders = ", ".join(f"`{f}`" for f in data.folders)
     lines = [
         "# X1: under-retrieval under permission filters, statistics",
         "",
-        f"Input: `{data.folder}`; {len(data.runs):,} result rows of {len(data.keys)} settings; "
-        f"{data.resamples:,} bootstrap resamples, seed {data.seed}. Verdicts follow PREREGISTRATION.md.",
+        f"Input: {folders} (grid {data.grid}); {len(data.runs):,} result rows of {len(data.keys)} settings; "
+        f"{data.resamples:,} bootstrap resamples, seed {data.seed}. Verdicts follow PREREGISTRATION.md"
+        + (", with amendment 2: P1 and P2 read `pg-custom` where they say `p-asrun`." if data.grid == "run2" else "."),
         "",
         "## Verdicts",
         "",
@@ -708,6 +888,16 @@ def report(data: Data, settings: pd.DataFrame, predictions: list[dict], path_not
     columns = ["store", "layout", "setting", "builds", "recall5", "recall10", "recall10_range", "empty5", "short5"]
     columns += ["gross_miss10", "sim_gap10", "latency_p50"]
     lines += pc.frame_table(settings, columns)
+    if not data.plans.empty:
+        lines += [
+            "## pgvector: the plans the searches executed (auto_explain, first pass; amendment 2)",
+            "",
+            f"A setting meant to search the HNSW graph with an HNSW share below {HNSW_SHARE_FLOOR} ran mostly exact"
+            f" and is left out of P1 and P2: {sorted(name(k) for k in data.mostly_exact) or 'none'}.",
+            "",
+        ]
+        overall = data.plans[data.plans["build"] == "all"]
+        lines += pc.frame_table(overall, ["layout", "setting", "captured", "hnsw_share", "gin_share", "generic_share"])
     if missing:
         lines += ["## Settings that did not run", ""]
         for m in missing:
@@ -722,15 +912,16 @@ def report(data: Data, settings: pd.DataFrame, predictions: list[dict], path_not
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Experiment X1: statistics and pre-registered verdicts")
-    parser.add_argument("--in", dest="folder", type=Path, default=Path("/kaggle/working/x1"))
+    parser.add_argument("--in", dest="folders", type=Path, nargs="+", default=[Path("/kaggle/working/x1run2")])
+    parser.add_argument("--out", type=Path, default=None, help="default <the first --in>/stats")
     parser.add_argument("--resamples", type=int, default=10_000)
     parser.add_argument("--seed", type=int, default=pc.SEED)
     args = parser.parse_args(argv)
-    out = args.folder / "stats"
+    out = args.out or args.folders[0] / "stats"
     out.mkdir(parents=True, exist_ok=True)
     log.to(out / "x1_stats.log")
     started = time.perf_counter()
-    data = Data(args.folder, args.resamples, args.seed)
+    data = Data(args.folders, args.resamples, args.seed)
 
     by_build = build_summary(data.runs)
     settings = setting_summary(by_build)
@@ -744,10 +935,13 @@ def main(argv: list[str] | None = None) -> int:
     tables["qdrant_paths"] = paths
     engagement, method = acorn_engagement(data, path)
     tables["acorn_engagement"] = engagement
+    tables["plans"] = data.plans
 
     log("pre-registered verdicts")
     predictions = [q1(data), q2(data, engagement, method), q3(data, by_build), q4(data), p1(data), p2(data)]
     predictions += [p3(data), p4(data)]
+    if data.grid == "run2":
+        predictions.append(p5(data))
     tables["predictions"] = pd.DataFrame(
         [{**p, "confirm": json.dumps(p["confirm"]), "falsify": json.dumps(p["falsify"])} for p in predictions]
     )
@@ -759,7 +953,8 @@ def main(argv: list[str] | None = None) -> int:
         out / "manifest.json",
         {
             "experiment": "X1 statistics",
-            "input": str(args.folder),
+            "input": [str(f) for f in args.folders],
+            "grid": data.grid,
             "resamples": args.resamples,
             "seed": args.seed,
             "settings": sorted(name(k) for k in data.keys),
