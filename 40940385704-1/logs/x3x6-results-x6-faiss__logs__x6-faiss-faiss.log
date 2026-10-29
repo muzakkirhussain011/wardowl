@@ -1,0 +1,177 @@
+[19:30:54] x6 faiss: loading the data
+[19:30:54] x6 faiss: seed 0
+[19:30:55]   seed 0: building w1 (57,638 chunks)
+[19:30:56]   seed 0: w1 built in 1 s {}
+[19:30:56]   seed 0: building sep (49,444 chunks)
+[19:30:56]   seed 0: sep built in 0 s {}
+[19:30:56]   seed 0: building w0 group 0 (57,638 chunks)
+[19:30:57]   seed 0: w0 group 0 built in 1 s {}
+[19:31:56]   seed 0: 1,080/15,552 retrievals (17.7 per s, 14 min left)
+[19:32:43]   seed 0: building w0 group 1 (57,638 chunks)
+[19:32:43]   seed 0: w0 group 1 built in 1 s {}
+[19:32:59]   seed 0: 2,232/15,552 retrievals (18.0 per s, 12 min left)
+[19:34:01]   seed 0: 3,384/15,552 retrievals (18.2 per s, 11 min left)
+[19:34:29]   seed 0: building w0 group 2 (57,638 chunks)
+[19:34:29]   seed 0: w0 group 2 built in 1 s {}
+[19:35:04]   seed 0: 4,536/15,552 retrievals (18.2 per s, 10 min left)
+[19:36:07]   seed 0: 5,688/15,552 retrievals (18.2 per s, 9 min left)
+[19:36:15]   seed 0: building w0 group 3 (57,638 chunks)
+[19:36:16]   seed 0: w0 group 3 built in 1 s {}
+[19:37:10]   seed 0: 6,840/15,552 retrievals (18.2 per s, 8 min left)
+[19:38:01]   seed 0: building w0 group 4 (57,638 chunks)
+[19:38:01]   seed 0: w0 group 4 built in 1 s {}
+[19:38:13]   seed 0: 7,992/15,552 retrievals (18.2 per s, 7 min left)
+[19:39:16]   seed 0: 9,144/15,552 retrievals (18.3 per s, 6 min left)
+[19:39:47]   seed 0: building w0 group 5 (57,638 chunks)
+[19:39:48]   seed 0: w0 group 5 built in 1 s {}
+[19:40:18]   seed 0: 10,296/15,552 retrievals (18.3 per s, 5 min left)
+[19:41:21]   seed 0: 11,448/15,552 retrievals (18.3 per s, 4 min left)
+[19:41:33]   seed 0: building w0 group 6 (57,638 chunks)
+[19:41:33]   seed 0: w0 group 6 built in 1 s {}
+[19:42:25]   seed 0: 12,600/15,552 retrievals (18.3 per s, 3 min left)
+[19:43:19]   seed 0: building w0 group 7 (57,638 chunks)
+[19:43:19]   seed 0: w0 group 7 built in 1 s {}
+[19:43:27]   seed 0: 13,752/15,552 retrievals (18.3 per s, 2 min left)
+[19:44:31]   seed 0: 14,904/15,552 retrievals (18.3 per s, 1 min left)
+[19:45:06] x6 faiss: seed 0 done in 14.2 min
+[19:45:06] x6 faiss: seed 1
+[19:45:07]   seed 1: building w1 (57,638 chunks)
+[19:45:07]   seed 1: w1 built in 1 s {}
+[19:45:08]   seed 1: building sep (49,128 chunks)
+[19:45:08]   seed 1: sep built in 0 s {}
+[19:45:08]   seed 1: building w0 group 0 (57,638 chunks)
+[19:45:09]   seed 1: w0 group 0 built in 1 s {}
+[19:46:08]   seed 1: 1,080/15,552 retrievals (17.7 per s, 14 min left)
+[19:46:55]   seed 1: building w0 group 1 (57,638 chunks)
+[19:46:56]   seed 1: w0 group 1 built in 1 s {}
+[19:47:08]   seed 1: 2,160/15,552 retrievals (17.8 per s, 13 min left)
+[19:48:12]   seed 1: 3,312/15,552 retrievals (17.9 per s, 11 min left)
+[19:48:42]   seed 1: building w0 group 2 (57,638 chunks)
+[19:48:43]   seed 1: w0 group 2 built in 1 s {}
+[19:49:13]   seed 1: 4,464/15,552 retrievals (18.1 per s, 10 min left)
+[19:50:16]   seed 1: 5,616/15,552 retrievals (18.2 per s, 9 min left)
+[19:50:28]   seed 1: building w0 group 3 (57,638 chunks)
+[19:50:29]   seed 1: w0 group 3 built in 1 s {}
+[19:51:17]   seed 1: 6,696/15,552 retrievals (18.1 per s, 8 min left)
+[19:52:16]   seed 1: building w0 group 4 (57,638 chunks)
+[19:52:16]   seed 1: w0 group 4 built in 1 s {}
+[19:52:21]   seed 1: 7,848/15,552 retrievals (18.1 per s, 7 min left)
+[19:53:24]   seed 1: 9,000/15,552 retrievals (18.1 per s, 6 min left)
+[19:54:03]   seed 1: building w0 group 5 (57,638 chunks)
+[19:54:04]   seed 1: w0 group 5 built in 1 s {}
+[19:54:28]   seed 1: 10,152/15,552 retrievals (18.1 per s, 5 min left)
+[19:55:31]   seed 1: 11,304/15,552 retrievals (18.1 per s, 4 min left)
+[19:55:50]   seed 1: building w0 group 6 (57,638 chunks)
+[19:55:51]   seed 1: w0 group 6 built in 1 s {}
+[19:56:34]   seed 1: 12,456/15,552 retrievals (18.1 per s, 3 min left)
+[19:57:36]   seed 1: 13,608/15,552 retrievals (18.2 per s, 2 min left)
+[19:57:36]   seed 1: building w0 group 7 (57,638 chunks)
+[19:57:37]   seed 1: w0 group 7 built in 1 s {}
+[19:58:40]   seed 1: 14,760/15,552 retrievals (18.1 per s, 1 min left)
+[19:59:23] x6 faiss: seed 1 done in 14.3 min
+[19:59:23] x6 faiss: seed 2
+[19:59:24]   seed 2: building w1 (57,638 chunks)
+[19:59:25]   seed 2: w1 built in 1 s {}
+[19:59:25]   seed 2: building sep (49,221 chunks)
+[19:59:25]   seed 2: sep built in 0 s {}
+[19:59:25]   seed 2: building w0 group 0 (57,638 chunks)
+[19:59:26]   seed 2: w0 group 0 built in 1 s {}
+[20:00:24]   seed 2: 1,080/15,552 retrievals (17.9 per s, 13 min left)
+[20:01:10]   seed 2: building w0 group 1 (57,638 chunks)
+[20:01:11]   seed 2: w0 group 1 built in 1 s {}
+[20:01:27]   seed 2: 2,232/15,552 retrievals (18.1 per s, 12 min left)
+[20:02:29]   seed 2: 3,384/15,552 retrievals (18.2 per s, 11 min left)
+[20:02:57]   seed 2: building w0 group 2 (57,638 chunks)
+[20:02:58]   seed 2: w0 group 2 built in 1 s {}
+[20:03:33]   seed 2: 4,536/15,552 retrievals (18.2 per s, 10 min left)
+[20:04:35]   seed 2: 5,688/15,552 retrievals (18.3 per s, 9 min left)
+[20:04:43]   seed 2: building w0 group 3 (57,638 chunks)
+[20:04:43]   seed 2: w0 group 3 built in 1 s {}
+[20:05:38]   seed 2: 6,840/15,552 retrievals (18.3 per s, 8 min left)
+[20:06:29]   seed 2: building w0 group 4 (57,638 chunks)
+[20:06:29]   seed 2: w0 group 4 built in 1 s {}
+[20:06:41]   seed 2: 7,992/15,552 retrievals (18.3 per s, 7 min left)
+[20:07:44]   seed 2: 9,144/15,552 retrievals (18.3 per s, 6 min left)
+[20:08:14]   seed 2: building w0 group 5 (57,638 chunks)
+[20:08:15]   seed 2: w0 group 5 built in 1 s {}
+[20:08:45]   seed 2: 10,296/15,552 retrievals (18.3 per s, 5 min left)
+[20:09:48]   seed 2: 11,448/15,552 retrievals (18.3 per s, 4 min left)
+[20:10:00]   seed 2: building w0 group 6 (57,638 chunks)
+[20:10:00]   seed 2: w0 group 6 built in 1 s {}
+[20:10:50]   seed 2: 12,600/15,552 retrievals (18.4 per s, 3 min left)
+[20:11:44]   seed 2: building w0 group 7 (57,638 chunks)
+[20:11:44]   seed 2: w0 group 7 built in 1 s {}
+[20:11:52]   seed 2: 13,752/15,552 retrievals (18.4 per s, 2 min left)
+[20:12:54]   seed 2: 14,904/15,552 retrievals (18.4 per s, 1 min left)
+[20:13:28] x6 faiss: seed 2 done in 14.1 min
+[20:13:28] x6 faiss: seed 3
+[20:13:29]   seed 3: building w1 (57,638 chunks)
+[20:13:30]   seed 3: w1 built in 1 s {}
+[20:13:30]   seed 3: building sep (50,639 chunks)
+[20:13:31]   seed 3: sep built in 1 s {}
+[20:13:31]   seed 3: building w0 group 0 (57,638 chunks)
+[20:13:31]   seed 3: w0 group 0 built in 1 s {}
+[20:14:31]   seed 3: 1,080/15,552 retrievals (17.6 per s, 14 min left)
+[20:15:18]   seed 3: building w0 group 1 (57,638 chunks)
+[20:15:18]   seed 3: w0 group 1 built in 1 s {}
+[20:15:34]   seed 3: 2,232/15,552 retrievals (17.9 per s, 12 min left)
+[20:16:35]   seed 3: 3,312/15,552 retrievals (17.9 per s, 11 min left)
+[20:17:06]   seed 3: building w0 group 2 (57,638 chunks)
+[20:17:07]   seed 3: w0 group 2 built in 1 s {}
+[20:17:38]   seed 3: 4,464/15,552 retrievals (18.0 per s, 10 min left)
+[20:18:41]   seed 3: 5,616/15,552 retrievals (18.0 per s, 9 min left)
+[20:18:53]   seed 3: building w0 group 3 (57,638 chunks)
+[20:18:53]   seed 3: w0 group 3 built in 1 s {}
+[20:19:41]   seed 3: 6,696/15,552 retrievals (18.0 per s, 8 min left)
+[20:20:40]   seed 3: building w0 group 4 (57,638 chunks)
+[20:20:40]   seed 3: w0 group 4 built in 1 s {}
+[20:20:44]   seed 3: 7,848/15,552 retrievals (18.0 per s, 7 min left)
+[20:21:47]   seed 3: 9,000/15,552 retrievals (18.1 per s, 6 min left)
+[20:22:26]   seed 3: building w0 group 5 (57,638 chunks)
+[20:22:27]   seed 3: w0 group 5 built in 1 s {}
+[20:22:50]   seed 3: 10,152/15,552 retrievals (18.1 per s, 5 min left)
+[20:23:54]   seed 3: 11,304/15,552 retrievals (18.1 per s, 4 min left)
+[20:24:14]   seed 3: building w0 group 6 (57,638 chunks)
+[20:24:14]   seed 3: w0 group 6 built in 1 s {}
+[20:24:54]   seed 3: 12,384/15,552 retrievals (18.1 per s, 3 min left)
+[20:25:57]   seed 3: 13,536/15,552 retrievals (18.1 per s, 2 min left)
+[20:26:01]   seed 3: building w0 group 7 (57,638 chunks)
+[20:26:02]   seed 3: w0 group 7 built in 1 s {}
+[20:26:57]   seed 3: 14,616/15,552 retrievals (18.1 per s, 1 min left)
+[20:27:49] x6 faiss: seed 3 done in 14.3 min
+[20:27:49] x6 faiss: seed 4
+[20:27:50]   seed 4: building w1 (57,638 chunks)
+[20:27:50]   seed 4: w1 built in 1 s {}
+[20:27:50]   seed 4: building sep (48,653 chunks)
+[20:27:51]   seed 4: sep built in 1 s {}
+[20:27:51]   seed 4: building w0 group 0 (57,638 chunks)
+[20:27:52]   seed 4: w0 group 0 built in 1 s {}
+[20:28:54]   seed 4: 1,152/15,552 retrievals (18.0 per s, 13 min left)
+[20:29:37]   seed 4: building w0 group 1 (57,638 chunks)
+[20:29:37]   seed 4: w0 group 1 built in 0 s {}
+[20:29:57]   seed 4: 2,304/15,552 retrievals (18.1 per s, 12 min left)
+[20:30:59]   seed 4: 3,456/15,552 retrievals (18.3 per s, 11 min left)
+[20:31:22]   seed 4: building w0 group 2 (57,638 chunks)
+[20:31:23]   seed 4: w0 group 2 built in 1 s {}
+[20:32:01]   seed 4: 4,608/15,552 retrievals (18.3 per s, 10 min left)
+[20:33:03]   seed 4: 5,760/15,552 retrievals (18.4 per s, 9 min left)
+[20:33:07]   seed 4: building w0 group 3 (57,638 chunks)
+[20:33:08]   seed 4: w0 group 3 built in 1 s {}
+[20:34:07]   seed 4: 6,912/15,552 retrievals (18.3 per s, 8 min left)
+[20:34:53]   seed 4: building w0 group 4 (57,638 chunks)
+[20:34:54]   seed 4: w0 group 4 built in 1 s {}
+[20:35:10]   seed 4: 8,064/15,552 retrievals (18.3 per s, 7 min left)
+[20:36:12]   seed 4: 9,216/15,552 retrievals (18.4 per s, 6 min left)
+[20:36:39]   seed 4: building w0 group 5 (57,638 chunks)
+[20:36:39]   seed 4: w0 group 5 built in 1 s {}
+[20:37:14]   seed 4: 10,368/15,552 retrievals (18.4 per s, 5 min left)
+[20:38:17]   seed 4: 11,520/15,552 retrievals (18.4 per s, 4 min left)
+[20:38:25]   seed 4: building w0 group 6 (57,638 chunks)
+[20:38:25]   seed 4: w0 group 6 built in 1 s {}
+[20:39:20]   seed 4: 12,672/15,552 retrievals (18.4 per s, 3 min left)
+[20:40:10]   seed 4: building w0 group 7 (57,638 chunks)
+[20:40:10]   seed 4: w0 group 7 built in 1 s {}
+[20:40:22]   seed 4: 13,824/15,552 retrievals (18.4 per s, 2 min left)
+[20:41:24]   seed 4: 14,976/15,552 retrievals (18.4 per s, 1 min left)
+[20:41:54] x6 faiss: seed 4 done in 14.1 min
+::notice title=x6 faiss::{"seeds": [0, 1, 2, 3, 4], "minutes": [14.2, 14.3, 14.1, 14.3, 14.1], "retrievals": [15552, 15552, 15552, 15552, 15552], "stopped": {}, "first_errors": {}}

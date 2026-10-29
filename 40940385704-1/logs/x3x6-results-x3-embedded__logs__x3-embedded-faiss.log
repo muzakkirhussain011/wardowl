@@ -1,0 +1,56 @@
+[20:48:03] x3 faiss: seed 0
+[20:48:05]   seed 0: building (100,000 chunks)
+[20:48:06]   seed 0: built in 1 s {}
+[20:48:53]   seed 0: G=1: ok, 0 errors, translation in-process
+[20:49:40]   seed 0: G=10: ok, 0 errors, translation in-process
+[20:50:27]   seed 0: G=100: ok, 0 errors, translation in-process
+[20:51:17]   seed 0: G=1,000: ok, 0 errors, translation in-process
+[20:52:07]   seed 0: G=4,000: ok, 0 errors, translation in-process
+[20:52:59]   seed 0: G=10,000: ok, 0 errors, translation in-process
+[20:53:54]   seed 0: G=40,000: ok, 0 errors, translation in-process
+[20:53:54] x3 faiss: seed 0 done in 5.8 min
+[20:53:54] x3 faiss: seed 1
+[20:53:56]   seed 1: building (100,000 chunks)
+[20:53:57]   seed 1: built in 1 s {}
+[20:54:44]   seed 1: G=1: ok, 0 errors, translation in-process
+[20:55:31]   seed 1: G=10: ok, 0 errors, translation in-process
+[20:56:18]   seed 1: G=100: ok, 0 errors, translation in-process
+[20:57:06]   seed 1: G=1,000: ok, 0 errors, translation in-process
+[20:57:56]   seed 1: G=4,000: ok, 0 errors, translation in-process
+[20:58:47]   seed 1: G=10,000: ok, 0 errors, translation in-process
+[20:59:43]   seed 1: G=40,000: ok, 0 errors, translation in-process
+[20:59:43] x3 faiss: seed 1 done in 5.8 min
+[20:59:43] x3 faiss: seed 2
+[20:59:45]   seed 2: building (100,000 chunks)
+[20:59:46]   seed 2: built in 1 s {}
+[21:00:32]   seed 2: G=1: ok, 0 errors, translation in-process
+[21:01:19]   seed 2: G=10: ok, 0 errors, translation in-process
+[21:02:05]   seed 2: G=100: ok, 0 errors, translation in-process
+[21:02:54]   seed 2: G=1,000: ok, 0 errors, translation in-process
+[21:03:44]   seed 2: G=4,000: ok, 0 errors, translation in-process
+[21:04:35]   seed 2: G=10,000: ok, 0 errors, translation in-process
+[21:05:30]   seed 2: G=40,000: ok, 0 errors, translation in-process
+[21:05:30] x3 faiss: seed 2 done in 5.8 min
+[21:05:30] x3 faiss: seed 3
+[21:05:32]   seed 3: building (100,000 chunks)
+[21:05:33]   seed 3: built in 1 s {}
+[21:06:19]   seed 3: G=1: ok, 0 errors, translation in-process
+[21:07:06]   seed 3: G=10: ok, 0 errors, translation in-process
+[21:07:54]   seed 3: G=100: ok, 0 errors, translation in-process
+[21:08:42]   seed 3: G=1,000: ok, 0 errors, translation in-process
+[21:09:32]   seed 3: G=4,000: ok, 0 errors, translation in-process
+[21:10:23]   seed 3: G=10,000: ok, 0 errors, translation in-process
+[21:11:20]   seed 3: G=40,000: ok, 0 errors, translation in-process
+[21:11:20] x3 faiss: seed 3 done in 5.8 min
+[21:11:20] x3 faiss: seed 4
+[21:11:22]   seed 4: building (100,000 chunks)
+[21:11:23]   seed 4: built in 1 s {}
+[21:12:09]   seed 4: G=1: ok, 0 errors, translation in-process
+[21:12:56]   seed 4: G=10: ok, 0 errors, translation in-process
+[21:13:43]   seed 4: G=100: ok, 0 errors, translation in-process
+[21:14:32]   seed 4: G=1,000: ok, 0 errors, translation in-process
+[21:15:23]   seed 4: G=4,000: ok, 0 errors, translation in-process
+[21:16:14]   seed 4: G=10,000: ok, 0 errors, translation in-process
+[21:17:10]   seed 4: G=40,000: ok, 0 errors, translation in-process
+[21:17:10] x3 faiss: seed 4 done in 5.8 min
+::notice title=x3 faiss::{"0": 0, "1": 0, "2": 0, "3": 0, "4": 0}

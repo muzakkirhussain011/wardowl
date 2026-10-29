@@ -1,0 +1,95 @@
+[19:30:26] x6 memory: loading the data
+[19:30:27] x6 memory: seed 0
+[19:30:27]   seed 0: building w1 (57,638 chunks)
+[19:30:28]   seed 0: w1 built in 0 s {}
+[19:30:28]   seed 0: building sep (49,444 chunks)
+[19:30:28]   seed 0: sep built in 0 s {}
+[19:30:28]   seed 0: building w0 group 0 (57,638 chunks)
+[19:30:28]   seed 0: w0 group 0 built in 0 s {}
+[19:32:08]   seed 0: 64/384 retrievals (0.6 per s, 8 min left)
+[19:33:51]   seed 0: 128/384 retrievals (0.6 per s, 7 min left)
+[19:35:36]   seed 0: 192/384 retrievals (0.6 per s, 5 min left)
+[19:36:41]   seed 0: 224/384 retrievals (0.6 per s, 4 min left)
+[19:38:22]   seed 0: 288/384 retrievals (0.6 per s, 3 min left)
+[19:38:22]   seed 0: building w0 group 1 (57,638 chunks)
+[19:38:23]   seed 0: w0 group 1 built in 0 s {}
+[19:40:08]   seed 0: 352/384 retrievals (0.6 per s, 1 min left)
+[19:40:08]   seed 0: building w0 group 2 (57,638 chunks)
+[19:40:08]   seed 0: w0 group 2 built in 0 s {}
+[19:41:08] x6 memory: seed 0 done in 10.7 min
+[19:41:08] x6 memory: seed 1
+[19:41:08]   seed 1: building w1 (57,638 chunks)
+[19:41:09]   seed 1: w1 built in 0 s {}
+[19:41:09]   seed 1: building sep (49,128 chunks)
+[19:41:09]   seed 1: sep built in 0 s {}
+[19:41:09]   seed 1: building w0 group 0 (57,638 chunks)
+[19:41:10]   seed 1: w0 group 0 built in 0 s {}
+[19:42:57]   seed 1: 64/384 retrievals (0.6 per s, 9 min left)
+[19:44:03]   seed 1: 96/384 retrievals (0.5 per s, 9 min left)
+[19:45:46]   seed 1: 160/384 retrievals (0.6 per s, 6 min left)
+[19:47:31]   seed 1: 224/384 retrievals (0.6 per s, 5 min left)
+[19:49:14]   seed 1: 288/384 retrievals (0.6 per s, 3 min left)
+[19:49:15]   seed 1: building w0 group 1 (57,638 chunks)
+[19:49:15]   seed 1: w0 group 1 built in 0 s {}
+[19:50:56]   seed 1: 352/384 retrievals (0.6 per s, 1 min left)
+[19:50:56]   seed 1: building w0 group 2 (57,638 chunks)
+[19:50:57]   seed 1: w0 group 2 built in 0 s {}
+[19:51:51] x6 memory: seed 1 done in 10.7 min
+[19:51:51] x6 memory: seed 2
+[19:51:52]   seed 2: building w1 (57,638 chunks)
+[19:51:52]   seed 2: w1 built in 0 s {}
+[19:51:52]   seed 2: building sep (49,221 chunks)
+[19:51:52]   seed 2: sep built in 0 s {}
+[19:51:52]   seed 2: building w0 group 0 (57,638 chunks)
+[19:51:53]   seed 2: w0 group 0 built in 0 s {}
+[19:53:29]   seed 2: 64/384 retrievals (0.7 per s, 8 min left)
+[19:54:33]   seed 2: 96/384 retrievals (0.6 per s, 8 min left)
+[19:56:19]   seed 2: 160/384 retrievals (0.6 per s, 6 min left)
+[19:58:00]   seed 2: 224/384 retrievals (0.6 per s, 4 min left)
+[19:59:45]   seed 2: 288/384 retrievals (0.6 per s, 3 min left)
+[19:59:45]   seed 2: building w0 group 1 (57,638 chunks)
+[19:59:46]   seed 2: w0 group 1 built in 0 s {}
+[20:01:46]   seed 2: 352/384 retrievals (0.6 per s, 1 min left)
+[20:01:46]   seed 2: building w0 group 2 (57,638 chunks)
+[20:01:46]   seed 2: w0 group 2 built in 0 s {}
+[20:02:46]   seed 2: 384/384 retrievals (0.6 per s, 0 min left)
+[20:02:46] x6 memory: seed 2 done in 10.9 min
+[20:02:46] x6 memory: seed 3
+[20:02:47]   seed 3: building w1 (57,638 chunks)
+[20:02:47]   seed 3: w1 built in 0 s {}
+[20:02:47]   seed 3: building sep (50,639 chunks)
+[20:02:48]   seed 3: sep built in 0 s {}
+[20:02:48]   seed 3: building w0 group 0 (57,638 chunks)
+[20:02:48]   seed 3: w0 group 0 built in 0 s {}
+[20:04:31]   seed 3: 64/384 retrievals (0.6 per s, 9 min left)
+[20:05:49]   seed 3: 96/384 retrievals (0.5 per s, 9 min left)
+[20:06:57]   seed 3: 128/384 retrievals (0.5 per s, 8 min left)
+[20:08:46]   seed 3: 192/384 retrievals (0.5 per s, 6 min left)
+[20:09:53]   seed 3: 224/384 retrievals (0.5 per s, 5 min left)
+[20:11:37]   seed 3: 288/384 retrievals (0.5 per s, 3 min left)
+[20:11:37]   seed 3: building w0 group 1 (57,638 chunks)
+[20:11:38]   seed 3: w0 group 1 built in 0 s {}
+[20:12:45]   seed 3: 320/384 retrievals (0.5 per s, 2 min left)
+[20:13:45]   seed 3: building w0 group 2 (57,638 chunks)
+[20:13:45]   seed 3: w0 group 2 built in 0 s {}
+[20:14:46]   seed 3: 384/384 retrievals (0.5 per s, 0 min left)
+[20:14:46] x6 memory: seed 3 done in 12.0 min
+[20:14:46] x6 memory: seed 4
+[20:14:47]   seed 4: building w1 (57,638 chunks)
+[20:14:47]   seed 4: w1 built in 0 s {}
+[20:14:47]   seed 4: building sep (48,653 chunks)
+[20:14:48]   seed 4: sep built in 0 s {}
+[20:14:48]   seed 4: building w0 group 0 (57,638 chunks)
+[20:14:48]   seed 4: w0 group 0 built in 0 s {}
+[20:16:35]   seed 4: 64/384 retrievals (0.6 per s, 9 min left)
+[20:18:33]   seed 4: 128/384 retrievals (0.6 per s, 8 min left)
+[20:20:13]   seed 4: 192/384 retrievals (0.6 per s, 5 min left)
+[20:21:53]   seed 4: 256/384 retrievals (0.6 per s, 4 min left)
+[20:22:42]   seed 4: building w0 group 1 (57,638 chunks)
+[20:22:42]   seed 4: w0 group 1 built in 0 s {}
+[20:23:33]   seed 4: 320/384 retrievals (0.6 per s, 2 min left)
+[20:24:24]   seed 4: building w0 group 2 (57,638 chunks)
+[20:24:24]   seed 4: w0 group 2 built in 0 s {}
+[20:25:20]   seed 4: 384/384 retrievals (0.6 per s, 0 min left)
+[20:25:20] x6 memory: seed 4 done in 10.6 min
+::notice title=x6 memory::{"seeds": [0, 1, 2, 3, 4], "minutes": [10.7, 10.7, 10.9, 12.0, 10.6], "retrievals": [384, 384, 384, 384, 384], "stopped": {}, "first_errors": {}}

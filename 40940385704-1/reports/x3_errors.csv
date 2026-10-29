@@ -1,0 +1,4 @@
+store,G,error,cause,count
+chroma,1000,InternalError: Error executing plan: Internal error: error returned from database: (code: 1) Expression tree is too large (maximum depth 1000),,90
+chroma,4000,InternalError: Error executing plan: Internal error: error returned from database: (code: 1) Expression tree is too large (maximum depth 1000),,90
+chroma,10000,InternalError: Error executing plan: Internal error: error returned from database: (code: 1) Expression tree is too large (maximum depth 1000),,90

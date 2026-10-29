@@ -1,0 +1,235 @@
+{
+  "experiment": "x3x6-data",
+  "mode": "full",
+  "seeds": 5,
+  "design": {
+    "groups": 8,
+    "per_group": {
+      "1000": 1,
+      "100": 2,
+      "10": 3,
+      "1": 3
+    },
+    "zone": 1000
+  },
+  "hubs": {
+    "hubs": 576,
+    "count_threshold": 901,
+    "count_max": 2052,
+    "count_median": 179.0,
+    "count_expected": 230.7
+  },
+  "key": "sentence-transformers/all-MiniLM-L6-v2|max_seq_length=256|fiqa=all|scidocs=12000|v1",
+  "embedding": {
+    "model": "sentence-transformers/all-MiniLM-L6-v2",
+    "revision": "1110a243fdf4706b3f48f1d95db1a4f5529b4d41",
+    "max_seq_length": 256,
+    "threads": 4
+  },
+  "sources": {
+    "fiqa": "hub:BeIR/fiqa",
+    "scidocs": "hub:BeIR/scidocs"
+  },
+  "counts": {
+    "fiqa_corpus": 57638,
+    "fiqa_queries": 6648,
+    "scidocs_subset": 12000
+  },
+  "versions": {
+    "sentence-transformers": "5.0.0",
+    "torch": "2.8.0+cpu",
+    "transformers": "4.57.6",
+    "huggingface-hub": "0.36.2",
+    "tokenizers": "0.22.2"
+  },
+  "from_cache": true,
+  "tokens": {
+    "fiqa_mean": 138.47735868697734,
+    "fiqa_median": 95.0
+  },
+  "plans": {
+    "0": {
+      "probes": {
+        "1000": 8,
+        "100": 16,
+        "10": 24,
+        "1": 24
+      },
+      "groups_full": 8,
+      "shortfall": [],
+      "placements_per_group": {
+        "0": 1,
+        "1": 2,
+        "2": 2,
+        "3": 2,
+        "4": 2,
+        "5": 2,
+        "6": 2,
+        "7": 2
+      },
+      "secret": 8194,
+      "secret_extra_group_memberships": 1670,
+      "far_eligible": 9002,
+      "far_reused": false,
+      "far_fallback": false,
+      "boundary": 0.2014707624912262,
+      "far_closest_max": 0.20146867632865906,
+      "rank_m_max": {
+        "1000": 1149,
+        "100": 123,
+        "10": 10,
+        "1": 2
+      }
+    },
+    "1": {
+      "probes": {
+        "1000": 8,
+        "100": 16,
+        "10": 24,
+        "1": 24
+      },
+      "groups_full": 8,
+      "shortfall": [],
+      "placements_per_group": {
+        "0": 1,
+        "1": 1,
+        "2": 1,
+        "3": 1,
+        "4": 1,
+        "5": 2,
+        "6": 1,
+        "7": 1
+      },
+      "secret": 8510,
+      "secret_extra_group_memberships": 1354,
+      "far_eligible": 4491,
+      "far_reused": true,
+      "far_fallback": false,
+      "boundary": 0.14162613451480865,
+      "far_closest_max": 0.14161165058612823,
+      "rank_m_max": {
+        "1000": 1085,
+        "100": 159,
+        "10": 12,
+        "1": 1
+      }
+    },
+    "2": {
+      "probes": {
+        "1000": 8,
+        "100": 16,
+        "10": 24,
+        "1": 24
+      },
+      "groups_full": 8,
+      "shortfall": [],
+      "placements_per_group": {
+        "0": 1,
+        "1": 1,
+        "2": 1,
+        "3": 1,
+        "4": 1,
+        "5": 1,
+        "6": 2,
+        "7": 2
+      },
+      "secret": 8417,
+      "secret_extra_group_memberships": 1447,
+      "far_eligible": 2331,
+      "far_reused": true,
+      "far_fallback": false,
+      "boundary": 0.11353432387113571,
+      "far_closest_max": 0.11352022737264633,
+      "rank_m_max": {
+        "1000": 1145,
+        "100": 152,
+        "10": 16,
+        "1": 2
+      }
+    },
+    "3": {
+      "probes": {
+        "1000": 8,
+        "100": 16,
+        "10": 24,
+        "1": 24
+      },
+      "groups_full": 8,
+      "shortfall": [],
+      "placements_per_group": {
+        "0": 1,
+        "1": 1,
+        "2": 1,
+        "3": 2,
+        "4": 1,
+        "5": 1,
+        "6": 1,
+        "7": 1
+      },
+      "secret": 6999,
+      "secret_extra_group_memberships": 2865,
+      "far_eligible": 7754,
+      "far_reused": false,
+      "far_fallback": false,
+      "boundary": 0.17374685406684875,
+      "far_closest_max": 0.17370037734508514,
+      "rank_m_max": {
+        "1000": 1271,
+        "100": 120,
+        "10": 11,
+        "1": 1
+      }
+    },
+    "4": {
+      "probes": {
+        "1000": 8,
+        "100": 16,
+        "10": 24,
+        "1": 24
+      },
+      "groups_full": 8,
+      "shortfall": [],
+      "placements_per_group": {
+        "0": 1,
+        "1": 1,
+        "2": 1,
+        "3": 1,
+        "4": 1,
+        "5": 1,
+        "6": 1,
+        "7": 1
+      },
+      "secret": 8985,
+      "secret_extra_group_memberships": 879,
+      "far_eligible": 4864,
+      "far_reused": true,
+      "far_fallback": false,
+      "boundary": 0.14302709698677063,
+      "far_closest_max": 0.14302074909210205,
+      "rank_m_max": {
+        "1000": 1040,
+        "100": 125,
+        "10": 15,
+        "1": 5
+      }
+    }
+  },
+  "timings": {
+    "download_s": 4.1,
+    "embed_s": 2593.5,
+    "plans_s": 6.9
+  },
+  "numpy": "2.5.4",
+  "host": {
+    "python": "3.12.15",
+    "platform": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+    "cpus": 4,
+    "memory_gib": 15.6,
+    "runner": "GitHub Actions 1000007955",
+    "image_os": "ubuntu24",
+    "image_version": "20261026.354.1",
+    "commit": "a1916263f118f92a3446e6b98ec812549e82261a",
+    "run_id": "40940385704",
+    "run_attempt": "1"
+  }
+}

@@ -1,0 +1,56 @@
+[21:17:10] x3 memory: seed 0
+[21:17:11]   seed 0: building (100,000 chunks)
+[21:17:12]   seed 0: built in 1 s {}
+[21:18:05]   seed 0: G=1: ok, 0 errors, translation in-process
+[21:18:58]   seed 0: G=10: ok, 0 errors, translation in-process
+[21:19:52]   seed 0: G=100: ok, 0 errors, translation in-process
+[21:20:47]   seed 0: G=1,000: ok, 0 errors, translation in-process
+[21:21:43]   seed 0: G=4,000: ok, 0 errors, translation in-process
+[21:22:42]   seed 0: G=10,000: ok, 0 errors, translation in-process
+[21:23:44]   seed 0: G=40,000: ok, 0 errors, translation in-process
+[21:23:44] x3 memory: seed 0 done in 6.6 min
+[21:23:44] x3 memory: seed 1
+[21:23:46]   seed 1: building (100,000 chunks)
+[21:23:47]   seed 1: built in 1 s {}
+[21:24:41]   seed 1: G=1: ok, 0 errors, translation in-process
+[21:25:34]   seed 1: G=10: ok, 0 errors, translation in-process
+[21:26:29]   seed 1: G=100: ok, 0 errors, translation in-process
+[21:27:24]   seed 1: G=1,000: ok, 0 errors, translation in-process
+[21:28:22]   seed 1: G=4,000: ok, 0 errors, translation in-process
+[21:29:21]   seed 1: G=10,000: ok, 0 errors, translation in-process
+[21:30:23]   seed 1: G=40,000: ok, 0 errors, translation in-process
+[21:30:23] x3 memory: seed 1 done in 6.6 min
+[21:30:24] x3 memory: seed 2
+[21:30:25]   seed 2: building (100,000 chunks)
+[21:30:26]   seed 2: built in 1 s {}
+[21:31:19]   seed 2: G=1: ok, 0 errors, translation in-process
+[21:32:13]   seed 2: G=10: ok, 0 errors, translation in-process
+[21:33:06]   seed 2: G=100: ok, 0 errors, translation in-process
+[21:34:01]   seed 2: G=1,000: ok, 0 errors, translation in-process
+[21:34:57]   seed 2: G=4,000: ok, 0 errors, translation in-process
+[21:35:56]   seed 2: G=10,000: ok, 0 errors, translation in-process
+[21:36:58]   seed 2: G=40,000: ok, 0 errors, translation in-process
+[21:36:58] x3 memory: seed 2 done in 6.6 min
+[21:36:58] x3 memory: seed 3
+[21:37:00]   seed 3: building (100,000 chunks)
+[21:37:01]   seed 3: built in 1 s {}
+[21:37:54]   seed 3: G=1: ok, 0 errors, translation in-process
+[21:38:47]   seed 3: G=10: ok, 0 errors, translation in-process
+[21:39:41]   seed 3: G=100: ok, 0 errors, translation in-process
+[21:40:36]   seed 3: G=1,000: ok, 0 errors, translation in-process
+[21:41:32]   seed 3: G=4,000: ok, 0 errors, translation in-process
+[21:42:29]   seed 3: G=10,000: ok, 0 errors, translation in-process
+[21:43:31]   seed 3: G=40,000: ok, 0 errors, translation in-process
+[21:43:31] x3 memory: seed 3 done in 6.5 min
+[21:43:31] x3 memory: seed 4
+[21:43:32]   seed 4: building (100,000 chunks)
+[21:43:33]   seed 4: built in 1 s {}
+[21:44:26]   seed 4: G=1: ok, 0 errors, translation in-process
+[21:45:20]   seed 4: G=10: ok, 0 errors, translation in-process
+[21:46:14]   seed 4: G=100: ok, 0 errors, translation in-process
+[21:47:09]   seed 4: G=1,000: ok, 0 errors, translation in-process
+[21:48:06]   seed 4: G=4,000: ok, 0 errors, translation in-process
+[21:49:04]   seed 4: G=10,000: ok, 0 errors, translation in-process
+[21:50:04]   seed 4: G=40,000: ok, 0 errors, translation in-process
+[21:50:05] x3 memory: seed 4 done in 6.6 min
+::notice title=x3 memory::{"0": 0, "1": 0, "2": 0, "3": 0, "4": 0}

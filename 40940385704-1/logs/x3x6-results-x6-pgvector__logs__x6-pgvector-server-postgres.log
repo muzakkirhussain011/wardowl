@@ -1,0 +1,118 @@
+The files belonging to this database system will be owned by user "postgres".
+This user must also own the server process.
+
+The database cluster will be initialized with locale "en_US.utf8".
+The default database encoding has accordingly been set to "UTF8".
+The default text search configuration will be set to "english".
+
+Data page checksums are disabled.
+
+fixing permissions on existing directory /var/lib/postgresql/data ... ok
+creating subdirectories ... ok
+selecting dynamic shared memory implementation ... posix
+selecting default "max_connections" ... 100
+selecting default "shared_buffers" ... 128MB
+selecting default time zone ... Etc/UTC
+creating configuration files ... ok
+running bootstrap script ... ok
+performing post-bootstrap initialization ... ok
+syncing data to disk ... ok
+
+
+Success. You can now start the database server using:
+
+    pg_ctl -D /var/lib/postgresql/data -l logfile start
+initdb: warning: enabling "trust" authentication for local connections
+
+initdb: hint: You can change this by editing pg_hba.conf or using the option -A, or --auth-local and --auth-host, the next time you run initdb.
+waiting for server to start....2026-10-29 19:29:43.823 UTC [47] LOG:  starting PostgreSQL 17.11 (Debian 17.11-1.pgdg12+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit
+2026-10-29 19:29:43.823 UTC [47] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+2026-10-29 19:29:43.826 UTC [50] LOG:  database system was shut down at 2026-10-29 19:29:43 UTC
+2026-10-29 19:29:43.829 UTC [47] LOG:  database system is ready to accept connections
+ done
+server started
+CREATE DATABASE
+
+
+/usr/local/bin/docker-entrypoint.sh: ignoring /docker-entrypoint-initdb.d/*
+
+waiting for server to shut down...2026-10-29 19:29:43.960 UTC [47] LOG:  received fast shutdown request
+.2026-10-29 19:29:43.961 UTC [47] LOG:  aborting any active transactions
+2026-10-29 19:29:43.964 UTC [47] LOG:  background worker "logical replication launcher" (PID 53) exited with exit code 1
+2026-10-29 19:29:43.964 UTC [48] LOG:  shutting down
+2026-10-29 19:29:43.964 UTC [48] LOG:  checkpoint starting: shutdown immediate
+2026-10-29 19:29:44.029 UTC [48] LOG:  checkpoint complete: wrote 921 buffers (0.4%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.054 s, sync=0.010 s, total=0.066 s; sync files=301, longest=0.009 s, average=0.001 s; distance=4238 kB, estimate=4238 kB; lsn=0/190A9B8, redo lsn=0/190A9B8
+2026-10-29 19:29:44.046 UTC [47] LOG:  database system is shut down
+ done
+server stopped
+
+PostgreSQL init process complete; ready for start up.
+
+2026-10-29 19:29:44.109 UTC [1] LOG:  starting PostgreSQL 17.11 (Debian 17.11-1.pgdg12+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit
+2026-10-29 19:29:44.109 UTC [1] LOG:  listening on IPv4 address "0.0.0.0", port 5432
+2026-10-29 19:29:44.109 UTC [1] LOG:  listening on IPv6 address "::", port 5432
+2026-10-29 19:29:44.110 UTC [1] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+2026-10-29 19:29:44.112 UTC [63] LOG:  database system was shut down at 2026-10-29 19:29:44 UTC
+2026-10-29 19:29:44.116 UTC [1] LOG:  database system is ready to accept connections
+2026-10-29 19:31:14.441 UTC [85] LOG:  skipping vacuum of "x6s0sep665fafc7" --- lock not available
+2026-10-29 19:31:27.926 UTC [61] LOG:  checkpoint starting: wal
+2026-10-29 19:33:04.258 UTC [61] LOG:  checkpoint complete: wrote 65147 buffers (24.9%); 0 WAL file(s) added, 1 removed, 33 recycled; write=94.814 s, sync=1.511 s, total=96.420 s; sync files=143, longest=0.658 s, average=0.011 s; distance=547799 kB, estimate=547799 kB; lsn=0/41452670, redo lsn=0/23000698
+2026-10-29 19:34:11.739 UTC [61] LOG:  checkpoint starting: wal
+2026-10-29 19:34:14.209 UTC [1136] LOG:  skipping vacuum of "x6s0w0g20ac63c2d" --- lock not available
+2026-10-29 19:35:46.697 UTC [61] LOG:  checkpoint complete: wrote 2619 buffers (1.0%); 0 WAL file(s) added, 0 removed, 33 recycled; write=93.767 s, sync=1.173 s, total=94.958 s; sync files=64, longest=0.460 s, average=0.019 s; distance=541686 kB, estimate=547187 kB; lsn=0/62B05440, redo lsn=0/440FE028
+2026-10-29 19:37:03.055 UTC [61] LOG:  checkpoint starting: wal
+2026-10-29 19:37:14.268 UTC [2138] LOG:  skipping vacuum of "x6s0w0g47c31c710" --- lock not available
+2026-10-29 19:38:38.026 UTC [61] LOG:  checkpoint complete: wrote 2179 buffers (0.8%); 0 WAL file(s) added, 1 removed, 32 recycled; write=93.705 s, sync=1.249 s, total=94.971 s; sync files=50, longest=0.529 s, average=0.025 s; distance=539864 kB, estimate=546455 kB; lsn=0/841B75C8, redo lsn=0/65034418
+2026-10-29 19:39:50.598 UTC [61] LOG:  checkpoint starting: wal
+2026-10-29 19:41:14.351 UTC [3611] LOG:  skipping vacuum of "x6s0w0g77f74bb2d" --- lock not available
+2026-10-29 19:41:18.739 UTC [61] LOG:  checkpoint complete: wrote 2248 buffers (0.9%); 0 WAL file(s) added, 1 removed, 32 recycled; write=86.763 s, sync=1.360 s, total=88.141 s; sync files=54, longest=0.629 s, average=0.026 s; distance=550160 kB, estimate=550160 kB; lsn=0/A58F4C08, redo lsn=0/869784A0
+2026-10-29 19:42:30.053 UTC [61] LOG:  checkpoint starting: wal
+2026-10-29 19:43:03.895 UTC [61] LOG:  checkpoint complete: wrote 1815 buffers (0.7%); 0 WAL file(s) added, 0 removed, 33 recycled; write=32.163 s, sync=1.673 s, total=33.842 s; sync files=57, longest=0.567 s, average=0.030 s; distance=533918 kB, estimate=548535 kB; lsn=0/C4F92970, redo lsn=0/A72DFE70
+2026-10-29 19:43:12.405 UTC [61] LOG:  checkpoint starting: wal
+2026-10-29 19:44:52.557 UTC [61] LOG:  checkpoint complete: wrote 63455 buffers (24.2%); 0 WAL file(s) added, 0 removed, 33 recycled; write=98.981 s, sync=1.157 s, total=100.152 s; sync files=74, longest=0.429 s, average=0.016 s; distance=542665 kB, estimate=547948 kB; lsn=0/E67DFF60, redo lsn=0/C84D2380
+2026-10-29 19:46:00.250 UTC [61] LOG:  checkpoint starting: wal
+2026-10-29 19:46:14.431 UTC [5169] LOG:  skipping vacuum of "x6s1w0g2ea7fba11" --- lock not available
+2026-10-29 19:47:38.621 UTC [61] LOG:  checkpoint complete: wrote 16709 buffers (6.4%); 0 WAL file(s) added, 0 removed, 33 recycled; write=97.184 s, sync=1.171 s, total=98.371 s; sync files=65, longest=0.578 s, average=0.019 s; distance=538440 kB, estimate=546998 kB; lsn=1/743D500, redo lsn=0/E92A4428
+2026-10-29 19:48:50.766 UTC [61] LOG:  checkpoint starting: wal
+2026-10-29 19:50:24.202 UTC [61] LOG:  checkpoint complete: wrote 3061 buffers (1.2%); 0 WAL file(s) added, 0 removed, 33 recycled; write=92.367 s, sync=1.053 s, total=93.436 s; sync files=55, longest=0.459 s, average=0.020 s; distance=550080 kB, estimate=550080 kB; lsn=1/28AD60D0, redo lsn=1/ABD4718
+2026-10-29 19:51:44.641 UTC [61] LOG:  checkpoint starting: wal
+2026-10-29 19:53:14.573 UTC [7617] LOG:  skipping vacuum of "x6s1w0g7d8a2d224" --- lock not available
+2026-10-29 19:53:19.183 UTC [61] LOG:  checkpoint complete: wrote 2494 buffers (1.0%); 0 WAL file(s) added, 1 removed, 32 recycled; write=93.368 s, sync=1.157 s, total=94.542 s; sync files=52, longest=0.537 s, average=0.023 s; distance=535054 kB, estimate=548578 kB; lsn=1/4A1A57D0, redo lsn=1/2B658168
+2026-10-29 19:54:42.108 UTC [61] LOG:  checkpoint starting: wal
+2026-10-29 19:55:15.094 UTC [8133] LOG:  skipping vacuum of "x6s2sepb1952e7b" --- lock not available
+2026-10-29 19:55:28.534 UTC [61] LOG:  checkpoint complete: wrote 3721 buffers (1.4%); 0 WAL file(s) added, 4 removed, 29 recycled; write=44.059 s, sync=2.214 s, total=46.426 s; sync files=65, longest=0.618 s, average=0.035 s; distance=546309 kB, estimate=548351 kB; lsn=1/6E0723D8, redo lsn=1/4CBD97A0
+2026-10-29 19:55:28.534 UTC [61] LOG:  checkpoint starting: wal
+2026-10-29 19:57:14.645 UTC [8701] LOG:  skipping vacuum of "x6s2w0g14af6d1be" --- lock not available
+2026-10-29 19:58:27.466 UTC [61] LOG:  checkpoint complete: wrote 64608 buffers (24.6%); 0 WAL file(s) added, 1 removed, 33 recycled; write=178.750 s, sync=0.046 s, total=178.933 s; sync files=83, longest=0.030 s, average=0.001 s; distance=546454 kB, estimate=548161 kB; lsn=1/8C46DFB0, redo lsn=1/6E17F0B8
+2026-10-29 19:58:28.395 UTC [61] LOG:  checkpoint starting: wal
+2026-10-29 20:00:28.899 UTC [61] LOG:  checkpoint complete: wrote 4112 buffers (1.6%); 0 WAL file(s) added, 0 removed, 33 recycled; write=119.850 s, sync=0.639 s, total=120.505 s; sync files=60, longest=0.560 s, average=0.011 s; distance=547460 kB, estimate=548091 kB; lsn=1/AC7F13F0, redo lsn=1/8F8201F0
+2026-10-29 20:01:14.355 UTC [61] LOG:  checkpoint starting: wal
+2026-10-29 20:03:14.842 UTC [61] LOG:  checkpoint complete: wrote 4025 buffers (1.5%); 0 WAL file(s) added, 0 removed, 33 recycled; write=119.982 s, sync=0.492 s, total=120.488 s; sync files=50, longest=0.411 s, average=0.010 s; distance=543984 kB, estimate=547680 kB; lsn=1/CDC14238, redo lsn=1/B0B5C400
+2026-10-29 20:04:04.045 UTC [61] LOG:  checkpoint starting: wal
+2026-10-29 20:04:14.774 UTC [11165] LOG:  skipping vacuum of "x6s2w0g65c09a62e" --- lock not available
+2026-10-29 20:05:50.436 UTC [61] LOG:  checkpoint complete: wrote 3632 buffers (1.4%); 0 WAL file(s) added, 0 removed, 33 recycled; write=105.291 s, sync=1.085 s, total=106.392 s; sync files=51, longest=0.416 s, average=0.022 s; distance=534023 kB, estimate=546314 kB; lsn=1/EF223440, redo lsn=1/D14DE020
+2026-10-29 20:06:55.908 UTC [61] LOG:  checkpoint starting: wal
+2026-10-29 20:07:40.999 UTC [61] LOG:  checkpoint complete: wrote 5819 buffers (2.2%); 0 WAL file(s) added, 3 removed, 30 recycled; write=43.326 s, sync=1.604 s, total=45.092 s; sync files=65, longest=0.428 s, average=0.025 s; distance=539923 kB, estimate=545675 kB; lsn=2/130E0BB0, redo lsn=1/F2422E00
+2026-10-29 20:07:40.999 UTC [61] LOG:  checkpoint starting: wal
+2026-10-29 20:09:14.878 UTC [12711] LOG:  skipping vacuum of "x6s3w0g1e078d20b" --- lock not available
+2026-10-29 20:10:31.486 UTC [61] LOG:  checkpoint complete: wrote 62483 buffers (23.8%); 0 WAL file(s) added, 0 removed, 33 recycled; write=170.372 s, sync=0.047 s, total=170.488 s; sync files=83, longest=0.021 s, average=0.001 s; distance=537773 kB, estimate=544885 kB; lsn=2/310B20A8, redo lsn=2/1314E4D8
+2026-10-29 20:10:32.427 UTC [61] LOG:  checkpoint starting: wal
+2026-10-29 20:12:21.844 UTC [61] LOG:  checkpoint complete: wrote 3953 buffers (1.5%); 0 WAL file(s) added, 0 removed, 33 recycled; write=108.309 s, sync=1.087 s, total=109.418 s; sync files=62, longest=0.420 s, average=0.018 s; distance=540360 kB, estimate=544433 kB; lsn=2/51699C60, redo lsn=2/34100578
+2026-10-29 20:13:12.822 UTC [61] LOG:  checkpoint starting: wal
+2026-10-29 20:13:14.958 UTC [14178] LOG:  skipping vacuum of "x6s3w0g4232afbd2" --- lock not available
+2026-10-29 20:14:56.290 UTC [61] LOG:  checkpoint complete: wrote 3830 buffers (1.5%); 0 WAL file(s) added, 0 removed, 33 recycled; write=102.427 s, sync=1.020 s, total=103.469 s; sync files=53, longest=0.430 s, average=0.020 s; distance=544902 kB, estimate=544902 kB; lsn=2/72B89B08, redo lsn=2/55522128
+2026-10-29 20:15:48.198 UTC [61] LOG:  checkpoint starting: wal
+2026-10-29 20:17:55.459 UTC [61] LOG:  checkpoint complete: wrote 4110 buffers (1.6%); 0 WAL file(s) added, 0 removed, 33 recycled; write=126.245 s, sync=0.999 s, total=127.261 s; sync files=53, longest=0.418 s, average=0.019 s; distance=551796 kB, estimate=551796 kB; lsn=2/9421B500, redo lsn=2/76FFF4B0
+2026-10-29 20:18:49.376 UTC [61] LOG:  checkpoint starting: wal
+2026-10-29 20:19:15.877 UTC [16199] LOG:  skipping vacuum of "x6s4sepe91d2505" --- lock not available
+2026-10-29 20:19:35.481 UTC [61] LOG:  checkpoint complete: wrote 7188 buffers (2.7%); 0 WAL file(s) added, 4 removed, 29 recycled; write=43.295 s, sync=2.643 s, total=46.105 s; sync files=66, longest=0.718 s, average=0.041 s; distance=540673 kB, estimate=550684 kB; lsn=2/B9002458, redo lsn=2/97FFFC10
+2026-10-29 20:19:35.481 UTC [61] LOG:  checkpoint starting: wal
+2026-10-29 20:21:15.097 UTC [16767] LOG:  skipping vacuum of "x6s4w0g1197f16ae" --- lock not available
+2026-10-29 20:22:25.571 UTC [61] LOG:  checkpoint complete: wrote 62404 buffers (23.8%); 0 WAL file(s) added, 1 removed, 33 recycled; write=169.762 s, sync=0.219 s, total=170.091 s; sync files=84, longest=0.129 s, average=0.003 s; distance=546295 kB, estimate=550245 kB; lsn=2/D7A42AF0, redo lsn=2/B957DA28
+2026-10-29 20:22:26.280 UTC [61] LOG:  checkpoint starting: wal
+2026-10-29 20:24:58.044 UTC [61] LOG:  checkpoint complete: wrote 4652 buffers (1.8%); 0 WAL file(s) added, 0 removed, 33 recycled; write=151.525 s, sync=0.185 s, total=151.765 s; sync files=61, longest=0.068 s, average=0.004 s; distance=539521 kB, estimate=549173 kB; lsn=2/F8AA1720, redo lsn=2/DA45E1B0
+2026-10-29 20:24:58.756 UTC [61] LOG:  checkpoint starting: wal
+2026-10-29 20:26:15.189 UTC [18730] LOG:  skipping vacuum of "x6s4w0g5905b16c4" --- lock not available
+2026-10-29 20:27:16.102 UTC [61] LOG:  checkpoint complete: wrote 4360 buffers (1.7%); 0 WAL file(s) added, 0 removed, 33 recycled; write=137.328 s, sync=0.002 s, total=137.347 s; sync files=52, longest=0.001 s, average=0.001 s; distance=539336 kB, estimate=548189 kB; lsn=3/175B2420, redo lsn=2/FB310258
+2026-10-29 20:27:27.112 UTC [61] LOG:  checkpoint starting: wal
+2026-10-29 20:29:49.692 UTC [61] LOG:  checkpoint complete: wrote 4375 buffers (1.7%); 0 WAL file(s) added, 0 removed, 33 recycled; write=142.563 s, sync=0.001 s, total=142.580 s; sync files=53, longest=0.001 s, average=0.001 s; distance=546481 kB, estimate=548018 kB; lsn=3/38C933E0, redo lsn=3/1C8BC788

@@ -1,0 +1,546 @@
+store,comparison,level,observable,delta_paired_auc,lo,hi,pairs,clusters
+elasticsearch,post - post-const,1,latency,-0.09444444444444444,-0.16944444444444445,-0.019444444444444445,360,120
+elasticsearch,post - post-const,1,count,0.0,0.0,0.0,360,120
+elasticsearch,post - post-const,1,complete,0.0,0.0,0.0,360,120
+elasticsearch,post - post-const,10,latency,0.013888888888888888,-0.058333333333333334,0.08611111111111111,360,120
+elasticsearch,post - post-const,10,count,0.0,-0.004166666666666667,0.004166666666666667,360,120
+elasticsearch,post - post-const,10,complete,0.0,0.0,0.0,360,120
+elasticsearch,post - post-const,100,latency,0.20833333333333334,0.12489583333333343,0.29583333333333334,240,80
+elasticsearch,post - post-const,100,count,-0.0020833333333333333,-0.00625,0.0,240,80
+elasticsearch,post - post-const,100,complete,0.0,0.0,0.0,240,80
+elasticsearch,post - post-const,1000,latency,0.23333333333333334,0.15,0.31666666666666665,120,40
+elasticsearch,post - post-const,1000,count,0.0,0.0,0.0,120,40
+elasticsearch,post - post-const,1000,complete,0.004166666666666667,0.0,0.0125,120,40
+elasticsearch,post - post-const,all,latency,0.04537037037037037,0.003703703703703704,0.08888888888888889,1080,360
+elasticsearch,post - post-const,all,count,-0.000462962962962963,-0.0023148148148148147,0.000925925925925926,1080,360
+elasticsearch,post - post-const,all,complete,0.000462962962962963,0.0,0.001388888888888889,1080,360
+elasticsearch,pre - pre-exact,1,latency,-0.015277777777777777,-0.07777777777777778,0.04722222222222222,360,120
+elasticsearch,pre - pre-exact,1,count,0.0,0.0,0.0,360,120
+elasticsearch,pre - pre-exact,1,complete,0.0,0.0,0.0,360,120
+elasticsearch,pre - pre-exact,10,latency,0.016666666666666666,-0.05,0.08611111111111111,360,120
+elasticsearch,pre - pre-exact,10,count,0.0,0.0,0.0,360,120
+elasticsearch,pre - pre-exact,10,complete,0.0,0.0,0.0,360,120
+elasticsearch,pre - pre-exact,100,latency,0.0020833333333333333,-0.08125,0.08963541666666591,240,80
+elasticsearch,pre - pre-exact,100,count,0.0,0.0,0.0,240,80
+elasticsearch,pre - pre-exact,100,complete,0.0,0.0,0.0,240,80
+elasticsearch,pre - pre-exact,1000,latency,0.12916666666666668,0.029166666666666667,0.22083333333333333,120,40
+elasticsearch,pre - pre-exact,1000,count,0.0,0.0,0.0,120,40
+elasticsearch,pre - pre-exact,1000,complete,0.0,0.0,0.0,120,40
+elasticsearch,pre - pre-exact,all,latency,0.015277777777777777,-0.022685185185185187,0.05324074074074074,1080,360
+elasticsearch,pre - pre-exact,all,count,0.0,0.0,0.0,1080,360
+elasticsearch,pre - pre-exact,all,complete,0.0,0.0,0.0,1080,360
+elasticsearch,bm25-pre: shared - separated,1,latency,-0.10277777777777777,-0.18333333333333332,-0.025,360,120
+elasticsearch,bm25-pre: shared - separated,1,count,0.0,0.0,0.0,360,120
+elasticsearch,bm25-pre: shared - separated,1,complete,0.0,0.0,0.0,360,120
+elasticsearch,bm25-pre: shared - separated,10,latency,-0.020833333333333332,-0.1,0.059722222222222225,360,120
+elasticsearch,bm25-pre: shared - separated,10,count,0.0,0.0,0.0,360,120
+elasticsearch,bm25-pre: shared - separated,10,complete,0.0,0.0,0.0,360,120
+elasticsearch,bm25-pre: shared - separated,100,latency,-0.08541666666666667,-0.18333333333333332,0.0125,240,80
+elasticsearch,bm25-pre: shared - separated,100,count,0.0,0.0,0.0,240,80
+elasticsearch,bm25-pre: shared - separated,100,complete,0.0,0.0,0.0,240,80
+elasticsearch,bm25-pre: shared - separated,1000,latency,-0.0375,-0.14583333333333334,0.07083333333333333,120,40
+elasticsearch,bm25-pre: shared - separated,1000,count,0.0,0.0,0.0,120,40
+elasticsearch,bm25-pre: shared - separated,1000,complete,0.0,0.0,0.0,120,40
+elasticsearch,bm25-pre: shared - separated,all,latency,-0.06435185185185185,-0.10972222222222222,-0.018518518518518517,1080,360
+elasticsearch,bm25-pre: shared - separated,all,count,0.0,0.0,0.0,1080,360
+elasticsearch,bm25-pre: shared - separated,all,complete,0.0,0.0,0.0,1080,360
+elasticsearch,bm25-pre: raw - padded,1,latency,-0.09375,-0.1597222222222222,-0.027777777777777776,288,96
+elasticsearch,bm25-pre: raw - padded,10,latency,-0.06076388888888889,-0.1267361111111111,0.006944444444444444,288,96
+elasticsearch,bm25-pre: raw - padded,100,latency,-0.08854166666666667,-0.16145833333333334,-0.010416666666666666,192,64
+elasticsearch,bm25-pre: raw - padded,1000,latency,-0.08854166666666667,-0.19270833333333334,0.020833333333333332,96,32
+elasticsearch,bm25-pre: raw - padded,all,latency,-0.08101851851851852,-0.11747685185185185,-0.043402777777777776,864,288
+elasticsearch,hybrid-exact: shared - separated,1,latency,-0.020833333333333332,-0.10833333333333334,0.06388888888888888,360,120
+elasticsearch,hybrid-exact: shared - separated,1,count,0.0,0.0,0.0,360,120
+elasticsearch,hybrid-exact: shared - separated,1,complete,0.0,0.0,0.0,360,120
+elasticsearch,hybrid-exact: shared - separated,10,latency,-0.03333333333333333,-0.10833333333333334,0.044444444444444446,360,120
+elasticsearch,hybrid-exact: shared - separated,10,count,0.0,0.0,0.0,360,120
+elasticsearch,hybrid-exact: shared - separated,10,complete,0.0,0.0,0.0,360,120
+elasticsearch,hybrid-exact: shared - separated,100,latency,0.03333333333333333,-0.04791666666666667,0.1125,240,80
+elasticsearch,hybrid-exact: shared - separated,100,count,0.0,0.0,0.0,240,80
+elasticsearch,hybrid-exact: shared - separated,100,complete,0.0,0.0,0.0,240,80
+elasticsearch,hybrid-exact: shared - separated,1000,latency,0.008333333333333333,-0.11666666666666667,0.13333333333333333,120,40
+elasticsearch,hybrid-exact: shared - separated,1000,count,0.0,0.0,0.0,120,40
+elasticsearch,hybrid-exact: shared - separated,1000,complete,0.0,0.0,0.0,120,40
+elasticsearch,hybrid-exact: shared - separated,all,latency,-0.009722222222222222,-0.05555555555555555,0.03564814814814815,1080,360
+elasticsearch,hybrid-exact: shared - separated,all,count,0.0,0.0,0.0,1080,360
+elasticsearch,hybrid-exact: shared - separated,all,complete,0.0,0.0,0.0,1080,360
+elasticsearch,hybrid-exact: raw - padded,1,latency,-0.05555555555555555,-0.11805555555555555,0.006944444444444444,288,96
+elasticsearch,hybrid-exact: raw - padded,10,latency,-0.09027777777777778,-0.1527777777777778,-0.027777777777777776,288,96
+elasticsearch,hybrid-exact: raw - padded,100,latency,-0.052083333333333336,-0.125,0.015625,192,64
+elasticsearch,hybrid-exact: raw - padded,1000,latency,-0.052083333333333336,-0.17708333333333334,0.0625,96,32
+elasticsearch,hybrid-exact: raw - padded,all,latency,-0.06597222222222222,-0.10185185185185185,-0.03009259259259259,864,288
+elasticsearch,hybrid-pre: shared - separated,1,latency,-0.009722222222222222,-0.10138888888888889,0.08055555555555556,360,120
+elasticsearch,hybrid-pre: shared - separated,1,count,0.0,0.0,0.0,360,120
+elasticsearch,hybrid-pre: shared - separated,1,complete,0.0,0.0,0.0,360,120
+elasticsearch,hybrid-pre: shared - separated,10,latency,-0.04722222222222222,-0.13333333333333333,0.03888888888888889,360,120
+elasticsearch,hybrid-pre: shared - separated,10,count,0.0,0.0,0.0,360,120
+elasticsearch,hybrid-pre: shared - separated,10,complete,0.0,0.0,0.0,360,120
+elasticsearch,hybrid-pre: shared - separated,100,latency,-0.052083333333333336,-0.14375,0.04375,240,80
+elasticsearch,hybrid-pre: shared - separated,100,count,0.0,0.0,0.0,240,80
+elasticsearch,hybrid-pre: shared - separated,100,complete,0.0,0.0,0.0,240,80
+elasticsearch,hybrid-pre: shared - separated,1000,latency,-0.008333333333333333,-0.13333333333333333,0.10833333333333334,120,40
+elasticsearch,hybrid-pre: shared - separated,1000,count,0.0,0.0,0.0,120,40
+elasticsearch,hybrid-pre: shared - separated,1000,complete,0.0,0.0,0.0,120,40
+elasticsearch,hybrid-pre: shared - separated,all,latency,-0.03148148148148148,-0.07916666666666666,0.016666666666666666,1080,360
+elasticsearch,hybrid-pre: shared - separated,all,count,0.0,0.0,0.0,1080,360
+elasticsearch,hybrid-pre: shared - separated,all,complete,0.0,0.0,0.0,1080,360
+elasticsearch,hybrid-pre: raw - padded,1,latency,-0.003472222222222222,-0.07291666666666667,0.06597222222222222,288,96
+elasticsearch,hybrid-pre: raw - padded,10,latency,-0.013888888888888888,-0.08680555555555555,0.05555555555555555,288,96
+elasticsearch,hybrid-pre: raw - padded,100,latency,-0.09114583333333333,-0.16666666666666666,-0.013020833333333334,192,64
+elasticsearch,hybrid-pre: raw - padded,1000,latency,0.0,-0.11458333333333333,0.11458333333333333,96,32
+elasticsearch,hybrid-pre: raw - padded,all,latency,-0.026041666666666668,-0.06539351851851852,0.01273148148148148,864,288
+elasticsearch,post: shared - separated,1,latency,-0.005555555555555556,-0.08055555555555556,0.06944444444444445,360,120
+elasticsearch,post: shared - separated,1,count,0.002777777777777778,-0.006944444444444444,0.0125,360,120
+elasticsearch,post: shared - separated,1,complete,-0.001388888888888889,-0.006944444444444444,0.002777777777777778,360,120
+elasticsearch,post: shared - separated,10,latency,0.07083333333333333,-0.019444444444444445,0.1638888888888889,360,120
+elasticsearch,post: shared - separated,10,count,0.008333333333333333,0.0,0.018055555555555554,360,120
+elasticsearch,post: shared - separated,10,complete,0.0,-0.004166666666666667,0.004166666666666667,360,120
+elasticsearch,post: shared - separated,100,latency,0.26666666666666666,0.18333333333333332,0.35,240,80
+elasticsearch,post: shared - separated,100,count,0.07708333333333334,0.05625,0.09791666666666667,240,80
+elasticsearch,post: shared - separated,100,complete,0.014583333333333334,0.004166666666666667,0.027083333333333334,240,80
+elasticsearch,post: shared - separated,1000,latency,0.35,0.23333333333333334,0.4666666666666667,120,40
+elasticsearch,post: shared - separated,1000,count,0.3416666666666667,0.30833333333333335,0.375,120,40
+elasticsearch,post: shared - separated,1000,complete,0.225,0.18333333333333332,0.2625,120,40
+elasticsearch,post: shared - separated,all,latency,0.11990740740740741,0.07222222222222222,0.1675925925925926,1080,360
+elasticsearch,post: shared - separated,all,count,0.0587962962962963,0.046296296296296294,0.07222222222222222,1080,360
+elasticsearch,post: shared - separated,all,complete,0.027777777777777776,0.019444444444444445,0.037037037037037035,1080,360
+elasticsearch,post: raw - padded,1,latency,-0.052083333333333336,-0.12152777777777778,0.017361111111111112,288,96
+elasticsearch,post: raw - padded,10,latency,0.09027777777777778,0.017361111111111112,0.1597222222222222,288,96
+elasticsearch,post: raw - padded,100,latency,0.234375,0.16666666666666666,0.3020833333333333,192,64
+elasticsearch,post: raw - padded,1000,latency,0.34375,0.28125,0.3958333333333333,96,32
+elasticsearch,post: raw - padded,all,latency,0.10300925925925926,0.0625,0.1423611111111111,864,288
+elasticsearch,post-const: shared - separated,1,latency,0.08333333333333333,-0.005555555555555556,0.17222222222222222,360,120
+elasticsearch,post-const: shared - separated,1,count,0.002777777777777778,-0.006944444444444444,0.0125,360,120
+elasticsearch,post-const: shared - separated,1,complete,-0.001388888888888889,-0.006944444444444444,0.002777777777777778,360,120
+elasticsearch,post-const: shared - separated,10,latency,0.03888888888888889,-0.04722222222222222,0.125,360,120
+elasticsearch,post-const: shared - separated,10,count,0.008333333333333333,-0.001388888888888889,0.018055555555555554,360,120
+elasticsearch,post-const: shared - separated,10,complete,0.0,-0.004166666666666667,0.004166666666666667,360,120
+elasticsearch,post-const: shared - separated,100,latency,0.008333333333333333,-0.09583333333333334,0.10833333333333334,240,80
+elasticsearch,post-const: shared - separated,100,count,0.07916666666666666,0.058333333333333334,0.1,240,80
+elasticsearch,post-const: shared - separated,100,complete,0.014583333333333334,0.004166666666666667,0.027083333333333334,240,80
+elasticsearch,post-const: shared - separated,1000,latency,0.15833333333333333,0.008333333333333333,0.3,120,40
+elasticsearch,post-const: shared - separated,1000,count,0.3416666666666667,0.30833333333333335,0.375,120,40
+elasticsearch,post-const: shared - separated,1000,complete,0.22083333333333333,0.18333333333333332,0.25833333333333336,120,40
+elasticsearch,post-const: shared - separated,all,latency,0.06018518518518518,0.010185185185185186,0.10928240740740708,1080,360
+elasticsearch,post-const: shared - separated,all,count,0.05925925925925926,0.046296296296296294,0.07222222222222222,1080,360
+elasticsearch,post-const: shared - separated,all,complete,0.027314814814814816,0.01898148148148148,0.03657407407407407,1080,360
+elasticsearch,post-const: raw - padded,1,latency,0.06597222222222222,-0.003472222222222222,0.13541666666666666,288,96
+elasticsearch,post-const: raw - padded,10,latency,0.06944444444444445,0.003472222222222222,0.13541666666666666,288,96
+elasticsearch,post-const: raw - padded,100,latency,0.005208333333333333,-0.08333333333333333,0.09375,192,64
+elasticsearch,post-const: raw - padded,1000,latency,0.125,0.010416666666666666,0.23958333333333334,96,32
+elasticsearch,post-const: raw - padded,all,latency,0.06018518518518518,0.020833333333333332,0.10069444444444445,864,288
+elasticsearch,pre: shared - separated,1,latency,-0.06111111111111111,-0.14722222222222223,0.022222222222222223,360,120
+elasticsearch,pre: shared - separated,1,count,0.0,0.0,0.0,360,120
+elasticsearch,pre: shared - separated,1,complete,0.0,0.0,0.0,360,120
+elasticsearch,pre: shared - separated,10,latency,0.05277777777777778,-0.03333333333333333,0.1361111111111111,360,120
+elasticsearch,pre: shared - separated,10,count,0.0,0.0,0.0,360,120
+elasticsearch,pre: shared - separated,10,complete,0.0,0.0,0.0,360,120
+elasticsearch,pre: shared - separated,100,latency,-0.010416666666666666,-0.11458333333333333,0.09583333333333334,240,80
+elasticsearch,pre: shared - separated,100,count,0.0,0.0,0.0,240,80
+elasticsearch,pre: shared - separated,100,complete,0.0,0.0,0.0,240,80
+elasticsearch,pre: shared - separated,1000,latency,0.05416666666666667,-0.06666666666666667,0.175,120,40
+elasticsearch,pre: shared - separated,1000,count,0.0,0.0,0.0,120,40
+elasticsearch,pre: shared - separated,1000,complete,0.0,0.0,0.0,120,40
+elasticsearch,pre: shared - separated,all,latency,0.000925925925925926,-0.04861111111111111,0.049074074074074076,1080,360
+elasticsearch,pre: shared - separated,all,count,0.0,0.0,0.0,1080,360
+elasticsearch,pre: shared - separated,all,complete,0.0,0.0,0.0,1080,360
+elasticsearch,pre: raw - padded,1,latency,-0.015625,-0.08333333333333333,0.04861111111111111,288,96
+elasticsearch,pre: raw - padded,10,latency,-0.003472222222222222,-0.0763888888888889,0.06944444444444445,288,96
+elasticsearch,pre: raw - padded,100,latency,-0.049479166666666664,-0.1328125,0.036458333333333336,192,64
+elasticsearch,pre: raw - padded,1000,latency,0.11979166666666667,0.026041666666666668,0.21354166666666666,96,32
+elasticsearch,pre: raw - padded,all,latency,-0.004050925925925926,-0.043402777777777776,0.03587962962962963,864,288
+elasticsearch,pre-exact: shared - separated,1,latency,-0.005555555555555556,-0.08055555555555556,0.07222222222222222,360,120
+elasticsearch,pre-exact: shared - separated,1,count,0.0,0.0,0.0,360,120
+elasticsearch,pre-exact: shared - separated,1,complete,0.0,0.0,0.0,360,120
+elasticsearch,pre-exact: shared - separated,10,latency,-0.03611111111111111,-0.11944444444444445,0.05277777777777778,360,120
+elasticsearch,pre-exact: shared - separated,10,count,0.0,0.0,0.0,360,120
+elasticsearch,pre-exact: shared - separated,10,complete,0.0,0.0,0.0,360,120
+elasticsearch,pre-exact: shared - separated,100,latency,0.01875,-0.07708333333333334,0.11458333333333333,240,80
+elasticsearch,pre-exact: shared - separated,100,count,0.0,0.0,0.0,240,80
+elasticsearch,pre-exact: shared - separated,100,complete,0.0,0.0,0.0,240,80
+elasticsearch,pre-exact: shared - separated,1000,latency,-0.1,-0.225,0.03333333333333333,120,40
+elasticsearch,pre-exact: shared - separated,1000,count,0.0,0.0,0.0,120,40
+elasticsearch,pre-exact: shared - separated,1000,complete,0.0,0.0,0.0,120,40
+elasticsearch,pre-exact: shared - separated,all,latency,-0.020833333333333332,-0.06759259259259259,0.02501157407407391,1080,360
+elasticsearch,pre-exact: shared - separated,all,count,0.0,0.0,0.0,1080,360
+elasticsearch,pre-exact: shared - separated,all,complete,0.0,0.0,0.0,1080,360
+elasticsearch,pre-exact: raw - padded,1,latency,0.0,-0.06597222222222222,0.0625,288,96
+elasticsearch,pre-exact: raw - padded,10,latency,-0.041666666666666664,-0.1111111111111111,0.027777777777777776,288,96
+elasticsearch,pre-exact: raw - padded,100,latency,-0.046875,-0.11979166666666667,0.026041666666666668,192,64
+elasticsearch,pre-exact: raw - padded,1000,latency,-0.052083333333333336,-0.16666666666666666,0.0625,96,32
+elasticsearch,pre-exact: raw - padded,all,latency,-0.03009259259259259,-0.06600115740740738,0.008101851851851851,864,288
+faiss,post - post-const,1,latency,0.03888888888888889,-0.027777777777777776,0.10555555555555556,360,120
+faiss,post - post-const,1,count,0.0,0.0,0.0,360,120
+faiss,post - post-const,1,complete,0.0,0.0,0.0,360,120
+faiss,post - post-const,10,latency,0.1,0.03888888888888889,0.16111111111111112,360,120
+faiss,post - post-const,10,count,0.0,0.0,0.0,360,120
+faiss,post - post-const,10,complete,0.0,0.0,0.0,360,120
+faiss,post - post-const,100,latency,0.3458333333333333,0.26666666666666666,0.42083333333333334,240,80
+faiss,post - post-const,100,count,0.0,0.0,0.0,240,80
+faiss,post - post-const,100,complete,0.0,0.0,0.0,240,80
+faiss,post - post-const,1000,latency,0.625,0.55,0.7,120,40
+faiss,post - post-const,1000,count,0.0,0.0,0.0,120,40
+faiss,post - post-const,1000,complete,0.0,0.0,0.0,120,40
+faiss,post - post-const,all,latency,0.1925925925925926,0.15185185185185185,0.23333333333333334,1080,360
+faiss,post - post-const,all,count,0.0,0.0,0.0,1080,360
+faiss,post - post-const,all,complete,0.0,0.0,0.0,1080,360
+faiss,post: shared - separated,1,latency,0.17916666666666667,0.10555555555555556,0.25,360,120
+faiss,post: shared - separated,1,count,0.0,0.0,0.0,360,120
+faiss,post: shared - separated,1,complete,0.0,0.0,0.0,360,120
+faiss,post: shared - separated,10,latency,0.17777777777777778,0.09722222222222222,0.25833333333333336,360,120
+faiss,post: shared - separated,10,count,0.008333333333333333,0.002777777777777778,0.015277777777777777,360,120
+faiss,post: shared - separated,10,complete,0.002777777777777778,0.0,0.006944444444444444,360,120
+faiss,post: shared - separated,100,latency,0.30416666666666664,0.23333333333333334,0.37083333333333335,240,80
+faiss,post: shared - separated,100,count,0.09166666666666666,0.07291666666666667,0.10833333333333334,240,80
+faiss,post: shared - separated,100,complete,0.016666666666666666,0.00625,0.029166666666666667,240,80
+faiss,post: shared - separated,1000,latency,0.21666666666666667,0.10833333333333334,0.3333333333333333,120,40
+faiss,post: shared - separated,1000,count,0.37083333333333335,0.3333333333333333,0.4041666666666667,120,40
+faiss,post: shared - separated,1000,complete,0.2375,0.19583333333333333,0.2791666666666667,120,40
+faiss,post: shared - separated,all,latency,0.21064814814814814,0.1675925925925926,0.25277777777777777,1080,360
+faiss,post: shared - separated,all,count,0.06435185185185185,0.05138888888888889,0.07825231481481464,1080,360
+faiss,post: shared - separated,all,complete,0.031018518518518518,0.022222222222222223,0.040740740740740744,1080,360
+faiss,post: raw - padded,1,latency,0.22916666666666666,0.18055555555555555,0.2777777777777778,288,96
+faiss,post: raw - padded,10,latency,0.2222222222222222,0.16666666666666666,0.2777777777777778,288,96
+faiss,post: raw - padded,100,latency,0.3333333333333333,0.2864583333333333,0.3802083333333333,192,64
+faiss,post: raw - padded,1000,latency,0.28125,0.22916666666666666,0.3333333333333333,96,32
+faiss,post: raw - padded,all,latency,0.25578703703703703,0.22800925925925927,0.2835648148148148,864,288
+faiss,post-const: shared - separated,1,latency,0.1361111111111111,0.06666666666666667,0.20555555555555555,360,120
+faiss,post-const: shared - separated,1,count,0.0,0.0,0.0,360,120
+faiss,post-const: shared - separated,1,complete,0.0,0.0,0.0,360,120
+faiss,post-const: shared - separated,10,latency,0.03888888888888889,-0.03611111111111111,0.11388888888888889,360,120
+faiss,post-const: shared - separated,10,count,0.008333333333333333,0.002777777777777778,0.015277777777777777,360,120
+faiss,post-const: shared - separated,10,complete,0.002777777777777778,0.0,0.006944444444444444,360,120
+faiss,post-const: shared - separated,100,latency,-0.05416666666666667,-0.14166666666666666,0.03333333333333333,240,80
+faiss,post-const: shared - separated,100,count,0.09166666666666666,0.07291666666666667,0.11041666666666666,240,80
+faiss,post-const: shared - separated,100,complete,0.016666666666666666,0.00625,0.029166666666666667,240,80
+faiss,post-const: shared - separated,1000,latency,-0.39166666666666666,-0.475,-0.30833333333333335,120,40
+faiss,post-const: shared - separated,1000,count,0.37083333333333335,0.3333333333333333,0.4083333333333333,120,40
+faiss,post-const: shared - separated,1000,complete,0.2375,0.19583333333333333,0.2833333333333333,120,40
+faiss,post-const: shared - separated,all,latency,0.002777777777777778,-0.040740740740740744,0.046296296296296294,1080,360
+faiss,post-const: shared - separated,all,count,0.06435185185185185,0.05138888888888889,0.07777777777777778,1080,360
+faiss,post-const: shared - separated,all,complete,0.031018518518518518,0.022222222222222223,0.040740740740740744,1080,360
+faiss,post-const: raw - padded,1,latency,0.1423611111111111,0.08680555555555555,0.19791666666666666,288,96
+faiss,post-const: raw - padded,10,latency,0.125,0.06944444444444445,0.18055555555555555,288,96
+faiss,post-const: raw - padded,100,latency,-0.010416666666666666,-0.078125,0.057291666666666664,192,64
+faiss,post-const: raw - padded,1000,latency,-0.3541666666666667,-0.4166666666666667,-0.28125,96,32
+faiss,post-const: raw - padded,all,latency,0.047453703703703706,0.011574074074074073,0.08333333333333333,864,288
+faiss,pre: shared - separated,1,latency,-0.3055555555555556,-0.375,-0.23055555555555557,360,120
+faiss,pre: shared - separated,1,count,0.0,0.0,0.0,360,120
+faiss,pre: shared - separated,1,complete,0.0,0.0,0.0,360,120
+faiss,pre: shared - separated,10,latency,-0.17222222222222222,-0.25555555555555554,-0.08888888888888889,360,120
+faiss,pre: shared - separated,10,count,0.0,0.0,0.0,360,120
+faiss,pre: shared - separated,10,complete,0.0,0.0,0.0,360,120
+faiss,pre: shared - separated,100,latency,-0.24583333333333332,-0.32916666666666666,-0.15833333333333333,240,80
+faiss,pre: shared - separated,100,count,0.0,0.0,0.0,240,80
+faiss,pre: shared - separated,100,complete,0.0,0.0,0.0,240,80
+faiss,pre: shared - separated,1000,latency,-0.125,-0.25833333333333336,0.008333333333333333,120,40
+faiss,pre: shared - separated,1000,count,0.0,0.0,0.0,120,40
+faiss,pre: shared - separated,1000,complete,0.0,0.0,0.0,120,40
+faiss,pre: shared - separated,all,latency,-0.22777777777777777,-0.2712962962962963,-0.18333333333333332,1080,360
+faiss,pre: shared - separated,all,count,0.0,0.0,0.0,1080,360
+faiss,pre: shared - separated,all,complete,0.0,0.0,0.0,1080,360
+faiss,pre: raw - padded,1,latency,-0.2361111111111111,-0.2916666666666667,-0.18055555555555555,288,96
+faiss,pre: raw - padded,10,latency,-0.17708333333333334,-0.23958333333333334,-0.1111111111111111,288,96
+faiss,pre: raw - padded,100,latency,-0.23958333333333334,-0.3020833333333333,-0.17708333333333334,192,64
+faiss,pre: raw - padded,1000,latency,-0.125,-0.22916666666666666,-0.010416666666666666,96,32
+faiss,pre: raw - padded,all,latency,-0.2048611111111111,-0.23845486111111108,-0.1701388888888889,864,288
+memory,post: shared - separated,1,latency,-0.2,-0.5333333333333333,0.13333333333333333,15,15
+memory,post: shared - separated,1,count,0.0,0.0,0.0,15,15
+memory,post: shared - separated,1,complete,0.0,0.0,0.0,15,15
+memory,post: shared - separated,10,latency,-0.2,-0.5333333333333333,0.13333333333333333,15,15
+memory,post: shared - separated,10,count,0.0,0.0,0.0,15,15
+memory,post: shared - separated,10,complete,0.0,0.0,0.0,15,15
+memory,post: shared - separated,100,latency,-0.13333333333333333,-0.4666666666666667,0.2,15,15
+memory,post: shared - separated,100,count,0.0,0.0,0.0,15,15
+memory,post: shared - separated,100,complete,0.0,0.0,0.0,15,15
+memory,post: shared - separated,1000,latency,0.26666666666666666,-0.06666666666666667,0.6,15,15
+memory,post: shared - separated,1000,count,0.0,0.0,0.0,15,15
+memory,post: shared - separated,1000,complete,0.0,0.0,0.0,15,15
+memory,post: shared - separated,all,latency,-0.06666666666666667,-0.23333333333333334,0.11666666666666667,60,60
+memory,post: shared - separated,all,count,0.0,0.0,0.0,60,60
+memory,post: shared - separated,all,complete,0.0,0.0,0.0,60,60
+memory,post: raw - padded,1,latency,-0.08333333333333333,-0.3333333333333333,0.16666666666666666,12,12
+memory,post: raw - padded,10,latency,-0.08333333333333333,-0.3333333333333333,0.16666666666666666,12,12
+memory,post: raw - padded,100,latency,-0.16666666666666666,-0.4166666666666667,0.08333333333333333,12,12
+memory,post: raw - padded,1000,latency,0.20833333333333334,-0.041666666666666664,0.4166666666666667,12,12
+memory,post: raw - padded,all,latency,-0.03125,-0.16666666666666666,0.10416666666666667,48,48
+memory,pre: shared - separated,1,latency,0.0,-0.3333333333333333,0.3333333333333333,15,15
+memory,pre: shared - separated,1,count,0.0,0.0,0.0,15,15
+memory,pre: shared - separated,1,complete,0.0,0.0,0.0,15,15
+memory,pre: shared - separated,10,latency,0.06666666666666667,-0.2,0.3333333333333333,15,15
+memory,pre: shared - separated,10,count,0.0,0.0,0.0,15,15
+memory,pre: shared - separated,10,complete,0.0,0.0,0.0,15,15
+memory,pre: shared - separated,100,latency,-0.26666666666666666,-0.6,0.06666666666666667,15,15
+memory,pre: shared - separated,100,count,0.0,0.0,0.0,15,15
+memory,pre: shared - separated,100,complete,0.0,0.0,0.0,15,15
+memory,pre: shared - separated,1000,latency,-0.26666666666666666,-0.4666666666666667,-0.06666666666666667,15,15
+memory,pre: shared - separated,1000,count,0.0,0.0,0.0,15,15
+memory,pre: shared - separated,1000,complete,0.0,0.0,0.0,15,15
+memory,pre: shared - separated,all,latency,-0.11666666666666667,-0.26666666666666666,0.03333333333333333,60,60
+memory,pre: shared - separated,all,count,0.0,0.0,0.0,60,60
+memory,pre: shared - separated,all,complete,0.0,0.0,0.0,60,60
+memory,pre: raw - padded,1,latency,0.0,-0.25,0.25,12,12
+memory,pre: raw - padded,10,latency,0.0,-0.25,0.25,12,12
+memory,pre: raw - padded,100,latency,-0.16666666666666666,-0.4166666666666667,0.08333333333333333,12,12
+memory,pre: raw - padded,1000,latency,-0.3333333333333333,-0.5,-0.08333333333333333,12,12
+memory,pre: raw - padded,all,latency,-0.125,-0.25,0.020833333333333332,48,48
+pgvector,post - post-const,1,latency,0.08055555555555556,0.011111111111111112,0.1527777777777778,360,120
+pgvector,post - post-const,1,count,0.0,0.0,0.0,360,120
+pgvector,post - post-const,1,complete,0.0,0.0,0.0,360,120
+pgvector,post - post-const,10,latency,0.1638888888888889,0.10277777777777777,0.225,360,120
+pgvector,post - post-const,10,count,0.0,0.0,0.0,360,120
+pgvector,post - post-const,10,complete,0.0,0.0,0.0,360,120
+pgvector,post - post-const,100,latency,0.5,0.44583333333333336,0.5541666666666667,240,80
+pgvector,post - post-const,100,count,0.0,0.0,0.0,240,80
+pgvector,post - post-const,100,complete,0.0,0.0,0.0,240,80
+pgvector,post - post-const,1000,latency,0.6583333333333333,0.6166666666666667,0.6916666666666667,120,40
+pgvector,post - post-const,1000,count,0.0,0.0,0.0,120,40
+pgvector,post - post-const,1000,complete,0.0,0.0,0.0,120,40
+pgvector,post - post-const,all,latency,0.2657407407407407,0.22590277777777779,0.3055555555555556,1080,360
+pgvector,post - post-const,all,count,0.0,0.0,0.0,1080,360
+pgvector,post - post-const,all,complete,0.0,0.0,0.0,1080,360
+pgvector,pre - pre-exact,1,latency,0.1625,0.1,0.22361111111111112,360,120
+pgvector,pre - pre-exact,1,count,0.0,0.0,0.0,360,120
+pgvector,pre - pre-exact,1,complete,0.0,0.0,0.0,360,120
+pgvector,pre - pre-exact,10,latency,0.2972222222222222,0.24166666666666667,0.3527777777777778,360,120
+pgvector,pre - pre-exact,10,count,0.0,0.0,0.0,360,120
+pgvector,pre - pre-exact,10,complete,0.0,0.0,0.0,360,120
+pgvector,pre - pre-exact,100,latency,0.6541666666666667,0.6,0.7083333333333334,240,80
+pgvector,pre - pre-exact,100,count,0.0,0.0,0.0,240,80
+pgvector,pre - pre-exact,100,complete,0.0,0.0,0.0,240,80
+pgvector,pre - pre-exact,1000,latency,0.75,0.6583333333333333,0.8416666666666667,120,40
+pgvector,pre - pre-exact,1000,count,0.0,0.0,0.0,120,40
+pgvector,pre - pre-exact,1000,complete,0.0,0.0,0.0,120,40
+pgvector,pre - pre-exact,all,latency,0.3819444444444444,0.3425925925925926,0.42083333333333334,1080,360
+pgvector,pre - pre-exact,all,count,0.0,0.0,0.0,1080,360
+pgvector,pre - pre-exact,all,complete,0.0,0.0,0.0,1080,360
+pgvector,bm25-pre: shared - separated,1,latency,-0.10694444444444444,-0.18472222222222223,-0.030555555555555555,360,120
+pgvector,bm25-pre: shared - separated,1,count,0.0,0.0,0.0,360,120
+pgvector,bm25-pre: shared - separated,1,complete,0.0,0.0,0.0,360,120
+pgvector,bm25-pre: shared - separated,10,latency,-0.059722222222222225,-0.1375,0.016666666666666666,360,120
+pgvector,bm25-pre: shared - separated,10,count,0.0,0.0,0.0,360,120
+pgvector,bm25-pre: shared - separated,10,complete,0.0,0.0,0.0,360,120
+pgvector,bm25-pre: shared - separated,100,latency,0.016666666666666666,-0.075,0.11046874999999924,240,80
+pgvector,bm25-pre: shared - separated,100,count,0.0,0.0,0.0,240,80
+pgvector,bm25-pre: shared - separated,100,complete,0.0,0.0,0.0,240,80
+pgvector,bm25-pre: shared - separated,1000,latency,0.11666666666666667,-0.03333333333333333,0.26666666666666666,120,40
+pgvector,bm25-pre: shared - separated,1000,count,0.0,0.0,0.0,120,40
+pgvector,bm25-pre: shared - separated,1000,complete,0.0,0.0,0.0,120,40
+pgvector,bm25-pre: shared - separated,all,latency,-0.03888888888888889,-0.08380787037037037,0.007407407407407408,1080,360
+pgvector,bm25-pre: shared - separated,all,count,0.0,0.0,0.0,1080,360
+pgvector,bm25-pre: shared - separated,all,complete,0.0,0.0,0.0,1080,360
+pgvector,bm25-pre: raw - padded,1,latency,-0.012152777777777778,-0.078125,0.052083333333333336,288,96
+pgvector,bm25-pre: raw - padded,10,latency,-0.015625,-0.08333333333333333,0.050347222222222224,288,96
+pgvector,bm25-pre: raw - padded,100,latency,0.015625,-0.07552083333333333,0.10416666666666667,192,64
+pgvector,bm25-pre: raw - padded,1000,latency,0.16666666666666666,0.041666666666666664,0.2916666666666667,96,32
+pgvector,bm25-pre: raw - padded,all,latency,0.01273148148148148,-0.027777777777777776,0.052662037037037035,864,288
+pgvector,post: shared - separated,1,latency,-0.1361111111111111,-0.20555555555555555,-0.06944444444444445,360,120
+pgvector,post: shared - separated,1,count,-0.001388888888888889,-0.004166666666666667,0.0,360,120
+pgvector,post: shared - separated,1,complete,0.0,0.0,0.0,360,120
+pgvector,post: shared - separated,10,latency,-0.10555555555555556,-0.17777777777777778,-0.03333333333333333,360,120
+pgvector,post: shared - separated,10,count,0.002777777777777778,-0.004166666666666667,0.009722222222222222,360,120
+pgvector,post: shared - separated,10,complete,0.0,0.0,0.0,360,120
+pgvector,post: shared - separated,100,latency,0.1125,0.020833333333333332,0.20416666666666666,240,80
+pgvector,post: shared - separated,100,count,0.07916666666666666,0.06041666666666667,0.09791666666666667,240,80
+pgvector,post: shared - separated,100,complete,0.010416666666666666,0.0020833333333333333,0.020833333333333332,240,80
+pgvector,post: shared - separated,1000,latency,0.15,0.05,0.24166666666666667,120,40
+pgvector,post: shared - separated,1000,count,0.3541666666666667,0.31666666666666665,0.3875,120,40
+pgvector,post: shared - separated,1000,complete,0.23333333333333334,0.19166666666666668,0.2791666666666667,120,40
+pgvector,post: shared - separated,all,latency,-0.03888888888888889,-0.08055555555555556,0.002777777777777778,1080,360
+pgvector,post: shared - separated,all,count,0.05740740740740741,0.04490740740740741,0.07083333333333333,1080,360
+pgvector,post: shared - separated,all,complete,0.02824074074074074,0.019444444444444445,0.03796296296296296,1080,360
+pgvector,post: raw - padded,1,latency,-0.1388888888888889,-0.1909722222222222,-0.08680555555555555,288,96
+pgvector,post: raw - padded,10,latency,-0.1111111111111111,-0.1701388888888889,-0.052083333333333336,288,96
+pgvector,post: raw - padded,100,latency,0.09375,0.036458333333333336,0.15104166666666666,192,64
+pgvector,post: raw - padded,1000,latency,0.17708333333333334,0.16666666666666666,0.19791666666666666,96,32
+pgvector,post: raw - padded,all,latency,-0.04282407407407408,-0.07523148148148148,-0.011574074074074073,864,288
+pgvector,post-const: shared - separated,1,latency,-0.175,-0.24444444444444444,-0.10555555555555556,360,120
+pgvector,post-const: shared - separated,1,count,-0.001388888888888889,-0.004166666666666667,0.0,360,120
+pgvector,post-const: shared - separated,1,complete,0.0,0.0,0.0,360,120
+pgvector,post-const: shared - separated,10,latency,-0.25277777777777777,-0.31666666666666665,-0.18611111111111112,360,120
+pgvector,post-const: shared - separated,10,count,0.002777777777777778,-0.004166666666666667,0.009722222222222222,360,120
+pgvector,post-const: shared - separated,10,complete,0.0,0.0,0.0,360,120
+pgvector,post-const: shared - separated,100,latency,-0.43333333333333335,-0.5083333333333333,-0.35833333333333334,240,80
+pgvector,post-const: shared - separated,100,count,0.07916666666666666,0.058333333333333334,0.1,240,80
+pgvector,post-const: shared - separated,100,complete,0.010416666666666666,0.0020833333333333333,0.020833333333333332,240,80
+pgvector,post-const: shared - separated,1000,latency,-0.5166666666666667,-0.6,-0.43333333333333335,120,40
+pgvector,post-const: shared - separated,1000,count,0.3541666666666667,0.32083333333333336,0.3875,120,40
+pgvector,post-const: shared - separated,1000,complete,0.23333333333333334,0.19166666666666668,0.2791666666666667,120,40
+pgvector,post-const: shared - separated,all,latency,-0.2962962962962963,-0.33425925925925926,-0.2574074074074074,1080,360
+pgvector,post-const: shared - separated,all,count,0.05740740740740741,0.044444444444444446,0.07083333333333333,1080,360
+pgvector,post-const: shared - separated,all,complete,0.02824074074074074,0.019444444444444445,0.037511574074073906,1080,360
+pgvector,post-const: raw - padded,1,latency,-0.2048611111111111,-0.2604166666666667,-0.14930555555555555,288,96
+pgvector,post-const: raw - padded,10,latency,-0.2569444444444444,-0.3055555555555556,-0.20833333333333334,288,96
+pgvector,post-const: raw - padded,100,latency,-0.421875,-0.4583333333333333,-0.3802083333333333,192,64
+pgvector,post-const: raw - padded,1000,latency,-0.4791666666666667,-0.5,-0.4375,96,32
+pgvector,post-const: raw - padded,all,latency,-0.30092592592592593,-0.3287037037037037,-0.27199074074074076,864,288
+pgvector,pre: shared - separated,1,latency,-0.15694444444444444,-0.225,-0.09027777777777778,360,120
+pgvector,pre: shared - separated,1,count,0.0,0.0,0.0,360,120
+pgvector,pre: shared - separated,1,complete,0.0,0.0,0.0,360,120
+pgvector,pre: shared - separated,10,latency,-0.05277777777777778,-0.11666666666666667,0.008333333333333333,360,120
+pgvector,pre: shared - separated,10,count,0.0,0.0,0.0,360,120
+pgvector,pre: shared - separated,10,complete,0.0,0.0,0.0,360,120
+pgvector,pre: shared - separated,100,latency,0.2791666666666667,0.19583333333333333,0.3625,240,80
+pgvector,pre: shared - separated,100,count,0.0,0.0,0.0,240,80
+pgvector,pre: shared - separated,100,complete,0.0,0.0,0.0,240,80
+pgvector,pre: shared - separated,1000,latency,0.3,0.21666666666666667,0.38333333333333336,120,40
+pgvector,pre: shared - separated,1000,count,0.0,0.0,0.0,120,40
+pgvector,pre: shared - separated,1000,complete,0.0,0.0,0.0,120,40
+pgvector,pre: shared - separated,all,latency,0.02546296296296296,-0.01712962962962963,0.06759259259259259,1080,360
+pgvector,pre: shared - separated,all,count,0.0,0.0,0.0,1080,360
+pgvector,pre: shared - separated,all,complete,0.0,0.0,0.0,1080,360
+pgvector,pre: raw - padded,1,latency,-0.1232638888888889,-0.1736111111111111,-0.07291666666666667,288,96
+pgvector,pre: raw - padded,10,latency,-0.06597222222222222,-0.12152777777777778,-0.010416666666666666,288,96
+pgvector,pre: raw - padded,100,latency,0.3072916666666667,0.265625,0.3489583333333333,192,64
+pgvector,pre: raw - padded,1000,latency,0.4270833333333333,0.375,0.46875,96,32
+pgvector,pre: raw - padded,all,latency,0.052662037037037035,0.016203703703703703,0.08854166666666667,864,288
+pgvector,pre-exact: shared - separated,1,latency,-0.3611111111111111,-0.425,-0.2972222222222222,360,120
+pgvector,pre-exact: shared - separated,1,count,0.0,0.0,0.0,360,120
+pgvector,pre-exact: shared - separated,1,complete,0.0,0.0,0.0,360,120
+pgvector,pre-exact: shared - separated,10,latency,-0.3458333333333333,-0.4125,-0.2777777777777778,360,120
+pgvector,pre-exact: shared - separated,10,count,0.0,0.0,0.0,360,120
+pgvector,pre-exact: shared - separated,10,complete,0.0,0.0,0.0,360,120
+pgvector,pre-exact: shared - separated,100,latency,-0.38125,-0.4666666666666667,-0.29583333333333334,240,80
+pgvector,pre-exact: shared - separated,100,count,0.0,0.0,0.0,240,80
+pgvector,pre-exact: shared - separated,100,complete,0.0,0.0,0.0,240,80
+pgvector,pre-exact: shared - separated,1000,latency,-0.35,-0.4666666666666667,-0.23333333333333334,120,40
+pgvector,pre-exact: shared - separated,1000,count,0.0,0.0,0.0,120,40
+pgvector,pre-exact: shared - separated,1000,complete,0.0,0.0,0.0,120,40
+pgvector,pre-exact: shared - separated,all,latency,-0.3592592592592593,-0.3976851851851852,-0.3199074074074074,1080,360
+pgvector,pre-exact: shared - separated,all,count,0.0,0.0,0.0,1080,360
+pgvector,pre-exact: shared - separated,all,complete,0.0,0.0,0.0,1080,360
+pgvector,pre-exact: raw - padded,1,latency,-0.3090277777777778,-0.3576388888888889,-0.2569444444444444,288,96
+pgvector,pre-exact: raw - padded,10,latency,-0.3541666666666667,-0.4027777777777778,-0.3020833333333333,288,96
+pgvector,pre-exact: raw - padded,100,latency,-0.3802083333333333,-0.4322916666666667,-0.3229166666666667,192,64
+pgvector,pre-exact: raw - padded,1000,latency,-0.3958333333333333,-0.4583333333333333,-0.3229166666666667,96,32
+pgvector,pre-exact: raw - padded,all,latency,-0.34953703703703703,-0.3773148148148148,-0.32060185185185186,864,288
+qdrant,post - post-const,1,latency,0.0,-0.075,0.07777777777777778,360,120
+qdrant,post - post-const,1,count,0.0,0.0,0.0,360,120
+qdrant,post - post-const,1,complete,0.0,0.0,0.0,360,120
+qdrant,post - post-const,10,latency,-0.013888888888888888,-0.08888888888888889,0.06111111111111111,360,120
+qdrant,post - post-const,10,count,0.0,0.0,0.0,360,120
+qdrant,post - post-const,10,complete,0.0,0.0,0.0,360,120
+qdrant,post - post-const,100,latency,0.3,0.22083333333333333,0.37916666666666665,240,80
+qdrant,post - post-const,100,count,0.0,0.0,0.0,240,80
+qdrant,post - post-const,100,complete,0.0,0.0,0.0,240,80
+qdrant,post - post-const,1000,latency,0.43333333333333335,0.3333333333333333,0.525,120,40
+qdrant,post - post-const,1000,count,0.0,0.0,0.0,120,40
+qdrant,post - post-const,1000,complete,0.0,0.0,0.0,120,40
+qdrant,post - post-const,all,latency,0.11018518518518519,0.06666666666666667,0.15462962962962962,1080,360
+qdrant,post - post-const,all,count,0.0,0.0,0.0,1080,360
+qdrant,post - post-const,all,complete,0.0,0.0,0.0,1080,360
+qdrant,pre - pre-exact,1,latency,0.022222222222222223,-0.05,0.09444444444444444,360,120
+qdrant,pre - pre-exact,1,count,0.0,0.0,0.0,360,120
+qdrant,pre - pre-exact,1,complete,0.0,0.0,0.0,360,120
+qdrant,pre - pre-exact,10,latency,-0.029166666666666667,-0.10277777777777777,0.04583333333333333,360,120
+qdrant,pre - pre-exact,10,count,0.0,0.0,0.0,360,120
+qdrant,pre - pre-exact,10,complete,0.0,0.0,0.0,360,120
+qdrant,pre - pre-exact,100,latency,-0.022916666666666665,-0.11875,0.07083333333333333,240,80
+qdrant,pre - pre-exact,100,count,0.0,0.0,0.0,240,80
+qdrant,pre - pre-exact,100,complete,0.0,0.0,0.0,240,80
+qdrant,pre - pre-exact,1000,latency,0.15,0.008333333333333333,0.2833333333333333,120,40
+qdrant,pre - pre-exact,1000,count,0.004166666666666667,0.0,0.0125,120,40
+qdrant,pre - pre-exact,1000,complete,0.004166666666666667,0.0,0.0125,120,40
+qdrant,pre - pre-exact,all,latency,0.009259259259259259,-0.03425925925925926,0.05277777777777778,1080,360
+qdrant,pre - pre-exact,all,count,0.000462962962962963,0.0,0.001388888888888889,1080,360
+qdrant,pre - pre-exact,all,complete,0.000462962962962963,0.0,0.001388888888888889,1080,360
+qdrant,bm25-pre: shared - separated,1,latency,-0.029166666666666667,-0.1111111111111111,0.05694444444444444,360,120
+qdrant,bm25-pre: shared - separated,1,count,0.0,0.0,0.0,360,120
+qdrant,bm25-pre: shared - separated,1,complete,0.0,0.0,0.0,360,120
+qdrant,bm25-pre: shared - separated,10,latency,-0.06388888888888888,-0.1361111111111111,0.008333333333333333,360,120
+qdrant,bm25-pre: shared - separated,10,count,0.0,0.0,0.0,360,120
+qdrant,bm25-pre: shared - separated,10,complete,0.0,0.0,0.0,360,120
+qdrant,bm25-pre: shared - separated,100,latency,-0.008333333333333333,-0.10416666666666667,0.0875,240,80
+qdrant,bm25-pre: shared - separated,100,count,0.0,0.0,0.0,240,80
+qdrant,bm25-pre: shared - separated,100,complete,0.0,0.0,0.0,240,80
+qdrant,bm25-pre: shared - separated,1000,latency,0.18333333333333332,0.075,0.2916666666666667,120,40
+qdrant,bm25-pre: shared - separated,1000,count,0.0,0.0,0.0,120,40
+qdrant,bm25-pre: shared - separated,1000,complete,0.0,0.0,0.0,120,40
+qdrant,bm25-pre: shared - separated,all,latency,-0.0125,-0.05787037037037037,0.03333333333333333,1080,360
+qdrant,bm25-pre: shared - separated,all,count,0.0,0.0,0.0,1080,360
+qdrant,bm25-pre: shared - separated,all,complete,0.0,0.0,0.0,1080,360
+qdrant,bm25-pre: raw - padded,1,latency,-0.026041666666666668,-0.09027777777777778,0.03819444444444445,288,96
+qdrant,bm25-pre: raw - padded,10,latency,-0.052083333333333336,-0.10416666666666667,0.0,288,96
+qdrant,bm25-pre: raw - padded,100,latency,0.026041666666666668,-0.036458333333333336,0.08854166666666667,192,64
+qdrant,bm25-pre: raw - padded,1000,latency,0.03125,-0.052083333333333336,0.11458333333333333,96,32
+qdrant,bm25-pre: raw - padded,all,latency,-0.01678240740740741,-0.04918981481481482,0.015046296296296295,864,288
+qdrant,post: shared - separated,1,latency,-0.019444444444444445,-0.09444444444444444,0.05277777777777778,360,120
+qdrant,post: shared - separated,1,count,0.005555555555555556,-0.002777777777777778,0.013888888888888888,360,120
+qdrant,post: shared - separated,1,complete,0.0,-0.004166666666666667,0.004166666666666667,360,120
+qdrant,post: shared - separated,10,latency,-0.022222222222222223,-0.09444444444444444,0.05,360,120
+qdrant,post: shared - separated,10,count,0.006944444444444444,-0.001388888888888889,0.015277777777777777,360,120
+qdrant,post: shared - separated,10,complete,-0.001388888888888889,-0.004166666666666667,0.0,360,120
+qdrant,post: shared - separated,100,latency,0.25,0.17083333333333334,0.32916666666666666,240,80
+qdrant,post: shared - separated,100,count,0.08333333333333333,0.06458333333333334,0.10208333333333333,240,80
+qdrant,post: shared - separated,100,complete,0.010416666666666666,0.0020833333333333333,0.020833333333333332,240,80
+qdrant,post: shared - separated,1000,latency,0.26666666666666666,0.15833333333333333,0.375,120,40
+qdrant,post: shared - separated,1000,count,0.37083333333333335,0.3333333333333333,0.4083333333333333,120,40
+qdrant,post: shared - separated,1000,complete,0.25,0.20833333333333334,0.2916666666666667,120,40
+qdrant,post: shared - separated,all,latency,0.0712962962962963,0.027777777777777776,0.11388888888888889,1080,360
+qdrant,post: shared - separated,all,count,0.06388888888888888,0.050462962962962966,0.07777777777777778,1080,360
+qdrant,post: shared - separated,all,complete,0.02962962962962963,0.020370370370370372,0.03981481481481482,1080,360
+qdrant,post: raw - padded,1,latency,-0.020833333333333332,-0.0798611111111111,0.03819444444444445,288,96
+qdrant,post: raw - padded,10,latency,-0.024305555555555556,-0.08333333333333333,0.034722222222222224,288,96
+qdrant,post: raw - padded,100,latency,0.2552083333333333,0.19791666666666666,0.3125,192,64
+qdrant,post: raw - padded,1000,latency,0.28125,0.22916666666666666,0.3333333333333333,96,32
+qdrant,post: raw - padded,all,latency,0.07291666666666667,0.03819444444444445,0.1076388888888889,864,288
+qdrant,post-const: shared - separated,1,latency,-0.019444444444444445,-0.09722222222222222,0.058333333333333334,360,120
+qdrant,post-const: shared - separated,1,count,0.005555555555555556,-0.002777777777777778,0.013888888888888888,360,120
+qdrant,post-const: shared - separated,1,complete,0.0,-0.004166666666666667,0.004166666666666667,360,120
+qdrant,post-const: shared - separated,10,latency,-0.03333333333333333,-0.10833333333333334,0.04722222222222222,360,120
+qdrant,post-const: shared - separated,10,count,0.006944444444444444,-0.001388888888888889,0.015277777777777777,360,120
+qdrant,post-const: shared - separated,10,complete,-0.001388888888888889,-0.004166666666666667,0.0,360,120
+qdrant,post-const: shared - separated,100,latency,-0.10833333333333334,-0.19166666666666668,-0.020833333333333332,240,80
+qdrant,post-const: shared - separated,100,count,0.08333333333333333,0.06458333333333334,0.10208333333333333,240,80
+qdrant,post-const: shared - separated,100,complete,0.010416666666666666,0.0020833333333333333,0.020833333333333332,240,80
+qdrant,post-const: shared - separated,1000,latency,-0.16666666666666666,-0.31666666666666665,-0.008333333333333333,120,40
+qdrant,post-const: shared - separated,1000,count,0.37083333333333335,0.3375,0.4083333333333333,120,40
+qdrant,post-const: shared - separated,1000,complete,0.25,0.20833333333333334,0.29583333333333334,120,40
+qdrant,post-const: shared - separated,all,latency,-0.06018518518518518,-0.10555555555555556,-0.01574074074074074,1080,360
+qdrant,post-const: shared - separated,all,count,0.06388888888888888,0.050462962962962966,0.07731481481481481,1080,360
+qdrant,post-const: shared - separated,all,complete,0.02962962962962963,0.020370370370370372,0.03981481481481482,1080,360
+qdrant,post-const: raw - padded,1,latency,-0.03125,-0.09027777777777778,0.027777777777777776,288,96
+qdrant,post-const: raw - padded,10,latency,-0.03125,-0.09027777777777778,0.03125,288,96
+qdrant,post-const: raw - padded,100,latency,-0.09895833333333333,-0.17708333333333334,-0.020833333333333332,192,64
+qdrant,post-const: raw - padded,1000,latency,-0.16666666666666666,-0.3020833333333333,-0.020833333333333332,96,32
+qdrant,post-const: raw - padded,all,latency,-0.061342592592592594,-0.09837962962962964,-0.024276620370370792,864,288
+qdrant,pre: shared - separated,1,latency,-0.05277777777777778,-0.12222222222222222,0.016666666666666666,360,120
+qdrant,pre: shared - separated,1,count,0.0,0.0,0.0,360,120
+qdrant,pre: shared - separated,1,complete,0.0,0.0,0.0,360,120
+qdrant,pre: shared - separated,10,latency,-0.058333333333333334,-0.1361111111111111,0.022222222222222223,360,120
+qdrant,pre: shared - separated,10,count,0.0,0.0,0.0,360,120
+qdrant,pre: shared - separated,10,complete,0.0,0.0,0.0,360,120
+qdrant,pre: shared - separated,100,latency,-0.03125,-0.12708333333333333,0.06666666666666667,240,80
+qdrant,pre: shared - separated,100,count,0.0,0.0,0.0,240,80
+qdrant,pre: shared - separated,100,complete,0.0,0.0,0.0,240,80
+qdrant,pre: shared - separated,1000,latency,0.08333333333333333,-0.058333333333333334,0.225,120,40
+qdrant,pre: shared - separated,1000,count,0.004166666666666667,0.0,0.0125,120,40
+qdrant,pre: shared - separated,1000,complete,0.004166666666666667,0.0,0.0125,120,40
+qdrant,pre: shared - separated,all,latency,-0.034722222222222224,-0.0787037037037037,0.010185185185185186,1080,360
+qdrant,pre: shared - separated,all,count,0.000462962962962963,0.0,0.001388888888888889,1080,360
+qdrant,pre: shared - separated,all,complete,0.000462962962962963,0.0,0.001388888888888889,1080,360
+qdrant,pre: raw - padded,1,latency,-0.020833333333333332,-0.0763888888888889,0.034722222222222224,288,96
+qdrant,pre: raw - padded,10,latency,-0.06944444444444445,-0.1284722222222222,-0.010416666666666666,288,96
+qdrant,pre: raw - padded,100,latency,-0.028645833333333332,-0.10416666666666667,0.046875,192,64
+qdrant,pre: raw - padded,1000,latency,0.08333333333333333,-0.041666666666666664,0.20833333333333334,96,32
+qdrant,pre: raw - padded,all,latency,-0.027199074074074073,-0.0625,0.008101851851851851,864,288
+qdrant,pre-exact: shared - separated,1,latency,-0.03888888888888889,-0.10555555555555556,0.030555555555555555,360,120
+qdrant,pre-exact: shared - separated,1,count,0.0,0.0,0.0,360,120
+qdrant,pre-exact: shared - separated,1,complete,0.0,0.0,0.0,360,120
+qdrant,pre-exact: shared - separated,10,latency,-0.020833333333333332,-0.09166666666666666,0.04722222222222222,360,120
+qdrant,pre-exact: shared - separated,10,count,0.0,0.0,0.0,360,120
+qdrant,pre-exact: shared - separated,10,complete,0.0,0.0,0.0,360,120
+qdrant,pre-exact: shared - separated,100,latency,-0.016666666666666666,-0.10833333333333334,0.075,240,80
+qdrant,pre-exact: shared - separated,100,count,0.0,0.0,0.0,240,80
+qdrant,pre-exact: shared - separated,100,complete,0.0,0.0,0.0,240,80
+qdrant,pre-exact: shared - separated,1000,latency,-0.13333333333333333,-0.26666666666666666,0.0,120,40
+qdrant,pre-exact: shared - separated,1000,count,0.0,0.0,0.0,120,40
+qdrant,pre-exact: shared - separated,1000,complete,0.0,0.0,0.0,120,40
+qdrant,pre-exact: shared - separated,all,latency,-0.038425925925925926,-0.07916666666666666,0.0014004629629627947,1080,360
+qdrant,pre-exact: shared - separated,all,count,0.0,0.0,0.0,1080,360
+qdrant,pre-exact: shared - separated,all,complete,0.0,0.0,0.0,1080,360
+qdrant,pre-exact: raw - padded,1,latency,-0.04513888888888889,-0.10416666666666667,0.010416666666666666,288,96
+qdrant,pre-exact: raw - padded,10,latency,-0.046875,-0.10069444444444445,0.006944444444444444,288,96
+qdrant,pre-exact: raw - padded,100,latency,0.020833333333333332,-0.052083333333333336,0.08854166666666667,192,64
+qdrant,pre-exact: raw - padded,1000,latency,-0.08333333333333333,-0.17708333333333334,0.010416666666666666,96,32
+qdrant,pre-exact: raw - padded,all,latency,-0.03530092592592592,-0.06770833333333333,-0.0023148148148148147,864,288

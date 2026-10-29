@@ -1,0 +1,56 @@
+[19:30:53] x3 cassandra: seed 0
+[19:30:54]   seed 0: building (100,000 chunks)
+[19:34:29]   seed 0: built in 214 s {}
+[19:34:44]   seed 0: G=1: ok, 0 errors, translation ok
+[19:34:52]   seed 0: G=10: ok, 0 errors, translation ok
+[19:35:18]   seed 0: G=100: ok, 0 errors, translation ok
+[19:35:30]   seed 0: G=1,000: ok, 0 errors, translation fallback
+[19:35:42]   seed 0: G=4,000: ok, 0 errors, translation fallback
+[19:35:58]   seed 0: G=10,000: ok, 0 errors, translation fallback
+[19:36:35]   seed 0: G=40,000: ok, 0 errors, translation fallback
+[19:36:57] x3 cassandra: seed 0 done in 6.1 min
+[19:36:57] x3 cassandra: seed 1
+[19:36:59]   seed 1: building (100,000 chunks)
+[19:40:28]   seed 1: built in 208 s {}
+[19:40:41]   seed 1: G=1: ok, 0 errors, translation ok
+[19:40:47]   seed 1: G=10: ok, 0 errors, translation ok
+[19:41:11]   seed 1: G=100: ok, 0 errors, translation ok
+[19:41:22]   seed 1: G=1,000: ok, 0 errors, translation fallback
+[19:41:35]   seed 1: G=4,000: ok, 0 errors, translation fallback
+[19:41:51]   seed 1: G=10,000: ok, 0 errors, translation fallback
+[19:42:27]   seed 1: G=40,000: ok, 0 errors, translation fallback
+[19:42:49] x3 cassandra: seed 1 done in 5.9 min
+[19:42:49] x3 cassandra: seed 2
+[19:42:51]   seed 2: building (100,000 chunks)
+[19:46:15]   seed 2: built in 204 s {}
+[19:46:28]   seed 2: G=1: ok, 0 errors, translation ok
+[19:46:33]   seed 2: G=10: ok, 0 errors, translation ok
+[19:46:58]   seed 2: G=100: ok, 0 errors, translation ok
+[19:47:09]   seed 2: G=1,000: ok, 0 errors, translation fallback
+[19:47:21]   seed 2: G=4,000: ok, 0 errors, translation fallback
+[19:47:37]   seed 2: G=10,000: ok, 0 errors, translation fallback
+[19:48:14]   seed 2: G=40,000: ok, 0 errors, translation fallback
+[19:48:36] x3 cassandra: seed 2 done in 5.8 min
+[19:48:36] x3 cassandra: seed 3
+[19:48:37]   seed 3: building (100,000 chunks)
+[19:52:06]   seed 3: built in 209 s {}
+[19:52:20]   seed 3: G=1: ok, 0 errors, translation ok
+[19:52:26]   seed 3: G=10: ok, 0 errors, translation ok
+[19:52:51]   seed 3: G=100: ok, 0 errors, translation ok
+[19:53:02]   seed 3: G=1,000: ok, 0 errors, translation fallback
+[19:53:15]   seed 3: G=4,000: ok, 0 errors, translation fallback
+[19:53:31]   seed 3: G=10,000: ok, 0 errors, translation fallback
+[19:54:07]   seed 3: G=40,000: ok, 0 errors, translation fallback
+[19:54:29] x3 cassandra: seed 3 done in 5.9 min
+[19:54:30] x3 cassandra: seed 4
+[19:54:31]   seed 4: building (100,000 chunks)
+[19:58:02]   seed 4: built in 211 s {}
+[19:58:15]   seed 4: G=1: ok, 0 errors, translation ok
+[19:58:20]   seed 4: G=10: ok, 0 errors, translation ok
+[19:58:44]   seed 4: G=100: ok, 0 errors, translation ok
+[19:58:55]   seed 4: G=1,000: ok, 0 errors, translation fallback
+[19:59:08]   seed 4: G=4,000: ok, 0 errors, translation fallback
+[19:59:24]   seed 4: G=10,000: ok, 0 errors, translation fallback
+[20:00:01]   seed 4: G=40,000: ok, 0 errors, translation fallback
+[20:00:23] x3 cassandra: seed 4 done in 5.9 min
+::notice title=x3 cassandra::{"0": 0, "1": 0, "2": 0, "3": 0, "4": 0}

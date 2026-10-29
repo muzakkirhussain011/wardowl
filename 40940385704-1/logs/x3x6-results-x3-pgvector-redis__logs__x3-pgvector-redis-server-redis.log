@@ -1,0 +1,166 @@
+Starting Redis Server
+1:C 29 Oct 2026 19:29:48.469 # WARNING Memory overcommit must be enabled! Without it, a background save or replication may fail under low memory condition. Being disabled, it can also cause failures without low memory condition, see https://github.com/jemalloc/jemalloc/issues/1328. To fix this issue add 'vm.overcommit_memory = 1' to /etc/sysctl.conf and then reboot or run the command 'sysctl vm.overcommit_memory=1' for this to take effect.
+1:C 29 Oct 2026 19:29:48.469 * oO0OoO0OoO0Oo Redis is starting oO0OoO0OoO0Oo
+1:C 29 Oct 2026 19:29:48.469 * Redis version=8.10.2, bits=64, commit=00000000, modified=1, pid=1, just started
+1:C 29 Oct 2026 19:29:48.469 * Configuration loaded
+1:M 29 Oct 2026 19:29:48.470 * monotonic clock: POSIX clock_gettime
+1:M 29 Oct 2026 19:29:48.470 * Running mode=standalone, port=6379.
+1:M 29 Oct 2026 19:29:48.471 * <bf> RedisBloom version 8.10.1 (Git=unknown)
+1:M 29 Oct 2026 19:29:48.471 * <bf> Registering configuration options: [
+1:M 29 Oct 2026 19:29:48.471 * <bf> 	{ bf-error-rate       :      0.01 }
+1:M 29 Oct 2026 19:29:48.471 * <bf> 	{ bf-initial-size     :       100 }
+1:M 29 Oct 2026 19:29:48.471 * <bf> 	{ bf-expansion-factor :         2 }
+1:M 29 Oct 2026 19:29:48.471 * <bf> 	{ cf-bucket-size      :         2 }
+1:M 29 Oct 2026 19:29:48.471 * <bf> 	{ cf-initial-size     :      1024 }
+1:M 29 Oct 2026 19:29:48.471 * <bf> 	{ cf-max-iterations   :        20 }
+1:M 29 Oct 2026 19:29:48.471 * <bf> 	{ cf-expansion-factor :         1 }
+1:M 29 Oct 2026 19:29:48.471 * <bf> 	{ cf-max-expansions   :        32 }
+1:M 29 Oct 2026 19:29:48.471 * <bf> ]
+1:M 29 Oct 2026 19:29:48.471 * Module 'bf' loaded from /usr/local/lib/redis/modules//redisbloom.so
+1:M 29 Oct 2026 19:29:48.475 * <search> search-workers default: 4 (min of MAX_WORKER_THREADS=16 and CPU cores)
+1:M 29 Oct 2026 19:29:48.475 * <search> Redis version found by RedisSearch : 8.10.2 - oss
+1:M 29 Oct 2026 19:29:48.475 * <search> RediSearch version 8.10.1 (Git=)
+1:M 29 Oct 2026 19:29:48.475 * <search> gc: ON, prefix min length: 2, min word length to stem: 4, prefix max expansions: 200, query timeout (ms): 500, timeout policy: return, oom policy: return, cursor read size: 1000, cursor max idle (ms): 300000, max doctable size: 1000000, max number of search results:  1000000, default scorer: BM25STD, 
+1:M 29 Oct 2026 19:29:48.475 * <search> Initialized thread pools!
+1:M 29 Oct 2026 19:29:48.475 * <search> Enabled workers threadpool of size 4
+1:M 29 Oct 2026 19:29:48.475 * <search> Subscribe to config changes
+1:M 29 Oct 2026 19:29:48.475 * <search> Subscribe to cluster slot migration events
+1:M 29 Oct 2026 19:29:48.475 * <search> Subscribe to cluster topology change events
+1:M 29 Oct 2026 19:29:48.475 * <search> Enabled role change notification
+1:M 29 Oct 2026 19:29:48.476 * <search> Cluster configuration: AUTO partitions, type: 0, coordinator timeout: 0ms
+1:M 29 Oct 2026 19:29:48.476 * Module 'search' loaded from /usr/local/lib/redis/modules//redisearch.so
+1:M 29 Oct 2026 19:29:48.477 * <timeseries> RedisTimeSeries version 81001, git_sha=
+1:M 29 Oct 2026 19:29:48.477 * <timeseries> Redis version found by RedisTimeSeries : 8.10.2 - oss
+1:M 29 Oct 2026 19:29:48.477 * <timeseries> Registering configuration options: [
+1:M 29 Oct 2026 19:29:48.477 * <timeseries> 	{ ts-compaction-policy   :              }
+1:M 29 Oct 2026 19:29:48.477 * <timeseries> 	{ ts-num-threads         :            3 }
+1:M 29 Oct 2026 19:29:48.477 * <timeseries> 	{ ts-libmr-protocol      :     INTERNAL }
+1:M 29 Oct 2026 19:29:48.477 * <timeseries> 	{ ts-retention-policy    :            0 }
+1:M 29 Oct 2026 19:29:48.477 * <timeseries> 	{ ts-duplicate-policy    :        block }
+1:M 29 Oct 2026 19:29:48.477 * <timeseries> 	{ ts-chunk-size-bytes    :         4096 }
+1:M 29 Oct 2026 19:29:48.477 * <timeseries> 	{ ts-encoding            :   compressed }
+1:M 29 Oct 2026 19:29:48.477 * <timeseries> 	{ ts-ignore-max-time-diff:            0 }
+1:M 29 Oct 2026 19:29:48.477 * <timeseries> 	{ ts-ignore-max-val-diff :     0.000000 }
+1:M 29 Oct 2026 19:29:48.477 * <timeseries> 	{ ts-topology-events     :         true }
+1:M 29 Oct 2026 19:29:48.477 * <timeseries> ]
+1:M 29 Oct 2026 19:29:48.477 * <timeseries> Detected redis oss (cluster-enabled=no)
+1:M 29 Oct 2026 19:29:48.477 * <timeseries> Subscribe to ASM events
+1:M 29 Oct 2026 19:29:48.477 * <timeseries> Subscribe to topology changes events
+1:M 29 Oct 2026 19:29:48.477 * <timeseries> Enabled diskless replication
+1:M 29 Oct 2026 19:29:48.477 * Module 'timeseries' loaded from /usr/local/lib/redis/modules//redistimeseries.so
+1:M 29 Oct 2026 19:29:48.478 * <ReJSON> Created new data type 'ReJSON-RL'
+1:M 29 Oct 2026 19:29:48.478 * <ReJSON> version: 81000 git sha: unknown branch: unknown
+1:M 29 Oct 2026 19:29:48.478 * <ReJSON> Exported RedisJSON_V1 API
+1:M 29 Oct 2026 19:29:48.478 * <ReJSON> Exported RedisJSON_V2 API
+1:M 29 Oct 2026 19:29:48.478 * <ReJSON> Exported RedisJSON_V3 API
+1:M 29 Oct 2026 19:29:48.478 * <ReJSON> Exported RedisJSON_V4 API
+1:M 29 Oct 2026 19:29:48.478 * <ReJSON> Exported RedisJSON_V5 API
+1:M 29 Oct 2026 19:29:48.478 * <ReJSON> Exported RedisJSON_V6 API
+1:M 29 Oct 2026 19:29:48.478 * <ReJSON> Exported RedisJSON_V7 API
+1:M 29 Oct 2026 19:29:48.478 * <ReJSON> Exported RedisJSON_V8 API
+1:M 29 Oct 2026 19:29:48.478 * <ReJSON> Enabled diskless replication
+1:M 29 Oct 2026 19:29:48.478 * <ReJSON> Initialized shared string cache, thread safe: true.
+1:M 29 Oct 2026 19:29:48.478 * Module 'ReJSON' loaded from /usr/local/lib/redis/modules//rejson.so
+1:M 29 Oct 2026 19:29:48.478 * <search> Acquired RedisJSON_V8 API
+1:M 29 Oct 2026 19:29:48.479 * Server initialized
+1:M 29 Oct 2026 19:29:48.479 * Ready to accept connections tcp
+1:M 29 Oct 2026 19:29:48.479 # WARNING: Redis does not require authentication and is not protected by network restrictions. Redis will accept connections from any IP address on any network interface.
+1:M 29 Oct 2026 19:46:18.506 * <search> Creating vector index of type HNSW. Required memory for a block of 1024 vectors: 1758144B
+1:M 29 Oct 2026 19:46:18.506 * <search> Successfully created index x3s0eceaa356
+1:M 29 Oct 2026 19:46:18.618 * 100 changes in 300 seconds. Saving...
+1:M 29 Oct 2026 19:46:18.619 * Background saving started by pid 42
+42:C 29 Oct 2026 19:46:18.635 * BGSAVE done, 500 keys saved, 0 keys skipped, 964857 bytes written.
+42:C 29 Oct 2026 19:46:18.640 * DB saved on disk
+42:C 29 Oct 2026 19:46:18.642 * Fork CoW for RDB: current 3 MB, peak 3 MB, average 2 MB
+1:M 29 Oct 2026 19:46:18.652 * <search> DocTable capacity increase from 1000 to 1501
+1:M 29 Oct 2026 19:46:18.720 * Background saving terminated with success
+1:M 29 Oct 2026 19:46:18.768 * <search> DocTable capacity increase from 1501 to 2252
+1:M 29 Oct 2026 19:46:18.858 * <search> DocTable capacity increase from 2252 to 3379
+1:M 29 Oct 2026 19:46:19.020 * <search> DocTable capacity increase from 3379 to 5069
+1:M 29 Oct 2026 19:46:19.335 * <search> DocTable capacity increase from 5069 to 7604
+1:M 29 Oct 2026 19:46:19.784 * <search> DocTable capacity increase from 7604 to 11407
+1:M 29 Oct 2026 19:46:20.444 * <search> DocTable capacity increase from 11407 to 17111
+1:M 29 Oct 2026 19:46:21.598 * <search> DocTable capacity increase from 17111 to 25667
+1:M 29 Oct 2026 19:46:23.453 * <search> DocTable capacity increase from 25667 to 38501
+1:M 29 Oct 2026 19:46:26.429 * <search> DocTable capacity increase from 38501 to 57752
+1:M 29 Oct 2026 19:46:31.355 * <search> DocTable capacity increase from 57752 to 86629
+1:M 29 Oct 2026 19:46:38.912 * <search> DocTable capacity increase from 86629 to 129944
+1:M 29 Oct 2026 19:47:05.173 * <search> Successfully dropped index x3s0eceaa356
+1:M 29 Oct 2026 19:47:06.888 * <search> Creating vector index of type HNSW. Required memory for a block of 1024 vectors: 1758144B
+1:M 29 Oct 2026 19:47:06.888 * <search> Successfully created index x3s100917a98
+1:M 29 Oct 2026 19:47:07.020 * <search> DocTable capacity increase from 1000 to 1501
+1:M 29 Oct 2026 19:47:07.135 * <search> DocTable capacity increase from 1501 to 2252
+1:M 29 Oct 2026 19:47:07.219 * <search> DocTable capacity increase from 2252 to 3379
+1:M 29 Oct 2026 19:47:07.377 * <search> DocTable capacity increase from 3379 to 5069
+1:M 29 Oct 2026 19:47:07.681 * <search> DocTable capacity increase from 5069 to 7604
+1:M 29 Oct 2026 19:47:08.104 * <search> DocTable capacity increase from 7604 to 11407
+1:M 29 Oct 2026 19:47:08.726 * <search> DocTable capacity increase from 11407 to 17111
+1:M 29 Oct 2026 19:47:09.850 * <search> DocTable capacity increase from 17111 to 25667
+1:M 29 Oct 2026 19:47:11.660 * <search> DocTable capacity increase from 25667 to 38501
+1:M 29 Oct 2026 19:47:14.707 * <search> DocTable capacity increase from 38501 to 57752
+1:M 29 Oct 2026 19:47:19.052 * 10000 changes in 60 seconds. Saving...
+1:M 29 Oct 2026 19:47:19.064 * Background saving started by pid 45
+1:M 29 Oct 2026 19:47:19.997 * <search> DocTable capacity increase from 57752 to 86629
+45:C 29 Oct 2026 19:47:20.676 * BGSAVE done, 55060 keys saved, 0 keys skipped, 106169666 bytes written.
+45:C 29 Oct 2026 19:47:20.682 * DB saved on disk
+45:C 29 Oct 2026 19:47:20.710 * Fork CoW for RDB: current 91 MB, peak 91 MB, average 50 MB
+1:M 29 Oct 2026 19:47:20.812 * Background saving terminated with success
+1:M 29 Oct 2026 19:47:27.806 * <search> DocTable capacity increase from 86629 to 129944
+1:M 29 Oct 2026 19:47:54.196 * <search> Successfully dropped index x3s100917a98
+1:M 29 Oct 2026 19:47:55.879 * <search> Creating vector index of type HNSW. Required memory for a block of 1024 vectors: 1758144B
+1:M 29 Oct 2026 19:47:55.879 * <search> Successfully created index x3s22f4c476b
+1:M 29 Oct 2026 19:47:56.019 * <search> DocTable capacity increase from 1000 to 1501
+1:M 29 Oct 2026 19:47:56.135 * <search> DocTable capacity increase from 1501 to 2252
+1:M 29 Oct 2026 19:47:56.228 * <search> DocTable capacity increase from 2252 to 3379
+1:M 29 Oct 2026 19:47:56.390 * <search> DocTable capacity increase from 3379 to 5069
+1:M 29 Oct 2026 19:47:56.702 * <search> DocTable capacity increase from 5069 to 7604
+1:M 29 Oct 2026 19:47:57.137 * <search> DocTable capacity increase from 7604 to 11407
+1:M 29 Oct 2026 19:47:57.787 * <search> DocTable capacity increase from 11407 to 17111
+1:M 29 Oct 2026 19:47:58.914 * <search> DocTable capacity increase from 17111 to 25667
+1:M 29 Oct 2026 19:48:00.739 * <search> DocTable capacity increase from 25667 to 38501
+1:M 29 Oct 2026 19:48:03.713 * <search> DocTable capacity increase from 38501 to 57752
+1:M 29 Oct 2026 19:48:08.673 * <search> DocTable capacity increase from 57752 to 86629
+1:M 29 Oct 2026 19:48:16.325 * <search> DocTable capacity increase from 86629 to 129944
+1:M 29 Oct 2026 19:48:21.084 * 10000 changes in 60 seconds. Saving...
+1:M 29 Oct 2026 19:48:21.102 * Background saving started by pid 46
+46:C 29 Oct 2026 19:48:22.674 * BGSAVE done, 100000 keys saved, 0 keys skipped, 192830938 bytes written.
+46:C 29 Oct 2026 19:48:22.679 * DB saved on disk
+46:C 29 Oct 2026 19:48:22.695 * Fork CoW for RDB: current 16 MB, peak 16 MB, average 10 MB
+1:M 29 Oct 2026 19:48:22.722 * Background saving terminated with success
+1:M 29 Oct 2026 19:48:42.851 * <search> Successfully dropped index x3s22f4c476b
+1:M 29 Oct 2026 19:48:44.522 * <search> Creating vector index of type HNSW. Required memory for a block of 1024 vectors: 1758144B
+1:M 29 Oct 2026 19:48:44.522 * <search> Successfully created index x3s36d693c7d
+1:M 29 Oct 2026 19:48:44.659 * <search> DocTable capacity increase from 1000 to 1501
+1:M 29 Oct 2026 19:48:44.773 * <search> DocTable capacity increase from 1501 to 2252
+1:M 29 Oct 2026 19:48:44.860 * <search> DocTable capacity increase from 2252 to 3379
+1:M 29 Oct 2026 19:48:45.017 * <search> DocTable capacity increase from 3379 to 5069
+1:M 29 Oct 2026 19:48:45.331 * <search> DocTable capacity increase from 5069 to 7604
+1:M 29 Oct 2026 19:48:45.775 * <search> DocTable capacity increase from 7604 to 11407
+1:M 29 Oct 2026 19:48:46.439 * <search> DocTable capacity increase from 11407 to 17111
+1:M 29 Oct 2026 19:48:47.589 * <search> DocTable capacity increase from 17111 to 25667
+1:M 29 Oct 2026 19:48:49.428 * <search> DocTable capacity increase from 25667 to 38501
+1:M 29 Oct 2026 19:48:52.473 * <search> DocTable capacity increase from 38501 to 57752
+1:M 29 Oct 2026 19:48:57.474 * <search> DocTable capacity increase from 57752 to 86629
+1:M 29 Oct 2026 19:49:05.093 * <search> DocTable capacity increase from 86629 to 129944
+1:M 29 Oct 2026 19:49:23.066 * 10000 changes in 60 seconds. Saving...
+1:M 29 Oct 2026 19:49:23.085 * Background saving started by pid 47
+47:C 29 Oct 2026 19:49:24.590 * BGSAVE done, 100000 keys saved, 0 keys skipped, 192826867 bytes written.
+47:C 29 Oct 2026 19:49:24.596 * DB saved on disk
+47:C 29 Oct 2026 19:49:24.610 * Fork CoW for RDB: current 40 MB, peak 40 MB, average 21 MB
+1:M 29 Oct 2026 19:49:24.633 * Background saving terminated with success
+1:M 29 Oct 2026 19:49:32.044 * <search> Successfully dropped index x3s36d693c7d
+1:M 29 Oct 2026 19:49:33.740 * <search> Creating vector index of type HNSW. Required memory for a block of 1024 vectors: 1758144B
+1:M 29 Oct 2026 19:49:33.740 * <search> Successfully created index x3s453990dc6
+1:M 29 Oct 2026 19:49:33.879 * <search> DocTable capacity increase from 1000 to 1501
+1:M 29 Oct 2026 19:49:33.993 * <search> DocTable capacity increase from 1501 to 2252
+1:M 29 Oct 2026 19:49:34.081 * <search> DocTable capacity increase from 2252 to 3379
+1:M 29 Oct 2026 19:49:34.243 * <search> DocTable capacity increase from 3379 to 5069
+1:M 29 Oct 2026 19:49:34.553 * <search> DocTable capacity increase from 5069 to 7604
+1:M 29 Oct 2026 19:49:34.996 * <search> DocTable capacity increase from 7604 to 11407
+1:M 29 Oct 2026 19:49:35.649 * <search> DocTable capacity increase from 11407 to 17111
+1:M 29 Oct 2026 19:49:36.796 * <search> DocTable capacity increase from 17111 to 25667
+1:M 29 Oct 2026 19:49:38.642 * <search> DocTable capacity increase from 25667 to 38501
+1:M 29 Oct 2026 19:49:41.648 * <search> DocTable capacity increase from 38501 to 57752
+1:M 29 Oct 2026 19:49:46.570 * <search> DocTable capacity increase from 57752 to 86629
+1:M 29 Oct 2026 19:49:54.118 * <search> DocTable capacity increase from 86629 to 129944
+1:M 29 Oct 2026 19:50:20.041 * <search> Successfully dropped index x3s453990dc6

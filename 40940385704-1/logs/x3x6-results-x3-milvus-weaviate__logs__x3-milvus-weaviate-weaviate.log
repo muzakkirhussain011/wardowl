@@ -1,0 +1,56 @@
+[19:37:19] x3 weaviate: seed 0
+[19:37:21]   seed 0: building (100,000 chunks)
+[19:38:07]   seed 0: built in 46 s {}
+[19:38:08]   seed 0: G=1: ok, 0 errors, translation ok
+[19:38:08]   seed 0: G=10: ok, 0 errors, translation ok
+[19:38:09]   seed 0: G=100: ok, 0 errors, translation ok
+[19:38:11]   seed 0: G=1,000: ok, 0 errors, translation ok
+[19:38:16]   seed 0: G=4,000: ok, 0 errors, translation ok
+[19:38:26]   seed 0: G=10,000: ok, 0 errors, translation ok
+[19:39:03]   seed 0: G=40,000: ok, 0 errors, translation ok
+[19:39:03] x3 weaviate: seed 0 done in 1.7 min
+[19:39:03] x3 weaviate: seed 1
+[19:39:05]   seed 1: building (100,000 chunks)
+[19:39:54]   seed 1: built in 49 s {}
+[19:39:54]   seed 1: G=1: ok, 0 errors, translation ok
+[19:39:55]   seed 1: G=10: ok, 0 errors, translation ok
+[19:39:56]   seed 1: G=100: ok, 0 errors, translation ok
+[19:39:58]   seed 1: G=1,000: ok, 0 errors, translation ok
+[19:40:02]   seed 1: G=4,000: ok, 0 errors, translation ok
+[19:40:12]   seed 1: G=10,000: ok, 0 errors, translation ok
+[19:40:49]   seed 1: G=40,000: ok, 0 errors, translation ok
+[19:40:50] x3 weaviate: seed 1 done in 1.8 min
+[19:40:50] x3 weaviate: seed 2
+[19:40:52]   seed 2: building (100,000 chunks)
+[19:41:38]   seed 2: built in 47 s {}
+[19:41:39]   seed 2: G=1: ok, 0 errors, translation ok
+[19:41:40]   seed 2: G=10: ok, 0 errors, translation ok
+[19:41:40]   seed 2: G=100: ok, 0 errors, translation ok
+[19:41:42]   seed 2: G=1,000: ok, 0 errors, translation ok
+[19:41:47]   seed 2: G=4,000: ok, 0 errors, translation ok
+[19:41:57]   seed 2: G=10,000: ok, 0 errors, translation ok
+[19:42:34]   seed 2: G=40,000: ok, 0 errors, translation ok
+[19:42:35] x3 weaviate: seed 2 done in 1.7 min
+[19:42:35] x3 weaviate: seed 3
+[19:42:37]   seed 3: building (100,000 chunks)
+[19:43:24]   seed 3: built in 47 s {}
+[19:43:25]   seed 3: G=1: ok, 0 errors, translation ok
+[19:43:25]   seed 3: G=10: ok, 0 errors, translation ok
+[19:43:26]   seed 3: G=100: ok, 0 errors, translation ok
+[19:43:28]   seed 3: G=1,000: ok, 0 errors, translation ok
+[19:43:33]   seed 3: G=4,000: ok, 0 errors, translation ok
+[19:43:43]   seed 3: G=10,000: ok, 0 errors, translation ok
+[19:44:22]   seed 3: G=40,000: ok, 0 errors, translation ok
+[19:44:22] x3 weaviate: seed 3 done in 1.8 min
+[19:44:22] x3 weaviate: seed 4
+[19:44:24]   seed 4: building (100,000 chunks)
+[19:45:12]   seed 4: built in 48 s {}
+[19:45:13]   seed 4: G=1: ok, 0 errors, translation ok
+[19:45:13]   seed 4: G=10: ok, 0 errors, translation ok
+[19:45:14]   seed 4: G=100: ok, 0 errors, translation ok
+[19:45:16]   seed 4: G=1,000: ok, 0 errors, translation ok
+[19:45:20]   seed 4: G=4,000: ok, 0 errors, translation ok
+[19:45:31]   seed 4: G=10,000: ok, 0 errors, translation ok
+[19:46:08]   seed 4: G=40,000: ok, 0 errors, translation ok
+[19:46:08] x3 weaviate: seed 4 done in 1.8 min
+::notice title=x3 weaviate::{"0": 0, "1": 0, "2": 0, "3": 0, "4": 0}
