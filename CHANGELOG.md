@@ -48,6 +48,10 @@ All notable changes are recorded here. The format follows
   (without `indexed_only`). In vector mode, `count` asks Qdrant for an exact count, and
   `search(..., exact=True)` searches with a copy of `search_params` that sets `exact=True` and
   `indexed_only=False`. ACORN is set through `search_params`, as before.
+- `wardowl.UnsupportedSubject`, raised by an authorizer when its permission service cannot represent
+  the subject's id or one of its groups, before anything is sent. It is an `AuthorizationError`, so
+  code that catches that and retrieval behave as before (retrieval fails closed), and a
+  `ValueError`, since the subject is at fault rather than the service.
 
 ### Changed
 
@@ -74,6 +78,33 @@ All notable changes are recorded here. The format follows
   A subclass of `InMemoryBackend` that drops hits on purpose should set `exact_search = False`.
 - `check_backend` checks a backend that declares `exact_search` as exact, whatever `exact=` says,
   since the retriever takes its short results as proof that nothing else matches.
+
+### Fixed
+
+- `OpenFGAAuthorizer` no longer sends a request OpenFGA refuses whole with HTTP 400, which surfaced
+  as `AuthorizationError("OpenFGA batch-check returned HTTP 400")`. A subject in more than 100
+  groups (OpenFGA takes at most 100 contextual tuples per check or list), a user longer than 512
+  bytes, a group longer than 256 characters, or an id or group with a control character now raises
+  `UnsupportedSubject` up front, saying which limit it broke; ids with `:`, `#`, `*` or whitespace
+  raise it too, in place of a plain `AuthorizationError`. To check a subject in more groups, store
+  its memberships in OpenFGA and pass `contextual_groups=False`. The paper's conformance campaign
+  found it: 119 of its 140 OpenFGA runs failed with that error, at the rates these limits predict
+  for its subjects (one in five is in 300 groups).
+- `SpiceDBAuthorizer` refuses a subject id that is not a SpiceDB object id (1 to 1024 letters,
+  digits and `/_|-=+`), and with `group_subjects=True` such a group name, with `UnsupportedSubject`
+  before anything is sent. Such a request failed closed before as well, but only after SpiceDB's
+  HTTP 400. The conformance campaign's users `zoë` and `7.0` made 117 and 124 of 140 SpiceDB runs
+  fail that way.
+- `RedisBackend` and `MongoDBBackend` find chunks whose metadata holds a long value. The Redis Query
+  Engine indexes at most 4,096 bytes of a TAG value and Atlas Search at most 8,181 characters of a
+  string; both cut a longer one short at indexing, while a filter names the whole value, so a
+  pre-filtered search missed such chunks, and a value made of the first part of a longer one
+  matched it (the retriever's re-check dropped those). A permission term longer than that, field
+  name and value together (over 2,048 bytes in Redis, whose terms are hex-encoded, and over 8,181
+  UTF-16 code units in MongoDB), is now stored and searched as its SHA-256 digest. Terms within the
+  limits are unchanged, so nothing needs re-indexing except chunks with such long values, which were
+  not found before either. The conformance campaign found it: 26 Redis and 19 MongoDB runs with
+  values of 3,001 to 40,000 characters missed matching chunks.
 
 ### Documentation
 

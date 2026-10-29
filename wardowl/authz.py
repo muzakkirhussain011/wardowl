@@ -33,11 +33,26 @@ __all__ = [
     "FunctionAuthorizer",
     "MetadataACLAuthorizer",
     "TenantAuthorizer",
+    "UnsupportedSubject",
 ]
 
 
 class AuthorizationError(RuntimeError):
     """The authorizer could not make a decision. No results are returned."""
+
+
+class UnsupportedSubject(AuthorizationError, ValueError):
+    """The permission service cannot represent the subject's id or one of its groups, so it was not
+    asked: it would refuse every request that named them.
+
+    An `AuthorizationError` like any other failure to decide, so retrieval fails closed, and a
+    `ValueError`, since the subject is at fault rather than the service.
+    """
+
+
+def _shown(value: str, limit: int = 64) -> str:
+    """`value` for an error message: its repr, cut short after `limit` characters."""
+    return repr(value) if len(value) <= limit else f"{value[:limit]!r}... ({len(value):,} characters)"
 
 
 @runtime_checkable

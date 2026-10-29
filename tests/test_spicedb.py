@@ -13,7 +13,16 @@ from helpers import corpora, oracle_top_k, queries, subjects
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
-from wardowl import AuthorizationError, Document, Hit, In, InMemoryBackend, PermissionedRetriever, Subject
+from wardowl import (
+    AuthorizationError,
+    Document,
+    Hit,
+    In,
+    InMemoryBackend,
+    PermissionedRetriever,
+    Subject,
+    UnsupportedSubject,
+)
 from wardowl.authorizers.spicedb import SpiceDBAuthorizer
 from wardowl.testing import check_authorizer
 
@@ -191,6 +200,38 @@ def test_a_resource_id_spicedb_would_refuse_denies_only_its_chunk(server, resour
     assert authz.check(ANN, hits) == [False] * len(bad) + [True] * len(good)
     sent = [i["resource"]["objectId"] for _, payload, _ in server.requests for i in payload["items"]]
     assert sorted(sent) == sorted(good)
+
+
+@pytest.mark.parametrize(
+    ("subject", "group_subjects"),
+    [
+        (Subject("zo\xeb"), False),  # users of the conformance kit's own data
+        (Subject("zoe\u0308"), False),
+        (Subject("7.0"), False),
+        (Subject("ann@example.com"), False),
+        (Subject("*"), False),  # the subjects' wildcard
+        (Subject("u" * 1025), False),
+        (Subject("ann", ["\xe9quipe"]), True),
+        (Subject("ann", ["eng", "a b"]), True),
+    ],
+)
+def test_a_subject_spicedb_cannot_name_is_refused_before_anything_is_sent(server, subject, group_subjects):
+    # SpiceDB refused every CheckBulkPermissions request naming such an id with HTTP 400, which the
+    # conformance campaign recorded as errors. It is now refused up front, with a ValueError as well.
+    server.responder = _bulk({("d1", "ann")})
+    authz = SpiceDBAuthorizer(server.url, group_subjects=group_subjects)
+    with pytest.raises(UnsupportedSubject, match="cannot be sent to SpiceDB") as raised:
+        authz.check(subject, HITS)
+    assert isinstance(raised.value, AuthorizationError) and isinstance(raised.value, ValueError)
+    with pytest.raises(UnsupportedSubject, match="cannot be sent to SpiceDB"):
+        authz.filter_for(subject)
+    assert server.requests == []
+
+
+def test_groups_are_checked_only_when_they_are_sent(server):
+    server.responder = _bulk({("d2", "ann")})
+    assert SpiceDBAuthorizer(server.url).check(Subject("ann", ["\xe9quipe"]), HITS) == [False, True, False]
+    assert SpiceDBAuthorizer(server.url).check(Subject("u" * 1024), HITS[:1]) == [False]
 
 
 def test_without_a_resource_field_chunks_are_resources_and_there_is_no_filter(server):

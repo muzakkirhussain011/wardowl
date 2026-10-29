@@ -16,7 +16,16 @@ from hypothesis import given, settings
 from hypothesis import strategies as st
 from test_opa import _Handler
 
-from wardowl import AuthorizationError, Document, Hit, In, InMemoryBackend, PermissionedRetriever, Subject
+from wardowl import (
+    AuthorizationError,
+    Document,
+    Hit,
+    In,
+    InMemoryBackend,
+    PermissionedRetriever,
+    Subject,
+    UnsupportedSubject,
+)
 from wardowl.authorizers.openfga import OpenFGAAuthorizer
 
 BOB = Subject("bob", ["eng"])
@@ -103,6 +112,68 @@ def test_ids_and_groups_that_openfga_would_read_as_something_else_are_refused(fg
         authz.filter_for(subject)
     assert fga.requests == []
     assert authz.check(Subject("ann@example.com", ["eng-team"]), [Hit("c1", "t", 1.0, {"doc_id": "a"})]) == [True]
+
+
+@pytest.mark.parametrize(
+    "subject",
+    [
+        Subject("u" * 508),  # "user:" and 508 characters make 513 bytes
+        Subject("\xe9" * 254),  # "user:" and 254 two-byte letters make 513 bytes
+        Subject("bob", ["g" * 251]),  # "group:" and 251 characters make 257
+        Subject("bob\x00"),
+        Subject("bob", ["a\x7fb"]),
+    ],
+)
+def test_ids_and_groups_openfga_refuses_for_their_length_or_characters_are_never_sent(fga, subject):
+    # OpenFGA refused the whole request with HTTP 400, which the conformance campaign recorded as
+    # errors. The subject is now refused before anything is sent, with a ValueError as well.
+    fga.responder = _all_allowed
+    authz = OpenFGAAuthorizer(fga.url, "s")
+    with pytest.raises(UnsupportedSubject, match="cannot be sent to OpenFGA"):
+        authz.check(subject, [Hit("c1", "t", 1.0, {"doc_id": "a"})])
+    with pytest.raises(UnsupportedSubject, match="cannot be sent to OpenFGA"):
+        authz.filter_for(subject)
+    assert fga.requests == []
+
+
+def test_the_longest_ids_and_groups_openfga_takes_are_sent(fga):
+    fga.responder = _all_allowed
+    authz = OpenFGAAuthorizer(fga.url, "s")
+    hit = Hit("c1", "t", 1.0, {"doc_id": "a"})
+    for subject in (Subject("u" * 507), Subject("\xe9" * 253), Subject("bob", ["g" * 250])):
+        assert authz.check(subject, [hit]) == [True]
+    users = [c["tuple_key"]["user"] for _, payload in fga.requests for c in payload["checks"]]
+    assert [len(u.encode()) for u in users] == [512, 511, 8]
+    groups = fga.requests[-1][1]["checks"][0]["contextual_tuples"]["tuple_keys"]
+    assert [len(g["object"]) for g in groups] == [256]
+
+
+def test_a_subject_in_more_groups_than_openfga_takes_with_a_request_is_refused(fga):
+    # OpenFGA takes at most 100 contextual tuples with a check or a list and refused the whole
+    # request beyond that: the campaign's subjects in 300 and in 1,000 groups.
+    fga.responder = _all_allowed
+    hit = Hit("c1", "t", 1.0, {"doc_id": "a"})
+    many = Subject("bob", [f"g{i}" for i in range(101)])
+    authz = OpenFGAAuthorizer(fga.url, "s")
+    with pytest.raises(UnsupportedSubject, match="101 groups"):
+        authz.check(many, [hit])
+    with pytest.raises(UnsupportedSubject, match="101 groups"):
+        authz.filter_for(many)
+    assert fga.requests == []
+    assert authz.check(Subject("bob", [f"g{i}" for i in range(100)]), [hit]) == [True]
+    assert len(fga.requests[-1][1]["checks"][0]["contextual_tuples"]["tuple_keys"]) == 100
+    # Groups that are not sent as contextual tuples are not limited.
+    assert OpenFGAAuthorizer(fga.url, "s", contextual_groups=False).check(many, [hit]) == [True]
+    assert "contextual_tuples" not in fga.requests[-1][1]["checks"][0]
+
+
+def test_an_unsupported_subject_fails_retrieval_closed_as_an_authorization_error(fga):
+    authz = OpenFGAAuthorizer(fga.url, "s")
+    retriever = PermissionedRetriever(InMemoryBackend([Document("c1", "plan", {"doc_id": "a"})]), authz)
+    with pytest.raises(UnsupportedSubject) as raised:
+        retriever.retrieve("plan", Subject("bob smith"))
+    assert isinstance(raised.value, AuthorizationError) and isinstance(raised.value, ValueError)
+    assert fga.requests == []
 
 
 def test_a_resource_field_that_is_not_one_string_never_passes_check(fga):
