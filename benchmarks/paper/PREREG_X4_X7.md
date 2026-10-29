@@ -413,3 +413,104 @@ no hypothesis, threshold or verdict rule changes.
 A harness fault found by the same run was fixed without changing the protocol: the proxy's `refuse`
 mode closed connections from another thread with `close()` alone, which leaves a socket open while
 its handler thread reads from it, so keep-alive connections kept working; it now shuts them down.
+
+### Amendment 2 (2026-10-29, after the full run 40919304635, before any rerun)
+
+The full run (workflow run 40919304635, attempt 1, reported in the evidence file `x4-x7-run1.md`)
+falsified X7-H1 in three cells and X7-H3 in two, all SpiceDB `minimizeLatency`, falsified X7-H5,
+left X7-H7c inconclusive for pgvector `blackhole` (no request fell inside the window), and exposed
+five library defects. They are fixed on the library branch `fix/revocation-faults` at commit
+`3c6559f3ecfd850bcd59416f14237d85887ba498`: after `invalidate()`, `CachingAuthorizer` caches no
+answer for the subject, here or in a shared cache, for `source_staleness` seconds (the wrapped
+authorizer's declared `max_staleness`); `SpiceDBAuthorizer.max_staleness` is 11 s for any
+consistency but `fullyConsistent`; an empty LookupResources stream gives no filter; a backend's
+search or count failure raises `SearchError` with a fixed message; and `PgVectorBackend` takes a
+`statement_timeout`. This amendment registers a targeted rerun of the affected cells with that
+library. It changes no rule and no verdict of the full run, which stand as reported; the full run's
+cells are the comparison. Everything not stated here is as registered above, amendment 1 included.
+
+**Library and configuration.** The rerun installs wardowl from that commit of
+`fix/revocation-faults`, not the copy of the package on this branch, and records the commit in
+every run-start record. A workflow input `configuration` selects `amendment2` (these jobs only) or
+`full` (the registered design, unchanged); the full configuration is not run again. A smoke
+profile of `amendment2` runs first and is never analysed.
+
+| Job | Part | Cells (path or target, fault, condition) |
+|---|---|---|
+| `a2-x7a-spicedb` | X7a | `spicedb-ml` under `nocache`, `ttl5`, `ttl30`, `ttl30-inv`, `ttl30-shared-inv` |
+| `a2-x7a-cerbos` | X7a | `cerbos-policy` under `nocache`, `ttl30-inv`, `ttl30-shared-inv` |
+| `a2-x7b-spicedb` | X7b | SpiceDB: `empty` and `empty-lookup`, `plain` |
+| `a2-x7b-pgvector` | X7b | pgvector: `down` and `refuse` under `plain`; `blackhole` and `lock` under `plain` and `stmt-timeout` |
+| `a2-x7b-qdrant` | X7b | Qdrant: `down`, `refuse`, `blackhole`, `http500`, `http503`, `truncate` under `plain` |
+
+Seeds, trials per cell (40), episodes per cell (10), worlds, queries and polling are as registered;
+X7a generates every condition's trials as before and runs only the conditions listed, so each
+trial's user, target and background are those of the full run.
+
+**Declared staleness D.** `spicedb-ml` uses the adapter's own declaration
+(`SpiceDBAuthorizer.max_staleness`, 11 s), which `CachingAuthorizer` reads as `source_staleness`.
+`cerbos-policy` passes `source_staleness=10` to `CachingAuthorizer`, the S' that amendment 1 set
+where no staleness is stated. Every trial records D. Amendment 1's polling horizon becomes
+max(B, B2, T + max(S', D)) + 15 s, with B2 below.
+
+**New faults and conditions.**
+
+- `empty-lookup` (proxy, SpiceDB): the answers to `POST /v1/permissions/resources` (LookupResources)
+  get an empty body; every other answer passes unchanged.
+- `lock` (pgvector): when the fault begins the harness opens a direct connection, starts a
+  transaction and takes `LOCK TABLE <the episode's table> IN ACCESS EXCLUSIVE MODE`; removing the
+  fault rolls it back. The fault begins when the lock is granted.
+- `stmt-timeout` (pgvector): the retriever's backend is `PgVectorBackend(statement_timeout=1.0)` over
+  the proxied pool; under `plain` no statement timeout is set.
+
+**Driver for store episodes.** An open loop: a retrieval starts every 0.2 s whatever is still
+running, each under the registered 10-s watchdog, so retrievals are in flight inside every fault
+window. A retrieval still running when the episode ends gets the rest of its watchdog. The engine
+episodes keep the closed loop. Inside, hang, leak, deviation and recovery are as registered.
+
+**Hypotheses.** Cells need at least 30 valid trials or 10 episodes and 5 seeds, else the verdict is
+inconclusive; shares and intervals are as registered.
+
+- **A2-H1, the invalidation bound.** In `spicedb-ml` and `cerbos-policy` under `ttl30-inv` and
+  `ttl30-shared-inv`, every valid trial's time to effect is at most B2 + 1 s, where B2 = D after
+  `invalidate()` and D + 1 s (`local_ttl`) on the shared replica: 12 s and 13 s for SpiceDB, 11 s
+  and 12 s for Cerbos. Confirmed when no trial exceeds it; falsified by one trial beyond it or one
+  that never takes effect. Full run: 40 of 40 and 39 of 40 SpiceDB trials beyond their bound.
+- **A2-H2, the cache adds nothing to the engine's delay.** The median time to effect under
+  `ttl30-inv` is at most 6.0 s for SpiceDB (X7-H3's limit, S + 0.5 s) and 4.0 s for Cerbos, and under
+  `ttl30-shared-inv` at most 7.0 s and 5.0 s. Confirmed within the limit, falsified above it by more
+  than 0.5 s, inconclusive between. Full run: medians 30.042 and 31.048 s (SpiceDB), 30.025 and
+  31.039 s (Cerbos).
+- **A2-H3, the declared staleness bounds the engine.** Every valid trial's time to effect is at
+  most D + 1 s under `nocache` (12 s SpiceDB, 11 s Cerbos) and at most ttl + D + 1 s under `ttl5` and
+  `ttl30` (`spicedb-ml`: 17 s and 42 s). Rules as A2-H1. X7-H2 and X7-H5 are judged again as first
+  written, as a replication; for X7-H5 we expect the median criterion to hold and make no
+  prediction on its maximum (full run: 8.742 s).
+- **A2-H4, pgvector `blackhole` with requests in flight**, under `plain` and `stmt-timeout`: (a) at
+  least 30 requests fall inside each cell (fewer: inconclusive); (b) X7-H7c as written: at least 99%
+  of them fail or hang, with the interval's lower end at least 95% (falsified when its upper end is
+  below 99%); (c) the statement timeout cannot bound them, since the statement never reaches the
+  server: in both conditions the median latency of the inside requests that fail or hang is at
+  least 4.5 s (the pool's 5-s timeout or the watchdog). Falsified when it is below 4.5 s in either.
+- **A2-H5, the statement timeout bounds a statement the server holds.** Under `lock`: with
+  `stmt-timeout`, at least 99% of inside requests fail (interval lower end at least 95%), none
+  hangs, and the median latency of the inside failures is at most 1.5 s; with `plain`, the median
+  latency of the inside requests that fail or hang is at least 4.5 s. Falsified when a share's
+  interval lies wholly on the wrong side of its threshold, when a request hangs under
+  `stmt-timeout`, or when a median lies on the wrong side.
+- **A2-H6, an empty stream no longer reads as "nothing readable".** SpiceDB `empty`: at least 99%
+  of inside requests fail (interval lower end at least 95%) and at most 1% deviate (falsified when
+  the failing share's interval lies below 99%, or the deviating share's lower end is above 1%).
+  Full run: 4,746 deviating answers and 1 failure. SpiceDB `empty-lookup`: at least 99% of inside
+  requests return the exact answer (interval lower end at least 95%; falsified when its upper end
+  is below 99%), post-filtered and checked by CheckBulkPermissions.
+- **A2-H7, store errors carry a fixed message.** In every store episode, every failed retrieval
+  raised `wardowl.retriever.SearchError` with the message "search failed" or "count failed", none
+  names a host, and no hit leaks. Confirmed with no exception to these rules over at least 100
+  failures; falsified by one failure of another class or message, one naming a host, or one leak.
+  Full run: 28,125 store-fault failures, all the clients' own exceptions.
+- **A2-H8, fail closed (replication of X7-H6)** over the SpiceDB episodes: no leak, and every
+  failure an `AuthorizationError` whose message names no host.
+
+The statistics script prints, beside each A2 cell, the full run's numbers for the same cell. A
+prediction found impossible to apply as written is reported as a deviation, as above.
