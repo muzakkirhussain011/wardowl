@@ -1,0 +1,4 @@
+[2026-10-29T16:58:42.067+00:00] x7b opa: start
+[2026-10-29T17:01:02.279+00:00] x7b opa seed 0: 140 s
+::notice title=x7 x7b-opa%3A no harness errors::every call the harness made returned
+::notice title=x7 x7b-opa records::28 records, 0 failed paths or targets, in results/x7-x7b-opa.jsonl

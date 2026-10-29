@@ -1,0 +1,423 @@
+# X7: revocation and faults
+
+Profile: ['smoke']. Files: 9; records: 202. **Smoke data: not analysed for the hypotheses.**
+
+## Verdicts
+
+| Hypothesis | Verdict | Numbers |
+|---|---|---|
+| X7-H1 acl-pgvector nocache | INCONCLUSIVE | 1 valid trials, 0 beyond B + 1 s (0 never took effect), B = 0.0 |
+| X7-H4 acl-pgvector nocache | INCONCLUSIVE | median 7.6e-04 [7.6e-04, 7.6e-04] |
+| X7-H1 acl-pgvector ttl5 | INCONCLUSIVE | 1 valid trials, 0 beyond B + 1 s (0 never took effect), B = 0.0 |
+| X7-H4 acl-pgvector ttl5 | INCONCLUSIVE | median 0.001 [0.001, 0.001] |
+| X7-H1 acl-pgvector ttl30 | INCONCLUSIVE | 1 valid trials, 0 beyond B + 1 s (0 never took effect), B = 0.0 |
+| X7-H4 acl-pgvector ttl30 | INCONCLUSIVE | median 0.001 [0.001, 0.001] |
+| X7-H1 acl-pgvector ttl30-inv | INCONCLUSIVE | 1 valid trials, 0 beyond B + 1 s (0 never took effect), B = 0.0 |
+| X7-H3 acl-pgvector ttl30-inv | INCONCLUSIVE | median 8.5e-04 [8.5e-04, 8.5e-04], limit 0.5 |
+| X7-H4 acl-pgvector ttl30-inv | INCONCLUSIVE | median 8.5e-04 [8.5e-04, 8.5e-04] |
+| X7-H1 acl-pgvector ttl30-shared-inv | INCONCLUSIVE | 1 valid trials, 0 beyond B + 1 s (0 never took effect), B = 0.0 |
+| X7-H3 acl-pgvector ttl30-shared-inv | INCONCLUSIVE | median 0.001 [0.001, 0.001], limit 1.5 |
+| X7-H4 acl-pgvector ttl30-shared-inv | INCONCLUSIVE | median 0.001 [0.001, 0.001] |
+| X7-H1 acl-qdrant nocache | INCONCLUSIVE | 1 valid trials, 0 beyond B + 1 s (0 never took effect), B = 0.0 |
+| X7-H4 acl-qdrant nocache | INCONCLUSIVE | median 0.002 [0.002, 0.002] |
+| X7-H1 acl-qdrant ttl5 | INCONCLUSIVE | 1 valid trials, 0 beyond B + 1 s (0 never took effect), B = 0.0 |
+| X7-H4 acl-qdrant ttl5 | INCONCLUSIVE | median 0.002 [0.002, 0.002] |
+| X7-H1 acl-qdrant ttl30 | INCONCLUSIVE | 1 valid trials, 0 beyond B + 1 s (0 never took effect), B = 0.0 |
+| X7-H4 acl-qdrant ttl30 | INCONCLUSIVE | median 0.003 [0.003, 0.003] |
+| X7-H1 acl-qdrant ttl30-inv | INCONCLUSIVE | 1 valid trials, 0 beyond B + 1 s (0 never took effect), B = 0.0 |
+| X7-H3 acl-qdrant ttl30-inv | INCONCLUSIVE | median 0.002 [0.002, 0.002], limit 0.5 |
+| X7-H4 acl-qdrant ttl30-inv | INCONCLUSIVE | median 0.002 [0.002, 0.002] |
+| X7-H1 acl-qdrant ttl30-shared-inv | INCONCLUSIVE | 1 valid trials, 0 beyond B + 1 s (0 never took effect), B = 0.0 |
+| X7-H3 acl-qdrant ttl30-shared-inv | INCONCLUSIVE | median 0.003 [0.003, 0.003], limit 1.5 |
+| X7-H4 acl-qdrant ttl30-shared-inv | INCONCLUSIVE | median 0.003 [0.003, 0.003] |
+| X7 exploratory cerbos-policy nocache | EXPLORATORY | median 3.936 [3.936, 3.936], maximum 3.936 |
+| X7 exploratory cerbos-policy ttl5 | EXPLORATORY | median 5.023 [5.023, 5.023], maximum 5.023 |
+| X7 exploratory cerbos-policy ttl30 | EXPLORATORY | median 30.002 [30.002, 30.002], maximum 30.002 |
+| X7 exploratory cerbos-policy ttl30-inv | EXPLORATORY | median n/a [n/a, n/a], maximum n/a |
+| X7 exploratory cerbos-policy ttl30-shared-inv | EXPLORATORY | median n/a [n/a, n/a], maximum n/a |
+| X7-H1 opa-data nocache | INCONCLUSIVE | 1 valid trials, 0 beyond B + 1 s (0 never took effect), B = 0.0 |
+| X7-H1 opa-data ttl5 | INCONCLUSIVE | 1 valid trials, 0 beyond B + 1 s (0 never took effect), B = 5.0 |
+| X7-H2 opa-data ttl5 | INCONCLUSIVE | median 5.043 [5.043, 5.043] against [4.0, 6.0] |
+| X7-H1 opa-data ttl30 | INCONCLUSIVE | 1 valid trials, 0 beyond B + 1 s (0 never took effect), B = 30.0 |
+| X7-H2 opa-data ttl30 | INCONCLUSIVE | median 30.034 [30.034, 30.034] against [29.0, 31.0] |
+| X7-H1 opa-data ttl30-inv | INCONCLUSIVE | 1 valid trials, 0 beyond B + 1 s (0 never took effect), B = 0.0 |
+| X7-H3 opa-data ttl30-inv | INCONCLUSIVE | median 0.001 [0.001, 0.001], limit 0.5 |
+| X7-H1 opa-data ttl30-shared-inv | INCONCLUSIVE | 1 valid trials, 0 beyond B + 1 s (0 never took effect), B = 1.0 |
+| X7-H3 opa-data ttl30-shared-inv | INCONCLUSIVE | median 1.019 [1.019, 1.019], limit 1.5 |
+| X7-H1 opa-policy nocache | INCONCLUSIVE | 1 valid trials, 0 beyond B + 1 s (0 never took effect), B = 0.0 |
+| X7-H1 opa-policy ttl5 | INCONCLUSIVE | 1 valid trials, 0 beyond B + 1 s (0 never took effect), B = 5.0 |
+| X7-H2 opa-policy ttl5 | INCONCLUSIVE | median 5.048 [5.048, 5.048] against [4.0, 6.0] |
+| X7-H1 opa-policy ttl30 | INCONCLUSIVE | 1 valid trials, 0 beyond B + 1 s (0 never took effect), B = 30.0 |
+| X7-H2 opa-policy ttl30 | INCONCLUSIVE | median 30.033 [30.033, 30.033] against [29.0, 31.0] |
+| X7-H1 opa-policy ttl30-inv | INCONCLUSIVE | 1 valid trials, 0 beyond B + 1 s (0 never took effect), B = 0.0 |
+| X7-H3 opa-policy ttl30-inv | INCONCLUSIVE | median 0.013 [0.013, 0.013], limit 0.5 |
+| X7-H1 opa-policy ttl30-shared-inv | INCONCLUSIVE | 1 valid trials, 0 beyond B + 1 s (0 never took effect), B = 1.0 |
+| X7-H3 opa-policy ttl30-shared-inv | INCONCLUSIVE | median 1.032 [1.032, 1.032], limit 1.5 |
+| X7-H1 openfga nocache | INCONCLUSIVE | 1 valid trials, 0 beyond B + 1 s (0 never took effect), B = 0.0 |
+| X7-H1 openfga ttl5 | INCONCLUSIVE | 1 valid trials, 0 beyond B + 1 s (0 never took effect), B = 5.0 |
+| X7-H2 openfga ttl5 | INCONCLUSIVE | median 4.993 [4.993, 4.993] against [4.0, 6.0] |
+| X7-H1 openfga ttl30 | INCONCLUSIVE | 1 valid trials, 0 beyond B + 1 s (0 never took effect), B = 30.0 |
+| X7-H2 openfga ttl30 | INCONCLUSIVE | median 29.997 [29.997, 29.997] against [29.0, 31.0] |
+| X7-H1 openfga ttl30-inv | INCONCLUSIVE | 1 valid trials, 0 beyond B + 1 s (0 never took effect), B = 0.0 |
+| X7-H3 openfga ttl30-inv | INCONCLUSIVE | median 0.003 [0.003, 0.003], limit 0.5 |
+| X7-H1 openfga ttl30-shared-inv | INCONCLUSIVE | 1 valid trials, 0 beyond B + 1 s (0 never took effect), B = 1.0 |
+| X7-H3 openfga ttl30-shared-inv | INCONCLUSIVE | median 1.019 [1.019, 1.019], limit 1.5 |
+| X7-H1 openfga-cached-hc nocache | INCONCLUSIVE | 1 valid trials, 0 beyond B + 1 s (0 never took effect), B = 0.0 |
+| X7-H1 openfga-cached-hc ttl5 | INCONCLUSIVE | 1 valid trials, 0 beyond B + 1 s (0 never took effect), B = 5.0 |
+| X7-H2 openfga-cached-hc ttl5 | INCONCLUSIVE | median 5.036 [5.036, 5.036] against [4.0, 6.0] |
+| X7-H1 openfga-cached-hc ttl30 | INCONCLUSIVE | 1 valid trials, 0 beyond B + 1 s (0 never took effect), B = 30.0 |
+| X7-H2 openfga-cached-hc ttl30 | INCONCLUSIVE | median 29.997 [29.997, 29.997] against [29.0, 31.0] |
+| X7-H1 openfga-cached-hc ttl30-inv | INCONCLUSIVE | 1 valid trials, 0 beyond B + 1 s (0 never took effect), B = 0.0 |
+| X7-H3 openfga-cached-hc ttl30-inv | INCONCLUSIVE | median 0.005 [0.005, 0.005], limit 0.5 |
+| X7-H1 openfga-cached-hc ttl30-shared-inv | INCONCLUSIVE | 1 valid trials, 0 beyond B + 1 s (0 never took effect), B = 1.0 |
+| X7-H3 openfga-cached-hc ttl30-shared-inv | INCONCLUSIVE | median 1.024 [1.024, 1.024], limit 1.5 |
+| X7-H1 openfga-cached-ml nocache | INCONCLUSIVE | 1 valid trials, 0 beyond B + 1 s (0 never took effect), B = 10.0 |
+| X7 exploratory openfga-cached-ml nocache | EXPLORATORY | median 0.003 [0.003, 0.003], maximum 0.003 |
+| X7-H1 openfga-cached-ml ttl5 | INCONCLUSIVE | 1 valid trials, 0 beyond B + 1 s (0 never took effect), B = 15.0 |
+| X7 exploratory openfga-cached-ml ttl5 | EXPLORATORY | median 4.990 [4.990, 4.990], maximum 4.990 |
+| X7-H1 openfga-cached-ml ttl30 | INCONCLUSIVE | 1 valid trials, 0 beyond B + 1 s (0 never took effect), B = 40.0 |
+| X7 exploratory openfga-cached-ml ttl30 | EXPLORATORY | median 29.990 [29.990, 29.990], maximum 29.990 |
+| X7-H1 openfga-cached-ml ttl30-inv | INCONCLUSIVE | 1 valid trials, 0 beyond B + 1 s (0 never took effect), B = 10.0 |
+| X7-H3 openfga-cached-ml ttl30-inv | INCONCLUSIVE | median 0.004 [0.004, 0.004], limit 10.5 |
+| X7 exploratory openfga-cached-ml ttl30-inv | EXPLORATORY | median 0.004 [0.004, 0.004], maximum 0.004 |
+| X7-H1 openfga-cached-ml ttl30-shared-inv | INCONCLUSIVE | 1 valid trials, 0 beyond B + 1 s (0 never took effect), B = 11.0 |
+| X7-H3 openfga-cached-ml ttl30-shared-inv | INCONCLUSIVE | median 1.020 [1.020, 1.020], limit 11.5 |
+| X7 exploratory openfga-cached-ml ttl30-shared-inv | EXPLORATORY | median 1.020 [1.020, 1.020], maximum 1.020 |
+| X7-H1 spicedb-fc nocache | INCONCLUSIVE | 1 valid trials, 0 beyond B + 1 s (0 never took effect), B = 0.0 |
+| X7-H1 spicedb-fc ttl5 | INCONCLUSIVE | 1 valid trials, 0 beyond B + 1 s (0 never took effect), B = 5.0 |
+| X7-H2 spicedb-fc ttl5 | INCONCLUSIVE | median 5.016 [5.016, 5.016] against [4.0, 6.0] |
+| X7-H1 spicedb-fc ttl30 | INCONCLUSIVE | 1 valid trials, 0 beyond B + 1 s (0 never took effect), B = 30.0 |
+| X7-H2 spicedb-fc ttl30 | INCONCLUSIVE | median 30.042 [30.042, 30.042] against [29.0, 31.0] |
+| X7-H1 spicedb-fc ttl30-inv | INCONCLUSIVE | 1 valid trials, 0 beyond B + 1 s (0 never took effect), B = 0.0 |
+| X7-H3 spicedb-fc ttl30-inv | INCONCLUSIVE | median 0.003 [0.003, 0.003], limit 0.5 |
+| X7-H1 spicedb-fc ttl30-shared-inv | INCONCLUSIVE | 1 valid trials, 0 beyond B + 1 s (0 never took effect), B = 1.0 |
+| X7-H3 spicedb-fc ttl30-shared-inv | INCONCLUSIVE | median 1.015 [1.015, 1.015], limit 1.5 |
+| X7-H1 spicedb-ml nocache | INCONCLUSIVE | 1 valid trials, 0 beyond B + 1 s (0 never took effect), B = 5.5 |
+| X7-H5 spicedb-ml staleness | INCONCLUSIVE | median 1.440 [1.440, 1.440], maximum 1.440 |
+| X7-H1 spicedb-ml ttl5 | INCONCLUSIVE | 1 valid trials, 0 beyond B + 1 s (0 never took effect), B = 10.5 |
+| X7-H2 spicedb-ml ttl5 | INCONCLUSIVE | median 5.004 [5.004, 5.004] against [4.0, 11.5] |
+| X7-H1 spicedb-ml ttl30 | INCONCLUSIVE | 1 valid trials, 0 beyond B + 1 s (0 never took effect), B = 35.5 |
+| X7-H2 spicedb-ml ttl30 | INCONCLUSIVE | median 30.023 [30.023, 30.023] against [29.0, 36.5] |
+| X7-H1 spicedb-ml ttl30-inv | FALSIFIED | 1 valid trials, 1 beyond B + 1 s (1 never took effect), B = 5.5 |
+| X7-H3 spicedb-ml ttl30-inv | INCONCLUSIVE | median n/a [n/a, n/a], limit 6.0 |
+| X7-H1 spicedb-ml ttl30-shared-inv | FALSIFIED | 1 valid trials, 1 beyond B + 1 s (1 never took effect), B = 6.5 |
+| X7-H3 spicedb-ml ttl30-shared-inv | INCONCLUSIVE | median n/a [n/a, n/a], limit 7.0 |
+| G3 leak detection (allow-all leaks) | CONFIRMED | {'openfga': 277, 'cerbos': 435, 'spicedb': 328, 'opa': 335} |
+| X7-H6 fail closed | INCONCLUSIVE | 20141 requests: 0 leaks (one-sided bound 0.000149), 0 engine failures not AuthorizationError, 0 naming a host |
+| X7 store errors (reported) | EXPLORATORY | 707 store-fault failures, 0 naming a host |
+| X7-H7a cerbos blackhole | INCONCLUSIVE | n/a [n/a, n/a] over 0 requests |
+| X7-H7a cerbos down | INCONCLUSIVE | 1.000 [1.000, 1.000] over 41 requests |
+| X7-H7a cerbos http500 | INCONCLUSIVE | 1.000 [1.000, 1.000] over 141 requests |
+| X7-H7a cerbos http503 | INCONCLUSIVE | 1.000 [1.000, 1.000] over 40 requests |
+| X7-H7a cerbos refuse | INCONCLUSIVE | 0.000 [0.000, 0.000] over 117 requests |
+| X7-H7b cerbos slow-1000 failing | INCONCLUSIVE | n/a [n/a, n/a] over 0 requests |
+| X7-H7b cerbos slow-1000 latency rise | INCONCLUSIVE | median rise n/a [n/a, n/a] s against 1.0 s |
+| X7-H7b cerbos slow-200 failing | INCONCLUSIVE | 0.000 [0.000, 0.000] over 6 requests |
+| X7-H7b cerbos slow-200 latency rise | INCONCLUSIVE | median rise 0.402 [0.402, 0.402] s against 0.2 s |
+| X7-H7a cerbos slow-3000 | INCONCLUSIVE | n/a [n/a, n/a] over 0 requests |
+| X7-H7a opa blackhole | INCONCLUSIVE | n/a [n/a, n/a] over 0 requests |
+| X7-H7a opa down | INCONCLUSIVE | 1.000 [1.000, 1.000] over 40 requests |
+| X7-H7a opa http500 | INCONCLUSIVE | 1.000 [1.000, 1.000] over 141 requests |
+| X7-H7a opa http503 | INCONCLUSIVE | 1.000 [1.000, 1.000] over 40 requests |
+| X7-H7a opa refuse | INCONCLUSIVE | 0.000 [0.000, 0.000] over 107 requests |
+| X7-H7b opa slow-1000 failing | INCONCLUSIVE | n/a [n/a, n/a] over 0 requests |
+| X7-H7b opa slow-1000 latency rise | INCONCLUSIVE | median rise n/a [n/a, n/a] s against 1.0 s |
+| X7-H7b opa slow-200 failing | INCONCLUSIVE | 0.000 [0.000, 0.000] over 6 requests |
+| X7-H7b opa slow-200 latency rise | INCONCLUSIVE | median rise 0.401 [0.401, 0.401] s against 0.2 s |
+| X7-H7a opa slow-3000 | INCONCLUSIVE | n/a [n/a, n/a] over 0 requests |
+| X7-H7a openfga blackhole | INCONCLUSIVE | n/a [n/a, n/a] over 0 requests |
+| X7-H7a openfga down | INCONCLUSIVE | 1.000 [1.000, 1.000] over 40 requests |
+| X7-H7a openfga http500 | INCONCLUSIVE | 1.000 [1.000, 1.000] over 141 requests |
+| X7-H7a openfga http503 | INCONCLUSIVE | 1.000 [1.000, 1.000] over 40 requests |
+| X7-H7a openfga refuse | INCONCLUSIVE | 0.000 [0.000, 0.000] over 86 requests |
+| X7-H7b openfga slow-1000 failing | INCONCLUSIVE | n/a [n/a, n/a] over 0 requests |
+| X7-H7b openfga slow-1000 latency rise | INCONCLUSIVE | median rise n/a [n/a, n/a] s against 1.0 s |
+| X7-H7b openfga slow-200 failing | INCONCLUSIVE | 0.000 [0.000, 0.000] over 5 requests |
+| X7-H7b openfga slow-200 latency rise | INCONCLUSIVE | median rise 0.398 [0.398, 0.398] s against 0.2 s |
+| X7-H7a openfga slow-3000 | INCONCLUSIVE | n/a [n/a, n/a] over 0 requests |
+| X7-H7a spicedb blackhole | INCONCLUSIVE | n/a [n/a, n/a] over 0 requests |
+| X7-H7a spicedb down | INCONCLUSIVE | 0.952 [0.952, 0.952] over 42 requests |
+| X7-H7a spicedb http500 | INCONCLUSIVE | 1.000 [1.000, 1.000] over 141 requests |
+| X7-H7a spicedb http503 | INCONCLUSIVE | 1.000 [1.000, 1.000] over 40 requests |
+| X7-H7a spicedb refuse | INCONCLUSIVE | 0.000 [0.000, 0.000] over 103 requests |
+| X7-H7b spicedb slow-1000 failing | INCONCLUSIVE | n/a [n/a, n/a] over 0 requests |
+| X7-H7b spicedb slow-1000 latency rise | INCONCLUSIVE | median rise n/a [n/a, n/a] s against 1.0 s |
+| X7-H7b spicedb slow-200 failing | INCONCLUSIVE | 0.000 [0.000, 0.000] over 5 requests |
+| X7-H7b spicedb slow-200 latency rise | INCONCLUSIVE | median rise 0.407 [0.407, 0.407] s against 0.2 s |
+| X7-H7a spicedb slow-3000 | INCONCLUSIVE | n/a [n/a, n/a] over 0 requests |
+| X7-H7c pgvector blackhole | INCONCLUSIVE | n/a [n/a, n/a] over 0 requests |
+| X7-H7c pgvector down | INCONCLUSIVE | n/a [n/a, n/a] over 0 requests |
+| X7-H7c pgvector refuse | INCONCLUSIVE | n/a [n/a, n/a] over 0 requests |
+| X7-H7b pgvector slow-1000 failing | INCONCLUSIVE | n/a [n/a, n/a] over 0 requests |
+| X7-H7b pgvector slow-1000 latency rise | INCONCLUSIVE | median rise n/a [n/a, n/a] s against 1.0 s |
+| X7-H7b pgvector slow-200 failing | INCONCLUSIVE | 0.000 [0.000, 0.000] over 2 requests |
+| X7-H7b pgvector slow-200 latency rise | INCONCLUSIVE | median rise 0.802 [0.802, 0.802] s against 0.2 s |
+| X7-H7c qdrant blackhole | INCONCLUSIVE | n/a [n/a, n/a] over 0 requests |
+| X7-H7c qdrant down | INCONCLUSIVE | 1.000 [1.000, 1.000] over 138 requests |
+| X7-H7c qdrant http500 | INCONCLUSIVE | 1.000 [1.000, 1.000] over 136 requests |
+| X7-H7c qdrant http503 | INCONCLUSIVE | 1.000 [1.000, 1.000] over 136 requests |
+| X7-H7c qdrant refuse | INCONCLUSIVE | 1.000 [1.000, 1.000] over 140 requests |
+| X7-H7b qdrant slow-1000 failing | INCONCLUSIVE | 0.000 [0.000, 0.000] over 1 requests |
+| X7-H7b qdrant slow-1000 latency rise | INCONCLUSIVE | median rise 1.001 [1.001, 1.001] s against 1.0 s |
+| X7-H7b qdrant slow-200 failing | INCONCLUSIVE | 0.000 [0.000, 0.000] over 12 requests |
+| X7-H7b qdrant slow-200 latency rise | INCONCLUSIVE | median rise 0.201 [0.201, 0.201] s against 0.2 s |
+| X7-H7c qdrant truncate | INCONCLUSIVE | 1.000 [1.000, 1.000] over 127 requests |
+| X7 exploratory cerbos drop-last | EXPLORATORY | {'ok': 101, 'authz': 122} |
+| X7 exploratory cerbos empty | EXPLORATORY | {'ok': 102, 'authz': 137} |
+| X7 exploratory cerbos garbage-json | EXPLORATORY | {'ok': 102, 'authz': 138} |
+| X7 exploratory cerbos truncate | EXPLORATORY | {'ok': 102, 'authz': 137} |
+| X7 exploratory cerbos type-flip | EXPLORATORY | {'ok': 103, 'authz': 137} |
+| X7 exploratory opa drop-last | EXPLORATORY | {'ok': 94, 'authz': 112} |
+| X7 exploratory opa empty | EXPLORATORY | {'ok': 94, 'authz': 132} |
+| X7 exploratory opa garbage-json | EXPLORATORY | {'ok': 94, 'authz': 133} |
+| X7 exploratory opa truncate | EXPLORATORY | {'ok': 94, 'authz': 133} |
+| X7 exploratory opa type-flip | EXPLORATORY | {'ok': 95, 'authz': 112} |
+| X7 exploratory openfga drop-last | EXPLORATORY | {'ok': 75, 'authz': 89} |
+| X7 exploratory openfga empty | EXPLORATORY | {'ok': 71, 'authz': 122} |
+| X7 exploratory openfga garbage-json | EXPLORATORY | {'ok': 74, 'authz': 122} |
+| X7 exploratory openfga truncate | EXPLORATORY | {'ok': 74, 'authz': 123} |
+| X7 exploratory openfga type-flip | EXPLORATORY | {'ok': 76, 'authz': 89} |
+| X7 exploratory spicedb drop-last | EXPLORATORY | {'ok': 88, 'authz': 107} |
+| X7 exploratory spicedb empty | EXPLORATORY | {'ok': 89, 'deviate': 126} |
+| X7 exploratory spicedb garbage-json | EXPLORATORY | {'ok': 89, 'authz': 126} |
+| X7 exploratory spicedb truncate | EXPLORATORY | {'ok': 88, 'authz': 126} |
+| X7 exploratory spicedb type-flip | EXPLORATORY | {'ok': 89, 'authz': 121} |
+| X7-H8b cerbos blackhole recovery | INCONCLUSIVE | median recovery 0.123 [0.123, 0.123] |
+| X7-H8a cerbos blackhole | INCONCLUSIVE | median recovery 0.112 [0.112, 0.112] |
+| X7-H8b cerbos down recovery | INCONCLUSIVE | median recovery 2.396 [2.396, 2.396] |
+| X7 exploratory recovery cerbos down | EXPLORATORY | median recovery 0.216 [0.216, 0.216] |
+| X7-H8b cerbos http500 recovery | INCONCLUSIVE | median recovery 2.091 [2.091, 2.091] |
+| X7-H8a cerbos http500 | INCONCLUSIVE | median recovery 0.008 [0.008, 0.008] |
+| X7-H8a cerbos http503 | INCONCLUSIVE | median recovery 0.067 [0.067, 0.067] |
+| X7-H8b cerbos refuse recovery | INCONCLUSIVE | median recovery 0.020 [0.020, 0.020] |
+| X7-H8a cerbos refuse | INCONCLUSIVE | median recovery 0.030 [0.030, 0.030] |
+| X7-H8b cerbos slow-3000 recovery | INCONCLUSIVE | median recovery 1.069 [1.069, 1.069] |
+| X7-H8a cerbos slow-3000 | INCONCLUSIVE | median recovery 1.069 [1.069, 1.069] |
+| X7-H8b opa blackhole recovery | INCONCLUSIVE | median recovery 0.117 [0.117, 0.117] |
+| X7-H8a opa blackhole | INCONCLUSIVE | median recovery 0.117 [0.117, 0.117] |
+| X7-H8b opa down recovery | INCONCLUSIVE | median recovery 2.359 [2.359, 2.359] |
+| X7 exploratory recovery opa down | EXPLORATORY | median recovery 0.055 [0.055, 0.055] |
+| X7-H8b opa http500 recovery | INCONCLUSIVE | median recovery 2.120 [2.120, 2.120] |
+| X7-H8a opa http500 | INCONCLUSIVE | median recovery 0.012 [0.012, 0.012] |
+| X7-H8a opa http503 | INCONCLUSIVE | median recovery 0.078 [0.078, 0.078] |
+| X7-H8b opa refuse recovery | INCONCLUSIVE | median recovery 0.023 [0.023, 0.023] |
+| X7-H8a opa refuse | INCONCLUSIVE | median recovery 0.020 [0.020, 0.020] |
+| X7-H8b opa slow-3000 recovery | INCONCLUSIVE | median recovery 1.081 [1.081, 1.081] |
+| X7-H8a opa slow-3000 | INCONCLUSIVE | median recovery 1.068 [1.068, 1.068] |
+| X7-H8b openfga blackhole recovery | INCONCLUSIVE | median recovery 0.137 [0.137, 0.137] |
+| X7-H8a openfga blackhole | INCONCLUSIVE | median recovery 0.140 [0.140, 0.140] |
+| X7-H8b openfga down recovery | INCONCLUSIVE | median recovery 2.455 [2.455, 2.455] |
+| X7 exploratory recovery openfga down | EXPLORATORY | median recovery 0.240 [0.240, 0.240] |
+| X7-H8b openfga http500 recovery | INCONCLUSIVE | median recovery 2.132 [2.132, 2.132] |
+| X7-H8a openfga http500 | INCONCLUSIVE | median recovery 0.036 [0.036, 0.036] |
+| X7-H8a openfga http503 | INCONCLUSIVE | median recovery 0.025 [0.025, 0.025] |
+| X7-H8b openfga refuse recovery | INCONCLUSIVE | median recovery 0.041 [0.041, 0.041] |
+| X7-H8a openfga refuse | INCONCLUSIVE | median recovery 0.044 [0.044, 0.044] |
+| X7-H8b openfga slow-3000 recovery | INCONCLUSIVE | median recovery 1.064 [1.064, 1.064] |
+| X7-H8a openfga slow-3000 | INCONCLUSIVE | median recovery 1.076 [1.076, 1.076] |
+| X7-H8b spicedb blackhole recovery | INCONCLUSIVE | median recovery 0.143 [0.143, 0.143] |
+| X7-H8a spicedb blackhole | INCONCLUSIVE | median recovery 0.152 [0.152, 0.152] |
+| X7-H8b spicedb down recovery | INCONCLUSIVE | median recovery 2.416 [2.416, 2.416] |
+| X7 exploratory recovery spicedb down | EXPLORATORY | median recovery 0.819 [0.819, 0.819] |
+| X7-H8b spicedb http500 recovery | INCONCLUSIVE | median recovery 2.136 [2.136, 2.136] |
+| X7-H8a spicedb http500 | INCONCLUSIVE | median recovery 0.022 [0.022, 0.022] |
+| X7-H8a spicedb http503 | INCONCLUSIVE | median recovery 0.109 [0.109, 0.109] |
+| X7-H8b spicedb refuse recovery | INCONCLUSIVE | median recovery 0.036 [0.036, 0.036] |
+| X7-H8a spicedb refuse | INCONCLUSIVE | median recovery 0.032 [0.032, 0.032] |
+| X7-H8b spicedb slow-3000 recovery | INCONCLUSIVE | median recovery 1.074 [1.074, 1.074] |
+| X7-H8a spicedb slow-3000 | INCONCLUSIVE | median recovery 1.076 [1.076, 1.076] |
+| X7-H9 cerbos blackhole | INCONCLUSIVE | succeeding 1.000 [1.000, 1.000] |
+| X7-H9 cerbos down | INCONCLUSIVE | succeeding 1.000 [1.000, 1.000] |
+| X7-H9 cerbos http500 | INCONCLUSIVE | succeeding 1.000 [1.000, 1.000] |
+| X7-H9 cerbos refuse | INCONCLUSIVE | succeeding 1.000 [1.000, 1.000] |
+| X7-H9 cerbos slow-3000 | INCONCLUSIVE | succeeding 1.000 [1.000, 1.000] |
+| X7-H9 opa blackhole | INCONCLUSIVE | succeeding 1.000 [1.000, 1.000] |
+| X7-H9 opa down | INCONCLUSIVE | succeeding 1.000 [1.000, 1.000] |
+| X7-H9 opa http500 | INCONCLUSIVE | succeeding 1.000 [1.000, 1.000] |
+| X7-H9 opa refuse | INCONCLUSIVE | succeeding 1.000 [1.000, 1.000] |
+| X7-H9 opa slow-3000 | INCONCLUSIVE | succeeding 1.000 [1.000, 1.000] |
+| X7-H9 openfga blackhole | INCONCLUSIVE | succeeding 1.000 [1.000, 1.000] |
+| X7-H9 openfga down | INCONCLUSIVE | succeeding 1.000 [1.000, 1.000] |
+| X7-H9 openfga http500 | INCONCLUSIVE | succeeding 1.000 [1.000, 1.000] |
+| X7-H9 openfga refuse | INCONCLUSIVE | succeeding 1.000 [1.000, 1.000] |
+| X7-H9 openfga slow-3000 | INCONCLUSIVE | succeeding 1.000 [1.000, 1.000] |
+| X7-H9 spicedb blackhole | INCONCLUSIVE | succeeding 1.000 [1.000, 1.000] |
+| X7-H9 spicedb down | INCONCLUSIVE | succeeding 1.000 [1.000, 1.000] |
+| X7-H9 spicedb http500 | INCONCLUSIVE | succeeding 1.000 [1.000, 1.000] |
+| X7-H9 spicedb refuse | INCONCLUSIVE | succeeding 1.000 [1.000, 1.000] |
+| X7-H9 spicedb slow-3000 | INCONCLUSIVE | succeeding 1.000 [1.000, 1.000] |
+
+## X7a: revocation latency
+
+| path | condition | trials | valid | median s [95% CI] | max s | p95 s | bound B s | beyond B + 1 s | never took effect | flaps | poll errors | median write s |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| acl-pgvector | nocache | 1 | 1 | 7.6e-04 [7.6e-04, 7.6e-04] | 7.6e-04 | 7.6e-04 | 0.000 | 0 | 0 | 0 | 0 | 7.6e-04 |
+| acl-pgvector | ttl5 | 1 | 1 | 0.001 [0.001, 0.001] | 0.001 | 0.001 | 0.000 | 0 | 0 | 0 | 0 | 0.001 |
+| acl-pgvector | ttl30 | 1 | 1 | 0.001 [0.001, 0.001] | 0.001 | 0.001 | 0.000 | 0 | 0 | 0 | 0 | 0.001 |
+| acl-pgvector | ttl30-inv | 1 | 1 | 8.5e-04 [8.5e-04, 8.5e-04] | 8.5e-04 | 8.5e-04 | 0.000 | 0 | 0 | 0 | 0 | 8.3e-04 |
+| acl-pgvector | ttl30-shared-inv | 1 | 1 | 0.001 [0.001, 0.001] | 0.001 | 0.001 | 0.000 | 0 | 0 | 0 | 0 | 7.8e-04 |
+| acl-qdrant | nocache | 1 | 1 | 0.002 [0.002, 0.002] | 0.002 | 0.002 | 0.000 | 0 | 0 | 0 | 0 | 0.002 |
+| acl-qdrant | ttl5 | 1 | 1 | 0.002 [0.002, 0.002] | 0.002 | 0.002 | 0.000 | 0 | 0 | 0 | 0 | 0.002 |
+| acl-qdrant | ttl30 | 1 | 1 | 0.003 [0.003, 0.003] | 0.003 | 0.003 | 0.000 | 0 | 0 | 0 | 0 | 0.003 |
+| acl-qdrant | ttl30-inv | 1 | 1 | 0.002 [0.002, 0.002] | 0.002 | 0.002 | 0.000 | 0 | 0 | 0 | 0 | 0.002 |
+| acl-qdrant | ttl30-shared-inv | 1 | 1 | 0.003 [0.003, 0.003] | 0.003 | 0.003 | 0.000 | 0 | 0 | 0 | 0 | 0.002 |
+| cerbos-policy | nocache | 1 | 1 | 3.936 [3.936, 3.936] | 3.936 | 3.936 | n/a | 0 | 0 | 0 | 0 | 3.7e-04 |
+| cerbos-policy | ttl5 | 1 | 1 | 5.023 [5.023, 5.023] | 5.023 | 5.023 | n/a | 0 | 0 | 0 | 0 | 5.6e-04 |
+| cerbos-policy | ttl30 | 1 | 1 | 30.002 [30.002, 30.002] | 30.002 | 30.002 | n/a | 0 | 0 | 0 | 0 | 5.1e-04 |
+| cerbos-policy | ttl30-inv | 1 | 1 | n/a [n/a, n/a] | n/a | n/a | n/a | 0 | 1 | 0 | 0 | 5.2e-04 |
+| cerbos-policy | ttl30-shared-inv | 1 | 1 | n/a [n/a, n/a] | n/a | n/a | n/a | 0 | 1 | 0 | 0 | 4.5e-04 |
+| opa-data | nocache | 1 | 1 | 8.0e-04 [8.0e-04, 8.0e-04] | 8.0e-04 | 8.0e-04 | 0.000 | 0 | 0 | 0 | 0 | 8.0e-04 |
+| opa-data | ttl5 | 1 | 1 | 5.043 [5.043, 5.043] | 5.043 | 5.043 | 5.000 | 0 | 0 | 0 | 0 | 7.7e-04 |
+| opa-data | ttl30 | 1 | 1 | 30.034 [30.034, 30.034] | 30.034 | 30.034 | 30.000 | 0 | 0 | 0 | 0 | 7.1e-04 |
+| opa-data | ttl30-inv | 1 | 1 | 0.001 [0.001, 0.001] | 0.001 | 0.001 | 0.000 | 0 | 0 | 0 | 0 | 9.8e-04 |
+| opa-data | ttl30-shared-inv | 1 | 1 | 1.019 [1.019, 1.019] | 1.019 | 1.019 | 1.000 | 0 | 0 | 0 | 0 | 8.7e-04 |
+| opa-policy | nocache | 1 | 1 | 0.014 [0.014, 0.014] | 0.014 | 0.014 | 0.000 | 0 | 0 | 0 | 0 | 0.014 |
+| opa-policy | ttl5 | 1 | 1 | 5.048 [5.048, 5.048] | 5.048 | 5.048 | 5.000 | 0 | 0 | 0 | 0 | 0.014 |
+| opa-policy | ttl30 | 1 | 1 | 30.033 [30.033, 30.033] | 30.033 | 30.033 | 30.000 | 0 | 0 | 0 | 0 | 0.013 |
+| opa-policy | ttl30-inv | 1 | 1 | 0.013 [0.013, 0.013] | 0.013 | 0.013 | 0.000 | 0 | 0 | 0 | 0 | 0.013 |
+| opa-policy | ttl30-shared-inv | 1 | 1 | 1.032 [1.032, 1.032] | 1.032 | 1.032 | 1.000 | 0 | 0 | 0 | 0 | 0.014 |
+| openfga | nocache | 1 | 1 | 0.006 [0.006, 0.006] | 0.006 | 0.006 | 0.000 | 0 | 0 | 0 | 0 | 0.006 |
+| openfga | ttl5 | 1 | 1 | 4.993 [4.993, 4.993] | 4.993 | 4.993 | 5.000 | 0 | 0 | 0 | 0 | 0.003 |
+| openfga | ttl30 | 1 | 1 | 29.997 [29.997, 29.997] | 29.997 | 29.997 | 30.000 | 0 | 0 | 0 | 0 | 0.003 |
+| openfga | ttl30-inv | 1 | 1 | 0.003 [0.003, 0.003] | 0.003 | 0.003 | 0.000 | 0 | 0 | 0 | 0 | 0.003 |
+| openfga | ttl30-shared-inv | 1 | 1 | 1.019 [1.019, 1.019] | 1.019 | 1.019 | 1.000 | 0 | 0 | 0 | 0 | 0.003 |
+| openfga-cached-hc | nocache | 1 | 1 | 0.003 [0.003, 0.003] | 0.003 | 0.003 | 0.000 | 0 | 0 | 0 | 0 | 0.003 |
+| openfga-cached-hc | ttl5 | 1 | 1 | 5.036 [5.036, 5.036] | 5.036 | 5.036 | 5.000 | 0 | 0 | 0 | 0 | 0.005 |
+| openfga-cached-hc | ttl30 | 1 | 1 | 29.997 [29.997, 29.997] | 29.997 | 29.997 | 30.000 | 0 | 0 | 0 | 0 | 0.003 |
+| openfga-cached-hc | ttl30-inv | 1 | 1 | 0.005 [0.005, 0.005] | 0.005 | 0.005 | 0.000 | 0 | 0 | 0 | 0 | 0.005 |
+| openfga-cached-hc | ttl30-shared-inv | 1 | 1 | 1.024 [1.024, 1.024] | 1.024 | 1.024 | 1.000 | 0 | 0 | 0 | 0 | 0.003 |
+| openfga-cached-ml | nocache | 1 | 1 | 0.003 [0.003, 0.003] | 0.003 | 0.003 | 10.000 | 0 | 0 | 0 | 0 | 0.003 |
+| openfga-cached-ml | ttl5 | 1 | 1 | 4.990 [4.990, 4.990] | 4.990 | 4.990 | 15.000 | 0 | 0 | 0 | 0 | 0.005 |
+| openfga-cached-ml | ttl30 | 1 | 1 | 29.990 [29.990, 29.990] | 29.990 | 29.990 | 40.000 | 0 | 0 | 0 | 0 | 0.008 |
+| openfga-cached-ml | ttl30-inv | 1 | 1 | 0.004 [0.004, 0.004] | 0.004 | 0.004 | 10.000 | 0 | 0 | 0 | 0 | 0.004 |
+| openfga-cached-ml | ttl30-shared-inv | 1 | 1 | 1.020 [1.020, 1.020] | 1.020 | 1.020 | 11.000 | 0 | 0 | 0 | 0 | 0.003 |
+| spicedb-fc | nocache | 1 | 1 | 0.003 [0.003, 0.003] | 0.003 | 0.003 | 0.000 | 0 | 0 | 0 | 0 | 0.003 |
+| spicedb-fc | ttl5 | 1 | 1 | 5.016 [5.016, 5.016] | 5.016 | 5.016 | 5.000 | 0 | 0 | 0 | 0 | 0.003 |
+| spicedb-fc | ttl30 | 1 | 1 | 30.042 [30.042, 30.042] | 30.042 | 30.042 | 30.000 | 0 | 0 | 0 | 0 | 0.003 |
+| spicedb-fc | ttl30-inv | 1 | 1 | 0.003 [0.003, 0.003] | 0.003 | 0.003 | 0.000 | 0 | 0 | 0 | 0 | 0.003 |
+| spicedb-fc | ttl30-shared-inv | 1 | 1 | 1.015 [1.015, 1.015] | 1.015 | 1.015 | 1.000 | 0 | 0 | 0 | 0 | 0.003 |
+| spicedb-ml | nocache | 1 | 1 | 1.440 [1.440, 1.440] | 1.440 | 1.440 | 5.500 | 0 | 0 | 0 | 0 | 0.003 |
+| spicedb-ml | ttl5 | 1 | 1 | 5.004 [5.004, 5.004] | 5.004 | 5.004 | 10.500 | 0 | 0 | 0 | 0 | 0.003 |
+| spicedb-ml | ttl30 | 1 | 1 | 30.023 [30.023, 30.023] | 30.023 | 30.023 | 35.500 | 0 | 0 | 0 | 0 | 0.003 |
+| spicedb-ml | ttl30-inv | 1 | 1 | n/a [n/a, n/a] | n/a | n/a | 5.500 | 1 | 1 | 0 | 0 | 0.003 |
+| spicedb-ml | ttl30-shared-inv | 1 | 1 | n/a [n/a, n/a] | n/a | n/a | 6.500 | 1 | 1 | 0 | 0 | 0.003 |
+
+## X7b: faults
+
+109 episodes; 0 excluded by G4 (baseline below 99% exact).
+
+| target | fault | condition | episodes | requests inside | failing [95% CI] | succeeding [95% CI] | leaks | failures not AuthorizationError | failures naming a host | recovery s [95% CI] | median failed latency s | codes | errors |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| cerbos | allow-all | plain | 1 | 121 | 0.000 [0.000, 0.000] | 0.000 [0.000, 0.000] | 435 | 0 | 0 | 0.021 [0.021, 0.021] | n/a | {'ok': 86, 'leak': 125} |  |
+| cerbos | blackhole | breaker | 1 | 0 | n/a [n/a, n/a] | n/a [n/a, n/a] | 0 | 0 | 0 | 0.123 [0.123, 0.123] | n/a | {'ok': 104, 'authz': 1} | wardowl.authz.AuthorizationError: Cerbos PlanResources timed out after 2.0 s |
+| cerbos | blackhole | cache30 | 1 | 138 | 0.000 [0.000, 0.000] | 1.000 [1.000, 1.000] | 0 | 0 | 0 | 0.020 [0.020, 0.020] | n/a | {'ok': 260} |  |
+| cerbos | blackhole | plain | 1 | 0 | n/a [n/a, n/a] | n/a [n/a, n/a] | 0 | 0 | 0 | 0.112 [0.112, 0.112] | n/a | {'ok': 103, 'authz': 1} | wardowl.authz.AuthorizationError: Cerbos PlanResources timed out after 2.0 s |
+| cerbos | down | breaker | 1 | 133 | 1.000 [1.000, 1.000] | 0.000 [0.000, 0.000] | 0 | 0 | 0 | 2.396 [2.396, 2.396] | 1.0e-04 | {'ok': 104, 'authz': 251} | wardowl.authz.AuthorizationError: Cerbos PlanResources failed: ConnectionRefusedError; wardowl.authz.AuthorizationError: the permission service keeps failing; requests are paused (circuit open) |
+| cerbos | down | cache30 | 1 | 137 | 0.000 [0.000, 0.000] | 1.000 [1.000, 1.000] | 0 | 0 | 0 | 0.017 [0.017, 0.017] | n/a | {'ok': 261} |  |
+| cerbos | down | plain | 1 | 41 | 1.000 [1.000, 1.000] | 0.000 [0.000, 0.000] | 0 | 0 | 0 | 0.216 [0.216, 0.216] | 0.051 | {'ok': 103, 'authz': 44} | wardowl.authz.AuthorizationError: Cerbos PlanResources failed: ConnectionRefusedError; wardowl.authz.AuthorizationError: Cerbos PlanResources failed: ConnectionResetError |
+| cerbos | drop-last | plain | 1 | 118 | 1.000 [1.000, 1.000] | 0.000 [0.000, 0.000] | 0 | 0 | 0 | 0.011 [0.011, 0.011] | 0.004 | {'ok': 101, 'authz': 122} | wardowl.authz.AuthorizationError: Cerbos CheckResources returned an unexpected response |
+| cerbos | empty | plain | 1 | 133 | 1.000 [1.000, 1.000] | 0.000 [0.000, 0.000] | 0 | 0 | 0 | 0.019 [0.019, 0.019] | 0.002 | {'ok': 102, 'authz': 137} | wardowl.authz.AuthorizationError: Cerbos PlanResources returned invalid JSON |
+| cerbos | garbage-json | plain | 1 | 132 | 1.000 [1.000, 1.000] | 0.000 [0.000, 0.000] | 0 | 0 | 0 | 0.024 [0.024, 0.024] | 0.002 | {'ok': 102, 'authz': 138} | wardowl.authz.AuthorizationError: Cerbos CheckResources returned an unexpected response; wardowl.authz.AuthorizationError: Cerbos PlanResources returned an unexpected response |
+| cerbos | http500 | breaker | 1 | 144 | 1.000 [1.000, 1.000] | 0.000 [0.000, 0.000] | 0 | 0 | 0 | 2.091 [2.091, 2.091] | 1.0e-04 | {'ok': 102, 'authz': 251} | wardowl.authz.AuthorizationError: Cerbos PlanResources returned HTTP 500; wardowl.authz.AuthorizationError: the permission service keeps failing; requests are paused (circuit open) |
+| cerbos | http500 | cache30 | 1 | 136 | 0.000 [0.000, 0.000] | 1.000 [1.000, 1.000] | 0 | 0 | 0 | 0.008 [0.008, 0.008] | n/a | {'ok': 259} |  |
+| cerbos | http500 | plain | 1 | 141 | 1.000 [1.000, 1.000] | 0.000 [0.000, 0.000] | 0 | 0 | 0 | 0.008 [0.008, 0.008] | 3.0e-04 | {'ok': 101, 'authz': 146} | wardowl.authz.AuthorizationError: Cerbos PlanResources returned HTTP 500 |
+| cerbos | http503 | plain | 1 | 40 | 1.000 [1.000, 1.000] | 0.000 [0.000, 0.000] | 0 | 0 | 0 | 0.067 [0.067, 0.067] | 0.051 | {'ok': 103, 'authz': 42} | wardowl.authz.AuthorizationError: Cerbos PlanResources failed: HTTP 503 |
+| cerbos | refuse | breaker | 1 | 118 | 0.000 [0.000, 0.000] | 1.000 [1.000, 1.000] | 0 | 0 | 0 | 0.020 [0.020, 0.020] | n/a | {'ok': 225} |  |
+| cerbos | refuse | cache30 | 1 | 137 | 0.000 [0.000, 0.000] | 1.000 [1.000, 1.000] | 0 | 0 | 0 | 0.007 [0.007, 0.007] | n/a | {'ok': 260} |  |
+| cerbos | refuse | plain | 1 | 117 | 0.000 [0.000, 0.000] | 1.000 [1.000, 1.000] | 0 | 0 | 0 | 0.030 [0.030, 0.030] | n/a | {'ok': 225} |  |
+| cerbos | slow-1000 | plain | 1 | 0 | n/a [n/a, n/a] | n/a [n/a, n/a] | 0 | 0 | 0 | 0.054 [0.054, 0.054] | n/a | {'ok': 103} |  |
+| cerbos | slow-200 | plain | 1 | 6 | 0.000 [0.000, 0.000] | 1.000 [1.000, 1.000] | 0 | 0 | 0 | 0.209 [0.209, 0.209] | n/a | {'ok': 110} |  |
+| cerbos | slow-3000 | breaker | 1 | 0 | n/a [n/a, n/a] | n/a [n/a, n/a] | 0 | 0 | 0 | 1.069 [1.069, 1.069] | n/a | {'ok': 103, 'authz': 2} | wardowl.authz.AuthorizationError: Cerbos PlanResources timed out after 2.0 s |
+| cerbos | slow-3000 | cache30 | 1 | 136 | 0.000 [0.000, 0.000] | 1.000 [1.000, 1.000] | 0 | 0 | 0 | 0.016 [0.016, 0.016] | n/a | {'ok': 259} |  |
+| cerbos | slow-3000 | plain | 1 | 0 | n/a [n/a, n/a] | n/a [n/a, n/a] | 0 | 0 | 0 | 1.069 [1.069, 1.069] | n/a | {'ok': 102, 'authz': 2} | wardowl.authz.AuthorizationError: Cerbos PlanResources timed out after 2.0 s |
+| cerbos | truncate | plain | 1 | 133 | 1.000 [1.000, 1.000] | 0.000 [0.000, 0.000] | 0 | 0 | 0 | 0.020 [0.020, 0.020] | 0.002 | {'ok': 102, 'authz': 137} | wardowl.authz.AuthorizationError: Cerbos PlanResources returned invalid JSON |
+| cerbos | type-flip | plain | 1 | 133 | 1.000 [1.000, 1.000] | 0.000 [0.000, 0.000] | 0 | 0 | 0 | 0.020 [0.020, 0.020] | 0.002 | {'ok': 103, 'authz': 137} | wardowl.authz.AuthorizationError: Cerbos PlanResources returned an unexpected response |
+| opa | allow-all | plain | 1 | 117 | 0.000 [0.000, 0.000] | 0.000 [0.000, 0.000] | 335 | 0 | 0 | 0.027 [0.027, 0.027] | n/a | {'ok': 103, 'leak': 122} |  |
+| opa | blackhole | breaker | 1 | 0 | n/a [n/a, n/a] | n/a [n/a, n/a] | 0 | 0 | 0 | 0.117 [0.117, 0.117] | n/a | {'ok': 94, 'authz': 1} | wardowl.authz.AuthorizationError: OPA x4rel/decisions timed out after 2.0 s |
+| opa | blackhole | cache30 | 1 | 137 | 0.000 [0.000, 0.000] | 1.000 [1.000, 1.000] | 0 | 0 | 0 | 0.004 [0.004, 0.004] | n/a | {'ok': 260} |  |
+| opa | blackhole | plain | 1 | 0 | n/a [n/a, n/a] | n/a [n/a, n/a] | 0 | 0 | 0 | 0.117 [0.117, 0.117] | n/a | {'ok': 94, 'authz': 1} | wardowl.authz.AuthorizationError: OPA x4rel/filter timed out after 2.0 s |
+| opa | down | breaker | 1 | 134 | 1.000 [1.000, 1.000] | 0.000 [0.000, 0.000] | 0 | 0 | 0 | 2.359 [2.359, 2.359] | 0.000 | {'ok': 97, 'authz': 251} | wardowl.authz.AuthorizationError: OPA x4rel/filter failed: ConnectionRefusedError; wardowl.authz.AuthorizationError: the permission service keeps failing; requests are paused (circuit open) |
+| opa | down | cache30 | 1 | 136 | 0.000 [0.000, 0.000] | 1.000 [1.000, 1.000] | 0 | 0 | 0 | 0.012 [0.012, 0.012] | n/a | {'ok': 258} |  |
+| opa | down | plain | 1 | 40 | 1.000 [1.000, 1.000] | 0.000 [0.000, 0.000] | 0 | 0 | 0 | 0.055 [0.055, 0.055] | 0.050 | {'ok': 96, 'authz': 43} | wardowl.authz.AuthorizationError: OPA x4rel/filter failed: ConnectionRefusedError |
+| opa | drop-last | plain | 1 | 108 | 1.000 [1.000, 1.000] | 0.000 [0.000, 0.000] | 0 | 0 | 0 | 0.031 [0.031, 0.031] | 0.006 | {'ok': 94, 'authz': 112} | wardowl.authz.AuthorizationError: OPA decision x4rel/decisions must be one boolean per resource |
+| opa | empty | plain | 1 | 128 | 1.000 [1.000, 1.000] | 0.000 [0.000, 0.000] | 0 | 0 | 0 | 0.015 [0.015, 0.015] | 0.002 | {'ok': 94, 'authz': 132} | wardowl.authz.AuthorizationError: OPA x4rel/filter returned invalid JSON |
+| opa | garbage-json | plain | 1 | 128 | 1.000 [1.000, 1.000] | 0.000 [0.000, 0.000] | 0 | 0 | 0 | 0.026 [0.026, 0.026] | 0.002 | {'ok': 94, 'authz': 133} | wardowl.authz.AuthorizationError: OPA decision x4rel/filter is undefined |
+| opa | http500 | breaker | 1 | 143 | 1.000 [1.000, 1.000] | 0.000 [0.000, 0.000] | 0 | 0 | 0 | 2.120 [2.120, 2.120] | 0.000 | {'ok': 94, 'authz': 251} | wardowl.authz.AuthorizationError: OPA x4rel/filter returned HTTP 500; wardowl.authz.AuthorizationError: the permission service keeps failing; requests are paused (circuit open) |
+| opa | http500 | cache30 | 1 | 136 | 0.000 [0.000, 0.000] | 1.000 [1.000, 1.000] | 0 | 0 | 0 | 0.003 [0.003, 0.003] | n/a | {'ok': 258} |  |
+| opa | http500 | plain | 1 | 141 | 1.000 [1.000, 1.000] | 0.000 [0.000, 0.000] | 0 | 0 | 0 | 0.012 [0.012, 0.012] | 3.0e-04 | {'ok': 94, 'authz': 145} | wardowl.authz.AuthorizationError: OPA x4rel/filter returned HTTP 500 |
+| opa | http503 | plain | 1 | 40 | 1.000 [1.000, 1.000] | 0.000 [0.000, 0.000] | 0 | 0 | 0 | 0.078 [0.078, 0.078] | 0.051 | {'ok': 94, 'authz': 42} | wardowl.authz.AuthorizationError: OPA x4rel/filter failed: HTTP 503 |
+| opa | refuse | breaker | 1 | 108 | 0.000 [0.000, 0.000] | 1.000 [1.000, 1.000] | 0 | 0 | 0 | 0.023 [0.023, 0.023] | n/a | {'ok': 206} |  |
+| opa | refuse | cache30 | 1 | 136 | 0.000 [0.000, 0.000] | 1.000 [1.000, 1.000] | 0 | 0 | 0 | 0.004 [0.004, 0.004] | n/a | {'ok': 257} |  |
+| opa | refuse | plain | 1 | 107 | 0.000 [0.000, 0.000] | 1.000 [1.000, 1.000] | 0 | 0 | 0 | 0.020 [0.020, 0.020] | n/a | {'ok': 204} |  |
+| opa | slow-1000 | plain | 1 | 0 | n/a [n/a, n/a] | n/a [n/a, n/a] | 0 | 0 | 0 | 0.066 [0.066, 0.066] | n/a | {'ok': 96} |  |
+| opa | slow-200 | plain | 1 | 6 | 0.000 [0.000, 0.000] | 1.000 [1.000, 1.000] | 0 | 0 | 0 | 0.015 [0.015, 0.015] | n/a | {'ok': 103} |  |
+| opa | slow-3000 | breaker | 1 | 0 | n/a [n/a, n/a] | n/a [n/a, n/a] | 0 | 0 | 0 | 1.081 [1.081, 1.081] | n/a | {'ok': 95, 'authz': 2} | wardowl.authz.AuthorizationError: OPA x4rel/filter timed out after 2.0 s |
+| opa | slow-3000 | cache30 | 1 | 137 | 0.000 [0.000, 0.000] | 1.000 [1.000, 1.000] | 0 | 0 | 0 | 0.018 [0.018, 0.018] | n/a | {'ok': 260} |  |
+| opa | slow-3000 | plain | 1 | 0 | n/a [n/a, n/a] | n/a [n/a, n/a] | 0 | 0 | 0 | 1.068 [1.068, 1.068] | n/a | {'ok': 94, 'authz': 2} | wardowl.authz.AuthorizationError: OPA x4rel/filter timed out after 2.0 s |
+| opa | truncate | plain | 1 | 129 | 1.000 [1.000, 1.000] | 0.000 [0.000, 0.000] | 0 | 0 | 0 | 0.026 [0.026, 0.026] | 0.002 | {'ok': 94, 'authz': 133} | wardowl.authz.AuthorizationError: OPA x4rel/filter returned invalid JSON |
+| opa | type-flip | plain | 1 | 108 | 1.000 [1.000, 1.000] | 0.000 [0.000, 0.000] | 0 | 0 | 0 | 0.028 [0.028, 0.028] | 0.006 | {'ok': 95, 'authz': 112} | wardowl.authz.AuthorizationError: OPA decision x4rel/decisions must be one boolean per resource |
+| openfga | allow-all | plain | 1 | 70 | 0.000 [0.000, 0.000] | 0.000 [0.000, 0.000] | 277 | 0 | 0 | 0.052 [0.052, 0.052] | n/a | {'ok': 39, 'leak': 74} |  |
+| openfga | blackhole | breaker | 1 | 0 | n/a [n/a, n/a] | n/a [n/a, n/a] | 0 | 0 | 0 | 0.137 [0.137, 0.137] | n/a | {'ok': 76, 'authz': 1} | wardowl.authz.AuthorizationError: OpenFGA list-objects timed out after 2.0 s |
+| openfga | blackhole | cache30 | 1 | 137 | 0.000 [0.000, 0.000] | 1.000 [1.000, 1.000] | 0 | 0 | 0 | 0.016 [0.016, 0.016] | n/a | {'ok': 258} |  |
+| openfga | blackhole | plain | 1 | 0 | n/a [n/a, n/a] | n/a [n/a, n/a] | 0 | 0 | 0 | 0.140 [0.140, 0.140] | n/a | {'ok': 76, 'authz': 1} | wardowl.authz.AuthorizationError: OpenFGA list-objects timed out after 2.0 s |
+| openfga | down | breaker | 1 | 133 | 1.000 [1.000, 1.000] | 0.000 [0.000, 0.000] | 0 | 0 | 0 | 2.455 [2.455, 2.455] | 1.0e-04 | {'ok': 74, 'authz': 250} | wardowl.authz.AuthorizationError: OpenFGA batch-check failed: ConnectionRefusedError; wardowl.authz.AuthorizationError: OpenFGA list-objects failed: ConnectionRefusedError; wardowl.authz.AuthorizationError: the permission service keeps failing; requests are paused (circuit open) |
+| openfga | down | cache30 | 1 | 137 | 0.000 [0.000, 0.000] | 1.000 [1.000, 1.000] | 0 | 0 | 0 | 0.018 [0.018, 0.018] | n/a | {'ok': 257} |  |
+| openfga | down | plain | 1 | 40 | 1.000 [1.000, 1.000] | 0.000 [0.000, 0.000] | 0 | 0 | 0 | 0.240 [0.240, 0.240] | 0.051 | {'ok': 73, 'authz': 44} | wardowl.authz.AuthorizationError: OpenFGA batch-check failed: ConnectionRefusedError; wardowl.authz.AuthorizationError: OpenFGA list-objects failed: ConnectionRefusedError; wardowl.authz.AuthorizationError: OpenFGA list-objects failed: ConnectionResetError |
+| openfga | drop-last | plain | 1 | 85 | 1.000 [1.000, 1.000] | 0.000 [0.000, 0.000] | 0 | 0 | 0 | 0.040 [0.040, 0.040] | 0.014 | {'ok': 75, 'authz': 89} | wardowl.authz.AuthorizationError: OpenFGA could not decide access to 'fop0d47': None; wardowl.authz.AuthorizationError: OpenFGA could not decide access to 'fop0d53': None; wardowl.authz.AuthorizationError: OpenFGA could not decide access to 'fop0d67': None; wardowl.authz.AuthorizationError: OpenFGA could not decide access to 'fop0d88': None; wardowl.authz.AuthorizationError: OpenFGA could not deci |
+| openfga | empty | plain | 1 | 118 | 1.000 [1.000, 1.000] | 0.000 [0.000, 0.000] | 0 | 0 | 0 | 0.017 [0.017, 0.017] | 0.004 | {'ok': 71, 'authz': 122} | wardowl.authz.AuthorizationError: OpenFGA list-objects returned invalid JSON |
+| openfga | garbage-json | plain | 1 | 118 | 1.000 [1.000, 1.000] | 0.000 [0.000, 0.000] | 0 | 0 | 0 | 0.015 [0.015, 0.015] | 0.004 | {'ok': 74, 'authz': 122} | wardowl.authz.AuthorizationError: OpenFGA batch-check returned no result; wardowl.authz.AuthorizationError: OpenFGA list-objects returned an unexpected response |
+| openfga | http500 | breaker | 1 | 143 | 1.000 [1.000, 1.000] | 0.000 [0.000, 0.000] | 0 | 0 | 0 | 2.132 [2.132, 2.132] | 1.0e-04 | {'ok': 75, 'authz': 250} | wardowl.authz.AuthorizationError: OpenFGA list-objects returned HTTP 500; wardowl.authz.AuthorizationError: the permission service keeps failing; requests are paused (circuit open) |
+| openfga | http500 | cache30 | 1 | 136 | 0.000 [0.000, 0.000] | 1.000 [1.000, 1.000] | 0 | 0 | 0 | 0.020 [0.020, 0.020] | n/a | {'ok': 256} |  |
+| openfga | http500 | plain | 1 | 141 | 1.000 [1.000, 1.000] | 0.000 [0.000, 0.000] | 0 | 0 | 0 | 0.036 [0.036, 0.036] | 4.0e-04 | {'ok': 74, 'authz': 146} | wardowl.authz.AuthorizationError: OpenFGA batch-check returned HTTP 500; wardowl.authz.AuthorizationError: OpenFGA list-objects returned HTTP 500 |
+| openfga | http503 | plain | 1 | 40 | 1.000 [1.000, 1.000] | 0.000 [0.000, 0.000] | 0 | 0 | 0 | 0.025 [0.025, 0.025] | 0.051 | {'ok': 72, 'authz': 42} | wardowl.authz.AuthorizationError: OpenFGA batch-check failed: HTTP 503; wardowl.authz.AuthorizationError: OpenFGA list-objects failed: HTTP 503 |
+| openfga | refuse | breaker | 1 | 85 | 0.000 [0.000, 0.000] | 1.000 [1.000, 1.000] | 0 | 0 | 0 | 0.041 [0.041, 0.041] | n/a | {'ok': 165} |  |
+| openfga | refuse | cache30 | 1 | 137 | 0.000 [0.000, 0.000] | 1.000 [1.000, 1.000] | 0 | 0 | 0 | 0.002 [0.002, 0.002] | n/a | {'ok': 258} |  |
+| openfga | refuse | plain | 1 | 86 | 0.000 [0.000, 0.000] | 1.000 [1.000, 1.000] | 0 | 0 | 0 | 0.044 [0.044, 0.044] | n/a | {'ok': 165} |  |
+| openfga | slow-1000 | plain | 1 | 0 | n/a [n/a, n/a] | n/a [n/a, n/a] | 0 | 0 | 0 | 0.113 [0.113, 0.113] | n/a | {'ok': 77} |  |
+| openfga | slow-200 | plain | 1 | 5 | 0.000 [0.000, 0.000] | 1.000 [1.000, 1.000] | 0 | 0 | 0 | 0.063 [0.063, 0.063] | n/a | {'ok': 83} |  |
+| openfga | slow-3000 | breaker | 1 | 0 | n/a [n/a, n/a] | n/a [n/a, n/a] | 0 | 0 | 0 | 1.064 [1.064, 1.064] | n/a | {'ok': 71, 'authz': 2} | wardowl.authz.AuthorizationError: OpenFGA batch-check timed out after 2.0 s; wardowl.authz.AuthorizationError: OpenFGA list-objects timed out after 2.0 s |
+| openfga | slow-3000 | cache30 | 1 | 136 | 0.000 [0.000, 0.000] | 1.000 [1.000, 1.000] | 0 | 0 | 0 | 0.025 [0.025, 0.025] | n/a | {'ok': 259} |  |
+| openfga | slow-3000 | plain | 1 | 0 | n/a [n/a, n/a] | n/a [n/a, n/a] | 0 | 0 | 0 | 1.076 [1.076, 1.076] | n/a | {'ok': 76, 'authz': 2} | wardowl.authz.AuthorizationError: OpenFGA list-objects timed out after 2.0 s |
+| openfga | truncate | plain | 1 | 118 | 1.000 [1.000, 1.000] | 0.000 [0.000, 0.000] | 0 | 0 | 0 | 0.037 [0.037, 0.037] | 0.004 | {'ok': 74, 'authz': 123} | wardowl.authz.AuthorizationError: OpenFGA batch-check returned invalid JSON; wardowl.authz.AuthorizationError: OpenFGA list-objects returned invalid JSON |
+| openfga | type-flip | plain | 1 | 85 | 1.000 [1.000, 1.000] | 0.000 [0.000, 0.000] | 0 | 0 | 0 | 0.033 [0.033, 0.033] | 0.013 | {'ok': 76, 'authz': 89} | wardowl.authz.AuthorizationError: OpenFGA could not decide access to 'fop0d100': {'allowed': 'true'}; wardowl.authz.AuthorizationError: OpenFGA could not decide access to 'fop0d103': {'allowed': 'true'}; wardowl.authz.AuthorizationError: OpenFGA could not decide access to 'fop0d105': {'allowed': 'true'}; wardowl.authz.AuthorizationError: OpenFGA could not decide access to 'fop0d17': {'allowed': 't |
+| pgvector | blackhole | plain | 1 | 0 | n/a [n/a, n/a] | n/a [n/a, n/a] | 0 | 1 | 0 | 0.026 [0.026, 0.026] | n/a | {'ok': 119, 'error': 1} | psycopg.OperationalError: consuming input failed: server closed the connection unexpectedly 	This probably means the ser |
+| pgvector | down | plain | 1 | 0 | n/a [n/a, n/a] | n/a [n/a, n/a] | 0 | 0 | 0 | 0.322 [0.322, 0.322] | n/a | {'ok': 122} |  |
+| pgvector | refuse | plain | 1 | 0 | n/a [n/a, n/a] | n/a [n/a, n/a] | 0 | 0 | 0 | 0.227 [0.227, 0.227] | n/a | {'ok': 120} |  |
+| pgvector | slow-1000 | plain | 1 | 0 | n/a [n/a, n/a] | n/a [n/a, n/a] | 0 | 0 | 0 | 1.045 [1.045, 1.045] | n/a | {'ok': 73} |  |
+| pgvector | slow-200 | plain | 1 | 2 | 0.000 [0.000, 0.000] | 1.000 [1.000, 1.000] | 0 | 0 | 0 | 0.107 [0.107, 0.107] | n/a | {'ok': 123} |  |
+| qdrant | blackhole | plain | 1 | 0 | n/a [n/a, n/a] | n/a [n/a, n/a] | 0 | 1 | 0 | 0.040 [0.040, 0.040] | n/a | {'ok': 110, 'error': 1} | qdrant_client.http.exceptions.ResponseHandlingException: [Errno 104] Connection reset by peer |
+| qdrant | down | plain | 1 | 138 | 1.000 [1.000, 1.000] | 0.000 [0.000, 0.000] | 0 | 149 | 0 | 0.168 [0.168, 0.168] | 8.0e-04 | {'ok': 114, 'error': 149} | qdrant_client.http.exceptions.ResponseHandlingException: Server disconnected without sending a response.; qdrant_client.http.exceptions.ResponseHandlingException: [Errno 104] Connection reset by peer; qdrant_client.http.exceptions.ResponseHandlingException: [Errno 111] Connection refused |
+| qdrant | http500 | plain | 1 | 136 | 1.000 [1.000, 1.000] | 0.000 [0.000, 0.000] | 0 | 140 | 0 | 0.015 [0.015, 0.015] | 0.001 | {'ok': 111, 'error': 140} | qdrant_client.http.exceptions.UnexpectedResponse: Unexpected Response: 500 (Injected) Raw response content: b'{"error":" |
+| qdrant | http503 | plain | 1 | 136 | 1.000 [1.000, 1.000] | 0.000 [0.000, 0.000] | 0 | 140 | 0 | 0.006 [0.006, 0.006] | 0.001 | {'ok': 111, 'error': 140} | qdrant_client.http.exceptions.UnexpectedResponse: Unexpected Response: 503 (Injected) Raw response content: b'{"error":" |
+| qdrant | refuse | plain | 1 | 140 | 1.000 [1.000, 1.000] | 0.000 [0.000, 0.000] | 0 | 145 | 0 | 0.023 [0.023, 0.023] | 6.0e-04 | {'ok': 112, 'error': 145} | qdrant_client.http.exceptions.ResponseHandlingException: [Errno 111] Connection refused |
+| qdrant | slow-1000 | plain | 1 | 1 | 0.000 [0.000, 0.000] | 1.000 [1.000, 1.000] | 0 | 0 | 0 | 0.090 [0.090, 0.090] | n/a | {'ok': 114} |  |
+| qdrant | slow-200 | plain | 1 | 12 | 0.000 [0.000, 0.000] | 1.000 [1.000, 1.000] | 0 | 0 | 0 | 0.148 [0.148, 0.148] | n/a | {'ok': 125} |  |
+| qdrant | truncate | plain | 1 | 127 | 1.000 [1.000, 1.000] | 0.000 [0.000, 0.000] | 0 | 131 | 0 | 0.021 [0.021, 0.021] | 0.003 | {'ok': 111, 'error': 131} | json.decoder.JSONDecodeError: Expecting ',' delimiter: line 1 column 322 (char 321); json.decoder.JSONDecodeError: Unterminated string starting at: line 1 column 269 (char 268); json.decoder.JSONDecodeError: Unterminated string starting at: line 1 column 280 (char 279); json.decoder.JSONDecodeError: Unterminated string starting at: line 1 column 282 (char 281); json.decoder.JSONDecodeError: Unterm |
+| spicedb | allow-all | plain | 1 | 115 | 0.000 [0.000, 0.000] | 0.000 [0.000, 0.000] | 328 | 0 | 0 | 0.024 [0.024, 0.024] | n/a | {'ok': 100, 'leak': 119} |  |
+| spicedb | blackhole | breaker | 1 | 0 | n/a [n/a, n/a] | n/a [n/a, n/a] | 0 | 0 | 0 | 0.143 [0.143, 0.143] | n/a | {'ok': 90, 'authz': 1} | wardowl.authz.AuthorizationError: SpiceDB LookupResources timed out after 2.0 s |
+| spicedb | blackhole | cache30 | 1 | 135 | 0.000 [0.000, 0.000] | 1.000 [1.000, 1.000] | 0 | 0 | 0 | 0.009 [0.009, 0.009] | n/a | {'ok': 255} |  |
+| spicedb | blackhole | plain | 1 | 0 | n/a [n/a, n/a] | n/a [n/a, n/a] | 0 | 0 | 0 | 0.152 [0.152, 0.152] | n/a | {'ok': 90, 'authz': 1} | wardowl.authz.AuthorizationError: SpiceDB LookupResources timed out after 2.0 s |
+| spicedb | down | breaker | 1 | 132 | 1.000 [1.000, 1.000] | 0.000 [0.000, 0.000] | 0 | 0 | 0 | 2.416 [2.416, 2.416] | 1.0e-04 | {'ok': 90, 'authz': 250} | wardowl.authz.AuthorizationError: SpiceDB LookupResources failed: ConnectionRefusedError; wardowl.authz.AuthorizationError: the permission service keeps failing; requests are paused (circuit open) |
+| spicedb | down | cache30 | 1 | 137 | 0.000 [0.000, 0.000] | 1.000 [1.000, 1.000] | 0 | 0 | 0 | 0.016 [0.016, 0.016] | n/a | {'ok': 255} |  |
+| spicedb | down | plain | 1 | 42 | 0.952 [0.952, 0.952] | 0.048 [0.048, 0.048] | 0 | 0 | 0 | 0.819 [0.819, 0.819] | 0.051 | {'ok': 97, 'authz': 51} | wardowl.authz.AuthorizationError: SpiceDB LookupResources failed: ConnectionRefusedError; wardowl.authz.AuthorizationError: SpiceDB LookupResources failed: ConnectionResetError |
+| spicedb | drop-last | plain | 1 | 103 | 1.000 [1.000, 1.000] | 0.000 [0.000, 0.000] | 0 | 0 | 0 | 0.014 [0.014, 0.014] | 0.007 | {'ok': 88, 'authz': 107} | wardowl.authz.AuthorizationError: SpiceDB returned None for 'fsp0d22': no answer, or a caveat that needs context; wardowl.authz.AuthorizationError: SpiceDB returned None for 'fsp0d59': no answer, or a caveat that needs context; wardowl.authz.AuthorizationError: SpiceDB returned None for 'fsp0d67': no answer, or a caveat that needs context; wardowl.authz.AuthorizationError: SpiceDB returned None fo |
+| spicedb | empty | plain | 1 | 122 | 0.000 [0.000, 0.000] | 1.000 [1.000, 1.000] | 0 | 0 | 0 | 0.025 [0.025, 0.025] | n/a | {'ok': 89, 'deviate': 126} |  |
+| spicedb | garbage-json | plain | 1 | 122 | 1.000 [1.000, 1.000] | 0.000 [0.000, 0.000] | 0 | 0 | 0 | 0.019 [0.019, 0.019] | 0.003 | {'ok': 89, 'authz': 126} | wardowl.authz.AuthorizationError: SpiceDB LookupResources failed: {'unexpected': True} |
+| spicedb | http500 | breaker | 1 | 143 | 1.000 [1.000, 1.000] | 0.000 [0.000, 0.000] | 0 | 0 | 0 | 2.136 [2.136, 2.136] | 1.0e-04 | {'ok': 87, 'authz': 251} | wardowl.authz.AuthorizationError: SpiceDB LookupResources returned HTTP 500; wardowl.authz.AuthorizationError: the permission service keeps failing; requests are paused (circuit open) |
+| spicedb | http500 | cache30 | 1 | 136 | 0.000 [0.000, 0.000] | 1.000 [1.000, 1.000] | 0 | 0 | 0 | 0.003 [0.003, 0.003] | n/a | {'ok': 257} |  |
+| spicedb | http500 | plain | 1 | 141 | 1.000 [1.000, 1.000] | 0.000 [0.000, 0.000] | 0 | 0 | 0 | 0.022 [0.022, 0.022] | 4.0e-04 | {'ok': 90, 'authz': 145} | wardowl.authz.AuthorizationError: SpiceDB LookupResources returned HTTP 500 |
+| spicedb | http503 | plain | 1 | 40 | 1.000 [1.000, 1.000] | 0.000 [0.000, 0.000] | 0 | 0 | 0 | 0.109 [0.109, 0.109] | 0.051 | {'ok': 91, 'authz': 42} | wardowl.authz.AuthorizationError: SpiceDB LookupResources failed: HTTP 503 |
+| spicedb | refuse | breaker | 1 | 105 | 0.000 [0.000, 0.000] | 1.000 [1.000, 1.000] | 0 | 0 | 0 | 0.036 [0.036, 0.036] | n/a | {'ok': 199} |  |
+| spicedb | refuse | cache30 | 1 | 137 | 0.000 [0.000, 0.000] | 1.000 [1.000, 1.000] | 0 | 0 | 0 | 0.011 [0.011, 0.011] | n/a | {'ok': 260} |  |
+| spicedb | refuse | plain | 1 | 103 | 0.000 [0.000, 0.000] | 1.000 [1.000, 1.000] | 0 | 0 | 0 | 0.032 [0.032, 0.032] | n/a | {'ok': 195} |  |
+| spicedb | slow-1000 | plain | 1 | 0 | n/a [n/a, n/a] | n/a [n/a, n/a] | 0 | 0 | 0 | 0.098 [0.098, 0.098] | n/a | {'ok': 92} |  |
+| spicedb | slow-200 | plain | 1 | 5 | 0.000 [0.000, 0.000] | 1.000 [1.000, 1.000] | 0 | 0 | 0 | 0.064 [0.064, 0.064] | n/a | {'ok': 98} |  |
+| spicedb | slow-3000 | breaker | 1 | 0 | n/a [n/a, n/a] | n/a [n/a, n/a] | 0 | 0 | 0 | 1.074 [1.074, 1.074] | n/a | {'ok': 90, 'authz': 2} | wardowl.authz.AuthorizationError: SpiceDB LookupResources timed out after 2.0 s |
+| spicedb | slow-3000 | cache30 | 1 | 138 | 0.000 [0.000, 0.000] | 1.000 [1.000, 1.000] | 0 | 0 | 0 | 0.010 [0.010, 0.010] | n/a | {'ok': 258} |  |
+| spicedb | slow-3000 | plain | 1 | 0 | n/a [n/a, n/a] | n/a [n/a, n/a] | 0 | 0 | 0 | 1.076 [1.076, 1.076] | n/a | {'ok': 90, 'authz': 2} | wardowl.authz.AuthorizationError: SpiceDB LookupResources timed out after 2.0 s |
+| spicedb | truncate | plain | 1 | 122 | 1.000 [1.000, 1.000] | 0.000 [0.000, 0.000] | 0 | 0 | 0 | 0.015 [0.015, 0.015] | 0.003 | {'ok': 88, 'authz': 126} | wardowl.authz.AuthorizationError: SpiceDB LookupResources returned invalid JSON |
+| spicedb | type-flip | plain | 1 | 117 | 1.000 [1.000, 1.000] | 0.000 [0.000, 0.000] | 0 | 0 | 0 | 0.019 [0.019, 0.019] | 0.004 | {'ok': 89, 'authz': 121} | wardowl.authz.AuthorizationError: SpiceDB LookupResources returned 'X_UNKNOWN_VALUE' |
+
+## Harness
+
+Runs: 9 job records; profile ['smoke']; commit ['62a587a'].

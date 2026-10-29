@@ -1,0 +1,8 @@
+[2026-10-29T16:59:06.025+00:00] x4 openfga part a: start
+[2026-10-29T16:59:10.537+00:00] x4a openfga seed 0: {'subjects': 12, 'with_filter': 12, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T16:59:14.385+00:00] x4a openfga-ctx seed 0: {'subjects': 12, 'with_filter': 12, 'fa': 0, 'fd': 0, 'co': 0, 'errors': 0}
+[2026-10-29T16:59:14.387+00:00] x4 openfga part a: 8 s
+[2026-10-29T16:59:14.387+00:00] x4 openfga part b: start
+[2026-10-29T16:59:19.122+00:00] x4 openfga part b: 5 s
+::notice title=x4 x4-openfga%3A no harness errors::every call the harness made returned
+::notice title=x4 x4-openfga records::55 records, 0 failed setups or parts, in results/x4-x4-openfga.jsonl

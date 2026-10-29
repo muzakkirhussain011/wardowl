@@ -1,0 +1,5 @@
+[2026-10-29T16:58:49.063+00:00] x4 openfga part c: start
+[2026-10-29T16:58:58.229+00:00] x4c openfga seed 0 done
+[2026-10-29T16:58:58.231+00:00] x4 openfga part c: 9 s
+::notice title=x4 x4-openfga-scale%3A no harness errors::every call the harness made returned
+::notice title=x4 x4-openfga-scale records::141 records, 0 failed setups or parts, in results/x4-x4-openfga-scale.jsonl

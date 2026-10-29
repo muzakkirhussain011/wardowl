@@ -1,0 +1,8 @@
+[2026-10-29T16:58:50.088+00:00] x7a openfga: start
+[2026-10-29T16:59:27.083+00:00] x7a openfga seed 0: 37 s
+[2026-10-29T16:59:27.088+00:00] x7a openfga-cached-hc: start
+[2026-10-29T17:00:03.952+00:00] x7a openfga-cached-hc seed 0: 37 s
+[2026-10-29T17:00:03.956+00:00] x7a openfga-cached-ml: start
+[2026-10-29T17:00:40.685+00:00] x7a openfga-cached-ml seed 0: 37 s
+::notice title=x7 x7a-openfga%3A no harness errors::every call the harness made returned
+::notice title=x7 x7a-openfga records::21 records, 0 failed paths or targets, in results/x7-x7a-openfga.jsonl

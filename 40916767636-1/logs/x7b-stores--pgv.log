@@ -1,0 +1,60 @@
+selecting default time zone ... Etc/UTC
+creating configuration files ... ok
+running bootstrap script ... ok
+performing post-bootstrap initialization ... ok
+syncing data to disk ... ok
+
+
+Success. You can now start the database server using:
+
+    pg_ctl -D /var/lib/postgresql/data -l logfile start
+
+initdb: warning: enabling "trust" authentication for local connections
+initdb: hint: You can change this by editing pg_hba.conf or using the option -A, or --auth-local and --auth-host, the next time you run initdb.
+waiting for server to start....2026-10-29 16:59:16.074 UTC [48] LOG:  starting PostgreSQL 17.11 (Debian 17.11-1.pgdg12+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit
+2026-10-29 16:59:16.075 UTC [48] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+2026-10-29 16:59:16.077 UTC [51] LOG:  database system was shut down at 2026-10-29 16:59:15 UTC
+2026-10-29 16:59:16.081 UTC [48] LOG:  database system is ready to accept connections
+ done
+server started
+CREATE DATABASE
+
+
+/usr/local/bin/docker-entrypoint.sh: ignoring /docker-entrypoint-initdb.d/*
+
+waiting for server to shut down...2026-10-29 16:59:16.237 UTC [48] LOG:  received fast shutdown request
+.2026-10-29 16:59:16.238 UTC [48] LOG:  aborting any active transactions
+2026-10-29 16:59:16.240 UTC [48] LOG:  background worker "logical replication launcher" (PID 54) exited with exit code 1
+2026-10-29 16:59:16.240 UTC [49] LOG:  shutting down
+2026-10-29 16:59:16.240 UTC [49] LOG:  checkpoint starting: shutdown immediate
+2026-10-29 16:59:16.307 UTC [49] LOG:  checkpoint complete: wrote 921 buffers (5.6%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.065 s, sync=0.002 s, total=0.068 s; sync files=301, longest=0.001 s, average=0.001 s; distance=4238 kB, estimate=4238 kB; lsn=0/190A9B8, redo lsn=0/190A9B8
+2026-10-29 16:59:16.314 UTC [48] LOG:  database system is shut down
+ done
+server stopped
+
+PostgreSQL init process complete; ready for start up.
+
+2026-10-29 16:59:16.355 UTC [1] LOG:  starting PostgreSQL 17.11 (Debian 17.11-1.pgdg12+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit
+2026-10-29 16:59:16.355 UTC [1] LOG:  listening on IPv4 address "0.0.0.0", port 5432
+2026-10-29 16:59:16.355 UTC [1] LOG:  listening on IPv6 address "::", port 5432
+2026-10-29 16:59:16.356 UTC [1] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+2026-10-29 16:59:16.358 UTC [64] LOG:  database system was shut down at 2026-10-29 16:59:16 UTC
+2026-10-29 16:59:16.362 UTC [1] LOG:  database system is ready to accept connections
+2026-10-29 16:59:46.375 UTC [75] FATAL:  terminating connection due to unexpected postmaster exit
+2026-10-29 16:59:46.375 UTC [76] FATAL:  terminating connection due to unexpected postmaster exit
+2026-10-29 16:59:46.375 UTC [80] FATAL:  terminating connection due to unexpected postmaster exit
+
+PostgreSQL Database directory appears to contain a database; Skipping initialization
+
+2026-10-29 16:59:49.507 UTC [1] LOG:  starting PostgreSQL 17.11 (Debian 17.11-1.pgdg12+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit
+2026-10-29 16:59:49.507 UTC [1] LOG:  listening on IPv4 address "0.0.0.0", port 5432
+2026-10-29 16:59:49.507 UTC [1] LOG:  listening on IPv6 address "::", port 5432
+2026-10-29 16:59:49.509 UTC [1] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+2026-10-29 16:59:49.511 UTC [30] LOG:  database system was interrupted; last known up at 2026-10-29 16:59:16 UTC
+2026-10-29 16:59:49.524 UTC [30] LOG:  database system was not properly shut down; automatic recovery in progress
+2026-10-29 16:59:49.525 UTC [30] LOG:  redo starts at 0/190AA30
+2026-10-29 16:59:49.529 UTC [30] LOG:  invalid record length at 0/1A49608: expected at least 24, got 0
+2026-10-29 16:59:49.529 UTC [30] LOG:  redo done at 0/1A495B8 system usage: CPU: user: 0.00 s, system: 0.00 s, elapsed: 0.00 s
+2026-10-29 16:59:49.530 UTC [28] LOG:  checkpoint starting: end-of-recovery immediate wait
+2026-10-29 16:59:49.534 UTC [28] LOG:  checkpoint complete: wrote 195 buffers (1.2%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.003 s, sync=0.001 s, total=0.005 s; sync files=92, longest=0.001 s, average=0.001 s; distance=1275 kB, estimate=1275 kB; lsn=0/1A49608, redo lsn=0/1A49608
+2026-10-29 16:59:49.537 UTC [1] LOG:  database system is ready to accept connections
