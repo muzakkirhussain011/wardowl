@@ -92,6 +92,46 @@ deeper for higher recall, `SearchParams(exact=True)` searches by brute force. Pa
 `async_client=AsyncQdrantClient(...)` for a native `aretrieve`; without it, async calls run the sync
 search in a thread.
 
+## Filters on common values
+
+Qdrant plans each filtered search per segment, from an estimate of how many points the filter
+admits. When it admits few, Qdrant searches them exactly, through the payload index. When it admits
+many, Qdrant walks the HNSW graph and skips every neighbour that fails the filter: it is neither
+scored nor followed. To keep the permitted points connected, Qdrant adds extra graph edges for the
+values of payload fields indexed when the graph is built, per field, never per combination of
+fields, and only for values within a size window: a value shared by too large a share of the
+points gets no extra edges
+([Indexing](https://qdrant.tech/documentation/concepts/indexing/),
+[Search](https://qdrant.tech/documentation/search/search/),
+[Filtered vector search with ACORN](https://qdrant.tech/articles/filtered-vector-search-acorn/)).
+
+Permission filters often hit exactly that case. A tenant that holds most of the collection, or a
+shared corpus tagged with every tenant or readable by everyone, makes the filter's values common,
+so they get no extra edges and Qdrant searches the graph. If the points a user may read are few
+near the question and cut off from each other in the graph, the search can miss them and return
+other permitted chunks instead. In wardowl's acceptance run on Kaggle, where a shared knowledge base
+carried every tenant's value, this is the likely reason Qdrant found only 0.56 of the true top 10,
+searching with `hnsw_ef=128` and without ACORN. Misses that come back as k other chunks are
+invisible to `complete`; a search that returns fewer than k says `complete=False`
+([Concepts](../concepts.md#what-a-result-tells-you)).
+
+What helps:
+
+- **ACORN** (Qdrant 1.16 and later) explores the neighbours of filtered-out neighbours, per query,
+  with no change to the index, at a cost in latency
+  ([Qdrant 1.16](https://qdrant.tech/blog/qdrant-1.16.x/)). It is used only when the planner
+  estimates that the filter admits at most `max_selectivity` of the points (0.4 by default; 1.0
+  means always), so set it higher for permission filters that admit a large share:
+  `SearchParams(hnsw_ef=128, acorn=models.AcornSearchParams(enable=True, max_selectivity=1.0))`.
+- **Per-tenant graphs.** A keyword index on the tenant field with `is_tenant=True`, and the
+  collection's `hnsw_config` set to `m=0` with `payload_m=16`, builds a graph per tenant and no
+  global one ([Multitenancy](https://qdrant.tech/documentation/manage-data/multitenancy/)). Keep a
+  corpus that every tenant shares in a collection of its own rather than tagging it with every
+  tenant.
+- **Exact search**, `SearchParams(exact=True)`, ranks every point the filter admits, at the cost of
+  scoring every one of them. `QdrantBackend` does not declare `exact_search` yet, even then, so a
+  result shorter than k still says `complete=False`.
+
 ## Keyword search and hybrid search
 
 `mode="keyword"` ranks the chunks by BM25, under the same `query_filter`, with no model to run.

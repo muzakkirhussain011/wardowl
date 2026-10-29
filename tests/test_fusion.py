@@ -81,6 +81,22 @@ def test_a_chunk_with_different_metadata_in_two_backends_is_left_out(caplog):
     assert [h.id for h in RankFusion(Fixed(_hit("a"), _hit("a"))).search("q", 5)] == ["a"]
 
 
+def test_fusion_never_declares_exact_search_even_over_exact_backends():
+    # Each backend fills its list of 3, the chunk whose metadata differs between them is left out,
+    # and 2 remain though d3 to d5 match too. Declaring exact search would make this short result
+    # complete; the retriever must report it as possibly incomplete.
+    docs = [Document(f"d{i}", "leave policy", {"allowed_groups": ["*"]}) for i in range(6)]
+    drifted = [Document("d0", "leave policy", {"allowed_groups": ["*"], "team": "eng"}), *docs[1:]]
+    fused = RankFusion(InMemoryBackend(docs), InMemoryBackend(drifted))
+    assert getattr(fused, "exact_search", False) is False
+    result = PermissionedRetriever(fused, MetadataACLAuthorizer()).retrieve("leave", Subject("bob"), k=3)
+    assert [h.id for h in result.hits] == ["d1", "d2"] and result.complete is False
+    # A depth below k cuts every list short in the same way.
+    shallow = RankFusion(InMemoryBackend(docs), InMemoryBackend(docs), depth=2)
+    result = PermissionedRetriever(shallow, MetadataACLAuthorizer()).retrieve("leave", Subject("bob"), k=3)
+    assert len(result.hits) == 2 and result.complete is False
+
+
 def test_filters_are_supported_only_when_every_backend_supports_them():
     class NoFilters(Fixed):
         supports_filters = False

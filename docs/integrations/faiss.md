@@ -42,6 +42,12 @@ index = faiss.IndexIDMap2(faiss.IndexHNSWFlat(768, 32, faiss.METRIC_INNER_PRODUC
 backend = FaissBackend(embed, dim=768, index=index)
 ```
 
+`backend.exact_search` is True for a flat index (`IndexFlat`, `IndexFlatIP`, `IndexFlatL2`), or an
+`IndexIDMap` or `IndexIDMap2` around one, the default included. A pre-filtered result with fewer
+than k hits then means the user may read no other matching chunk, and it says `complete=True`.
+For any other index, HNSW and IVF included, it is False: a short result may be an index that
+stopped early, and says `complete=False` ([Concepts](../concepts.md#what-a-result-tells-you)).
+
 ## Changes
 
 `add` replaces chunks with the same id, and keeps only the last of an id repeated in one call, as

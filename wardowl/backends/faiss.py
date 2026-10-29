@@ -10,8 +10,9 @@ single process; for many millions of chunks, use a vector database.
 The default index is exact (`IndexFlatIP` over normalized vectors, so scores are cosine
 similarities). Pass `index` for another FAISS index that supports `add_with_ids`, `remove_ids` and
 search parameters with an ID selector (an `IndexIDMap2` around HNSW, say); it must already be
-trained. `save(path)` writes the index and the chunks to a directory, and `FaissBackend.load` reads
-them back.
+trained. `exact_search` is True only for a flat index, or an ID map around one, so the retriever
+reports a short result from any other index as possibly incomplete. `save(path)` writes the index
+and the chunks to a directory, and `FaissBackend.load` reads them back.
 """
 
 from __future__ import annotations
@@ -45,6 +46,16 @@ def _copy(metadata: Mapping[str, Any]) -> dict[str, Any]:
     return copy.deepcopy(dict(metadata))
 
 
+def _flat(faiss: Any, index: Any) -> bool:
+    """True when `index` scores every vector it holds: a flat index, or ID maps around one."""
+    try:
+        while isinstance(index, (faiss.IndexIDMap, faiss.IndexIDMap2)):
+            index = faiss.downcast_index(index.index)  # the wrapped index, as its own class
+        return isinstance(index, faiss.IndexFlat)
+    except Exception:  # an index that cannot be inspected is not proven exact
+        return False
+
+
 class FaissBackend:
     """Chunks in a FAISS index, searched with the permission filter as an ID selector.
 
@@ -67,6 +78,13 @@ class FaissBackend:
         self._ids: dict[str, int] = {}
         self._next = 0
         self._lock = threading.RLock()
+
+    @property
+    def exact_search(self) -> bool:
+        """True when the index is flat, or an `IndexIDMap` or `IndexIDMap2` around a flat index, as
+        the default is: every chunk the filter admits is scored, so fewer than k hits means nothing
+        else matches. False for any other index (HNSW, IVF and the rest), which is not proven exact."""
+        return _flat(self._faiss, self.index)
 
     def _matrix(self, vectors: Sequence[Sequence[float]]) -> Any:
         x = self._np.asarray(vectors, dtype="float32").reshape(len(vectors), -1)

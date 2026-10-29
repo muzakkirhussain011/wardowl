@@ -1,7 +1,10 @@
 """PostgreSQL + pgvector backend: vector search with the permission filter inside the query.
 
 Install with `pip install "wardowl[pgvector]"`. Needs PostgreSQL with pgvector 0.8 or newer for
-iterative index scans, which keep an HNSW scan going until enough rows pass a selective filter.
+iterative index scans, which keep an HNSW scan going until enough rows pass a selective filter or
+a scan limit is reached (`hnsw.max_scan_tuples`, or `work_mem` x `hnsw.scan_mem_multiplier` of
+memory). The backend does not declare `exact_search`, since it cannot see whether the table has an
+HNSW index, so the retriever reports a short result as possibly incomplete.
 
 Chunks live in one table: `id text`, `content text`, `metadata jsonb`, `embedding vector(n)`.
 Permission metadata is matched with JSON containment, which a GIN (`jsonb_path_ops`) index serves,

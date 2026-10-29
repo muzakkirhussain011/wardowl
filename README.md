@@ -157,7 +157,8 @@ Setup for each, with code:
 
 **PostgreSQL + pgvector** (`pip install "wardowl[pgvector]"`, pgvector 0.8+). The permission
 filter runs inside the SQL query as JSON containment tests, served by a GIN index, and iterative
-index scans keep HNSW returning k rows under selective filters.
+index scans keep HNSW returning rows under selective filters, up to pgvector's scan limits; a
+result they cut short says `complete=False`.
 
 ```python
 from psycopg_pool import ConnectionPool

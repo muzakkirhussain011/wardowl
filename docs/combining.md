@@ -63,7 +63,11 @@ filter the store receives the same filter it would when pre-filtering
 That matters at scale. If a tenant holds 1% of the index, post-filtering across the whole index
 examines about a hundred chunks of other tenants for every one of its own and, within
 `max_candidates`, finds little or nothing; post-filtering inside the tenant examines only its
-chunks. Results are exactly right either way, because every candidate is still checked.
+chunks. Results are exactly right either way, because every candidate is still checked. When the
+candidates inside the scope run out before k readable chunks are found, the result is complete only
+on a backend that declares `exact_search`; an approximate index may have stopped early inside the
+scope, so there it says `complete=False`
+([What a result tells you](concepts.md#what-a-result-tells-you)).
 
 Any authorizer can offer a scope by implementing `scope_for(subject, action) -> Filter | None`;
 `CachingAuthorizer` caches it like `filter_for`. `AllOf` computes its scope by asking each part for

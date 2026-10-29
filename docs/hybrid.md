@@ -81,3 +81,8 @@ score(chunk) = sum over backends that returned it of  weight / (rank_constant + 
   `wardowl` logger. That happens when one index has not caught up with a permission change: the
   chunk's permissions are uncertain, so it is not returned with whichever version came first.
   Monitor the warning; it means your indexes have drifted apart.
+
+`RankFusion` never declares `exact_search`, even over exact backends, so a fused result with fewer
+than k hits says `complete=False`. A short fused list does not prove that the backends ran out: the
+chunks left out for differing metadata are removed after each backend filled its list, and a
+`depth` below k cuts every list short ([What a result tells you](concepts.md#what-a-result-tells-you)).

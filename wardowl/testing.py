@@ -355,7 +355,9 @@ def check_backend(
     alike; it may not return wrong hits.
 
     `exact=False` suits approximate indexes, which may miss matching documents: results must
-    still never include a document that does not match, but may contain fewer than expected.
+    still never include a document that does not match, but may contain fewer than expected. A
+    backend whose `exact_search` is True is checked as exact whatever `exact` says, since the
+    retriever takes its short results as proof that nothing else matches.
 
     Every search uses `query`. Pass `Query(vector=...)` to check a backend searched with vectors
     you compute, for example `Query(QUERY, HashingEmbedder()(QUERY))` against a backend built
@@ -368,13 +370,14 @@ def check_backend(
         docs = random_documents(rng, rng.randint(0, max_documents))
         example = _Example(seed, number, docs)
         backend = factory(docs)
+        strict = _strict(backend, exact)
         by_id = {d.id: d for d in docs}
         everything = max(len(docs), 1)
 
         # Every document, then the top few: a backend must honour k in both cases.
         for k in (everything, rng.randint(1, everything)):
             hits = backend.search(query, k)
-            problems = _problems(hits, k, set(by_id), by_id, exact)
+            problems = _problems(hits, k, set(by_id), by_id, strict)
             if problems:
                 raise example.failure("search without a filter", problems, k=k, returned=[h.id for h in hits])
             _compare_asearch(backend, example, query, k, None, hits)
@@ -388,7 +391,7 @@ def check_backend(
                 if found is None:
                     _compare_arefusal(backend, example, query, k, f)
                     continue
-                problems = _problems(found, k, expected, by_id, exact)
+                problems = _problems(found, k, expected, by_id, strict)
                 if problems:
                     raise example.failure(
                         "search with a filter",
@@ -402,9 +405,14 @@ def check_backend(
 
         set_metadata = getattr(backend, "set_metadata", None)
         if set_metadata is not None and docs:
-            _check_set_metadata(backend, set_metadata, rng, example, docs, filters_per_example, exact, query)
+            _check_set_metadata(backend, set_metadata, rng, example, docs, filters_per_example, strict, query)
 
         _check_retrieval(factory, rng, seed, number, max_documents, exact, query)
+
+
+def _strict(backend: SearchBackend, exact: bool) -> bool:
+    """Whether to check `backend` as exact: when asked to, or when it declares exact search."""
+    return exact or getattr(backend, "exact_search", False) is True
 
 
 def _check_set_metadata(
@@ -457,6 +465,7 @@ def _check_retrieval(
     docs = _acl_documents(rng, rng.randint(0, size))
     example = _Example(seed, number, docs)
     backend = factory(docs)
+    exact = _strict(backend, exact)
     strategies: tuple[Strategy, ...] = ("prefilter", "postfilter") if backend.supports_filters else ("postfilter",)
     for _ in range(3):
         subject = _subject(rng)

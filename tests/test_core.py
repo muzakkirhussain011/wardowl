@@ -8,6 +8,7 @@ import pickle
 import pytest
 
 from wardowl import (
+    AllOf,
     And,
     AuthorizationError,
     CachingAuthorizer,
@@ -20,6 +21,7 @@ from wardowl import (
     Or,
     PermissionedRetriever,
     Subject,
+    TenantAuthorizer,
     matches,
 )
 
@@ -231,6 +233,96 @@ def test_postfilter_reports_incomplete_results_when_capped():
     )
     result = retriever.retrieve("leave", BOB, k=1)
     assert result.hits == [] and result.complete is False
+
+
+# ---- complete: what a short result proves ------------------------------------------------------
+
+
+class Store:
+    """The in-memory backend's answers behind an index that declares `exact_search` as given, or
+    not at all (an approximate index, which may stop early). Counts its searches."""
+
+    supports_filters = True
+
+    def __init__(self, docs, exact_search=None):
+        self.store = InMemoryBackend(docs)
+        if exact_search is not None:
+            self.exact_search = exact_search
+        self.searches = 0
+
+    def search(self, query, k, filter=None):
+        self.searches += 1
+        return self.store.search(query, k, filter)
+
+
+def _both(retriever, query, subject, k):
+    """What `retrieve` returns, once `aretrieve` has returned the same."""
+    result = retriever.retrieve(query, subject, k)
+    assert asyncio.run(retriever.aretrieve(query, subject, k)) == result
+    return result
+
+
+EXACT_AND_APPROXIMATE = [pytest.param(InMemoryBackend, True, id="exact"), pytest.param(Store, False, id="approximate")]
+
+
+@pytest.mark.parametrize(("backend", "complete"), EXACT_AND_APPROXIMATE)
+@pytest.mark.parametrize(("query", "found"), [("leave", 2), ("salary", 0)], ids=["short", "empty"])
+def test_a_short_prefiltered_result_is_complete_only_from_an_exact_search(backend, complete, query, found):
+    # Bob may read two chunks about leave and none about salaries. Only an exact search proves that
+    # nothing else matches: an approximate index may have stopped early under the filter, as
+    # pgvector's iterative scan does at hnsw.max_scan_tuples.
+    result = _both(PermissionedRetriever(backend(corpus()), MetadataACLAuthorizer()), query, BOB, 5)
+    assert result.strategy == "prefilter" and len(result.hits) == found and result.violations == 0
+    assert result.complete is complete
+
+
+@pytest.mark.parametrize(("declared", "complete"), [(True, True), (False, False), ("yes", False), (1, False)])
+def test_only_exact_search_true_makes_a_short_result_complete(declared, complete):
+    retriever = PermissionedRetriever(Store(corpus(), declared), MetadataACLAuthorizer())
+    assert _both(retriever, "leave", BOB, 5).complete is complete
+
+
+def test_a_full_result_from_an_approximate_search_is_taken_at_the_backends_word():
+    # k hits: complete trusts the ranking, and cannot see better chunks an index failed to rank.
+    result = _both(PermissionedRetriever(Store(corpus()), MetadataACLAuthorizer()), "leave", BOB, 2)
+    assert len(result.hits) == 2 and result.complete is True
+
+
+def test_with_a_reranker_a_pool_shorter_than_its_depth_is_short():
+    # The reranker chooses from the top rerank_depth chunks; an approximate index that returned fewer
+    # may have missed the one it would put first.
+    def retriever(backend):
+        return PermissionedRetriever(backend, MetadataACLAuthorizer(), reranker=lambda q, hits: hits, rerank_depth=5)
+
+    assert _both(retriever(Store(corpus())), "leave", BOB, 2).complete is False
+    assert _both(retriever(InMemoryBackend(corpus())), "leave", BOB, 2).complete is True
+
+
+ANN = Subject("ann", [], {"tenant": "acme"})
+ANYONE = FunctionAuthorizer(lambda subject, hits, action: [True] * len(hits))  # a rule with no filter
+
+
+@pytest.mark.parametrize(("declared", "complete"), [(True, True), (None, False)], ids=["exact", "approximate"])
+def test_running_out_inside_a_scope_is_complete_only_on_an_exact_search(declared, complete):
+    # The rule has no filter, so AllOf has none either, but it scopes post-filtering to the tenant.
+    # Its 3 chunks come back, fewer than the 20 asked for: an exact search has ranked the whole
+    # scope, while an approximate index may have stopped early inside it.
+    docs = [Document(f"a{i}", "leave policy", {"tenant": "acme"}) for i in range(3)]
+    docs += [Document(f"g{i:02d}", "leave policy", {"tenant": "globex"}) for i in range(40)]
+    store = Store(docs, declared)
+    result = _both(PermissionedRetriever(store, AllOf(TenantAuthorizer(), ANYONE)), "leave", ANN, 5)
+    assert result.strategy == "postfilter" and sorted(h.id for h in result.hits) == ["a0", "a1", "a2"]
+    assert result.complete is complete
+    assert store.searches == 2  # one for each driver: a short list still ends the search, as before
+
+
+def test_running_out_without_a_filter_is_complete_on_any_search():
+    # No filter and no scope: an index with no filter to apply returns every chunk it holds, up to
+    # the number asked for, so a short list is the end of the store.
+    store = Store(corpus())
+    result = _both(PermissionedRetriever(store, FunctionAuthorizer(MetadataACLAuthorizer().check)), "leave", BOB, 5)
+    assert result.strategy == "postfilter" and sorted(h.id for h in result.hits) == ["bob-review", "handbook"]
+    assert result.complete is True and store.searches == 2
 
 
 # ---- failing closed ----------------------------------------------------------------------------

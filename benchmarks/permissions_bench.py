@@ -184,6 +184,7 @@ class ExactBackend:
     """Brute-force cosine search with exact filtering over normalised vectors."""
 
     supports_filters = True
+    exact_search = True  # every chunk the filter admits is scored, so a short result is complete
 
     def __init__(self, ids: Sequence[str], vectors: np.ndarray, metadata: Sequence[dict[str, Any]], embed: Any):
         self.ids = list(ids)
