@@ -32,7 +32,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  PROFILE: ${{ inputs.profile || 'smoke' }}
+  PROFILE: ${{ inputs.profile || 'full' }}
 
 jobs:
   experiment:
