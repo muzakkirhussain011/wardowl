@@ -1,0 +1,12 @@
+[19:23:29] x3 vespa: seed 0
+[19:23:30]   seed 0: building (8,000 chunks)
+[19:23:50]   seed 0: built in 20 s {}
+[19:23:50]   seed 0: G=1: ok, 0 errors, translation ok
+[19:23:50]   seed 0: G=10: ok, 0 errors, translation ok
+[19:23:50]   seed 0: G=100: ok, 0 errors, translation ok
+[19:23:50]   seed 0: G=1,000: ok, 0 errors, translation ok
+[19:23:51]   seed 0: G=4,000: ok, 0 errors, translation ok
+[19:23:51]   seed 0: G=10,000: ok, 0 errors, translation ok
+[19:23:53]   seed 0: G=40,000: ok, 0 errors, translation ok
+[19:24:05] x3 vespa: seed 0 done in 0.6 min
+::notice title=x3 vespa::{"0": 0}

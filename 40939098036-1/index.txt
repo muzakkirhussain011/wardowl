@@ -1,0 +1,47 @@
+run: https://github.com/muzakkirhussain011/wardowl/actions/runs/40939098036
+commit: 6496961ca6e28d1aed0df6fe29e9258cd7af608f
+mode: smoke
+seeds: 5
+published: 2026-10-29T19:26:19Z
+
+raw result files (in the artifacts x3x6-results-*):
+17125 bytes  x3x6-results-x3-cassandra/x3-cassandra.jsonl
+92 bytes  x3x6-results-x3-embedded/crashes.jsonl
+13108 bytes  x3x6-results-x3-embedded/x3-chroma.jsonl
+16493 bytes  x3x6-results-x3-embedded/x3-faiss.jsonl
+16712 bytes  x3x6-results-x3-embedded/x3-lancedb.jsonl
+16538 bytes  x3x6-results-x3-embedded/x3-memory.jsonl
+16958 bytes  x3x6-results-x3-milvus-weaviate/x3-milvus.jsonl
+17050 bytes  x3x6-results-x3-milvus-weaviate/x3-weaviate.jsonl
+16966 bytes  x3x6-results-x3-mongodb/x3-mongodb.jsonl
+21276 bytes  x3x6-results-x3-pgvector-redis/x3-pgvector.jsonl
+16809 bytes  x3x6-results-x3-pgvector-redis/x3-redis.jsonl
+17765 bytes  x3x6-results-x3-search/x3-elasticsearch.jsonl
+17492 bytes  x3x6-results-x3-search/x3-opensearch.jsonl
+16959 bytes  x3x6-results-x3-vespa-qdrant/x3-qdrant.jsonl
+16820 bytes  x3x6-results-x3-vespa-qdrant/x3-vespa.jsonl
+1118673 bytes  x3x6-results-x6-elasticsearch/x6-elasticsearch.jsonl
+510239 bytes  x3x6-results-x6-faiss/x6-faiss.jsonl
+51537 bytes  x3x6-results-x6-memory/x6-memory.jsonl
+1000597 bytes  x3x6-results-x6-pgvector/x6-pgvector.jsonl
+763996 bytes  x3x6-results-x6-qdrant/x6-qdrant.jsonl
+69 x3x6-results-x3-cassandra/x3-cassandra.jsonl
+1 x3x6-results-x3-embedded/crashes.jsonl
+53 x3x6-results-x3-embedded/x3-chroma.jsonl
+69 x3x6-results-x3-embedded/x3-faiss.jsonl
+69 x3x6-results-x3-embedded/x3-lancedb.jsonl
+69 x3x6-results-x3-embedded/x3-memory.jsonl
+69 x3x6-results-x3-milvus-weaviate/x3-milvus.jsonl
+69 x3x6-results-x3-milvus-weaviate/x3-weaviate.jsonl
+69 x3x6-results-x3-mongodb/x3-mongodb.jsonl
+76 x3x6-results-x3-pgvector-redis/x3-pgvector.jsonl
+69 x3x6-results-x3-pgvector-redis/x3-redis.jsonl
+69 x3x6-results-x3-search/x3-elasticsearch.jsonl
+69 x3x6-results-x3-search/x3-opensearch.jsonl
+69 x3x6-results-x3-vespa-qdrant/x3-qdrant.jsonl
+69 x3x6-results-x3-vespa-qdrant/x3-vespa.jsonl
+1520 x3x6-results-x6-elasticsearch/x6-elasticsearch.jsonl
+656 x3x6-results-x6-faiss/x6-faiss.jsonl
+72 x3x6-results-x6-memory/x6-memory.jsonl
+1160 x3x6-results-x6-pgvector/x6-pgvector.jsonl
+1088 x3x6-results-x6-qdrant/x6-qdrant.jsonl

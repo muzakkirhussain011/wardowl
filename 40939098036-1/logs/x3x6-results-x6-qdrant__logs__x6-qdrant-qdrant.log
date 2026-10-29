@@ -1,0 +1,11 @@
+[19:22:33] x6 qdrant: loading the data
+[19:22:34] x6 qdrant: seed 0
+[19:22:35]   seed 0: building w1 (57,638 chunks)
+[19:23:32]   seed 0: w1 built in 57 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 11.0}
+[19:23:32]   seed 0: building sep (49,444 chunks)
+[19:24:22]   seed 0: sep built in 50 s {'points': 49444, 'indexed_vectors': 98850, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 11.0}
+[19:24:22]   seed 0: building w0 group 0 (57,638 chunks)
+[19:25:21]   seed 0: w0 group 0 built in 59 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 14.0}
+[19:25:22]   seed 0: 40/1,080 retrievals (0.2 per s, 72 min left)
+[19:25:40] x6 qdrant: seed 0 done in 3.1 min
+::notice title=x6 qdrant::{"seeds": [0], "minutes": [3.1], "retrievals": [1080], "stopped": {}, "first_errors": {}}

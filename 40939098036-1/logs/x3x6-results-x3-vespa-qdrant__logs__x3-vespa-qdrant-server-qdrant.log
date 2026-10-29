@@ -1,0 +1,110 @@
+           _                 _    
+  __ _  __| |_ __ __ _ _ __ | |_  
+ / _` |/ _` | '__/ _` | '_ \| __| 
+| (_| | (_| | | | (_| | | | | |_  
+ \__, |\__,_|_|  \__,_|_| |_|\__| 
+    |_|                           
+
+Version: 1.19.2, build: 016542aa
+Access web UI at http://localhost:6333/dashboard
+Agentic Skills: https://skills.qdrant.tech/
+
+2026-10-29T19:21:41.909581Z  WARN qdrant: There is a potential issue with the filesystem for storage path ./storage. Details: Container filesystem detected - storage might be lost with container re-creation
+2026-10-29T19:21:41.909722Z  INFO storage::content_manager::consensus::persistent: Initializing new raft state at ./storage/raft_state.json
+2026-10-29T19:21:41.914441Z  INFO qdrant: Distributed mode disabled
+2026-10-29T19:21:41.914517Z  INFO qdrant: Telemetry reporting enabled, id: 9dd22c98-40a5-46d2-98bd-d044e71dba63
+2026-10-29T19:21:41.943547Z  INFO qdrant::actix: REST transport settings: keep_alive=5s, client_request_timeout=5s, client_disconnect_timeout=5s
+2026-10-29T19:21:41.943643Z  INFO qdrant::actix: TLS disabled for REST API
+2026-10-29T19:21:41.943713Z  INFO qdrant::actix: Qdrant HTTP listening on 6333
+2026-10-29T19:21:41.943774Z  INFO actix_server::builder: starting 3 workers
+2026-10-29T19:21:41.943808Z  INFO actix_server::server: Actix runtime found; starting in Actix runtime
+2026-10-29T19:21:41.943838Z  INFO actix_server::server: starting service: "actix-web-service-0.0.0.0:6333", workers: 3, listening on: 0.0.0.0:6333
+2026-10-29T19:21:41.964799Z  INFO qdrant::tonic: Qdrant gRPC listening on 6334
+2026-10-29T19:21:41.965004Z  INFO qdrant::tonic: TLS disabled for gRPC API
+2026-10-29T19:24:06.669967Z  INFO actix_web::middleware::logger: 172.17.0.1 "GET /collections HTTP/1.1" 200 68 "-" "python-client/1.19.1 python/3.12.15" 0.000698
+2026-10-29T19:24:06.877395Z  INFO actix_web::middleware::logger: 172.17.0.1 "GET /collections/x3s011693a35/exists HTTP/1.1" 200 69 "-" "python-client/1.19.1 python/3.12.15" 0.000216
+2026-10-29T19:24:06.879839Z  INFO storage::content_manager::toc::collection_meta_ops: Creating collection x3s011693a35
+2026-10-29T19:24:06.895124Z  INFO actix_web::middleware::logger: 172.17.0.1 "PUT /collections/x3s011693a35 HTTP/1.1" 200 57 "-" "python-client/1.19.1 python/3.12.15" 0.015482
+2026-10-29T19:24:06.915566Z  INFO actix_web::middleware::logger: 172.17.0.1 "PUT /collections/x3s011693a35/index?wait=true HTTP/1.1" 200 84 "-" "python-client/1.19.1 python/3.12.15" 0.018161
+2026-10-29T19:24:06.934005Z  INFO actix_web::middleware::logger: 172.17.0.1 "PUT /collections/x3s011693a35/index?wait=true HTTP/1.1" 200 84 "-" "python-client/1.19.1 python/3.12.15" 0.016083
+2026-10-29T19:24:06.952348Z  INFO actix_web::middleware::logger: 172.17.0.1 "PUT /collections/x3s011693a35/index?wait=true HTTP/1.1" 200 82 "-" "python-client/1.19.1 python/3.12.15" 0.016634
+2026-10-29T19:24:06.953796Z  INFO storage::content_manager::toc::collection_meta_ops: Updating collection x3s011693a35
+2026-10-29T19:24:06.954835Z  INFO actix_web::middleware::logger: 172.17.0.1 "PATCH /collections/x3s011693a35 HTTP/1.1" 200 57 "-" "python-client/1.19.1 python/3.12.15" 0.001153
+2026-10-29T19:24:07.588176Z  INFO actix_web::middleware::logger: 172.17.0.1 "PUT /collections/x3s011693a35/points?wait=true HTTP/1.1" 200 83 "-" "python-client/1.19.1 python/3.12.15" 0.024535
+2026-10-29T19:24:07.719275Z  INFO actix_web::middleware::logger: 172.17.0.1 "PUT /collections/x3s011693a35/points?wait=true HTTP/1.1" 200 83 "-" "python-client/1.19.1 python/3.12.15" 0.024610
+2026-10-29T19:24:07.848592Z  INFO actix_web::middleware::logger: 172.17.0.1 "PUT /collections/x3s011693a35/points?wait=true HTTP/1.1" 200 81 "-" "python-client/1.19.1 python/3.12.15" 0.024319
+2026-10-29T19:24:07.979475Z  INFO actix_web::middleware::logger: 172.17.0.1 "PUT /collections/x3s011693a35/points?wait=true HTTP/1.1" 200 84 "-" "python-client/1.19.1 python/3.12.15" 0.022894
+2026-10-29T19:24:08.103483Z  INFO actix_web::middleware::logger: 172.17.0.1 "PUT /collections/x3s011693a35/points?wait=true HTTP/1.1" 200 84 "-" "python-client/1.19.1 python/3.12.15" 0.021709
+2026-10-29T19:24:08.249623Z  INFO actix_web::middleware::logger: 172.17.0.1 "PUT /collections/x3s011693a35/points?wait=true HTTP/1.1" 200 84 "-" "python-client/1.19.1 python/3.12.15" 0.029769
+2026-10-29T19:24:08.376346Z  INFO actix_web::middleware::logger: 172.17.0.1 "PUT /collections/x3s011693a35/points?wait=true HTTP/1.1" 200 85 "-" "python-client/1.19.1 python/3.12.15" 0.023536
+2026-10-29T19:24:08.506544Z  INFO actix_web::middleware::logger: 172.17.0.1 "PUT /collections/x3s011693a35/points?wait=true HTTP/1.1" 200 84 "-" "python-client/1.19.1 python/3.12.15" 0.029970
+2026-10-29T19:24:08.642011Z  INFO actix_web::middleware::logger: 172.17.0.1 "PUT /collections/x3s011693a35/points?wait=true HTTP/1.1" 200 82 "-" "python-client/1.19.1 python/3.12.15" 0.025640
+2026-10-29T19:24:08.777037Z  INFO actix_web::middleware::logger: 172.17.0.1 "PUT /collections/x3s011693a35/points?wait=true HTTP/1.1" 200 84 "-" "python-client/1.19.1 python/3.12.15" 0.019726
+2026-10-29T19:24:08.921455Z  INFO actix_web::middleware::logger: 172.17.0.1 "PUT /collections/x3s011693a35/points?wait=true HTTP/1.1" 200 85 "-" "python-client/1.19.1 python/3.12.15" 0.021616
+2026-10-29T19:24:09.050844Z  INFO actix_web::middleware::logger: 172.17.0.1 "PUT /collections/x3s011693a35/points?wait=true HTTP/1.1" 200 85 "-" "python-client/1.19.1 python/3.12.15" 0.024428
+2026-10-29T19:24:09.205392Z  INFO actix_web::middleware::logger: 172.17.0.1 "PUT /collections/x3s011693a35/points?wait=true HTTP/1.1" 200 84 "-" "python-client/1.19.1 python/3.12.15" 0.022727
+2026-10-29T19:24:09.340237Z  INFO actix_web::middleware::logger: 172.17.0.1 "PUT /collections/x3s011693a35/points?wait=true HTTP/1.1" 200 83 "-" "python-client/1.19.1 python/3.12.15" 0.025413
+2026-10-29T19:24:09.506597Z  INFO actix_web::middleware::logger: 172.17.0.1 "PUT /collections/x3s011693a35/points?wait=true HTTP/1.1" 200 84 "-" "python-client/1.19.1 python/3.12.15" 0.023909
+2026-10-29T19:24:09.630827Z  INFO actix_web::middleware::logger: 172.17.0.1 "PUT /collections/x3s011693a35/points?wait=true HTTP/1.1" 200 84 "-" "python-client/1.19.1 python/3.12.15" 0.022459
+2026-10-29T19:24:09.767531Z  INFO actix_web::middleware::logger: 172.17.0.1 "PUT /collections/x3s011693a35/points?wait=true HTTP/1.1" 200 84 "-" "python-client/1.19.1 python/3.12.15" 0.019874
+2026-10-29T19:24:09.902337Z  INFO actix_web::middleware::logger: 172.17.0.1 "PUT /collections/x3s011693a35/points?wait=true HTTP/1.1" 200 82 "-" "python-client/1.19.1 python/3.12.15" 0.021045
+2026-10-29T19:24:10.031888Z  INFO actix_web::middleware::logger: 172.17.0.1 "PUT /collections/x3s011693a35/points?wait=true HTTP/1.1" 200 84 "-" "python-client/1.19.1 python/3.12.15" 0.019834
+2026-10-29T19:24:10.169483Z  INFO actix_web::middleware::logger: 172.17.0.1 "PUT /collections/x3s011693a35/points?wait=true HTTP/1.1" 200 84 "-" "python-client/1.19.1 python/3.12.15" 0.023667
+2026-10-29T19:24:10.295328Z  INFO actix_web::middleware::logger: 172.17.0.1 "PUT /collections/x3s011693a35/points?wait=true HTTP/1.1" 200 83 "-" "python-client/1.19.1 python/3.12.15" 0.022650
+2026-10-29T19:24:10.433330Z  INFO actix_web::middleware::logger: 172.17.0.1 "PUT /collections/x3s011693a35/points?wait=true HTTP/1.1" 200 84 "-" "python-client/1.19.1 python/3.12.15" 0.030097
+2026-10-29T19:24:10.567573Z  INFO actix_web::middleware::logger: 172.17.0.1 "PUT /collections/x3s011693a35/points?wait=true HTTP/1.1" 200 83 "-" "python-client/1.19.1 python/3.12.15" 0.028521
+2026-10-29T19:24:10.720651Z  INFO actix_web::middleware::logger: 172.17.0.1 "PUT /collections/x3s011693a35/points?wait=true HTTP/1.1" 200 84 "-" "python-client/1.19.1 python/3.12.15" 0.024556
+2026-10-29T19:24:10.861880Z  INFO actix_web::middleware::logger: 172.17.0.1 "PUT /collections/x3s011693a35/points?wait=true HTTP/1.1" 200 85 "-" "python-client/1.19.1 python/3.12.15" 0.028434
+2026-10-29T19:24:10.991023Z  INFO actix_web::middleware::logger: 172.17.0.1 "PUT /collections/x3s011693a35/points?wait=true HTTP/1.1" 200 83 "-" "python-client/1.19.1 python/3.12.15" 0.023517
+2026-10-29T19:24:11.112994Z  INFO actix_web::middleware::logger: 172.17.0.1 "PUT /collections/x3s011693a35/points?wait=true HTTP/1.1" 200 84 "-" "python-client/1.19.1 python/3.12.15" 0.021652
+2026-10-29T19:24:11.236125Z  INFO actix_web::middleware::logger: 172.17.0.1 "PUT /collections/x3s011693a35/points?wait=true HTTP/1.1" 200 85 "-" "python-client/1.19.1 python/3.12.15" 0.024510
+2026-10-29T19:24:11.398024Z  INFO actix_web::middleware::logger: 172.17.0.1 "PUT /collections/x3s011693a35/points?wait=true HTTP/1.1" 200 84 "-" "python-client/1.19.1 python/3.12.15" 0.027898
+2026-10-29T19:24:11.546537Z  INFO actix_web::middleware::logger: 172.17.0.1 "PUT /collections/x3s011693a35/points?wait=true HTTP/1.1" 200 85 "-" "python-client/1.19.1 python/3.12.15" 0.027320
+2026-10-29T19:24:11.692526Z  INFO actix_web::middleware::logger: 172.17.0.1 "PUT /collections/x3s011693a35/points?wait=true HTTP/1.1" 200 84 "-" "python-client/1.19.1 python/3.12.15" 0.025022
+2026-10-29T19:24:11.725909Z  INFO actix_web::middleware::logger: 172.17.0.1 "PUT /collections/x3s011693a35/points?wait=true HTTP/1.1" 200 84 "-" "python-client/1.19.1 python/3.12.15" 0.007535
+2026-10-29T19:24:16.800833Z  INFO actix_web::middleware::logger: 172.17.0.1 "GET /collections/x3s011693a35 HTTP/1.1" 200 504 "-" "python-client/1.19.1 python/3.12.15" 0.001190
+2026-10-29T19:24:19.804529Z  INFO actix_web::middleware::logger: 172.17.0.1 "GET /collections/x3s011693a35 HTTP/1.1" 200 505 "-" "python-client/1.19.1 python/3.12.15" 0.000899
+2026-10-29T19:24:19.814069Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x3s011693a35/points/query HTTP/1.1" 200 838 "-" "python-client/1.19.1 python/3.12.15" 0.003661
+2026-10-29T19:24:19.819878Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x3s011693a35/points/query HTTP/1.1" 200 837 "-" "python-client/1.19.1 python/3.12.15" 0.002994
+2026-10-29T19:24:19.824646Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x3s011693a35/points/query HTTP/1.1" 200 818 "-" "python-client/1.19.1 python/3.12.15" 0.002408
+2026-10-29T19:24:19.827596Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x3s011693a35/points/query HTTP/1.1" 200 836 "-" "python-client/1.19.1 python/3.12.15" 0.000852
+2026-10-29T19:24:19.830485Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x3s011693a35/points/query HTTP/1.1" 200 837 "-" "python-client/1.19.1 python/3.12.15" 0.000851
+2026-10-29T19:24:19.833202Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x3s011693a35/points/query HTTP/1.1" 200 818 "-" "python-client/1.19.1 python/3.12.15" 0.000856
+2026-10-29T19:24:19.836376Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x3s011693a35/points/query HTTP/1.1" 200 836 "-" "python-client/1.19.1 python/3.12.15" 0.000839
+2026-10-29T19:24:19.839242Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x3s011693a35/points/query HTTP/1.1" 200 837 "-" "python-client/1.19.1 python/3.12.15" 0.000803
+2026-10-29T19:24:19.842354Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x3s011693a35/points/query HTTP/1.1" 200 818 "-" "python-client/1.19.1 python/3.12.15" 0.000805
+2026-10-29T19:24:19.845138Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x3s011693a35/points/query HTTP/1.1" 200 836 "-" "python-client/1.19.1 python/3.12.15" 0.000810
+2026-10-29T19:24:19.847762Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x3s011693a35/points/query HTTP/1.1" 200 837 "-" "python-client/1.19.1 python/3.12.15" 0.000701
+2026-10-29T19:24:19.850497Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x3s011693a35/points/query HTTP/1.1" 200 817 "-" "python-client/1.19.1 python/3.12.15" 0.000761
+2026-10-29T19:24:19.853895Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x3s011693a35/points/query HTTP/1.1" 200 836 "-" "python-client/1.19.1 python/3.12.15" 0.000890
+2026-10-29T19:24:19.856805Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x3s011693a35/points/query HTTP/1.1" 200 837 "-" "python-client/1.19.1 python/3.12.15" 0.000783
+2026-10-29T19:24:19.859744Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x3s011693a35/points/query HTTP/1.1" 200 818 "-" "python-client/1.19.1 python/3.12.15" 0.000808
+2026-10-29T19:24:19.862724Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x3s011693a35/points/query HTTP/1.1" 200 836 "-" "python-client/1.19.1 python/3.12.15" 0.000837
+2026-10-29T19:24:19.865673Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x3s011693a35/points/query HTTP/1.1" 200 837 "-" "python-client/1.19.1 python/3.12.15" 0.000783
+2026-10-29T19:24:19.868698Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x3s011693a35/points/query HTTP/1.1" 200 817 "-" "python-client/1.19.1 python/3.12.15" 0.000879
+2026-10-29T19:24:19.875121Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x3s011693a35/points/query HTTP/1.1" 200 838 "-" "python-client/1.19.1 python/3.12.15" 0.001806
+2026-10-29T19:24:19.879721Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x3s011693a35/points/query HTTP/1.1" 200 837 "-" "python-client/1.19.1 python/3.12.15" 0.001615
+2026-10-29T19:24:19.884429Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x3s011693a35/points/query HTTP/1.1" 200 818 "-" "python-client/1.19.1 python/3.12.15" 0.001753
+2026-10-29T19:24:19.888913Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x3s011693a35/points/query HTTP/1.1" 200 838 "-" "python-client/1.19.1 python/3.12.15" 0.001397
+2026-10-29T19:24:19.893382Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x3s011693a35/points/query HTTP/1.1" 200 837 "-" "python-client/1.19.1 python/3.12.15" 0.001416
+2026-10-29T19:24:19.898020Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x3s011693a35/points/query HTTP/1.1" 200 818 "-" "python-client/1.19.1 python/3.12.15" 0.001505
+2026-10-29T19:24:19.914558Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x3s011693a35/points/query HTTP/1.1" 200 837 "-" "python-client/1.19.1 python/3.12.15" 0.004029
+2026-10-29T19:24:19.925594Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x3s011693a35/points/query HTTP/1.1" 200 837 "-" "python-client/1.19.1 python/3.12.15" 0.003836
+2026-10-29T19:24:19.936431Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x3s011693a35/points/query HTTP/1.1" 200 818 "-" "python-client/1.19.1 python/3.12.15" 0.003547
+2026-10-29T19:24:19.947088Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x3s011693a35/points/query HTTP/1.1" 200 838 "-" "python-client/1.19.1 python/3.12.15" 0.003504
+2026-10-29T19:24:19.957755Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x3s011693a35/points/query HTTP/1.1" 200 837 "-" "python-client/1.19.1 python/3.12.15" 0.003396
+2026-10-29T19:24:19.968580Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x3s011693a35/points/query HTTP/1.1" 200 818 "-" "python-client/1.19.1 python/3.12.15" 0.003378
+2026-10-29T19:24:20.047950Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x3s011693a35/points/query HTTP/1.1" 200 838 "-" "python-client/1.19.1 python/3.12.15" 0.007793
+2026-10-29T19:24:20.073394Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x3s011693a35/points/query HTTP/1.1" 200 837 "-" "python-client/1.19.1 python/3.12.15" 0.008368
+2026-10-29T19:24:20.099350Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x3s011693a35/points/query HTTP/1.1" 200 818 "-" "python-client/1.19.1 python/3.12.15" 0.008599
+2026-10-29T19:24:20.124001Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x3s011693a35/points/query HTTP/1.1" 200 836 "-" "python-client/1.19.1 python/3.12.15" 0.006980
+2026-10-29T19:24:20.148915Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x3s011693a35/points/query HTTP/1.1" 200 837 "-" "python-client/1.19.1 python/3.12.15" 0.007732
+2026-10-29T19:24:20.173153Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x3s011693a35/points/query HTTP/1.1" 200 818 "-" "python-client/1.19.1 python/3.12.15" 0.006987
+2026-10-29T19:24:20.328200Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x3s011693a35/points/query HTTP/1.1" 200 836 "-" "python-client/1.19.1 python/3.12.15" 0.030136
+2026-10-29T19:24:20.423479Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x3s011693a35/points/query HTTP/1.1" 200 837 "-" "python-client/1.19.1 python/3.12.15" 0.028708
+2026-10-29T19:24:20.520865Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x3s011693a35/points/query HTTP/1.1" 200 818 "-" "python-client/1.19.1 python/3.12.15" 0.029482
+2026-10-29T19:24:20.615884Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x3s011693a35/points/query HTTP/1.1" 200 836 "-" "python-client/1.19.1 python/3.12.15" 0.028634
+2026-10-29T19:24:20.713579Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x3s011693a35/points/query HTTP/1.1" 200 837 "-" "python-client/1.19.1 python/3.12.15" 0.030128
+2026-10-29T19:24:20.810389Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x3s011693a35/points/query HTTP/1.1" 200 818 "-" "python-client/1.19.1 python/3.12.15" 0.026145
+2026-10-29T19:24:20.823456Z  INFO storage::content_manager::toc::collection_meta_ops: Deleting collection x3s011693a35
+2026-10-29T19:24:20.828895Z  INFO actix_web::middleware::logger: 172.17.0.1 "DELETE /collections/x3s011693a35 HTTP/1.1" 200 57 "-" "python-client/1.19.1 python/3.12.15" 0.005538
