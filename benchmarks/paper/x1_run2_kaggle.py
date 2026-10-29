@@ -127,8 +127,8 @@ def main() -> int:
     install(args.src)
     if args.role == "smoke":
         return smoke(args.src)
-    if args.role == "prep":
-        return x1(args.src, "--prepare-only", "--out", str(WORK / "x1run2"))
+    if args.role == "prep":  # on the CPU when no GPU session is free (amendment 2, item 8): about an hour
+        return x1(args.src, "--prepare-only", "--allow-cpu-embedding", "--out", str(WORK / "x1run2"))
     if args.role == "stats":
         shards = [f for f in folders_with("role.txt") if (f / "runs").is_dir()]
         say(f"shard folders: {shards}")
