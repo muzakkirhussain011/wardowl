@@ -1,0 +1,402 @@
+name: paper-x2-x5
+
+# The research paper's experiments X2 (recall against throughput under permission-shaped filters)
+# and X5 (detecting and repairing under-retrieval). Design, statistics and verdict rules:
+# benchmarks/paper/PREREG_X2_X5.md; how to run and read it: benchmarks/paper/README_X2_X5.md.
+#
+# A push to this branch runs the configuration in benchmarks/paper/x2x5_config.json: "smoke" (a few
+# thousand chunks, one build, every code path) or "full". The embeddings and the prepared data are
+# computed once, in this run, unless data_run_id names an earlier run whose artifacts to reuse.
+# Every store job runs one store on its own runner; the stats job applies the pre-registered rules;
+# the publish job commits reports and log tails to the branch results/x2-x5.
+
+on:
+  push:
+    branches: [paper/x2-x5]
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: smoke or full
+        type: choice
+        options: [smoke, full]
+        default: smoke
+      data_run_id:
+        description: A run of this workflow whose data artifacts to reuse (empty to embed again)
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: paper-x2-x5-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  HF_HUB_DISABLE_TELEMETRY: "1"
+  PYTHONUNBUFFERED: "1"
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      mode: ${{ steps.plan.outputs.mode }}
+      smoke: ${{ steps.plan.outputs.smoke }}
+      minutes: ${{ steps.plan.outputs.minutes }}
+      resamples: ${{ steps.plan.outputs.resamples }}
+      data_run: ${{ steps.plan.outputs.data_run }}
+      embed_e: ${{ steps.plan.outputs.embed_e }}
+      embed_m: ${{ steps.plan.outputs.embed_m }}
+      x2e: ${{ steps.plan.outputs.x2e }}
+      x2m: ${{ steps.plan.outputs.x2m }}
+      x5e: ${{ steps.plan.outputs.x5e }}
+      x5m: ${{ steps.plan.outputs.x5m }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: { persist-credentials: false }
+      - id: plan
+        env:
+          INPUT_MODE: ${{ inputs.mode }}
+          INPUT_DATA_RUN: ${{ inputs.data_run_id }}
+        run: python3 benchmarks/paper/x2x5_plan.py --out "$GITHUB_OUTPUT"
+
+  # ---- data: embeddings in shards, then one preparation per corpus ------------------------------
+
+  embed-e:
+    needs: plan
+    if: needs.plan.outputs.data_run == ''
+    name: embed e ${{ matrix.shard }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.plan.outputs.embed_e) }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: { persist-credentials: false }
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with: { python-version: "3.12" }
+      - name: Install CPU PyTorch, sentence-transformers, datasets and wardowl
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu torch
+          pip install sentence-transformers datasets numpy
+          pip install --require-hashes --no-deps -r .github/requirements/build.txt
+          pip install --no-deps --no-build-isolation -e .
+      - name: Embed shard ${{ matrix.shard }} of ${{ matrix.shards }}
+        run: |
+          mkdir -p shards logs
+          python benchmarks/paper/x2x5_prepare.py embed --corpus e --shard ${{ matrix.shard }} \
+            --shards ${{ matrix.shards }} --out shards ${{ needs.plan.outputs.smoke }} 2>&1 | tee logs/embed-e-${{ matrix.shard }}.log
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: x2x5-emb-e-${{ matrix.shard }}
+          path: |
+            shards/*.npy
+            shards/*.json
+          if-no-files-found: error
+          retention-days: 90
+          compression-level: 1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with: { name: "x2x5-log-embed-e-${{ matrix.shard }}", path: logs/, retention-days: 90, if-no-files-found: ignore }
+
+  embed-m:
+    needs: plan
+    if: needs.plan.outputs.data_run == ''
+    name: embed m ${{ matrix.shard }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.plan.outputs.embed_m) }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: { persist-credentials: false }
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with: { python-version: "3.12" }
+      - name: Install CPU PyTorch, sentence-transformers, datasets and wardowl
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu torch
+          pip install sentence-transformers datasets numpy
+          pip install --require-hashes --no-deps -r .github/requirements/build.txt
+          pip install --no-deps --no-build-isolation -e .
+      - name: Embed shard ${{ matrix.shard }} of ${{ matrix.shards }}
+        run: |
+          mkdir -p shards logs
+          python benchmarks/paper/x2x5_prepare.py embed --corpus m --shard ${{ matrix.shard }} \
+            --shards ${{ matrix.shards }} --out shards ${{ needs.plan.outputs.smoke }} 2>&1 | tee logs/embed-m-${{ matrix.shard }}.log
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: x2x5-emb-m-${{ matrix.shard }}
+          path: |
+            shards/*.npy
+            shards/*.json
+          if-no-files-found: error
+          retention-days: 90
+          compression-level: 1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with: { name: "x2x5-log-embed-m-${{ matrix.shard }}", path: logs/, retention-days: 90, if-no-files-found: ignore }
+
+  prepare-e:
+    needs: [plan, embed-e]
+    if: needs.plan.outputs.data_run == ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: { persist-credentials: false }
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with: { python-version: "3.12" }
+      - name: Install CPU PyTorch, sentence-transformers, datasets, faiss and wardowl
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu torch
+          pip install sentence-transformers datasets numpy faiss-cpu
+          pip install --require-hashes --no-deps -r .github/requirements/build.txt
+          pip install --no-deps --no-build-isolation -e .
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with: { pattern: "x2x5-emb-e-*", path: shards, merge-multiple: true }
+      - name: Merge the shards, embed the questions, compute the exact baseline and the axes
+        run: |
+          mkdir -p logs
+          python benchmarks/paper/x2x5_prepare.py prepare --corpus e --shards shards --out data-e \
+            ${{ needs.plan.outputs.smoke }} 2>&1 | tee logs/prepare-e.log
+          { echo "### E data"; echo '```'; python -c "import json; c = json.load(open('data-e/config.json')); \
+            print(json.dumps({k: v for k, v in c.items() if 'environment' not in k}, indent=1))"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with: { name: x2x5-data-e, path: data-e/, if-no-files-found: error, retention-days: 90, compression-level: 1 }
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: x2x5-meta-e
+          path: |
+            data-e/pairs.csv
+            data-e/people.json
+            data-e/config.json
+            data-e/checksums.json
+          if-no-files-found: error
+          retention-days: 90
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with: { name: x2x5-log-prepare-e, path: logs/, retention-days: 90, if-no-files-found: ignore }
+
+  prepare-m:
+    needs: [plan, embed-m]
+    if: needs.plan.outputs.data_run == ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: { persist-credentials: false }
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with: { python-version: "3.12" }
+      - name: Install CPU PyTorch, sentence-transformers, datasets, faiss and wardowl
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu torch
+          pip install sentence-transformers datasets numpy faiss-cpu
+          pip install --require-hashes --no-deps -r .github/requirements/build.txt
+          pip install --no-deps --no-build-isolation -e .
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with: { pattern: "x2x5-emb-m-*", path: shards, merge-multiple: true }
+      - name: Merge the shards, draw the layouts and subjects, compute the exact baseline and the axes
+        run: |
+          mkdir -p logs
+          python benchmarks/paper/x2x5_prepare.py prepare --corpus m --shards shards --out data-m \
+            ${{ needs.plan.outputs.smoke }} 2>&1 | tee logs/prepare-m.log
+          { echo "### M data"; echo '```'; python -c "import json; c = json.load(open('data-m/config.json')); \
+            print(json.dumps({k: v for k, v in c.items() if 'environment' not in k}, indent=1))"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with: { name: x2x5-data-m, path: data-m/, if-no-files-found: error, retention-days: 90, compression-level: 1 }
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: x2x5-meta-m
+          path: |
+            data-m/pairs.csv
+            data-m/subjects.json
+            data-m/config.json
+            data-m/checksums.json
+          if-no-files-found: error
+          retention-days: 90
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with: { name: x2x5-log-prepare-m, path: logs/, retention-days: 90, if-no-files-found: ignore }
+
+  # ---- the stores: one job per store (E) or per store and build (M) ------------------------------
+
+  x2-e:
+    needs: [plan, prepare-e]
+    if: always() && needs.plan.result == 'success' && (needs.prepare-e.result == 'success' || needs.plan.outputs.data_run != '')
+    uses: ./.github/workflows/paper-x2-x5-store.yml
+    with:
+      experiment: x2
+      corpus: e
+      matrix: ${{ needs.plan.outputs.x2e }}
+      data_run: ${{ needs.plan.outputs.data_run }}
+      minutes: ${{ needs.plan.outputs.minutes }}
+
+  x2-m:
+    needs: [plan, prepare-m]
+    if: always() && needs.plan.result == 'success' && (needs.prepare-m.result == 'success' || needs.plan.outputs.data_run != '')
+    uses: ./.github/workflows/paper-x2-x5-store.yml
+    with:
+      experiment: x2
+      corpus: m
+      matrix: ${{ needs.plan.outputs.x2m }}
+      data_run: ${{ needs.plan.outputs.data_run }}
+      minutes: ${{ needs.plan.outputs.minutes }}
+
+  x5-e:
+    needs: [plan, prepare-e]
+    if: always() && needs.plan.result == 'success' && (needs.prepare-e.result == 'success' || needs.plan.outputs.data_run != '')
+    uses: ./.github/workflows/paper-x2-x5-store.yml
+    with:
+      experiment: x5
+      corpus: e
+      matrix: ${{ needs.plan.outputs.x5e }}
+      data_run: ${{ needs.plan.outputs.data_run }}
+      minutes: ${{ needs.plan.outputs.minutes }}
+
+  x5-m:
+    needs: [plan, prepare-m]
+    if: always() && needs.plan.result == 'success' && (needs.prepare-m.result == 'success' || needs.plan.outputs.data_run != '')
+    uses: ./.github/workflows/paper-x2-x5-store.yml
+    with:
+      experiment: x5
+      corpus: m
+      matrix: ${{ needs.plan.outputs.x5m }}
+      data_run: ${{ needs.plan.outputs.data_run }}
+      minutes: ${{ needs.plan.outputs.minutes }}
+
+  # ---- statistics and publication ----------------------------------------------------------------
+
+  stats:
+    needs: [plan, x2-e, x2-m, x5-e, x5-m]
+    if: always() && needs.plan.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: { persist-credentials: false }
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with: { python-version: "3.12" }
+      - run: pip install numpy pandas
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with: { pattern: "x2x5-res-*", path: results }
+      - name: Download the corpus tables of this run
+        if: needs.plan.outputs.data_run == ''
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with: { pattern: "x2x5-meta-*", path: meta }
+      - name: Download the corpus tables of run ${{ needs.plan.outputs.data_run }}
+        if: needs.plan.outputs.data_run != ''
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: "x2x5-meta-*"
+          path: meta
+          run-id: ${{ needs.plan.outputs.data_run }}
+          github-token: ${{ github.token }}
+      - name: Statistics and the pre-registered verdicts
+        run: |
+          mkdir -p stats logs
+          ls -R meta | head -20
+          python benchmarks/paper/x2x5_stats.py --results results --meta-e meta/x2x5-meta-e --meta-m meta/x2x5-meta-m \
+            --out stats --resamples ${{ needs.plan.outputs.resamples }} 2>&1 | tee logs/stats.log
+          cat stats/summary.md >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with: { name: x2x5-stats, path: stats/, retention-days: 90, if-no-files-found: ignore }
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with: { name: x2x5-log-stats, path: logs/, retention-days: 90, if-no-files-found: ignore }
+
+  publish:
+    needs: [plan, embed-e, embed-m, prepare-e, prepare-m, x2-e, x2-m, x5-e, x5-m, stats]
+    if: always() && needs.plan.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        continue-on-error: true
+        with: { pattern: "x2x5-log-*", path: logs }
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        continue-on-error: true
+        with: { name: x2x5-stats, path: stats }
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        continue-on-error: true
+        with: { pattern: "x2x5-res-*", path: results }
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        continue-on-error: true
+        with: { pattern: "x2x5-meta-*", path: meta }
+      - name: Commit the reports and log tails to results/x2-x5
+        env:
+          TOKEN: ${{ github.token }}
+          MODE: ${{ needs.plan.outputs.mode }}
+          DATA_RUN: ${{ needs.plan.outputs.data_run }}
+          RESULTS: >-
+            embed-e=${{ needs.embed-e.result }} embed-m=${{ needs.embed-m.result }}
+            prepare-e=${{ needs.prepare-e.result }} prepare-m=${{ needs.prepare-m.result }}
+            x2-e=${{ needs.x2-e.result }} x2-m=${{ needs.x2-m.result }} x5-e=${{ needs.x5-e.result }}
+            x5-m=${{ needs.x5-m.result }} stats=${{ needs.stats.result }}
+        run: |
+          run_dir="${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          dest="publish/$run_dir"
+          mkdir -p "$dest/logs" "$dest/jobs" "$dest/stats" "$dest/data"
+          shopt -s nullglob
+          for folder in logs/*/; do
+            name=$(basename "$folder")
+            find "$folder" -type f -name '*.log' | while read -r file; do
+              tail -n 200 "$file" > "$dest/logs/${name#x2x5-log-}__$(basename "$file")"
+            done
+            for extra in "$folder"*.txt "$folder"logs/*.txt; do
+              cp "$extra" "$dest/logs/${name#x2x5-log-}__$(basename "$extra")"
+            done
+          done
+          for folder in results/*/; do
+            name=$(basename "$folder")
+            for file in job.json summary.md LEAK.json; do
+              if [ -f "$folder$file" ]; then cp "$folder$file" "$dest/jobs/${name#x2x5-res-}__$file"; fi
+            done
+          done
+          if [ -d stats ]; then cp -r stats/. "$dest/stats/"; fi
+          for corpus in e m; do
+            for file in config.json checksums.json; do
+              if [ -f "meta/x2x5-meta-$corpus/$file" ]; then cp "meta/x2x5-meta-$corpus/$file" "$dest/data/$corpus-$file"; fi
+            done
+          done
+          {
+            echo "# paper-x2-x5 run $GITHUB_RUN_ID, attempt $GITHUB_RUN_ATTEMPT"
+            echo
+            echo "- run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+            echo "- commit: $GITHUB_SHA ($GITHUB_REF_NAME)"
+            echo "- mode: $MODE; data from run: ${DATA_RUN:-this run}"
+            echo "- jobs: $RESULTS"
+            echo "- finished: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          } > "$dest/RUN.md"
+          if [ -f "$dest/stats/summary.md" ]; then cat "$dest/stats/summary.md" >> "$dest/RUN.md"; fi
+          cd publish
+          git init -q
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git remote add origin "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          if git fetch -q --depth 1 origin results/x2-x5; then
+            git checkout -q -B results/x2-x5 FETCH_HEAD
+          else
+            git checkout -q --orphan results/x2-x5
+          fi
+          git add "$run_dir"
+          git commit -q -m "results: paper-x2-x5 run $run_dir ($MODE)"
+          for attempt in 1 2 3 4 5 6; do
+            if git push -q origin HEAD:results/x2-x5; then echo "pushed $run_dir"; exit 0; fi
+            sleep $((attempt * 5))
+            git fetch -q --depth 20 origin results/x2-x5 && git rebase -q FETCH_HEAD
+          done
+          echo "::error::could not push the results"
+          exit 1

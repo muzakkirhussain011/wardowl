@@ -1,0 +1,125 @@
+name: paper-x2-x5-store
+
+# One store job of paper-x2-x5.yml (called once per experiment and corpus, with a matrix of
+# stores, layouts and builds): start the store, install wardowl and the clients from uv.lock by
+# hash, download the prepared corpus, run the experiment, and upload its rows, record and log
+# whatever happened.
+
+on:
+  workflow_call:
+    inputs:
+      experiment:
+        type: string
+        required: true
+      corpus:
+        type: string
+        required: true
+      matrix:
+        type: string
+        required: true
+      data_run:
+        type: string
+        default: ""
+      minutes:
+        type: string
+        default: "320"
+
+permissions:
+  contents: read
+  actions: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  store:
+    name: ${{ inputs.experiment }} ${{ inputs.corpus }} ${{ matrix.label }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(inputs.matrix) }}
+    env:
+      PYTHONUNBUFFERED: "1"
+      X2X5_PG_URL: postgresql://bench:bench@127.0.0.1:5432/bench
+      X2X5_QDRANT_URL: http://127.0.0.1:6333
+      X2X5_ES_URL: http://127.0.0.1:9200
+      X2X5_OS_URL: http://127.0.0.1:9200
+      X2X5_WEAVIATE_URL: http://127.0.0.1:8079
+      X2X5_WEAVIATE_GRPC_PORT: "50051"
+      X2X5_REDIS_URL: redis://127.0.0.1:6379/0
+      X2X5_MILVUS_URL: http://127.0.0.1:19530
+      X2X5_MONGO_URL: mongodb://127.0.0.1:27017/?directConnection=true
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: { persist-credentials: false }
+      - name: Free disk space for a million chunks
+        if: inputs.corpus == 'm'
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL || true
+          df -h /
+      - name: Start ${{ matrix.store }}
+        run: bash benchmarks/paper/x2x5_services.sh start "${{ matrix.store }}"
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with: { python-version: "3.12", cache: pip }
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with: { version: "0.13.1", enable-cache: false }
+      - name: Install from uv.lock, by hash
+        run: |
+          uv export --frozen --no-emit-project --all-extras --group integration -o "$RUNNER_TEMP/requirements.txt"
+          pip install --require-hashes --no-deps -r "$RUNNER_TEMP/requirements.txt"
+          pip install --require-hashes --no-deps -r .github/requirements/build.txt
+          pip install --no-deps --no-build-isolation -e .
+          python -c "import wardowl, numpy; print('wardowl', wardowl.__version__, 'numpy', numpy.__version__)"
+      - name: Download the data of this run
+        if: inputs.data_run == ''
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with: { name: "x2x5-data-${{ inputs.corpus }}", path: data }
+      - name: Download the data of run ${{ inputs.data_run }}
+        if: inputs.data_run != ''
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: x2x5-data-${{ inputs.corpus }}
+          path: data
+          run-id: ${{ inputs.data_run }}
+          github-token: ${{ github.token }}
+      - name: Wait for ${{ matrix.store }}
+        run: bash benchmarks/paper/x2x5_services.sh wait "${{ matrix.store }}"
+      - name: Run ${{ inputs.experiment }} on ${{ matrix.store }} (${{ matrix.layouts }}, builds ${{ matrix.builds }})
+        run: |
+          mkdir -p out
+          free -m; df -h / | tail -1
+          script=benchmarks/paper/x2_frontiers.py
+          if [ "${{ inputs.experiment }}" = x5 ]; then script=benchmarks/paper/x5_mitigation.py; fi
+          status=0
+          python "$script" --data data --store "${{ matrix.store }}" --layouts "${{ matrix.layouts }}" \
+            --builds "${{ matrix.builds }}" --out out --label "${{ inputs.experiment }}-${{ inputs.corpus }}-${{ matrix.label }}" \
+            --minutes "${{ inputs.minutes }}" 2>&1 | tee out/run.log || status=$?
+          if [ -f out/summary.md ]; then cat out/summary.md >> "$GITHUB_STEP_SUMMARY"; fi
+          if [ -f out/LEAK.json ]; then echo "::error::a permission leak stopped the job: $(cat out/LEAK.json)"; fi
+          exit "$status"
+      - name: Keep the server's logs and the runner's state
+        if: always()
+        run: bash benchmarks/paper/x2x5_services.sh logs out/logs
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: x2x5-res-${{ inputs.experiment }}-${{ inputs.corpus }}-${{ matrix.label }}
+          path: |
+            out/
+            !out/work/
+            !out/run.log
+            !out/logs/
+          if-no-files-found: warn
+          retention-days: 90
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: x2x5-log-${{ inputs.experiment }}-${{ inputs.corpus }}-${{ matrix.label }}
+          path: |
+            out/run.log
+            out/logs/
+          if-no-files-found: warn
+          retention-days: 90
