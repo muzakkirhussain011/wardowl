@@ -26,10 +26,23 @@ in [`PREREG_X3_X6.md`](PREREG_X3_X6.md) (commit 5da58ee, 2026-10-29).
 | [`x6_side_channels.py`](x6_side_channels.py) | X6 on one store: builds W0, W1 and SEP per seed, plays the game through wardowl's public API, writes `x6-<store>.jsonl` |
 | [`x3_filter_scaling.py`](x3_filter_scaling.py) | X3 on one store: one index of 100,000 vectors per seed, every G level, writes `x3-<store>.jsonl` |
 | [`x6_stats.py`](x6_stats.py), [`x3_stats.py`](x3_stats.py) | Statistics: cluster-bootstrap intervals, paired comparisons, the guards and the pre-registered verdicts; CSV tables and a Markdown report |
+| [`x6_crossbuild.py`](x6_crossbuild.py) | Follow-up (amendment 4, exploratory): the X6 game again with W1, W1 rebuilt and W0_g built twice, on FAISS, pgvector, Qdrant and Elasticsearch; pgvector's page and vacuum state and plans; writes `x6cb-<store>.jsonl` |
+| [`x3_chroma_bisect.py`](x3_chroma_bisect.py) | Follow-up (exploratory): one Chroma retrieval per level in a fresh process, bisecting the crash between 10,000 and 40,000 groups, with the fault handler and once under gdb; writes `x3bisect-chroma.jsonl` |
+| [`x3x6_followup.py`](x3x6_followup.py) | Follow-up readings: the components of FAISS's latency, the hub counts, pgvector's plans, the cross-build contrasts and the bisection, from run 40940385704's raw records and the follow-up's; `fu_*.csv` and `fu_report.md` |
+
+## The follow-up configuration (amendment 4)
+
+Since amendment 4 a push runs the `followup` configuration; the full design runs only when the
+workflow is dispatched with `configuration: full`. The follow-up downloads run 40940385704's data and
+raw records (`actions/download-artifact` with its run id), runs Chroma's X3 seeds 3 and 4 with the
+unchanged harness (`fu-x3-chroma`), the bisection (`fu-chroma-bisect`) and the cross-build A/A
+(`fu-cb-<store>`) in parallel, then `follow-up readings` recomputes the X3 verdicts with Chroma's five
+seeds and writes the exploratory tables. Its size is `FOLLOWUP_MODE` (smoke first, then full); it
+publishes to `results/x3-x6` under its own run id.
 
 ## The workflow
 
-A push to `paper/x3-x6` starts it; the size comes from `X3X6_MODE` at the top of the workflow:
+In the full configuration the size comes from `X3X6_MODE` at the top of the workflow:
 
 - **smoke**: X6 on the full corpus but group 0 of seed 0 and one repetition; X3 on 8,000 vectors,
   one seed and 3 queries. It exists to find faults in the harness; its numbers are never analysed or

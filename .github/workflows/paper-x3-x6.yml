@@ -13,14 +13,25 @@ name: paper-x3-x6
 # statistics and writes the reports to its job summary. The publish job commits the reports, the
 # tables and the end of every job's log to the branch results/x3-x6, under <run id>-<attempt>/, so
 # they can be read with git alone.
+#
+# Two configurations. `full` is the design above (data, run, summary), as run in 40940385704; it now
+# runs only when dispatched with configuration full. `followup` (amendment 4 of the pre-registration)
+# is what a push runs: Chroma's X3 seeds 3 and 4, a cross-build A/A on four stores and a bisection of
+# Chroma's crash, then exploratory readings of these and of run 40940385704's raw records, which it
+# downloads from that run's artifacts.
 
 on:
   push:
     branches: [paper/x3-x6]
   workflow_dispatch:
     inputs:
+      configuration:
+        description: followup (amendment 4) or full (the pre-registered design)
+        type: choice
+        options: [followup, full]
+        default: followup
       mode:
-        description: smoke (minutes) or full (the pre-registered design)
+        description: smoke (minutes) or full size
         type: choice
         options: [full, smoke]
         default: full
@@ -33,18 +44,23 @@ permissions:
   contents: read
 
 concurrency:
-  group: paper-x3-x6-runs-${{ github.ref }}
+  group: paper-x3-x6-runs-${{ github.ref }}-${{ inputs.configuration || 'followup' }}
   cancel-in-progress: false
 
 env:
-  # The size of a push-triggered run: full, the pre-registered design, since the fifth smoke run
-  # (40939098036) ran every job without an error.
+  X3X6_CONFIGURATION: ${{ inputs.configuration || 'followup' }}
+  # The size of a full-configuration run: the pre-registered design.
   X3X6_MODE: ${{ inputs.mode || 'full' }}
+  # The size of a push-triggered follow-up: smoke first (never analysed), then full.
+  FOLLOWUP_MODE: ${{ inputs.mode || 'smoke' }}
   SEEDS: ${{ inputs.seeds || 5 }}
+  # The full run whose artifacts the follow-up reads.
+  RUN1: "40940385704"
 
 jobs:
   data:
     name: data (FiQA, SciDocs, embeddings, plans)
+    if: ${{ (inputs.configuration || 'followup') == 'full' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 300
     steps:
@@ -99,7 +115,7 @@ jobs:
     needs: data
     # X3 falls back to synthetic vectors when the data job failed, and says so; X6 records that it
     # cannot run.
-    if: ${{ !cancelled() }}
+    if: ${{ !cancelled() && (inputs.configuration || 'followup') == 'full' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 350
     strategy:
@@ -297,7 +313,7 @@ jobs:
   summary:
     name: summary
     needs: [data, run]
-    if: ${{ !cancelled() }}
+    if: ${{ !cancelled() && (inputs.configuration || 'followup') == 'full' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 150
     steps:
@@ -340,12 +356,215 @@ jobs:
           if-no-files-found: warn
           retention-days: 90
 
+  # ---- the follow-up (amendment 4): its own jobs, on the data and records of run $RUN1 -------------
+
+  followup:
+    name: ${{ matrix.group }}
+    if: ${{ (inputs.configuration || 'followup') == 'followup' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 350
+    permissions:
+      contents: read
+      actions: read # the data artifact of run $RUN1
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Part A: Chroma's X3 seeds 3 and 4, as written, with the whole job's time.
+          - { group: fu-x3-chroma, kind: x3, target: chroma, services: none }
+          # Part B: exploratory.
+          - { group: fu-chroma-bisect, kind: bisect, target: chroma, services: none }
+          - { group: fu-cb-faiss, kind: crossbuild, target: faiss, services: none }
+          - { group: fu-cb-pgvector, kind: crossbuild, target: pgvector, services: postgres }
+          - { group: fu-cb-qdrant, kind: crossbuild, target: qdrant, services: qdrant }
+          - { group: fu-cb-elasticsearch, kind: crossbuild, target: elasticsearch, services: elasticsearch }
+    env:
+      GROUP: ${{ matrix.group }}
+      WARDOWL_TEST_DATABASE_URL: postgresql://test:test@localhost:5432/test
+      WARDOWL_TEST_ELASTICSEARCH_URL: http://127.0.0.1:9200
+      WARDOWL_TEST_QDRANT_URL: http://127.0.0.1:6333
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: { persist-credentials: false }
+      # The images and settings of the main run.
+      - name: Start the server
+        if: matrix.services != 'none'
+        env:
+          SERVICE: ${{ matrix.services }}
+        run: |
+          mkdir -p results/logs
+          exec > >(tee -a "results/logs/$GROUP-setup.log") 2>&1
+          case "$SERVICE" in
+            postgres)
+              docker run -d --name postgres --shm-size=1g -p 5432:5432 -e POSTGRES_USER=test -e POSTGRES_PASSWORD=test \
+                -e POSTGRES_DB=test pgvector/pgvector:pg17 \
+                -c shared_buffers=2GB -c maintenance_work_mem=1GB -c max_parallel_maintenance_workers=3 ;;
+            elasticsearch)
+              docker run -d --name elasticsearch -p 9200:9200 -e discovery.type=single-node \
+                -e xpack.security.enabled=false -e ES_JAVA_OPTS="-Xms2g -Xmx2g" \
+                docker.elastic.co/elasticsearch/elasticsearch:9.5.5 ;;
+            qdrant) docker run -d --name qdrant -p 6333:6333 qdrant/qdrant:v1.19.2 ;;
+            *) echo "::error::unknown service $SERVICE" ;;
+          esac
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with: { python-version: "3.12", cache: pip }
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with: { version: "0.13.1", enable-cache: false }
+      - name: Install from uv.lock, by hash
+        run: |
+          mkdir -p results/logs
+          exec > >(tee -a "results/logs/$GROUP-setup.log") 2>&1
+          uv export --frozen --no-emit-project --all-extras --group integration --group examples -o "$RUNNER_TEMP/requirements.txt"
+          pip install --require-hashes --no-deps -r "$RUNNER_TEMP/requirements.txt"
+          pip install --require-hashes --no-deps -r .github/requirements/build.txt
+          pip install --no-deps --no-build-isolation -e .
+          python -c "import wardowl; print('wardowl', wardowl.__version__)"
+      # The data (FiQA and SciDocs embeddings, X6's plans) of run $RUN1, so the game is the same one.
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: x3x6-data
+          path: x6data
+          run-id: ${{ env.RUN1 }}
+          github-token: ${{ github.token }}
+      - name: Wait for the server
+        if: matrix.services != 'none'
+        env:
+          SERVICE: ${{ matrix.services }}
+        run: |
+          exec > >(tee -a "results/logs/$GROUP-setup.log") 2>&1
+          ready() {
+            local name=$1 tries=$2; shift 2
+            for _ in $(seq 1 "$tries"); do "$@" > /dev/null 2>&1 && { echo "$name is ready"; return 0; }; sleep 2; done
+            echo "::warning::$name did not answer"; docker logs --tail 50 "$name" || true
+            return 1
+          }
+          case "$SERVICE" in
+            postgres) ready postgres 60 docker exec postgres pg_isready -U test || true ;;
+            elasticsearch) ready elasticsearch 90 curl -sf "$WARDOWL_TEST_ELASTICSEARCH_URL/_cluster/health?wait_for_status=yellow&timeout=2s" || true ;;
+            qdrant) ready qdrant 60 curl -sf "$WARDOWL_TEST_QDRANT_URL/readyz" || true ;;
+          esac
+      - name: Install gdb
+        if: matrix.kind == 'bisect'
+        run: command -v gdb || { sudo apt-get update -q && sudo apt-get install -y -q gdb; }
+      - name: Run the follow-up part
+        env:
+          KIND: ${{ matrix.kind }}
+          TARGET: ${{ matrix.target }}
+        run: |
+          set +e
+          mkdir -p results/logs
+          deadline=$(( $(date +%s) + 320 * 60 ))
+          status=99
+          case "$KIND" in
+            x3)
+              # The pre-registered harness, unchanged; the whole job's time (one target); the fault handler on.
+              PYTHONFAULTHANDLER=1 python benchmarks/paper/x3_filter_scaling.py --store "$TARGET" --data x6data \
+                --out results --mode "$FOLLOWUP_MODE" --seeds 5 --seed-list 3-4 --group-deadline "$deadline" \
+                --remaining 1 2>&1 | tee "results/logs/$GROUP-$TARGET.log"
+              status=${PIPESTATUS[0]} ;;
+            bisect)
+              python benchmarks/paper/x3_chroma_bisect.py --data x6data --out results --mode "$FOLLOWUP_MODE" --gdb \
+                2>&1 | tee "results/logs/$GROUP-$TARGET.log"
+              status=${PIPESTATUS[0]} ;;
+            crossbuild)
+              python benchmarks/paper/x6_crossbuild.py --store "$TARGET" --data x6data --out results \
+                --mode "$FOLLOWUP_MODE" --seeds 5 --group-deadline "$deadline" --remaining 1 2>&1 \
+                | tee "results/logs/$GROUP-$TARGET.log"
+              status=${PIPESTATUS[0]} ;;
+          esac
+          if [ "$status" -ne 0 ]; then
+            echo "::error title=$GROUP::the driver stopped with exit status $status"
+            printf '{"schema": 1, "type": "crash", "store": "%s", "group": "%s", "exit_status": %d}\n' \
+              "$TARGET" "$GROUP" "$status" >> results/crashes.jsonl
+          fi
+          ls -la results
+      - name: Keep the server's log with the results
+        if: always()
+        run: |
+          mkdir -p results/logs
+          for name in $(docker ps -a --format '{{.Names}}'); do
+            docker logs --tail 300 "$name" > "results/logs/$GROUP-server-$name.log" 2>&1 || true
+          done
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: x3x6-results-${{ matrix.group }}
+          path: results/
+          if-no-files-found: warn
+          retention-days: 90
+
+  followup-analysis:
+    name: follow-up readings
+    needs: followup
+    if: ${{ !cancelled() && (inputs.configuration || 'followup') == 'followup' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 150
+    permissions:
+      contents: read
+      actions: read # the artifacts of run $RUN1
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: { persist-credentials: false }
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with: { python-version: "3.12" }
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with: { version: "0.13.1", enable-cache: false }
+      - name: Install numpy from uv.lock, by hash
+        run: |
+          uv export --frozen --no-emit-project --extra faiss -o "$RUNNER_TEMP/requirements.txt"
+          pip install --require-hashes --no-deps -r "$RUNNER_TEMP/requirements.txt"
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: x3x6-data
+          path: run1/data
+          run-id: ${{ env.RUN1 }}
+          github-token: ${{ github.token }}
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: x3x6-results-x*
+          path: run1
+          run-id: ${{ env.RUN1 }}
+          github-token: ${{ github.token }}
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: x3x6-results-fu-*
+          path: parts
+      - name: X3 statistics with Chroma's seeds 3 and 4 (part A)
+        run: |
+          mkdir -p reports combined
+          exec > >(tee -a reports/stats-x3.log) 2>&1
+          for folder in run1/x3x6-results-x3-*; do cp -r "$folder" combined/; done
+          mkdir -p combined/followup-chroma
+          cp parts/x3x6-results-fu-x3-chroma/x3-chroma.jsonl combined/followup-chroma/ || echo "::warning::no follow-up Chroma records"
+          find combined -name 'x3-*.jsonl' -exec wc -l {} +
+          resamples=10000
+          if [ "$FOLLOWUP_MODE" = smoke ]; then resamples=200; fi
+          python benchmarks/paper/x3_stats.py --in combined --out reports --resamples "$resamples" --annotate
+          if [ -f reports/x3_report.md ]; then cat reports/x3_report.md >> "$GITHUB_STEP_SUMMARY"; fi
+      - name: Exploratory readings (part B)
+        if: ${{ !cancelled() }}
+        run: |
+          mkdir -p reports
+          exec > >(tee -a reports/stats-followup.log) 2>&1
+          du -sh run1/* parts/* || true
+          resamples=10000
+          if [ "$FOLLOWUP_MODE" = smoke ]; then resamples=200; fi
+          python benchmarks/paper/x3x6_followup.py --run1 run1 --followup parts --out reports --resamples "$resamples"
+          if [ -f reports/fu_report.md ]; then cat reports/fu_report.md >> "$GITHUB_STEP_SUMMARY"; fi
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: ${{ !cancelled() }}
+        with:
+          name: x3x6-reports
+          path: reports/
+          if-no-files-found: warn
+          retention-days: 90
+
   # Commits what a reader needs to the branch results/x3-x6, under <run id>-<attempt>/: the reports
   # and tables, the data job's manifest, the result of every job, and the last 200 lines of every log.
   # The raw JSON lines stay in the artifacts (x3x6-results-*), which are too large for git.
   publish:
     name: publish to results/x3-x6
-    needs: [data, run, summary]
+    needs: [data, run, summary, followup, followup-analysis]
     if: ${{ always() }}
     runs-on: ubuntu-24.04
     timeout-minutes: 30
@@ -392,7 +611,13 @@ jobs:
           {
             echo "run: $RUN_URL"
             echo "commit: $GITHUB_SHA"
-            echo "mode: $X3X6_MODE"
+            echo "configuration: $X3X6_CONFIGURATION"
+            if [ "$X3X6_CONFIGURATION" = followup ]; then
+              echo "mode: $FOLLOWUP_MODE"
+              echo "reads the artifacts of run: $RUN1"
+            else
+              echo "mode: $X3X6_MODE"
+            fi
             echo "seeds: $SEEDS"
             echo "published: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
             echo
@@ -420,7 +645,8 @@ jobs:
           rm -rf "$folder"
           cp -r "$RUNNER_TEMP/publish/$folder" "$folder"
           git add -A "$folder"
-          git commit --quiet -m "results: paper-x3-x6 run $GITHUB_RUN_ID, attempt $GITHUB_RUN_ATTEMPT ($X3X6_MODE)"
+          if [ "$X3X6_CONFIGURATION" = followup ]; then label="followup, $FOLLOWUP_MODE"; else label="$X3X6_MODE"; fi
+          git commit --quiet -m "results: paper-x3-x6 run $GITHUB_RUN_ID, attempt $GITHUB_RUN_ATTEMPT ($label)"
           for attempt in 1 2 3 4 5; do
             if git push --quiet origin "HEAD:$branch"; then echo "pushed to $branch/$folder"; exit 0; fi
             sleep $((attempt * 5))
