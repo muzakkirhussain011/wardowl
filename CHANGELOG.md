@@ -80,6 +80,11 @@ All notable changes are recorded here. The format follows
   per-tenant graphs (`is_tenant` with `m=0` and `payload_m`), and exact search. Concepts, the
   security model, the threat model, operations, production, hybrid search and the store pages
   describe `complete` as it now behaves.
+- The OpenFGA page says to raise `OPENFGA_REQUEST_TIMEOUT` together with the ListObjects deadline,
+  since OpenFGA refuses to start when the deadline is the longer of the two. The Kaggle acceptance
+  run did exactly that: it set a 20-second deadline and left the request timeout at its default, so
+  OpenFGA never started and its configuration was reported as a start-up timeout. The run now sets
+  the request timeout as well.
 
 ## [2.1.0] - 2026-10-24
 
