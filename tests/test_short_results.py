@@ -17,6 +17,7 @@ from wardowl import (
     InMemoryBackend,
     MetadataACLAuthorizer,
     PermissionedRetriever,
+    SearchError,
     Subject,
     matches,
 )
@@ -299,10 +300,12 @@ class Failing(Lossy):
 @pytest.mark.parametrize("part", ["count", "exact"])
 def test_an_error_in_the_count_or_the_search_run_again_fails_the_retrieval(part):
     retriever = PermissionedRetriever(Failing(DOCS, part), MetadataACLAuthorizer(), short_results="exact")
-    with pytest.raises(ConnectionError):
+    with pytest.raises(SearchError, match=f"^{'count' if part == 'count' else 'search'} failed$") as failure:
         retriever.retrieve("leave", BOB, 5)
-    with pytest.raises(ConnectionError):
+    assert isinstance(failure.value.__cause__, ConnectionError)  # the store's own error, for the logs
+    with pytest.raises(SearchError) as failure:
         asyncio.run(retriever.aretrieve("leave", BOB, 5))
+    assert isinstance(failure.value.__cause__, ConnectionError)
 
 
 def test_an_authorizer_error_after_a_search_run_again_fails_closed():

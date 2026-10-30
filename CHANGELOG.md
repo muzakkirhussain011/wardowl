@@ -55,6 +55,20 @@ All notable changes are recorded here. The format follows
   the subject's id or one of its groups, before anything is sent. It is an `AuthorizationError`, so
   code that catches that and retrieval behave as before (retrieval fails closed), and a
   `ValueError`, since the subject is at fault rather than the service.
+- `CachingAuthorizer(source_staleness=...)`: how many seconds old the data behind the wrapped
+  authorizer's answers can be. By default it is the authorizer's `max_staleness`, an optional
+  attribute an authorizer declares when it can answer from stale data, or 0 when it declares none.
+  `SpiceDBAuthorizer.max_staleness` follows its consistency (11 seconds, or 0 with
+  `fullyConsistent`; `max_staleness=` sets it), `AllOf` and `AnyOf` declare the largest of their
+  parts', and `CachingAuthorizer.max_staleness` is its `ttl` plus `source_staleness`, for a cache
+  that wraps another. See Security for what the cache does with it.
+- `wardowl.SearchError`, raised when the backend's search or count fails (see Changed).
+- `PgVectorBackend(statement_timeout=...)`, in seconds: PostgreSQL cancels a search or count that
+  runs longer, time waiting for a lock included, and the retrieval raises `SearchError`. It is set
+  with `SET LOCAL statement_timeout` in the statement's transaction, like the scan settings; `count`
+  now runs in a transaction of its own for it. None, the default, sets nothing.
+- `SpiceDBAuthorizer(trust_empty_lookup=True)` takes a LookupResources answer with no document as
+  "nothing is readable", as before; see Changed.
 
 ### Changed
 
@@ -81,6 +95,41 @@ All notable changes are recorded here. The format follows
   A subclass of `InMemoryBackend` that drops hits on purpose should set `exact_search = False`.
 - `check_backend` checks a backend that declares `exact_search` as exact, whatever `exact=` says,
   since the retriever takes its short results as proof that nothing else matches.
+- A failure in the backend's search or count, the searches `short_results` runs again included,
+  raises `SearchError` with a fixed message, "search failed" or "count failed", and the store
+  client's exception as its `__cause__`. It reached the caller as the client's own exception, with
+  its own text, which can name hosts (a Qdrant error carries the raw response), while agent
+  frameworks show a tool's error to the model: the guarantee the retriever states for authorizer
+  failures now holds for the store too. `InvalidQuery` from a backend is still raised as it is.
+  Code that caught a store client's exceptions around `retrieve` should catch `SearchError` and read
+  `__cause__`. `SearchError` is a `RuntimeError`, not an `AuthorizationError`. The paper's fault
+  experiment X7 found it: 28,125 failures under store faults surfaced as psycopg, psycopg-pool,
+  qdrant-client and JSON exceptions.
+- `SpiceDBAuthorizer.filter_for` returns no filter when LookupResources finds no document, so the
+  retriever post-filters and CheckBulkPermissions decides each candidate. The stream has no end
+  marker, so one cut off before its first line by a proxy or a fault read as "nothing is readable",
+  and retrieval returned nothing without an error: under X7's fault that emptied SpiceDB's answers,
+  4,746 retrievals did. Subjects who truly read nothing now cost a post-filtered search, and under
+  `strategy="prefilter"` they raise `ValueError`, as a truncated lookup already did; pass
+  `trust_empty_lookup=True` to keep the earlier behaviour. OpenFGA's ListObjects is unchanged: its
+  answer is one JSON document, which a cut would break, and a deadline-cut list already gives no
+  filter.
+
+### Security
+
+- `CachingAuthorizer.invalidate()` no longer lets a permission service that is itself behind refill
+  the cache with a decision from before the change. After `invalidate()`, the next retrieval asked
+  the service, which could still answer from a stale snapshot (SpiceDB under `minimizeLatency`,
+  Cerbos before reloading a policy), and the cache kept that answer for its whole `ttl`. In the
+  paper's experiment X7, all 40 SpiceDB revocations with `invalidate()` took the full 30-second
+  `ttl` (a median 30.04 s, against a stated 5.5 s), 39 of 40 on a second replica, and Cerbos's took
+  as long. Now, for `source_staleness` seconds after `invalidate()`, answers for the subject (or
+  for everyone) are passed on and cached nowhere: not in the process, and not in the shared cache,
+  whose epoch carries the end of the hold so that every replica holds back too. The bound after
+  `invalidate()` is the service's own staleness when `source_staleness` covers it, plus `local_ttl`
+  on other replicas. With `source_staleness` 0, the default for every authorizer but
+  `SpiceDBAuthorizer` without `fullyConsistent`, nothing changes. Replicas of earlier versions
+  sharing the cache during an upgrade do not see the hold.
 
 ### Security
 
@@ -160,6 +209,15 @@ All notable changes are recorded here. The format follows
   count and the exact search; the Qdrant page describes `exact_search`, the count, the exact
   search and ACORN as a wider search. The extending guide and operations describe the new backend
   members, event fields, span attributes and metrics.
+- Corrected SpiceDB's revocation bound. The adapter and its page said a revoked permission keeps
+  granting access under `minimizeLatency` for up to the quantization interval, 5 seconds by
+  default. SpiceDB documents the interval plus 10% of it (5.5 s), and X7 measured up to 8.7 s, with
+  revoked documents reappearing after they had gone in 28 polls. The SpiceDB page, Revocation and
+  consistency, operations, the security model and the threat model give the bound with and without
+  `invalidate()`, and the acceptance scenario waits for the declared `max_staleness`.
+- The pgvector page has a section on timeouts: `statement_timeout`, and libpq's `connect_timeout`,
+  `tcp_user_timeout` and keepalives, and the pool's `timeout`, with what each bounds and what none
+  of them does.
 - The OpenFGA page says to raise `OPENFGA_REQUEST_TIMEOUT` together with the ListObjects deadline,
   since OpenFGA refuses to start when the deadline is the longer of the two. The Kaggle acceptance
   run did exactly that: it set a 20-second deadline and left the request timeout at its default, so
