@@ -11,6 +11,46 @@ All notable changes are recorded here. The format follows
 - `ChromaBackend(fallback_candidates=...)`, how many chunks a search reads when its filter is too
   large to send to Chroma whole (1,000 by default), and `wardowl.backends.chroma.FilterTooLarge`,
   the `ValueError` that `filter_to_where` raises for such a filter. See Fixed.
+- `PermissionedRetriever(short_results=...)` decides what happens when a pre-filtered search on an
+  approximate index returns fewer hits than were asked for. `"report"` (the default) returns them
+  with `complete=False`, as before, and runs nothing more. `"count"` asks the backend how many
+  chunks match the filter: no more than came back proves that the user may read no more, and the
+  result is complete; more proves that the index missed some. `"exact"` also searches again,
+  exactly, under the same filter, when the count shows a miss and is at most `max_exact_rows`
+  (10,000 by default; `None` for no bound), so a large readable set never sets off a large scan.
+  `"widen"` searches again with `wider`, the same store with larger search settings, and keeps the
+  best hits of both searches. The search run again is checked again with the authorizer, together
+  with the first search's hits it did not return, so a backend that ignored the filter either time
+  is counted in `violations`; an error in the count or the search fails the retrieval. A backend
+  that cannot count or search exactly keeps the first hits. The acceptance run on Kaggle found
+  pgvector returning nothing to users who could read about 600 chunks; with `"exact"`, such a
+  result is counted, and searched again exactly over those few hundred chunks.
+- `RetrievalResult.shortfall` says why a pre-filtered search came back short: `"exhausted"` (the
+  user may read no more), `"missed"` (the index missed chunks the user may read) or `"unknown"`
+  (approximate, and nothing was counted). `RetrievalResult.fallback` says what `short_results` did:
+  `"exact"`, `"widened"`, `"over_limit"` (above `max_exact_rows`) or `"unsupported"` (the backend
+  cannot count, or cannot search exactly). Both are None otherwise. `RetrievalEvent` carries both,
+  and `shortfall_ms`, the time spent on a short result; `OpenTelemetryObserver` records them as
+  span attributes, and `OpenTelemetryMetrics` counts short results in `wardowl.short_results`.
+- `PermissionedRetriever(recall_sample_rate=...)` (0 by default): for that share of pre-filtered
+  retrievals on a backend that can search exactly, the exact search runs too, and
+  `RetrievalResult.sampled_recall` reports how much of its top k came back, which `complete` cannot
+  see. The exact hits are never returned. `OpenTelemetryMetrics` records it in the
+  `wardowl.sampled_recall` histogram.
+- Backends can offer `count(filter, limit)` (and `acount`), and declare `supports_exact = True`
+  when `search` and `asearch` accept `exact=True`. Both are optional and read with `getattr`; the
+  retriever passes `exact` only to a backend that declares it, so existing backends work unchanged.
+  `check_backend` checks both where they are there: an exact search must return what the filter
+  matches, and a count must count it.
+- `PgVectorBackend(max_scan_tuples=..., scan_mem_multiplier=..., work_mem=...)` set pgvector's
+  iterative scan limits and `work_mem` with `SET LOCAL` in each search's transaction, as
+  `ef_search` and `iterative_scan` are. In vector mode, `count` counts the rows a filter matches,
+  stopping at the limit, and `search(..., exact=True)` searches with `SET LOCAL enable_indexscan =
+  off`, so every row the filter matches is ranked.
+- `QdrantBackend.exact_search` is True for a vector backend whose `search_params` set `exact=True`
+  (without `indexed_only`). In vector mode, `count` asks Qdrant for an exact count, and
+  `search(..., exact=True)` searches with a copy of `search_params` that sets `exact=True` and
+  `indexed_only=False`. ACORN is set through `search_params`, as before.
 - `wardowl.UnsupportedSubject`, raised by an authorizer when its permission service cannot represent
   the subject's id or one of its groups, before anything is sent. It is an `AuthorizationError`, so
   code that catches that and retrieval behave as before (retrieval fails closed), and a
@@ -36,9 +76,9 @@ All notable changes are recorded here. The format follows
   satisfy it. `InMemoryBackend` declares it, and `FaissBackend` does when its index is flat (the
   default) or an ID map around a flat index. `RankFusion` does not, even over exact backends: it
   leaves out chunks whose metadata differs between backends after each has filled its list, so a
-  short fused list proves nothing. Every other built-in backend searches approximately and does
-  not declare it. A subclass of `InMemoryBackend` that drops hits on purpose should set
-  `exact_search = False`.
+  short fused list proves nothing. `QdrantBackend` declares it when its `search_params` force exact
+  search (see Added). Every other built-in backend searches approximately and does not declare it.
+  A subclass of `InMemoryBackend` that drops hits on purpose should set `exact_search = False`.
 - `check_backend` checks a backend that declares `exact_search` as exact, whatever `exact=` says,
   since the retriever takes its short results as proof that nothing else matches.
 
@@ -113,6 +153,13 @@ All notable changes are recorded here. The format follows
   per-tenant graphs (`is_tenant` with `m=0` and `payload_m`), and exact search. Concepts, the
   security model, the threat model, operations, production, hybrid search and the store pages
   describe `complete` as it now behaves.
+- Concepts has a section on short results: what `short_results` and `recall_sample_rate` do, what
+  they cost, and how the guarantees hold when a search runs again. It credits OpenSearch, which
+  since 3.5 falls back to an exact search inside the engine when an approximate filtered k-NN
+  search returns fewer than k results. The pgvector page describes the scan-limit arguments, the
+  count and the exact search; the Qdrant page describes `exact_search`, the count, the exact
+  search and ACORN as a wider search. The extending guide and operations describe the new backend
+  members, event fields, span attributes and metrics.
 - The OpenFGA page says to raise `OPENFGA_REQUEST_TIMEOUT` together with the ListObjects deadline,
   since OpenFGA refuses to start when the deadline is the longer of the two. The Kaggle acceptance
   run did exactly that: it set a 20-second deadline and left the request timeout at its default, so

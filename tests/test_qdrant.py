@@ -11,6 +11,7 @@ import pytest
 
 qdrant_client = pytest.importorskip("qdrant_client")
 from qdrant_client import models  # noqa: E402
+from qdrant_client.http import models as rest_models  # noqa: E402
 
 from wardowl import (  # noqa: E402
     And,
@@ -210,6 +211,122 @@ def test_named_vectors_and_search_params_are_passed_through():
     backend = QdrantBackend(client, "named", EMBED, vector_name="text", search_params=models.SearchParams(exact=True))
     backend.add([Document("a", "leave policy", {"team": "x"}), Document("b", "salary", {"team": "y"})])
     assert [h.id for h in backend.search("leave", 5, In("team", ["x"]))] == ["a"]
+
+
+def test_exact_search_is_declared_when_the_search_params_force_it():
+    def backend(params, mode="vector"):
+        return QdrantBackend(None, "c", EMBED, mode=mode, search_params=params)
+
+    assert backend(models.SearchParams(exact=True)).exact_search is True
+    assert backend(None).exact_search is False
+    assert backend(models.SearchParams(hnsw_ef=128)).exact_search is False
+    # indexed_only skips segments that are still being indexed, so not every point is scored.
+    assert backend(models.SearchParams(exact=True, indexed_only=True)).exact_search is False
+    assert backend(models.SearchParams(exact=True), mode="keyword").exact_search is False
+    assert backend(None).supports_exact is True and backend(None, mode="keyword").supports_exact is False
+
+
+class Recording:
+    """A Qdrant client that records what it is asked, and answers with no points and a fixed count."""
+
+    def __init__(self, count=0):
+        self.counted = count
+        self.calls = []
+
+    def query_points(self, **request):
+        self.calls.append(("query_points", request))
+        # qdrant_client.models also exports fastembed's QueryResponse under that name; query_points
+        # answers with the REST model.
+        return rest_models.QueryResponse(points=[])
+
+    def count(self, collection_name, **options):
+        self.calls.append(("count", {"collection_name": collection_name, **options}))
+        return models.CountResult(count=self.counted)
+
+
+class AsyncRecording(Recording):
+    async def query_points(self, **request):
+        return super().query_points(**request)
+
+    async def count(self, collection_name, **options):
+        return super().count(collection_name, **options)
+
+
+def test_an_exact_search_forces_exact_on_a_copy_of_the_search_params():
+    acorn = models.AcornSearchParams(enable=True, max_selectivity=1.0)
+    params = models.SearchParams(hnsw_ef=128, acorn=acorn, indexed_only=True)
+    client = Recording()
+    backend = QdrantBackend(client, "docs", EMBED, search_params=params)
+    f = In("allowed_groups", ["hr"])
+    backend.search("leave", 5, f)
+    backend.search("leave", 5, f, exact=True)
+    QdrantBackend(client, "docs", EMBED).search("leave", 5, f, exact=True)
+    (_, approximate), (_, exact), (_, plain) = client.calls
+    assert approximate["search_params"] is params and params.exact is not True  # ACORN, as given
+    forced = exact["search_params"]
+    assert (forced.exact, forced.indexed_only, forced.hnsw_ef, forced.acorn) == (True, False, 128, acorn)
+    assert plain["search_params"] == models.SearchParams(exact=True)
+    assert exact["query_filter"] == approximate["query_filter"] == filter_to_qdrant(f) and exact["limit"] == 5
+
+
+def test_count_asks_qdrant_for_an_exact_count_under_the_same_filter():
+    client = Recording(count=7)
+    backend = QdrantBackend(client, "docs", EMBED)
+    f = And(In("tenant", ["acme"]), In("allowed_groups", ["hr"]))
+    assert backend.count(f, 3) == 7  # Qdrant counts them all, past the limit
+    assert client.calls == [("count", {"collection_name": "docs", "count_filter": filter_to_qdrant(f), "exact": True})]
+    assert backend.count(In("allowed_groups", []), 3) == 0 and len(client.calls) == 1  # nothing can match
+    assert asyncio.run(backend.acount(f, 3)) == 7  # in a thread, with no async client
+    keyword = QdrantBackend(client, "docs", mode="keyword", async_client=AsyncRecording(count=7))
+    assert keyword.count(f, 3) is None and asyncio.run(keyword.acount(f, 3)) is None
+
+
+def test_native_async_count_and_exact_search_send_what_the_sync_ones_send():
+    sync, native = Recording(count=4), AsyncRecording(count=4)
+    f = In("allowed_groups", ["hr"])
+    backend = QdrantBackend(sync, "docs", EMBED)
+    async_backend = QdrantBackend(None, "docs", EMBED, async_client=native)
+    assert backend.count(f, 5) == asyncio.run(async_backend.acount(f, 5)) == 4
+    assert asyncio.run(async_backend.acount(In("allowed_groups", []), 5)) == 0
+    assert backend.search("leave", 5, f, exact=True) == asyncio.run(async_backend.asearch("leave", 5, f, exact=True))
+    assert native.calls == sync.calls
+
+
+class Stopped(QdrantBackend):
+    """Returns one hit under a filter unless asked for an exact search, as an index that stopped early."""
+
+    def search(self, query, k, filter=None, *, exact=False):
+        hits = super().search(query, k, filter, exact=exact)
+        return hits if exact or filter is None else hits[:1]
+
+
+def test_short_results_are_told_apart_and_repaired(any_client):
+    name = f"wo_{uuid.uuid4().hex}"
+    create_collection(any_client, name, EMBED.dim)
+    groups = [["*"] if i % 3 == 0 else ["hr"] for i in range(12)]
+    QdrantBackend(any_client, name, EMBED).add(
+        [Document(f"d{i:02d}", f"leave report {i}", {"allowed_groups": g}) for i, g in enumerate(groups)]
+    )
+    bob = Subject("bob", ["eng"])  # may read the four chunks for everyone
+    authorizer = MetadataACLAuthorizer()
+    try:
+        backend = QdrantBackend(any_client, name, EMBED)
+        assert backend.count(In("allowed_groups", ["hr"]), 1) == 8
+        reported = PermissionedRetriever(backend, authorizer).retrieve("leave", bob, 10)
+        assert len(reported.hits) == 4 and (reported.shortfall, reported.complete) == ("unknown", False)
+        counted = PermissionedRetriever(backend, authorizer, short_results="count")
+        result = counted.retrieve("leave", bob, 10)
+        assert (result.shortfall, result.complete) == ("exhausted", True)
+        assert asyncio.run(counted.aretrieve("leave", bob, 10)) == result
+        exact = QdrantBackend(any_client, name, EMBED, search_params=models.SearchParams(exact=True))
+        result = PermissionedRetriever(exact, authorizer).retrieve("leave", bob, 10)
+        assert len(result.hits) == 4 and (result.shortfall, result.complete) == ("exhausted", True)
+        repaired = PermissionedRetriever(Stopped(any_client, name, EMBED), authorizer, short_results="exact")
+        result = repaired.retrieve("leave", bob, 10)
+        assert sorted(h.id for h in result.hits) == ["d00", "d03", "d06", "d09"]
+        assert (result.shortfall, result.fallback, result.complete) == ("missed", "exact", True)
+    finally:
+        any_client.delete_collection(name)
 
 
 def test_wrong_input_is_rejected():

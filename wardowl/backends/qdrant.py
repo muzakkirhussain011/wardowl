@@ -172,6 +172,24 @@ def _filter(f: Filter, metadata_key: str) -> models.Filter | None:
     return models.Filter(must=[result])
 
 
+def _forces_exact(params: Any) -> bool:
+    """Whether search parameters make Qdrant score every point the filter admits: `exact`, and not
+    `indexed_only`, which skips segments still being indexed."""
+    return getattr(params, "exact", None) is True and getattr(params, "indexed_only", None) is not True
+
+
+def _exact(params: Any) -> Any:
+    """`params` with exact search forced, as a copy: Qdrant then scores every point the filter admits."""
+    from qdrant_client import models
+
+    if params is None:
+        return models.SearchParams(exact=True)
+    copy = getattr(params, "model_copy", None)  # pydantic 2; pydantic 1 names it copy
+    if copy is None:
+        copy = params.copy
+    return copy(update={"exact": True, "indexed_only": False})
+
+
 def create_collection(
     client: Any,
     name: str,
@@ -210,10 +228,18 @@ class QdrantBackend:
 
     `embed` turns text into a vector (your embedding model). `vector_name` selects a named vector,
     `search_params` (a `qdrant_client.models.SearchParams`) tunes the search, for example
-    `SearchParams(hnsw_ef=128)` for higher recall or `SearchParams(exact=True)` for brute force.
-    Scores are Qdrant's: cosine similarity for a cosine collection. Pass `async_client` (an
-    `AsyncQdrantClient`) for a native `asearch`; otherwise async calls run `search` in a thread.
-    Without `embed`, search with `Query(vector=...)` and pass `embeddings` to `add`.
+    `SearchParams(hnsw_ef=128)` for higher recall, ACORN's filtered graph search with
+    `SearchParams(acorn=AcornSearchParams(enable=True, max_selectivity=1.0))`, or
+    `SearchParams(exact=True)` for brute force, which makes `exact_search` True (unless
+    `indexed_only` is set too). Scores are Qdrant's: cosine similarity for a cosine collection.
+    Pass `async_client` (an `AsyncQdrantClient`) for a native `asearch`; otherwise async calls run
+    `search` in a thread. Without `embed`, search with `Query(vector=...)` and pass `embeddings`
+    to `add`.
+
+    In vector mode the backend also offers what `PermissionedRetriever(short_results=...)` uses to
+    check a short result: `count(filter, limit)` counts the points the filter admits, exactly (it
+    counts them all; Qdrant's count has no limit), and `search(..., exact=True)` (`supports_exact`)
+    searches with a copy of `search_params` that sets `exact=True` and `indexed_only=False`.
 
     `mode="keyword"` ranks by BM25 instead, on the sparse vector `wardowl_bm25` of a collection
     created with `text_search=True`, under the same `query_filter`. Scores are BM25, higher for
@@ -252,6 +278,18 @@ class QdrantBackend:
         self.metadata_key = metadata_key
         self.vector_name = vector_name
         self.search_params = search_params
+
+    @property
+    def exact_search(self) -> bool:
+        """True for a vector search whose `search_params` force exact search (`exact=True`, without
+        `indexed_only`): Qdrant then scores every point the filter admits, so fewer than k hits means
+        that no other point matches."""
+        return self.mode == "vector" and _forces_exact(self.search_params)
+
+    @property
+    def supports_exact(self) -> bool:
+        """True in vector mode: `search(..., exact=True)` then scores every point the filter admits."""
+        return self.mode == "vector"
 
     # ---- writing -----------------------------------------------------------------------------
 
@@ -320,7 +358,7 @@ class QdrantBackend:
 
     # ---- searching ---------------------------------------------------------------------------
 
-    def _request(self, query: Query, k: int, f: Filter | None) -> dict[str, Any] | None:
+    def _request(self, query: Query, k: int, f: Filter | None, exact: bool = False) -> dict[str, Any] | None:
         query_filter = None
         if f is not None:
             query_filter = _filter(f, self.metadata_key)
@@ -328,6 +366,7 @@ class QdrantBackend:
                 return None  # nothing can match
         search: Any
         using: str | None
+        params = self.search_params
         if self.mode == "keyword":
             from qdrant_client import models
 
@@ -337,12 +376,14 @@ class QdrantBackend:
             search, using = models.SparseVector(indices=indices, values=weights), SPARSE_NAME
         else:
             search, using = query.embedded(self.embed), self.vector_name
+            if exact:
+                params = _exact(params)
         return {
             "collection_name": self.collection,
             "query": search,
             "using": using,
             "query_filter": query_filter,
-            "search_params": self.search_params,
+            "search_params": params,
             "limit": k,
             "with_payload": True,
         }
@@ -366,21 +407,52 @@ class QdrantBackend:
         hits.sort(key=lambda h: (-h.score, h.id))
         return hits
 
-    def search(self, query: str | Query, k: int, filter: Filter | None = None) -> list[Hit]:
+    def search(self, query: str | Query, k: int, filter: Filter | None = None, *, exact: bool = False) -> list[Hit]:
+        """The k nearest points the filter admits; with `exact`, scored by brute force."""
         if k < 1:
             return []
-        request = self._request(Query.of(query), k, filter)
+        request = self._request(Query.of(query), k, filter, exact)
         if request is None:
             return []
         return self._hits(self.client.query_points(**request).points)
 
-    async def asearch(self, query: str | Query, k: int, filter: Filter | None = None) -> list[Hit]:
+    async def asearch(
+        self, query: str | Query, k: int, filter: Filter | None = None, *, exact: bool = False
+    ) -> list[Hit]:
         if self.async_client is None:
-            return await asyncio.to_thread(self.search, query, k, filter)
+            return await asyncio.to_thread(self.search, query, k, filter, exact=exact)
         if k < 1:
             return []
-        request = await asyncio.to_thread(self._request, Query.of(query), k, filter)
+        request = await asyncio.to_thread(self._request, Query.of(query), k, filter, exact)
         if request is None:
             return []
         response = await self.async_client.query_points(**request)
         return self._hits(response.points)
+
+    def count(self, filter: Filter, limit: int) -> int | None:
+        """How many points the filter admits, counted exactly. Qdrant counts them all, so `limit`
+        is not used.
+
+        `PermissionedRetriever(short_results=...)` compares it with a short result: a vector search
+        can return any of these points, so more of them than hits means the index missed some. A
+        point that holds only the keyword vector is counted too, which can make a short result look
+        missed, but never makes one complete. None in keyword mode, which ranks only the points
+        that contain the query's words.
+        """
+        if self.mode == "keyword":
+            return None
+        count_filter = _filter(filter, self.metadata_key)
+        if count_filter is None:
+            return 0  # nothing can match
+        return int(self.client.count(self.collection, count_filter=count_filter, exact=True).count)
+
+    async def acount(self, filter: Filter, limit: int) -> int | None:
+        if self.async_client is None:
+            return await asyncio.to_thread(self.count, filter, limit)
+        if self.mode == "keyword":
+            return None
+        count_filter = _filter(filter, self.metadata_key)
+        if count_filter is None:
+            return 0
+        response = await self.async_client.count(self.collection, count_filter=count_filter, exact=True)
+        return int(response.count)
