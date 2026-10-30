@@ -39,7 +39,11 @@ whole BatchCheck request, so every retrieval that found the chunk would return n
 
 Subject ids and group names are written into OpenFGA's `type:id` strings, where `bob#manager`
 would be a userset, `*` the wildcard and a `:` another type. An id or group name that is empty or
-contains `:`, `#`, `*` or whitespace therefore raises `AuthorizationError` instead of being sent.
+contains `:`, `#`, `*`, whitespace or a control character therefore raises `UnsupportedSubject`
+instead of being sent. So does one OpenFGA's API refuses for its length: a user (`user:<id>`)
+longer than 512 bytes in UTF-8, or a group (`group:<name>`) longer than 256 characters. OpenFGA
+would refuse every request naming them. `UnsupportedSubject` is an `AuthorizationError`, so
+retrieval fails closed, and a `ValueError`, since the subject is at fault.
 
 Change the names with `object_type=`, `user_type=`, `relations={"read": "viewer"}`,
 `group_type=` and `group_relation=`. Pass `authorization_model_id=` to pin a model version.
@@ -64,6 +68,8 @@ looked complete. So when the answer reaches `list_objects_limit` (default 1000),
 retriever post-filters with BatchCheck instead. Set both to your server's values;
 `list_objects_deadline=None` suits a server configured without a deadline. With the default
 `timeout` of 2 seconds, a call slow enough to meet the default deadline fails first and raises.
+To raise the server's deadline, raise `OPENFGA_REQUEST_TIMEOUT` (3 seconds by default) with it:
+OpenFGA refuses to start when the ListObjects deadline is longer than its request timeout.
 
 `In` matches a list field when any of its elements is listed, while `check` denies a chunk whose
 resource field is not one string. The retriever's re-check of pre-filtered hits (`recheck=True`,
@@ -86,6 +92,11 @@ With `contextual_groups=True` (the default), the subject's groups are sent with 
 contextual tuples (`user:<id> member group:<name>`), so group memberships from your identity
 provider take effect without being written to OpenFGA first. They are trusted as given, so they
 must come from authentication, not from the client.
+
+OpenFGA takes at most 100 contextual tuples with a check or a list, and refuses the whole request
+beyond that. A subject in more than 100 groups therefore raises `UnsupportedSubject` before
+anything is sent. Write such memberships to OpenFGA as tuples (`user:<id> member group:<name>`) and
+pass `contextual_groups=False`, so that OpenFGA follows the memberships it stores.
 
 ## Tenants in one store
 

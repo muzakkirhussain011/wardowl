@@ -1272,6 +1272,8 @@ class PgVectorStore(Store):
             "OPENFGA_METRICS_ENABLED": "false",
             "OPENFGA_LIST_OBJECTS_MAX_RESULTS": str(FGA_LIST_LIMIT),
             "OPENFGA_LIST_OBJECTS_DEADLINE": f"{FGA_DEADLINE:.0f}s",
+            # OpenFGA refuses to start when the deadline exceeds its request timeout (3 s by default)
+            "OPENFGA_REQUEST_TIMEOUT": f"{FGA_DEADLINE + 5:.0f}s",
             "OPENFGA_LOG_LEVEL": "warn",
         }
         self.services.append(spawn(self.run.work, "openfga", [str(binary), "run"], env))

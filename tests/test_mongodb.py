@@ -11,7 +11,7 @@ import pytest
 
 from wardowl import And, Document, In, MetadataACLAuthorizer, Or, PermissionedRetriever, Query, Subject
 from wardowl.backends import NothingMatches
-from wardowl.backends._engines import TERMS_FIELD, tag, terms
+from wardowl.backends._engines import TERMS_FIELD, digest, tag, terms
 from wardowl.backends.mongodb import (
     WRITE_FIELD,
     MongoDBBackend,
@@ -47,6 +47,31 @@ def test_an_empty_in_matches_nothing_without_asking_mongodb():
     collection = FakeCollection()
     assert MongoDBBackend(collection, EMBED).search("leave", 5, In("team", [])) == []
     assert collection.pipelines == []
+
+
+def test_a_term_longer_than_atlas_indexes_whole_becomes_its_digest():
+    # Atlas Search indexes at most 8,181 characters of a string and cuts a longer one short, while a
+    # filter names the whole value: the conformance campaign's long values were never found.
+    edge = "g" * (8181 - len(tag("allowed_groups", "")))  # the longest value kept as it is
+    longer = edge + "g"
+    assert permission_terms({"allowed_groups": [edge]}) == [tag("allowed_groups", edge)]
+    (stored,) = permission_terms({"allowed_groups": [longer]})
+    assert stored == digest(tag("allowed_groups", longer)) and len(stored) < 80
+    assert filter_to_mongo(In("allowed_groups", [longer])) == {TERMS_FIELD: {"$in": [stored]}}
+    assert filter_to_search(In("allowed_groups", [longer])) == {"in": {"path": TERMS_FIELD, "value": [stored]}}
+    # Atlas counts Java characters: a character outside the Basic Multilingual Plane is two.
+    emoji = "\N{GRINNING FACE}" * (len(edge) // 2 + 1)
+    assert permission_terms({"allowed_groups": [emoji]}) == [digest(tag("allowed_groups", emoji))]
+
+
+def test_add_stores_the_digest_of_a_long_term_and_the_metadata_as_written():
+    pytest.importorskip("pymongo")
+    collection = FakeCollection()
+    longer = "g" * 9000
+    backend = MongoDBBackend(collection, EMBED)
+    backend.add([Document("a", "leave", {"allowed_groups": [longer]})])
+    assert collection.documents["a"][TERMS_FIELD] == [digest(tag("allowed_groups", longer))]
+    assert collection.documents["a"]["metadata"] == {"allowed_groups": [longer]}
 
 
 def test_names_containing_the_separator_are_refused():
@@ -357,6 +382,26 @@ def test_documents_written_by_another_tool_need_their_permission_terms():
     backend._wait(partial(backend._count, {WRITE_FIELD: "second"}, EMBED("leave")), 1)
     assert [h.id for h in prefilter.retrieve("leave", hr, k=5).hits] == ["raw-1"]
     collection.drop()
+
+
+def test_values_longer_than_atlas_indexes_whole_are_found():
+    # Before, Atlas kept the first 8,181 characters of the long value's term: the whole value never
+    # matched, and a value made of its first 8,164 letters did.
+    collection = _collection()
+    backend = MongoDBBackend(collection, EMBED, exact=True)
+    edge = "g" * (8181 - len(tag("allowed_groups", "")))
+    long_group = edge + "g" * 3000
+    try:
+        backend.add(
+            [
+                Document("long", "leave", {"allowed_groups": [long_group]}),
+                Document("edge", "leave", {"allowed_groups": [edge]}),
+            ]
+        )
+        assert [h.id for h in backend.search("leave", 5, In("allowed_groups", [long_group]))] == ["long"]
+        assert [h.id for h in backend.search("leave", 5, In("allowed_groups", [edge]))] == ["edge"]
+    finally:
+        collection.drop()
 
 
 def test_replaced_permissions_are_searchable_when_add_returns():
