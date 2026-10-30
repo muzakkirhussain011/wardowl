@@ -260,15 +260,21 @@ def _compare_asearch(
     k: int,
     f: Filter | None,
     hits: Sequence[Hit],
+    *,
+    exact: bool = False,
     **details: Any,
 ) -> None:
-    """Check that `asearch`, if the backend has one, returns what `search` returned: `hits`."""
+    """Check that `asearch`, if the backend has one, returns what `search` returned: `hits`. With
+    `exact`, both searches were asked to be exact."""
     asearch = getattr(backend, "asearch", None)
     if asearch is None:
         return
-    async_hits = asyncio.run(asearch(query, k, f))
+    options = {"exact": True} if exact else {}
+    async_hits = asyncio.run(asearch(query, k, f, **options))
     problems = _differences(hits, async_hits)
     if problems:
+        if exact:
+            details["exact"] = True
         if f is not None:
             details["filter"] = _json(filter_to_dict(f))
         raise example.failure(
@@ -300,6 +306,51 @@ def _compare_arefusal(
         k=k,
         asearch=[h.id for h in async_hits],
     )
+
+
+def _check_short_results(
+    backend: SearchBackend,
+    example: _Example,
+    query: str | Query,
+    k: int,
+    f: Filter,
+    expected: set[str],
+    by_id: Mapping[str, Document],
+) -> None:
+    """Check what a backend offers `PermissionedRetriever(short_results=...)`, where it offers it.
+
+    `search(..., exact=True)` must find what `matches` selects, as an exact search does, since the
+    retriever takes its short results as proof that nothing else matches; `count` must count it.
+    """
+    details: dict[str, Any] = {"filter": _json(filter_to_dict(f)), "k": k, "expected": sorted(expected)}
+    if getattr(backend, "supports_exact", False) is True:
+        search: Any = backend.search
+        hits = list(search(query, k, f, exact=True))
+        problems = _problems(hits, k, expected, by_id, True)
+        if problems:
+            raise example.failure("exact search with a filter", problems, **details, returned=[h.id for h in hits])
+        _compare_asearch(backend, example, query, k, f, hits, exact=True)
+    count = getattr(backend, "count", None)
+    if count is None:
+        return
+    # Every document at most: a count below the limit must be exact, one that reaches it may stop.
+    limit = max(len(by_id), 1)
+    answers = {"count": count(f, limit)}
+    acount = getattr(backend, "acount", None)
+    if acount is not None:
+        answers["acount"] = asyncio.run(acount(f, limit))
+    problems = []
+    for name, n in answers.items():
+        if n is None:
+            continue  # it cannot count in this mode
+        if isinstance(n, bool) or not isinstance(n, int):
+            problems.append(f"{name} returned {n!r}, not a number of documents")
+        elif (n != len(expected)) if len(expected) < limit else (n < limit):
+            problems.append(f"{name}(filter, limit={limit}) returned {n}, though {len(expected)} documents match")
+    if "acount" in answers and answers["acount"] != answers["count"]:
+        problems.append(f"count and acount disagree: {answers['count']!r} and {answers['acount']!r}")
+    if problems:
+        raise example.failure("count with a filter", problems, **details)
 
 
 def _names_odd_field(f: Filter) -> bool:
@@ -347,7 +398,12 @@ def check_backend(
       and `"postfilter"` where available);
     * if the backend has `set_metadata`, replacing the metadata of some documents (and of an id
       that is not stored) leaves their text as it was, changes what filters select as `matches`
-      says it should, keeps no key of the old metadata, and stores nothing new.
+      says it should, keeps no key of the old metadata, and stores nothing new;
+    * if the backend offers what `PermissionedRetriever(short_results=...)` uses, for each of those
+      filters: with `supports_exact`, `search(..., exact=True)` (and `asearch`) returns min(k,
+      matching) of the documents `matches` selects, as an exact search must, whatever `exact`
+      says; `count`, unless it returns None, counts the documents `matches` selects, and
+      `acount`, if there is one, agrees with it.
 
     The data holds the values stores tend to confuse: 1 and "1", "a" and "A", one letter composed and
     decomposed, and field names with a dot or letters outside ASCII. A backend may refuse a filter on
@@ -357,7 +413,8 @@ def check_backend(
     `exact=False` suits approximate indexes, which may miss matching documents: results must
     still never include a document that does not match, but may contain fewer than expected. A
     backend whose `exact_search` is True is checked as exact whatever `exact` says, since the
-    retriever takes its short results as proof that nothing else matches.
+    retriever takes its short results as proof that nothing else matches. So is every search asked
+    for with `exact=True`.
 
     Every search uses `query`. Pass `Query(vector=...)` to check a backend searched with vectors
     you compute, for example `Query(QUERY, HashingEmbedder()(QUERY))` against a backend built
@@ -402,6 +459,7 @@ def check_backend(
                         returned=[h.id for h in found],
                     )
                 _compare_asearch(backend, example, query, k, f, found)
+                _check_short_results(backend, example, query, k, f, expected, by_id)
 
         set_metadata = getattr(backend, "set_metadata", None)
         if set_metadata is not None and docs:
@@ -430,7 +488,7 @@ def _check_set_metadata(
     set_metadata({**replacements, "not-stored": {"team": "a", "allowed_groups": ["*"]}})
     updated = [Document(d.id, d.text, replacements.get(d.id, d.metadata)) for d in docs]
     by_id = {d.id: d for d in updated}
-    details = {"replaced": _json(replacements)}
+    details: dict[str, Any] = {"replaced": _json(replacements)}
 
     hits = backend.search(query, len(updated))
     problems = _problems(hits, len(updated), set(by_id), by_id, exact)

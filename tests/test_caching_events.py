@@ -313,8 +313,12 @@ def test_opentelemetry_metrics_count_outcomes_and_never_identify_anyone():
         "wardowl.chunks.examined",
         "wardowl.chunks.denied",
         "wardowl.violations",
+        "wardowl.short_results",
     }
     outcomes = {p.attributes["wardowl.outcome"]: p.value for p in points["wardowl.retrievals"]}
+    # Both may read fewer than the 5 chunks asked for, which the exact in-memory search proves.
+    (short,) = points["wardowl.short_results"]
+    assert short.attributes["wardowl.shortfall"] == "exhausted" and short.value == 2
     assert outcomes == {"complete": 2, "error": 1}
     (error,) = [p for p in points["wardowl.retrievals"] if "error.type" in p.attributes]
     assert error.attributes["error.type"] == "AuthorizationError"

@@ -231,7 +231,10 @@ passes it to each observer. An observer is any callable taking the event.
 | `examined`, `denied`, `violations`, `complete` | As in `RetrievalResult` |
 | `duration_ms`, `started_at` | Timing (`started_at` is Unix time) |
 | `search_ms`, `authorize_ms` | Time spent in the backend and in the authorizer |
-| `searches` | Backend searches: one when pre-filtering, more when post-filtering fetched again |
+| `searches` | Backend searches: one when pre-filtering, more when post-filtering fetched again or a [short result](concepts.md#short-results) or a recall sample searched again |
+| `shortfall`, `fallback` | As in `RetrievalResult`: why a pre-filtered search came back short, and what `short_results` did about it |
+| `shortfall_ms` | Time spent in the backend on a short result, counting and searching again; part of `search_ms` |
+| `sampled_recall` | For a retrieval `recall_sample_rate` sampled, the share of an exact search's top k that came back |
 | `reranked`, `rerank_ms` | Chunks given to the [reranker](reranking.md) (0 without one), and the time it took |
 | `error` | The exception type when the call failed, for example `AuthorizationError` |
 | `cause` | The type of the exception behind `error`: for an `AuthorizationError`, what the call to the permission service raised (`TimeoutError`, `ConnectionRefusedError`), or `None` for a malformed answer |
@@ -247,7 +250,7 @@ without storing them. Rotating the key breaks that link, which can be what you w
 flushes after each event:
 
 ```json
-{"action":"read","authorize_ms":0.18,"complete":true,"denied":0,"duration_ms":4.21,"error":null,"examined":2,"k":5,"query_hmac":"9f2c...","rerank_ms":0.0,"reranked":0,"returned_ids":["handbook","policy-7"],"search_ms":3.87,"searches":1,"started_at":1792152000.12,"strategy":"prefilter","subject_id":"bob","violations":0}
+{"action":"read","authorize_ms":0.18,"cause":null,"complete":true,"denied":0,"duration_ms":4.21,"error":null,"examined":2,"fallback":null,"k":5,"query_hmac":"9f2c...","rerank_ms":0.0,"reranked":0,"returned_ids":["handbook","policy-7"],"sampled_recall":null,"search_ms":3.87,"searches":1,"shortfall":null,"shortfall_ms":0.0,"started_at":1792152000.12,"strategy":"prefilter","subject_id":"bob","violations":0}
 ```
 
 An observer that raises is logged on the `wardowl` logger and never changes what retrieval
@@ -268,6 +271,8 @@ the call and parented to the span that was current when it ran.
 | `wardowl.complete` | As `RetrievalResult.complete` |
 | `wardowl.searches`, `wardowl.search.duration_ms`, `wardowl.authorize.duration_ms` | Backend searches made, and the time spent in the backend and in the authorizer |
 | `wardowl.reranked`, `wardowl.rerank.duration_ms` | Chunks reranked and the reranker's time, on reranked retrievals only |
+| `wardowl.shortfall`, `wardowl.shortfall.duration_ms`, `wardowl.fallback` | Why a pre-filtered search came back short, the time spent on it, and what `short_results` did, when it did something |
+| `wardowl.sampled_recall` | On retrievals `recall_sample_rate` sampled |
 | `error.type`, `wardowl.error` | The exception type; the span status is then ERROR |
 | `wardowl.error.cause` | The type of the exception behind it, as `RetrievalEvent.cause` |
 | `wardowl.subject.id` | Only with `OpenTelemetryObserver(record_subject=True)` |
@@ -297,6 +302,8 @@ retriever = PermissionedRetriever(backend, authorizer, observers=observers)
 | `wardowl.rerank.duration` | Histogram, s | Time spent in the reranker, on reranked retrievals only |
 | `wardowl.chunks.returned`, `.examined`, `.denied` | Counters | Chunks returned, checked by the authorizer, and withheld |
 | `wardowl.violations` | Counter | Pre-filtered chunks the re-check rejected |
+| `wardowl.short_results` | Counter | Pre-filtered retrievals whose search came back short, by `wardowl.shortfall` and, where `short_results` did something, `wardowl.fallback` |
+| `wardowl.sampled_recall` | Histogram, 1 | For retrievals `recall_sample_rate` sampled, the share of an exact search's top k that came back |
 
 Every instrument is broken down by `wardowl.action` and `wardowl.strategy`, plus the outcome
 and `error.type` where they apply. Each has a handful of values, so the number of time series stays
@@ -312,7 +319,8 @@ either.
 |---|---|---|
 | Any violation | `wardowl.violations` increases | The backend returned chunks outside the filter. Nothing leaked, because the re-check caught them, but the backend or its translation has a bug. |
 | Authorization failures | `wardowl.retrievals` with `error.type = AuthorizationError` | The permission service is failing. Users are getting errors, which is the safe outcome, but it is an outage. |
-| Incomplete results | Share of `wardowl.outcome = incomplete` | Post-filtering is hitting `max_candidates`: raise it, or move to pre-filtering. Or an approximate index returned fewer than k hits under the permission filter: it stopped early, or the user may read fewer than k matching chunks, and wardowl cannot tell which. Tune the store's filtered search ([pgvector's scan limits](integrations/pgvector.md#iterative-index-scans), [Qdrant's ACORN](integrations/qdrant.md#filters-on-common-values)). |
+| Incomplete results | Share of `wardowl.outcome = incomplete` | Post-filtering is hitting `max_candidates`: raise it, or move to pre-filtering. Or an approximate index returned fewer than k hits under the permission filter: it stopped early, or the user may read fewer than k matching chunks, and wardowl cannot tell which. Tune the store's filtered search ([pgvector's scan limits](integrations/pgvector.md#iterative-index-scans), [Qdrant's ACORN](integrations/qdrant.md#filters-on-common-values)), or tell the two apart and repair the misses with [`short_results`](concepts.md#short-results). |
+| Index misses | `wardowl.short_results` with `wardowl.shortfall = missed`, and `wardowl.sampled_recall` falling | The index is missing chunks users may read: short results it cut off, or full results that are not the true top k. Raise the store's search limits, or repair short results with `short_results="exact"`. |
 | Slow permission checks | `wardowl.authorize.duration` p99 | The permission service, or the network to it, is slowing retrieval down. `CachingAuthorizer` helps. |
 | Probing | `denied` per call, by subject, in the audit log | Unusually high values can mean a user is probing for documents they may not read. |
 | Which part is failing | `error.type = AuthorizationError` by `RetrievalEvent.cause` (or the span's `wardowl.error.cause`) | `TimeoutError` points at a slow permission service, `ConnectionRefusedError` and other `OSError`s at one that cannot be reached, `CircuitOpenError` at a circuit breaker that is open (the service was not called; earlier failures opened it), and no cause at an error status (HTTP 503) or an answer in the wrong shape. |

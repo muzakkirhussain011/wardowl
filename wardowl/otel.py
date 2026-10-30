@@ -29,6 +29,8 @@ __all__ = ["OpenTelemetryMetrics", "OpenTelemetryObserver"]
 GENAI_DURATION_BUCKETS = (0.01, 0.02, 0.04, 0.08, 0.16, 0.32, 0.64, 1.28, 2.56, 5.12, 10.24, 20.48, 40.96, 81.92)
 # A cached authorizer answers in well under a millisecond, so the stage histograms start lower.
 STAGE_DURATION_BUCKETS = (0.0005, 0.001, 0.0025, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0)
+# A share from 0 to 1, finer near 1, where a good index's recall lies.
+RECALL_BUCKETS = (0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.99)
 
 
 class OpenTelemetryObserver:
@@ -68,6 +70,13 @@ class OpenTelemetryObserver:
             attributes["error.type"] = event.error
         if event.cause:
             attributes["wardowl.error.cause"] = event.cause
+        if event.shortfall:
+            attributes["wardowl.shortfall"] = event.shortfall
+            attributes["wardowl.shortfall.duration_ms"] = event.shortfall_ms
+        if event.fallback:
+            attributes["wardowl.fallback"] = event.fallback
+        if event.sampled_recall is not None:
+            attributes["wardowl.sampled_recall"] = event.sampled_recall
         if self.record_subject:
             attributes["wardowl.subject.id"] = event.subject_id
         start = int(event.started_at * 1_000_000_000)
@@ -97,6 +106,11 @@ class OpenTelemetryMetrics:
       (counters): chunks returned, checked by the authorizer, and withheld.
     - `wardowl.violations` (counter): pre-filtered chunks the re-check rejected. Alert on any
       increase.
+    - `wardowl.short_results` (counter): pre-filtered retrievals whose search returned fewer hits
+      than were asked for, by `wardowl.shortfall` and, where `short_results` did something,
+      `wardowl.fallback`.
+    - `wardowl.sampled_recall` (histogram, 1): for retrievals `recall_sample_rate` sampled, the
+      share of an exact search's top k that came back.
     """
 
     def __init__(self, meter: Any = None) -> None:
@@ -142,6 +156,17 @@ class OpenTelemetryMetrics:
             unit="{chunk}",
             description="Pre-filtered chunks the re-check rejected. Any increase is a backend bug.",
         )
+        self._short = meter.create_counter(
+            "wardowl.short_results",
+            unit="{retrieval}",
+            description="Pre-filtered retrievals whose search returned fewer hits than were asked for.",
+        )
+        self._recall = meter.create_histogram(
+            "wardowl.sampled_recall",
+            unit="1",
+            description="Share of an exact search's top k that came back, for sampled retrievals.",
+            explicit_bucket_boundaries_advisory=list(RECALL_BUCKETS),
+        )
 
     def __call__(self, event: RetrievalEvent) -> None:
         common: dict[str, str] = {"wardowl.action": event.action}
@@ -159,3 +184,10 @@ class OpenTelemetryMetrics:
         self._examined.add(event.examined, common)
         self._denied.add(event.denied, common)
         self._violations.add(event.violations, common)  # adding 0 too, so the series exists to alert on
+        if event.shortfall:
+            why = {"wardowl.shortfall": event.shortfall}
+            if event.fallback:
+                why["wardowl.fallback"] = event.fallback
+            self._short.add(1, {**common, **why})
+        if event.sampled_recall is not None:
+            self._recall.record(event.sampled_recall, common)

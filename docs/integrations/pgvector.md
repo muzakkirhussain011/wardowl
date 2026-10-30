@@ -100,15 +100,64 @@ k rows, or none, and pgvector gives no sign that it stopped early. In wardowl's 
 Kaggle, least-privileged users who could read several hundred chunks got no rows at all for
 questions far from those chunks. `PgVectorBackend` does not declare `exact_search`, so wardowl
 reports such a short or empty result as `complete=False`
-([Concepts](../concepts.md#what-a-result-tells-you)).
+([Concepts](../concepts.md#what-a-result-tells-you)), and can find out why and repair it
+([Short results](#short-results)).
 
-For users who may read little, raise the limits. The backend does not set them; set them where
-PostgreSQL settings live, for example `ALTER DATABASE app SET hnsw.max_scan_tuples = 100000`.
-pgvector's README suggests raising `hnsw.scan_mem_multiplier` when raising `hnsw.max_scan_tuples`
-does not improve recall. Its other remedies for filters that admit few rows are a partial index
-per filter value, for a few distinct values, and partitioning, for many
+For users who may read little, raise the limits. The backend sets them for each search, with
+`SET LOCAL` in the search's transaction, so other users of the connection pool keep their own:
+
+```python
+backend = PgVectorBackend(pool, embed, max_scan_tuples=100_000, scan_mem_multiplier=4, work_mem="64MB")
+```
+
+| Argument | Sets | Values |
+|---|---|---|
+| `max_scan_tuples` | `hnsw.max_scan_tuples` | 1 to 2,147,483,647 |
+| `scan_mem_multiplier` | `hnsw.scan_mem_multiplier` | 1 to 1000 |
+| `work_mem` | `work_mem`, which also sizes the query's sorts | kilobytes (64 or more), or text with a unit, such as `"64MB"` |
+
+`None`, the default for each, leaves the server's setting, which you can also set where PostgreSQL
+settings live, for example `ALTER DATABASE app SET hnsw.max_scan_tuples = 100000`. pgvector's README
+suggests raising `hnsw.scan_mem_multiplier` when raising `hnsw.max_scan_tuples` does not improve
+recall. A higher limit costs time only on the searches that need it, where the filter admits few
+rows near the question. pgvector's other remedies for filters that admit few rows are a partial
+index per filter value, for a few distinct values, and partitioning, for many
 ([pgvector: Filtering](https://github.com/pgvector/pgvector#filtering),
 [Iterative index scans](https://github.com/pgvector/pgvector#iterative-index-scans)).
+
+## Short results
+
+A higher limit makes an empty result rarer; it cannot prove that a short one is complete. For that,
+the backend offers what [`short_results`](../concepts.md#short-results) uses, in vector mode:
+
+- `count(filter, limit)` counts the rows the filter matches, and stops at `limit`:
+  `SELECT count(*) FROM (SELECT 1 FROM <table> WHERE <filter> LIMIT <limit>) AS matching`. The
+  metadata index serves the filter, as it does in a search.
+- `search(..., exact=True)` runs the same query with `SET LOCAL enable_indexscan = off`, so the
+  HNSW index, which is what stops early, is not used: PostgreSQL reads every row the filter
+  matches, through the metadata index or a scan of the table, and sorts them by distance. It
+  returns the true nearest rows the subject may read, at the cost of computing the distance to
+  each of them.
+
+```python
+retriever = PermissionedRetriever(backend, authorizer, short_results="exact", max_exact_rows=10_000)
+result = retriever.retrieve("What is our acquisition plan?", subject)
+result.shortfall, result.fallback  # ("missed", "exact"): the index stopped early; the exact search did not
+```
+
+`max_exact_rows` bounds the rows the filter matches, not the plan PostgreSQL chooses: if it
+misjudges a selective filter, it may still read the whole table for the exact search. Check the
+plan with `EXPLAIN` for your largest readable sets. In keyword mode, `count` returns `None`, since a
+full-text search ranks only the rows that contain the query's words, and `supports_exact` is
+False.
+
+To compare `"exact"` with a deeper approximate search, give `short_results="widen"` a second backend
+on the same table with higher limits:
+
+```python
+wider = PgVectorBackend(pool, embed, max_scan_tuples=1_000_000, scan_mem_multiplier=16, ef_search=400)
+retriever = PermissionedRetriever(backend, authorizer, short_results="widen", wider=wider)
+```
 
 ## Search depth
 

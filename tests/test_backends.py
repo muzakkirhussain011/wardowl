@@ -410,6 +410,210 @@ def test_pgvector_ef_search_holds_for_the_search_only(pgvector_pool):
         assert conn.execute("SELECT current_setting('hnsw.ef_search', true)").fetchone()[0] != "123"
 
 
+class Recorder:
+    """A psycopg pool in place of a server: it records each statement as PostgreSQL would receive
+    it, with its parameters, and answers every query with `rows`."""
+
+    def __init__(self, rows=()):
+        self.rows = list(rows)
+        self.statements = []
+
+    @contextlib.contextmanager
+    def connection(self):
+        yield self
+
+    @contextlib.contextmanager
+    def transaction(self):
+        yield
+
+    def execute(self, statement, params=None):
+        self.statements.append((statement.as_string(), params))
+        return self
+
+    def fetchall(self):
+        return self.rows
+
+    def fetchone(self):
+        return self.rows[0]
+
+
+class AsyncRecorder(Recorder):
+    """The same, in place of an `AsyncConnectionPool`."""
+
+    @contextlib.asynccontextmanager
+    async def connection(self):
+        yield self
+
+    @contextlib.asynccontextmanager
+    async def transaction(self):
+        yield
+
+    async def execute(self, statement, params=None):
+        return super().execute(statement, params)
+
+    async def fetchall(self):
+        return self.rows
+
+    async def fetchone(self):
+        return self.rows[0]
+
+
+ROW = ("d1", "leave policy", {"allowed_groups": ["hr"]}, 0.25)  # id, content, metadata, distance
+
+
+def test_pgvector_sets_its_scan_limits_in_each_search_and_reads_every_row_for_an_exact_one():
+    pytest.importorskip("psycopg")
+    from wardowl.backends.pgvector import PgVectorBackend
+
+    pool = Recorder([ROW])
+    backend = PgVectorBackend(
+        pool, EMBED, ef_search=100, max_scan_tuples=100_000, scan_mem_multiplier=8, work_mem="64MB"
+    )
+    f = In("allowed_groups", ["hr"])
+    [hit] = backend.search("leave", 5, f)
+    assert (hit.id, hit.score) == ("d1", 0.75)
+    *settings, (query, params) = pool.statements
+    assert [s for s, _ in settings] == [
+        "SET LOCAL work_mem = '64MB'",
+        "SET LOCAL hnsw.iterative_scan = 'relaxed_order'",
+        "SET LOCAL hnsw.ef_search = 100",
+        "SET LOCAL hnsw.max_scan_tuples = 100000",
+        "SET LOCAL hnsw.scan_mem_multiplier = 8",
+    ]
+    assert query.startswith("WITH candidates AS MATERIALIZED") and params[-1] == 5
+    # The same query, with no HNSW index scan to stop early.
+    pool.statements.clear()
+    backend.search("leave", 5, f, exact=True)
+    assert [s for s, _ in pool.statements] == ["SET LOCAL work_mem = '64MB'", "SET LOCAL enable_indexscan = off", query]
+    pool.statements.clear()
+    PgVectorBackend(pool, EMBED).search("leave", 5, f, exact=True)
+    PgVectorBackend(pool, EMBED).search("leave", 5, f)
+    assert [s for s, _ in pool.statements if s.startswith("SET")] == [
+        "SET LOCAL enable_indexscan = off",
+        "SET LOCAL hnsw.iterative_scan = 'relaxed_order'",
+    ]
+
+
+def test_pgvector_counts_the_rows_a_filter_matches_no_further_than_a_limit():
+    pytest.importorskip("psycopg")
+    from wardowl.backends.pgvector import PgVectorBackend
+
+    pool = Recorder([(3,)])
+    backend = PgVectorBackend(pool, EMBED, table="chunks")
+    assert backend.count(In("allowed_groups", ["hr"]), 11) == 3
+    ((statement, params),) = pool.statements
+    assert statement == (
+        'SELECT count(*) FROM (SELECT 1 FROM "chunks" WHERE (metadata @> %s::jsonb OR metadata @> %s::jsonb)'
+        " LIMIT %s) AS matching"
+    )
+    assert params == ['{"allowed_groups": "hr"}', '{"allowed_groups": ["hr"]}', 11]
+    assert asyncio.run(backend.acount(In("allowed_groups", ["hr"]), 11)) == 3  # in a thread, with no async pool
+    backend.count(In("allowed_groups", ["hr"]), 2**70)  # past a bigint: every row is counted instead
+    assert pool.statements[-1][1][-1] == 2**63 - 1
+    # A keyword search ranks only rows that contain the query's words: a count says nothing about it.
+    keyword = PgVectorBackend(pool, None, mode="keyword", async_pool=AsyncRecorder([(3,)]))
+    assert keyword.count(In("allowed_groups", ["hr"]), 11) is None
+    assert asyncio.run(keyword.acount(In("allowed_groups", ["hr"]), 11)) is None
+    assert len(pool.statements) == 3 and backend.supports_exact and not keyword.supports_exact
+
+
+def test_pgvector_native_async_paths_send_what_the_sync_ones_send():
+    pytest.importorskip("psycopg")
+    from wardowl.backends.pgvector import PgVectorBackend
+
+    options = {"max_scan_tuples": 50_000, "scan_mem_multiplier": 2.5, "work_mem": 65536}
+    sync_pool, async_pool = Recorder([ROW]), AsyncRecorder([ROW])
+    sync = PgVectorBackend(sync_pool, EMBED, **options)
+    native = PgVectorBackend(None, EMBED, async_pool=async_pool, **options)
+    f = In("allowed_groups", ["hr"])
+    for exact in (False, True):
+        assert asyncio.run(native.asearch("leave", 3, f, exact=exact)) == sync.search("leave", 3, f, exact=exact)
+    count_pool, acount_pool = Recorder([(2,)]), AsyncRecorder([(2,)])
+    assert PgVectorBackend(count_pool, EMBED).count(f, 4) == 2
+    assert asyncio.run(PgVectorBackend(None, EMBED, async_pool=acount_pool).acount(f, 4)) == 2
+    assert async_pool.statements == sync_pool.statements and acount_pool.statements == count_pool.statements
+
+
+@pytest.mark.parametrize(
+    "options",
+    [
+        {"max_scan_tuples": 0},
+        {"max_scan_tuples": 2**31},
+        {"max_scan_tuples": True},
+        {"max_scan_tuples": 1.5},
+        {"scan_mem_multiplier": 0.5},
+        {"scan_mem_multiplier": 1001},
+        {"scan_mem_multiplier": float("nan")},
+        {"scan_mem_multiplier": "2"},
+        {"work_mem": 63},
+        {"work_mem": True},
+        {"work_mem": "64 megabytes"},
+        {"work_mem": "64MB; RESET ALL"},
+    ],
+)
+def test_pgvector_scan_settings_are_checked(options):
+    from wardowl.backends.pgvector import PgVectorBackend
+
+    with pytest.raises(ValueError):
+        PgVectorBackend(None, EMBED, **options)
+    # The edges of each range are fine.
+    PgVectorBackend(None, EMBED, max_scan_tuples=1, scan_mem_multiplier=1000, work_mem="1.5GB")
+
+
+def test_pgvector_scan_limits_hold_for_the_search_only(pgvector_pool):
+    from psycopg import sql
+
+    from wardowl.backends.pgvector import PgVectorBackend
+
+    class Probe(PgVectorBackend):
+        # Returns the settings the search query sees, in place of rows.
+        def _query(self, query_vector, k, f):
+            settings = sql.SQL(
+                "SELECT current_setting('hnsw.max_scan_tuples') || ' ' || current_setting('hnsw.scan_mem_multiplier')"
+                " || ' ' || current_setting('work_mem'), '', NULL, 0.0"
+            )
+            return settings, []
+
+    probe = Probe(pgvector_pool, EMBED, max_scan_tuples=100_000, scan_mem_multiplier=4, work_mem="64MB")
+    [hit] = probe.search("anything", 1)
+    assert hit.id == "100000 4 64MB"
+    # SET LOCAL ends with the search's transaction: the pooled connection is left as it was.
+    with pgvector_pool.connection() as conn:
+        assert conn.execute("SELECT current_setting('work_mem')").fetchone()[0] != "64MB"
+
+
+def test_pgvector_repairs_a_result_its_index_cut_short(pgvector_pool):
+    from psycopg import sql
+
+    from wardowl.backends.pgvector import PgVectorBackend, create_schema
+
+    class IndexOnly(PgVectorBackend):
+        # A small table is read in full; this one must go through its HNSW index, as a large one does.
+        def _settings(self, exact=False):
+            if exact:
+                return super()._settings(exact)
+            names = ("enable_seqscan", "enable_bitmapscan", "enable_sort")
+            return [*super()._settings(exact), *(sql.SQL(f"SET LOCAL {name} = off") for name in names)]
+
+    create_schema(pgvector_pool, EMBED.dim, table="wo_short", hnsw=True)
+    with pgvector_pool.connection() as conn:
+        conn.execute("TRUNCATE wo_short")
+    docs = [Document(f"hr-{i:03d}", f"leave policy note {i}", {"allowed_groups": ["hr"]}) for i in range(400)]
+    docs += [Document(f"bob-{i}", f"leave policy note bob {i}", {"allowed_users": ["bob"]}) for i in range(5)]
+    # Without iterative scans, the index returns ef_search rows (one, here) before the filter applies.
+    backend = IndexOnly(pgvector_pool, EMBED, table="wo_short", iterative_scan=None, ef_search=1)
+    backend.add(docs)
+    bob = Subject("bob")
+    reported = PermissionedRetriever(backend, MetadataACLAuthorizer(), strategy="prefilter")
+    first = reported.retrieve("leave policy", bob, 5)
+    assert len(first.hits) <= 1 and (first.shortfall, first.complete) == ("unknown", False)
+    repaired = PermissionedRetriever(backend, MetadataACLAuthorizer(), strategy="prefilter", short_results="exact")
+    result = repaired.retrieve("leave policy", bob, 5)
+    assert sorted(h.id for h in result.hits) == [f"bob-{i}" for i in range(5)]
+    assert (result.shortfall, result.fallback, result.complete) == ("missed", "exact", True)
+    assert asyncio.run(repaired.aretrieve("leave policy", bob, 5)) == result
+
+
 def test_pgvector_native_async_search_matches_sync(pgvector_pool, pgvector_factory):
     psycopg_pool = pytest.importorskip("psycopg_pool")
     from wardowl.backends.pgvector import PgVectorBackend

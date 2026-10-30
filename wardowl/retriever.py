@@ -15,6 +15,15 @@ postfilter
 auto (default)
     prefilter when both sides support it, postfilter otherwise.
 
+Short results
+-------------
+A pre-filtered search on an approximate index can return fewer than k hits though the subject may
+read more: the index stopped early under a selective filter. `short_results` decides what happens
+then: "report" it (the default); "count" the chunks the filter matches, to tell a small readable
+set from a miss; or repair a miss by searching again, exactly ("exact") or with larger search
+settings ("widen"). A search run again uses the same filter, and its hits are checked again like
+any other.
+
 Guarantees
 ----------
 * Fail closed: if the authorizer errors, `AuthorizationError` is raised and nothing is returned.
@@ -37,6 +46,7 @@ import asyncio
 import dataclasses
 import logging
 import math
+import random
 import time
 from collections.abc import Callable, Generator, Iterator, Sequence
 from contextlib import contextmanager
@@ -49,9 +59,12 @@ from wardowl.filters import And, Filter, In, Or, matches
 from wardowl.redaction import RedactFunction, Redactor
 from wardowl.types import Hit, InvalidQuery, Query, Subject
 
-__all__ = ["PermissionedRetriever", "Reranker", "RetrievalResult", "SearchBackend", "Strategy"]
+__all__ = ["PermissionedRetriever", "Reranker", "RetrievalResult", "SearchBackend", "ShortResults", "Strategy"]
 
 Strategy = Literal["auto", "prefilter", "postfilter"]
+ShortResults = Literal["report", "count", "exact", "widen"]
+Shortfall = Literal["exhausted", "missed", "unknown"]
+Fallback = Literal["exact", "widened", "over_limit", "unsupported"]
 
 
 @runtime_checkable
@@ -72,6 +85,15 @@ class SearchBackend(Protocol):
     matches. The retriever then reports such a result as complete. A backend searched through an
     approximate index (HNSW, IVF and the like) leaves it out or sets it to False, and its short
     results are reported with `complete=False`.
+
+    Two more optional members let the retriever check and repair a short pre-filtered result (see
+    `short_results`), and are read the same way. `count(filter, limit)` returns how many chunks
+    match the filter, or any number of at least `limit` when that many do; it returns None when a
+    count cannot be compared with the search, as for a keyword search, which ranks only the chunks
+    that contain the query's words. An async `acount` with the same signature may come with it.
+    `supports_exact = True` says that `search`, and `asearch` if there is one, accept `exact=True`
+    and then rank every chunk that matches the filter, as an exact search does. The retriever
+    passes `exact` only to a backend that declares `supports_exact`, so other backends never see it.
     """
 
     supports_filters: bool
@@ -111,15 +133,43 @@ class RetrievalResult:
     """False when wardowl knows results may be missing. True only when:
 
     * pre-filtering: the re-check removed no hit, and the backend returned as many hits as were
-      asked for (k, or `rerank_depth` with a reranker), or fewer from a backend whose
-      `exact_search` is True, which proves that nothing else matches;
+      asked for (k, or `rerank_depth` with a reranker), or fewer that prove nothing else matches:
+      from a backend whose `exact_search` is True, or at least as many as the backend counted
+      under the filter (with `short_results` other than "report"), after any search run again;
     * post-filtering: k permitted hits were found, or the backend ran out of candidates before
       `max_candidates`. A candidate list shorter than asked for counts as running out when the
       backend's `exact_search` is True or the search had no filter; under a scope, an approximate
       index may have stopped early, so it does not count.
 
     A full result trusts the backend's ranking: `complete` cannot see better chunks that an
-    approximate index failed to rank."""
+    approximate index failed to rank. `sampled_recall` can."""
+    shortfall: Shortfall | None = None
+    """Why the pre-filtered search returned fewer hits than were asked for; None when it returned
+    as many, or the result was post-filtered.
+
+    * `"exhausted"`: the subject may read no more matching chunks. The backend searches exactly,
+      or it counted the chunks the filter matches and found no more than came back.
+    * `"missed"`: the index missed chunks the subject may read. The backend counted more chunks
+      matching the filter than came back.
+    * `"unknown"`: the search is approximate and nothing was counted, because `short_results` is
+      "report" or the backend cannot count, so it may be either.
+
+    It describes the first search, before any `fallback`."""
+    fallback: Fallback | None = None
+    """What `short_results` did about a short result; None when it did nothing: with "report" or
+    "count", or after a shortfall of "exhausted".
+
+    * `"exact"`: the search ran again, exactly, and its hits replaced the first search's.
+    * `"widened"`: the search ran again with `wider`, and the best hits of both searches were kept.
+    * `"over_limit"`: the backend counted more than `max_exact_rows` matching chunks, so nothing
+      ran again and the first search's hits were kept.
+    * `"unsupported"`: the backend cannot count, or, for "exact", cannot search exactly, so
+      nothing ran again and the first search's hits were kept."""
+    sampled_recall: float | None = None
+    """For a pre-filtered retrieval that `recall_sample_rate` sampled, the share of an exact
+    search's top k, under the same filter and before redaction and reranking, that came back.
+    None when the retrieval was not sampled, or the exact search found nothing. It measures what
+    `complete` cannot see: k hits from an approximate index that are not the true top k."""
 
 
 # Operations the algorithm asks its driver to perform.
@@ -138,6 +188,16 @@ class _Search:
     query: str | Query
     k: int
     filter: Filter | None
+    mode: Literal["search", "exact", "wider"] = "search"
+    """The backend's own search, its exact search, or a search of `wider`."""
+    repair: bool = False
+    """Run again because the first search came back short: its time counts as shortfall time too."""
+
+
+@dataclass(frozen=True)
+class _Count:
+    filter: Filter
+    limit: int
 
 
 @dataclass(frozen=True)
@@ -156,17 +216,18 @@ class _Redact:
     hits: list[Hit]
 
 
-_Op = _FilterFor | _ScopeFor | _Search | _Check | _Rerank | _Redact
+_Op = _FilterFor | _ScopeFor | _Search | _Count | _Check | _Rerank | _Redact
 _log = logging.getLogger("wardowl")
 _Plan = Generator[_Op, Any, RetrievalResult]
 RerankFunction = Callable[[Any, list[Hit]], Sequence[Hit]]
 
 
 class _Timings:
-    """Seconds spent in the backend, the authorizer and the reranker during one retrieval."""
+    """Seconds spent in the backend, the authorizer and the reranker during one retrieval, and the
+    part of the backend's time spent on a short result."""
 
     def __init__(self) -> None:
-        self.search = self.authorize = self.rerank = 0.0
+        self.search = self.authorize = self.rerank = self.shortfall = 0.0
         self.searches = self.reranked = 0
 
     @contextmanager
@@ -179,6 +240,11 @@ class _Timings:
             if isinstance(op, _Search):
                 self.search += elapsed
                 self.searches += 1
+                if op.repair:
+                    self.shortfall += elapsed
+            elif isinstance(op, _Count):
+                self.search += elapsed
+                self.shortfall += elapsed
             elif isinstance(op, _Rerank):
                 self.rerank += elapsed
                 self.reranked += len(op.hits)
@@ -213,6 +279,25 @@ class PermissionedRetriever:
     before the reranker: it may change a hit's text and metadata but must return the same hits in
     the same order, and if it fails the retrieval raises `AuthorizationError`. `aretrieve` runs it
     in a thread, off the event loop.
+
+    `short_results` decides what happens when a pre-filtered search on an approximate backend
+    returns fewer hits than were asked for (see `RetrievalResult.shortfall`). `"report"` (the
+    default) returns them with `complete=False`. `"count"` asks the backend how many chunks match
+    the filter (its `count`): no more than came back proves that the subject may read no more, and
+    the result is complete; more proves that the index missed some. `"exact"` counts too, and
+    after a miss searches again exactly, when the count is at most `max_exact_rows` (10,000 by
+    default; None for no bound), so that a large readable set never sets off an unbounded scan.
+    `"widen"` counts too, and after a miss searches again with `wider`, the same store with larger
+    search settings, keeping the best hits of both searches. A search run again uses the same
+    filter, and its hits, with those of the first search, are checked again like any other; an
+    error in the count or in the search fails the retrieval. A backend that cannot count, or, for
+    `"exact"`, cannot search exactly, keeps the first hits and says why in
+    `RetrievalResult.fallback`.
+
+    `recall_sample_rate` (0 by default) is the share of pre-filtered retrievals for which a backend
+    that can search exactly, but does not always, runs an exact search as well. The exact hits are
+    never returned; `RetrievalResult.sampled_recall` reports how much of their top k came back,
+    which measures what `complete` cannot see. Each sampled retrieval costs one more search.
     """
 
     def __init__(
@@ -230,9 +315,27 @@ class PermissionedRetriever:
         reranker: Reranker | RerankFunction | None = None,
         rerank_depth: int = 50,
         redactor: Redactor | RedactFunction | None = None,
+        short_results: ShortResults = "report",
+        max_exact_rows: int | None = 10_000,
+        wider: SearchBackend | None = None,
+        recall_sample_rate: float = 0.0,
     ) -> None:
         if strategy not in ("auto", "prefilter", "postfilter"):
             raise ValueError(f"unknown strategy {strategy!r}")
+        if short_results not in ("report", "count", "exact", "widen"):
+            raise ValueError(f"unknown short_results {short_results!r}")
+        rows: Any = max_exact_rows
+        if rows is not None and (isinstance(rows, bool) or not isinstance(rows, int) or rows < 1):
+            raise ValueError("max_exact_rows must be None or a positive integer")
+        if short_results == "widen" and wider is None:
+            raise ValueError("short_results='widen' needs wider, the backend to search again")
+        if wider is not None and short_results != "widen":
+            raise ValueError("wider is used only with short_results='widen'")
+        if wider is not None and not wider.supports_filters:
+            raise ValueError("wider must support filters: it searches again under the permission filter")
+        rate: Any = recall_sample_rate
+        if isinstance(rate, bool) or not isinstance(rate, (int, float)) or not 0 <= rate <= 1:
+            raise ValueError("recall_sample_rate must be a number from 0 to 1")
         if strategy == "prefilter" and not backend.supports_filters:
             raise ValueError("strategy='prefilter' needs a backend that supports filters")
         if overfetch < 2:
@@ -264,6 +367,10 @@ class PermissionedRetriever:
         self.recheck = recheck
         self.observers = tuple(observers)
         self.audit_key = audit_key
+        self.short_results: ShortResults = short_results
+        self.max_exact_rows = max_exact_rows
+        self.wider = wider
+        self.recall_sample_rate = recall_sample_rate
 
     # ---- public API ------------------------------------------------------------------------
 
@@ -373,6 +480,10 @@ class PermissionedRetriever:
             searches=timings.searches,
             rerank_ms=round(timings.rerank * 1000, 3),
             reranked=timings.reranked,
+            shortfall=result.shortfall if result else None,
+            fallback=result.fallback if result else None,
+            shortfall_ms=round(timings.shortfall * 1000, 3),
+            sampled_recall=result.sampled_recall if result else None,
         )
 
     # ---- the algorithm (shared by both drivers) --------------------------------------------
@@ -423,28 +534,121 @@ class PermissionedRetriever:
         """Whether the backend declares exact search (see `SearchBackend`). Only True counts."""
         return getattr(self.backend, "exact_search", False) is True
 
+    def _supports_exact(self) -> bool:
+        """Whether the backend searches exactly when asked to (see `SearchBackend`). Only True counts."""
+        return getattr(self.backend, "supports_exact", False) is True
+
     def _prefilter(self, query: str | Query, k: int, f: Filter) -> _Plan:
-        hits: list[Hit] = yield _Search(query, k, f)
-        hits = list(hits)[:k]
+        first: list[Hit] = yield _Search(query, k, f)
+        first = list(first)[:k]
+        hits: list[Hit] = first  # what may be returned
+        others: list[Hit] = []  # checked with the hits, never returned
+        shortfall: Shortfall | None = None
+        fallback: Fallback | None = None
+        matching: int | None = None
+        if len(first) < k:
+            if self._exact_search():
+                shortfall = "exhausted"
+            else:
+                # An approximate index can stop early under a selective filter (pgvector's iterative
+                # scan at hnsw.max_scan_tuples, for one) and return few hits or none. A count of the
+                # chunks the filter matches tells that apart from a subject who may read little.
+                if self.short_results != "report" and getattr(self.backend, "count", None) is not None:
+                    matching = yield _Count(f, self._count_limit(k))
+                shortfall = "unknown" if matching is None else "exhausted" if matching <= len(first) else "missed"
+                fallback = self._fallback(shortfall, matching)
+                if fallback in ("exact", "widened"):
+                    mode: Literal["exact", "wider"] = "exact" if fallback == "exact" else "wider"
+                    again: list[Hit] = yield _Search(query, k, f, mode, repair=True)
+                    hits, others = self._repaired(first, list(again)[:k], k, merge=fallback == "widened")
         # k hits are taken at the backend's word. Fewer prove that nothing else matches only when
-        # the search was exact: an approximate index can stop early under a selective filter
-        # (pgvector's iterative scan at hnsw.max_scan_tuples, for one) and return few hits or none.
-        # Truncating to k does not change this test: a backend that returned more has k here.
-        settled = len(hits) == k or self._exact_search()
-        if not hits:
-            return RetrievalResult(hits, "prefilter", examined=0, denied=0, violations=0, complete=settled)
-        if self.recheck:
-            decisions: list[bool] = yield _Check(hits)
-            kept = [h for h, ok in zip(hits, decisions, strict=True) if ok]
-        else:
-            # No call to the authorizer, but each hit must still match the filter the backend was
-            # given: one that does not means the backend ignored it, and is dropped and counted.
-            kept = [h for h in hits if matches(f, h.metadata)]
-        violations = len(hits) - len(kept)
-        examined = len(hits) if self.recheck else 0
+        # the search was exact, or the backend counted no more matching chunks than there are hits.
+        # Truncating to k does not change this test: a backend that returned more has k here. A
+        # count stops at its limit, which is at least k, so a count that stopped never settles it.
+        settled = len(hits) == k or self._exact_search() or (matching is not None and len(hits) >= matching)
+        # A search run again leaves the first search's other hits unreturned, but they are checked
+        # too: a backend that ignored the filter the first time is still counted in violations.
+        candidates = hits + others
+        kept: list[Hit] = []
+        examined = violations = 0
+        if candidates:
+            if self.recheck:
+                decisions: list[bool] = yield _Check(candidates)
+            else:
+                # No call to the authorizer, but each hit must still match the filter the backend was
+                # given: one that does not means the backend ignored it, and is dropped and counted.
+                decisions = [matches(f, h.metadata) for h in candidates]
+            kept = [h for h, ok in zip(hits, decisions[: len(hits)], strict=True) if ok]
+            violations = decisions.count(False)
+            examined = len(candidates) if self.recheck else 0
+        recall = yield from self._sampled_recall(query, k, f, kept, fallback)
         return RetrievalResult(
-            kept, "prefilter", examined=examined, denied=0, violations=violations, complete=settled and violations == 0
+            kept,
+            "prefilter",
+            examined=examined,
+            denied=0,
+            violations=violations,
+            complete=settled and violations == 0,
+            shortfall=shortfall,
+            fallback=fallback,
+            sampled_recall=recall,
         )
+
+    def _count_limit(self, k: int) -> int:
+        """How far the backend must count: past `max_exact_rows`, when that bounds an exact search,
+        and otherwise to k, which tells whether more chunks match than a short result holds."""
+        if self.short_results == "exact" and self.max_exact_rows is not None and self._supports_exact():
+            return max(k, self.max_exact_rows + 1)
+        return k
+
+    def _fallback(self, shortfall: Shortfall, matching: int | None) -> Fallback | None:
+        """What `short_results` does about a short result from an approximate search."""
+        if self.short_results in ("report", "count") or shortfall == "exhausted":
+            return None
+        if matching is None:
+            return "unsupported"  # without a count there is no miss to repair, nor a bound on a scan
+        if self.short_results == "widen":
+            return "widened"
+        if not self._supports_exact():
+            return "unsupported"
+        if self.max_exact_rows is not None and matching > self.max_exact_rows:
+            return "over_limit"
+        return "exact"
+
+    @staticmethod
+    def _repaired(first: list[Hit], again: list[Hit], k: int, *, merge: bool) -> tuple[list[Hit], list[Hit]]:
+        """The hits to return after a search run again, and the first search's other hits.
+
+        An exact search ranks every chunk the filter matches, so its hits replace the first ones. A
+        wider search can still miss chunks the first one found, so both are merged, best first.
+        """
+        returned = {h.id for h in again}
+        rest = [h for h in first if h.id not in returned]
+        if not merge:
+            return again, rest
+        both = sorted(again + rest, key=lambda h: h.score, reverse=True)  # stable: ties keep again first
+        return both[:k], both[k:]
+
+    def _samples(self) -> bool:
+        """Whether `recall_sample_rate` applies: to a backend that can search exactly, but does not always."""
+        return self.recall_sample_rate > 0 and self._supports_exact() and not self._exact_search()
+
+    def _sampled_recall(
+        self, query: str | Query, k: int, f: Filter, kept: list[Hit], fallback: Fallback | None
+    ) -> Generator[_Op, Any, float | None]:
+        """For a sampled share of retrievals, the share of an exact search's top k found in `kept`."""
+        if fallback == "exact" or not self._samples():
+            return None  # nothing to sample, or the hits already come from an exact search
+        # A sample for a metric: nothing secret depends on the choice.
+        if random.random() >= self.recall_sample_rate:  # noqa: S311
+            return None
+        exact: list[Hit] = yield _Search(query, k, f, "exact")
+        # The exact search's hits are never returned, and only those the filter matches are counted.
+        best = [h.id for h in list(exact)[:k] if matches(f, h.metadata)]
+        if not best:
+            return None  # there was nothing to find
+        found = {h.id for h in kept}
+        return sum(i in found for i in best) / len(best)
 
     def _postfilter(self, query: str | Query, k: int, scope: Filter | None = None) -> _Plan:
         fetch = min(k * self.overfetch, self.max_candidates)
@@ -497,9 +701,30 @@ class PermissionedRetriever:
         except Exception as exc:
             raise AuthorizationError("redaction failed") from exc
 
+    def _target(self, op: _Search) -> tuple[Any, dict[str, Any]]:
+        """The backend `op` searches, and the options its search is given: none but for an exact
+        search, so that a backend without them sees the same call as ever."""
+        if op.mode == "wider":
+            return self.wider, {}
+        options: dict[str, Any] = {"exact": True} if op.mode == "exact" else {}
+        return self.backend, options
+
+    @staticmethod
+    def _counted(value: Any) -> int | None:
+        """A backend's count: a whole number of chunks, or None when it cannot count them."""
+        if value is None:
+            return None
+        if isinstance(value, int) and not isinstance(value, bool) and value >= 0:
+            return value
+        raise TypeError(f"count must return a whole number of chunks or None, not {type(value).__name__}")
+
     def _run(self, op: _Op, subject: Subject) -> Any:
         if isinstance(op, _Search):
-            return self.backend.search(op.query, op.k, op.filter)
+            backend, options = self._target(op)
+            return backend.search(op.query, op.k, op.filter, **options)
+        if isinstance(op, _Count):
+            counter: Any = self.backend
+            return self._counted(counter.count(op.filter, op.limit))
         if isinstance(op, _Rerank):
             rerank: Any = getattr(self.reranker, "rerank", self.reranker)
             return self._reranked(op.hits, rerank(op.query, list(op.hits)))
@@ -520,10 +745,17 @@ class PermissionedRetriever:
 
     async def _arun(self, op: _Op, subject: Subject) -> Any:
         if isinstance(op, _Search):
-            asearch = getattr(self.backend, "asearch", None)
+            backend, options = self._target(op)
+            asearch = getattr(backend, "asearch", None)
             if asearch is not None:
-                return await asearch(op.query, op.k, op.filter)
-            return await asyncio.to_thread(self.backend.search, op.query, op.k, op.filter)
+                return await asearch(op.query, op.k, op.filter, **options)
+            return await asyncio.to_thread(backend.search, op.query, op.k, op.filter, **options)
+        if isinstance(op, _Count):
+            counter: Any = self.backend
+            acount = getattr(counter, "acount", None)
+            if acount is not None:
+                return self._counted(await acount(op.filter, op.limit))
+            return self._counted(await asyncio.to_thread(counter.count, op.filter, op.limit))
         if isinstance(op, _Rerank):
             arerank = getattr(self.reranker, "arerank", None)
             if arerank is not None:
