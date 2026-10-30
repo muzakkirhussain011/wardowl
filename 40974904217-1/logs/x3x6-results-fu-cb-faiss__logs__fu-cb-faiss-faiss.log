@@ -1,0 +1,15 @@
+[00:02:07] x6cb faiss: loading the data
+[00:02:07] x6cb faiss: seed 0
+[00:02:08]   seed 0: building w1 (57,638 chunks)
+[00:02:08]   seed 0: w1 built in 1 s {}
+[00:02:09]   seed 0: building sep (49,444 chunks)
+[00:02:09]   seed 0: sep built in 0 s {}
+[00:02:09]   seed 0: building w1 group 0 (57,638 chunks)
+[00:02:10]   seed 0: w1 group 0 built in 0 s {}
+[00:02:10]   seed 0: building w0 group 0 (57,638 chunks)
+[00:02:10]   seed 0: w0 group 0 built in 1 s {}
+[00:02:10]   seed 0: building w0 group 0 (57,638 chunks)
+[00:02:11]   seed 0: w0 group 0 built in 1 s {}
+[00:02:46]   seed 0: group 0 done, 432 retrievals
+[00:02:46] x6cb faiss: seed 0 done in 0.7 min
+::notice title=x6cb faiss::seeds done [0]

@@ -1,0 +1,53 @@
+[23:46:03] x3 chroma: seed 3
+[23:46:03]   seed 3: building (8,000 chunks)
+[23:46:06]   seed 3: built in 3 s {}
+[23:46:09]   seed 3: G=1: ok, 0 errors, translation ok
+[23:46:11]   seed 3: G=10: ok, 0 errors, translation ok
+[23:46:14]   seed 3: G=100: ok, 0 errors, translation ok
+[23:46:15]   seed 3: G=1,000: refused, 3 errors, translation ok
+[23:46:17]   seed 3: G=4,000: refused, 3 errors, translation ok
+[23:46:18]   seed 3: G=10,000: refused, 3 errors, translation ok
+Fatal Python error: Segmentation fault
+
+Current thread 0x00007f5c6ece3b80 (most recent call first):
+  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/chromadb/api/rust.py", line 582 in _query
+  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/chromadb/api/models/Collection.py", line 265 in query
+  File "/home/runner/work/wardowl/wardowl/wardowl/backends/chroma.py", line 233 in search
+  File "/home/runner/work/wardowl/wardowl/wardowl/retriever.py", line 502 in _run
+  File "/home/runner/work/wardowl/wardowl/wardowl/retriever.py", line 285 in retrieve
+  File "/home/runner/work/wardowl/wardowl/benchmarks/paper/x3_filter_scaling.py", line 102 in measure
+  File "/home/runner/work/wardowl/wardowl/benchmarks/paper/x3_filter_scaling.py", line 203 in play_seed
+  File "/home/runner/work/wardowl/wardowl/benchmarks/paper/x3_filter_scaling.py", line 271 in run_seed
+  File "/home/runner/work/wardowl/wardowl/benchmarks/paper/x3_filter_scaling.py", line 294 in run
+  File "/home/runner/work/wardowl/wardowl/benchmarks/paper/x3_filter_scaling.py", line 357 in main
+  File "/home/runner/work/wardowl/wardowl/benchmarks/paper/x3_filter_scaling.py", line 365 in <module>
+
+Extension modules: numpy._core._multiarray_umath, numpy.linalg._umath_linalg, pybase64._pybase64, zstandard.backend_c, yaml._yaml, grpc._cython.cygrpc, google._upb._message, numpy.random._common, numpy.random.bit_generator, numpy.random._bounded_integers, numpy.random._pcg64, numpy.random._generator, numpy.random._mt19937, numpy.random._philox, numpy.random._sfc64, numpy.random.mtrand (total: 16)
+::warning title=x3 chroma::seed 3: the process ended with status -11
+[23:46:22] x3 chroma: seed 4
+[23:46:22]   seed 4: building (8,000 chunks)
+[23:46:25]   seed 4: built in 3 s {}
+[23:46:27]   seed 4: G=1: ok, 0 errors, translation ok
+[23:46:30]   seed 4: G=10: ok, 0 errors, translation ok
+[23:46:33]   seed 4: G=100: ok, 0 errors, translation ok
+[23:46:34]   seed 4: G=1,000: refused, 3 errors, translation ok
+[23:46:35]   seed 4: G=4,000: refused, 3 errors, translation ok
+[23:46:37]   seed 4: G=10,000: refused, 3 errors, translation ok
+Fatal Python error: Segmentation fault
+
+Current thread 0x00007f1eaa36db80 (most recent call first):
+  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/chromadb/api/rust.py", line 582 in _query
+  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/chromadb/api/models/Collection.py", line 265 in query
+  File "/home/runner/work/wardowl/wardowl/wardowl/backends/chroma.py", line 233 in search
+  File "/home/runner/work/wardowl/wardowl/wardowl/retriever.py", line 502 in _run
+  File "/home/runner/work/wardowl/wardowl/wardowl/retriever.py", line 285 in retrieve
+  File "/home/runner/work/wardowl/wardowl/benchmarks/paper/x3_filter_scaling.py", line 102 in measure
+  File "/home/runner/work/wardowl/wardowl/benchmarks/paper/x3_filter_scaling.py", line 203 in play_seed
+  File "/home/runner/work/wardowl/wardowl/benchmarks/paper/x3_filter_scaling.py", line 271 in run_seed
+  File "/home/runner/work/wardowl/wardowl/benchmarks/paper/x3_filter_scaling.py", line 294 in run
+  File "/home/runner/work/wardowl/wardowl/benchmarks/paper/x3_filter_scaling.py", line 357 in main
+  File "/home/runner/work/wardowl/wardowl/benchmarks/paper/x3_filter_scaling.py", line 365 in <module>
+
+Extension modules: numpy._core._multiarray_umath, numpy.linalg._umath_linalg, pybase64._pybase64, zstandard.backend_c, yaml._yaml, grpc._cython.cygrpc, google._upb._message, numpy.random._common, numpy.random.bit_generator, numpy.random._bounded_integers, numpy.random._pcg64, numpy.random._generator, numpy.random._mt19937, numpy.random._philox, numpy.random._sfc64, numpy.random.mtrand (total: 16)
+::warning title=x3 chroma::seed 4: the process ended with status -11
+::warning title=x3 chroma::{"3": -11, "4": -11}

@@ -1,0 +1,15 @@
+[00:01:21] x6cb qdrant: loading the data
+[00:01:23] x6cb qdrant: seed 0
+[00:01:24]   seed 0: building w1 (57,638 chunks)
+[00:02:24]   seed 0: w1 built in 60 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 14.2}
+[00:02:24]   seed 0: building sep (49,444 chunks)
+[00:03:14]   seed 0: sep built in 50 s {'points': 49444, 'indexed_vectors': 98850, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 11.0}
+[00:03:14]   seed 0: building w1 group 0 (57,638 chunks)
+[00:04:11]   seed 0: w1 group 0 built in 57 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 11.0}
+[00:04:11]   seed 0: building w0 group 0 (57,638 chunks)
+[00:05:11]   seed 0: w0 group 0 built in 60 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 14.0}
+[00:05:11]   seed 0: building w0 group 0 (57,638 chunks)
+[00:06:12]   seed 0: w0 group 0 built in 61 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 14.0}
+[00:06:14]   seed 0: group 0 done, 216 retrievals
+[00:06:14] x6cb qdrant: seed 0 done in 4.9 min
+::notice title=x6cb qdrant::seeds done [0]

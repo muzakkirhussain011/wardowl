@@ -1,0 +1,15 @@
+[00:06:46] x6cb elasticsearch: loading the data
+[00:06:47] x6cb elasticsearch: seed 0
+[00:06:48]   seed 0: building w1 (57,638 chunks)
+[00:07:25]   seed 0: w1 built in 37 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 9, 'docs': 57638}
+[00:07:25]   seed 0: building sep (49,444 chunks)
+[00:07:52]   seed 0: sep built in 27 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 8, 'docs': 49444}
+[00:07:52]   seed 0: building w1 group 0 (57,638 chunks)
+[00:08:24]   seed 0: w1 group 0 built in 32 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 11, 'docs': 57638}
+[00:08:24]   seed 0: building w0 group 0 (57,638 chunks)
+[00:08:56]   seed 0: w0 group 0 built in 32 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 11, 'docs': 57638}
+[00:08:56]   seed 0: building w0 group 0 (57,638 chunks)
+[00:09:27]   seed 0: w0 group 0 built in 32 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 11, 'docs': 57638}
+[00:09:30]   seed 0: group 0 done, 216 retrievals
+[00:09:30] x6cb elasticsearch: seed 0 done in 2.7 min
+::notice title=x6cb elasticsearch::seeds done [0]

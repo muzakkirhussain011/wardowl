@@ -1,0 +1,15 @@
+[23:57:30] x6cb pgvector: loading the data
+[23:57:31] x6cb pgvector: seed 0
+[23:57:32]   seed 0: building w1 (57,638 chunks)
+[23:58:07]   seed 0: w1 built in 35 s {}
+[23:58:07]   seed 0: building sep (49,444 chunks)
+[23:58:37]   seed 0: sep built in 30 s {}
+[23:58:37]   seed 0: building w1 group 0 (57,638 chunks)
+[23:59:12]   seed 0: w1 group 0 built in 35 s {}
+[23:59:12]   seed 0: building w0 group 0 (57,638 chunks)
+[23:59:47]   seed 0: w0 group 0 built in 35 s {}
+[23:59:47]   seed 0: building w0 group 0 (57,638 chunks)
+[00:00:22]   seed 0: w0 group 0 built in 34 s {}
+[00:00:43]   seed 0: group 0 done, 216 retrievals
+[00:00:43] x6cb pgvector: seed 0 done in 3.2 min
+::notice title=x6cb pgvector::seeds done [0]

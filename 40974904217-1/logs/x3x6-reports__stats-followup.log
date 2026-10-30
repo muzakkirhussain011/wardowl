@@ -1,0 +1,21 @@
+175M	run1/data
+1.7M	run1/x3x6-results-x3-cassandra
+5.4M	run1/x3x6-results-x3-embedded
+2.8M	run1/x3x6-results-x3-milvus-weaviate
+1.7M	run1/x3x6-results-x3-mongodb
+2.7M	run1/x3x6-results-x3-pgvector-redis
+2.9M	run1/x3x6-results-x3-search
+2.8M	run1/x3x6-results-x3-vespa-qdrant
+129M	run1/x3x6-results-x6-elasticsearch
+59M	run1/x3x6-results-x6-faiss
+1.9M	run1/x3x6-results-x6-memory
+92M	run1/x3x6-results-x6-pgvector
+88M	run1/x3x6-results-x6-qdrant
+768K	parts/x3x6-results-fu-cb-elasticsearch
+772K	parts/x3x6-results-fu-cb-faiss
+1.2M	parts/x3x6-results-fu-cb-pgvector
+656K	parts/x3x6-results-fu-cb-qdrant
+468K	parts/x3x6-results-fu-chroma-bisect
+472K	parts/x3x6-results-fu-x3-chroma
+[00:10:34] followup: neighbours of 6,648 queries in 57,638 passages
+[00:10:42] followup: done
