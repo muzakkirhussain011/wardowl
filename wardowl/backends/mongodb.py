@@ -59,8 +59,9 @@ WRITE_FIELD = "wardowl_write"
 _BATCH = 500
 _MAX_CANDIDATES = 10_000  # Atlas Vector Search's limit for numCandidates (and so for limit)
 _WORD = re.compile(r"\w")
-# The longest string Atlas Search indexes whole, in Java characters (UTF-16 code units): it cuts
-# longer ones short (the token type's documented limit), and a filter naming the whole string misses it.
+# Below the longest string a vector-search filter field indexes whole, in Java characters (UTF-16 code
+# units): it cuts longer ones short, and a filter naming the whole string misses it. Measured at 8,191
+# on Atlas Local 8.0 and 8.3; the token type documents 8,181, which this keeps to.
 _MAX_TERM = 8181
 
 
