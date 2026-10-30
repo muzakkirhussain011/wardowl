@@ -51,8 +51,9 @@ env:
   X3X6_CONFIGURATION: ${{ inputs.configuration || 'followup' }}
   # The size of a full-configuration run: the pre-registered design.
   X3X6_MODE: ${{ inputs.mode || 'full' }}
-  # The size of a push-triggered follow-up: smoke first (never analysed), then full.
-  FOLLOWUP_MODE: ${{ inputs.mode || 'smoke' }}
+  # The size of a push-triggered follow-up: full, since its smoke run (40974904217) ran every job
+  # without an error.
+  FOLLOWUP_MODE: ${{ inputs.mode || 'full' }}
   SEEDS: ${{ inputs.seeds || 5 }}
   # The full run whose artifacts the follow-up reads.
   RUN1: "40940385704"
