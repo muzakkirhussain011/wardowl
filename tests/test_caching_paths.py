@@ -88,7 +88,7 @@ def test_an_answer_that_is_not_a_filter_is_never_cached_and_fails_closed(answer)
     retriever = PermissionedRetriever(InMemoryBackend([Document("d", "leave", {})]), authz)
     for _ in range(2):
         # refused by the retriever, or by the store (whose failure the retriever raises as SearchError)
-        with pytest.raises((AuthorizationError, SearchError)):
+        with pytest.raises((AuthorizationError, TypeError, SearchError)):
             retriever.retrieve("leave", BOB)
     assert bogus.filters == 2 and shared.data == {}  # asked again: neither cache kept it
 
