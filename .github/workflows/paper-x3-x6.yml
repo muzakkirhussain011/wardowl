@@ -397,7 +397,10 @@ jobs:
           exec > >(tee -a "results/logs/$GROUP-setup.log") 2>&1
           case "$SERVICE" in
             postgres)
-              docker run -d --name postgres --shm-size=1g -p 5432:5432 -e POSTGRES_USER=test -e POSTGRES_PASSWORD=test \
+              # /dev/shm of 4 GB, not the main run's 1 GB: with five tables live (W1, SEP, W1r, W0a, W0b)
+              # a parallel HNSW build could not get its 1.07 GB segment in run 40978589778. The server's
+              # settings are the main run's.
+              docker run -d --name postgres --shm-size=4g -p 5432:5432 -e POSTGRES_USER=test -e POSTGRES_PASSWORD=test \
                 -e POSTGRES_DB=test pgvector/pgvector:pg17 \
                 -c shared_buffers=2GB -c maintenance_work_mem=1GB -c max_parallel_maintenance_workers=3 ;;
             elasticsearch)
