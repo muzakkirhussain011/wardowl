@@ -1,0 +1,60 @@
+2026-10-30T00:06:51.310041Z  INFO qdrant: Telemetry reporting enabled, id: f1596875-c50b-44d6-a51e-279ed39de409
+2026-10-30T00:06:51.318394Z  INFO qdrant::actix: REST transport settings: keep_alive=5s, client_request_timeout=5s, client_disconnect_timeout=5s
+2026-10-30T00:06:51.318410Z  INFO qdrant::actix: TLS disabled for REST API
+2026-10-30T00:06:51.318437Z  INFO qdrant::actix: Qdrant HTTP listening on 6333
+2026-10-30T00:06:51.318444Z  INFO actix_server::builder: starting 3 workers
+2026-10-30T00:06:51.318451Z  INFO actix_server::server: Actix runtime found; starting in Actix runtime
+2026-10-30T00:06:51.318454Z  INFO actix_server::server: starting service: "actix-web-service-0.0.0.0:6333", workers: 3, listening on: 0.0.0.0:6333
+2026-10-30T00:06:51.323765Z  INFO qdrant::tonic: Qdrant gRPC listening on 6334
+2026-10-30T00:06:51.323776Z  INFO qdrant::tonic: TLS disabled for gRPC API
+2026-10-30T00:06:51.511548Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7f_qdrant_4_40969846593/points/query HTTP/1.1" 200 456 "-" "python-client/1.19.1 python/3.12.15" 0.001433
+2026-10-30T00:06:51.711010Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7f_qdrant_4_40969846593/points/query HTTP/1.1" 200 469 "-" "python-client/1.19.1 python/3.12.15" 0.001260
+2026-10-30T00:06:51.910570Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7f_qdrant_4_40969846593/points/query HTTP/1.1" 200 454 "-" "python-client/1.19.1 python/3.12.15" 0.000939
+2026-10-30T00:06:52.110080Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7f_qdrant_4_40969846593/points/query HTTP/1.1" 200 468 "-" "python-client/1.19.1 python/3.12.15" 0.000517
+2026-10-30T00:06:52.310211Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7f_qdrant_4_40969846593/points/query HTTP/1.1" 200 477 "-" "python-client/1.19.1 python/3.12.15" 0.000618
+2026-10-30T00:06:52.510981Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7f_qdrant_4_40969846593/points/query HTTP/1.1" 200 466 "-" "python-client/1.19.1 python/3.12.15" 0.001077
+2026-10-30T00:06:52.710340Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7f_qdrant_4_40969846593/points/query HTTP/1.1" 200 483 "-" "python-client/1.19.1 python/3.12.15" 0.000483
+2026-10-30T00:06:52.910754Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7f_qdrant_4_40969846593/points/query HTTP/1.1" 200 479 "-" "python-client/1.19.1 python/3.12.15" 0.000757
+2026-10-30T00:06:53.111223Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7f_qdrant_4_40969846593/points/query HTTP/1.1" 200 467 "-" "python-client/1.19.1 python/3.12.15" 0.001053
+2026-10-30T00:06:53.310700Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7f_qdrant_4_40969846593/points/query HTTP/1.1" 200 464 "-" "python-client/1.19.1 python/3.12.15" 0.000485
+2026-10-30T00:06:53.510942Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7f_qdrant_4_40969846593/points/query HTTP/1.1" 200 456 "-" "python-client/1.19.1 python/3.12.15" 0.000520
+2026-10-30T00:06:53.710979Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7f_qdrant_4_40969846593/points/query HTTP/1.1" 200 468 "-" "python-client/1.19.1 python/3.12.15" 0.000507
+2026-10-30T00:06:53.911369Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7f_qdrant_4_40969846593/points/query HTTP/1.1" 200 454 "-" "python-client/1.19.1 python/3.12.15" 0.000859
+2026-10-30T00:06:54.110984Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7f_qdrant_4_40969846593/points/query HTTP/1.1" 200 468 "-" "python-client/1.19.1 python/3.12.15" 0.000455
+2026-10-30T00:06:54.311364Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7f_qdrant_4_40969846593/points/query HTTP/1.1" 200 477 "-" "python-client/1.19.1 python/3.12.15" 0.000810
+2026-10-30T00:06:54.511151Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7f_qdrant_4_40969846593/points/query HTTP/1.1" 200 466 "-" "python-client/1.19.1 python/3.12.15" 0.000397
+2026-10-30T00:06:54.711701Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7f_qdrant_4_40969846593/points/query HTTP/1.1" 200 482 "-" "python-client/1.19.1 python/3.12.15" 0.000786
+2026-10-30T00:06:54.715106Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7f_qdrant_4_40969846593/points/query HTTP/1.1" 200 214 "-" "python-client/1.19.1 python/3.12.15" 0.000608
+2026-10-30T00:06:54.717644Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7f_qdrant_4_40969846593/points/query HTTP/1.1" 200 467 "-" "python-client/1.19.1 python/3.12.15" 0.000420
+2026-10-30T00:06:54.919048Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7f_qdrant_4_40969846593/points/query HTTP/1.1" 200 477 "-" "python-client/1.19.1 python/3.12.15" 0.001085
+2026-10-30T00:06:55.119218Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7f_qdrant_4_40969846593/points/query HTTP/1.1" 200 465 "-" "python-client/1.19.1 python/3.12.15" 0.000748
+2026-10-30T00:06:55.319364Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7f_qdrant_4_40969846593/points/query HTTP/1.1" 200 483 "-" "python-client/1.19.1 python/3.12.15" 0.000728
+2026-10-30T00:06:55.520324Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7f_qdrant_4_40969846593/points/query HTTP/1.1" 200 479 "-" "python-client/1.19.1 python/3.12.15" 0.001258
+2026-10-30T00:06:55.720371Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7f_qdrant_4_40969846593/points/query HTTP/1.1" 200 467 "-" "python-client/1.19.1 python/3.12.15" 0.001303
+2026-10-30T00:06:55.919875Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7f_qdrant_4_40969846593/points/query HTTP/1.1" 200 464 "-" "python-client/1.19.1 python/3.12.15" 0.001091
+2026-10-30T00:06:56.119639Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7f_qdrant_4_40969846593/points/query HTTP/1.1" 200 456 "-" "python-client/1.19.1 python/3.12.15" 0.000722
+2026-10-30T00:06:56.319896Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7f_qdrant_4_40969846593/points/query HTTP/1.1" 200 469 "-" "python-client/1.19.1 python/3.12.15" 0.000777
+2026-10-30T00:06:56.520757Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7f_qdrant_4_40969846593/points/query HTTP/1.1" 200 454 "-" "python-client/1.19.1 python/3.12.15" 0.001284
+2026-10-30T00:06:56.720513Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7f_qdrant_4_40969846593/points/query HTTP/1.1" 200 468 "-" "python-client/1.19.1 python/3.12.15" 0.000779
+2026-10-30T00:06:56.920273Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7f_qdrant_4_40969846593/points/query HTTP/1.1" 200 476 "-" "python-client/1.19.1 python/3.12.15" 0.000693
+2026-10-30T00:06:57.120286Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7f_qdrant_4_40969846593/points/query HTTP/1.1" 200 466 "-" "python-client/1.19.1 python/3.12.15" 0.000678
+2026-10-30T00:06:57.320388Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7f_qdrant_4_40969846593/points/query HTTP/1.1" 200 483 "-" "python-client/1.19.1 python/3.12.15" 0.000788
+2026-10-30T00:06:57.520536Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7f_qdrant_4_40969846593/points/query HTTP/1.1" 200 479 "-" "python-client/1.19.1 python/3.12.15" 0.000861
+2026-10-30T00:07:09.727610Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7f_qdrant_4_40969846593/points/query HTTP/1.1" 200 468 "-" "python-client/1.19.1 python/3.12.15" 0.001148
+2026-10-30T00:07:09.927985Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7f_qdrant_4_40969846593/points/query HTTP/1.1" 200 464 "-" "python-client/1.19.1 python/3.12.15" 0.001357
+2026-10-30T00:07:10.127067Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7f_qdrant_4_40969846593/points/query HTTP/1.1" 200 456 "-" "python-client/1.19.1 python/3.12.15" 0.000715
+2026-10-30T00:07:10.326754Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7f_qdrant_4_40969846593/points/query HTTP/1.1" 200 468 "-" "python-client/1.19.1 python/3.12.15" 0.000452
+2026-10-30T00:07:10.527572Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7f_qdrant_4_40969846593/points/query HTTP/1.1" 200 454 "-" "python-client/1.19.1 python/3.12.15" 0.000800
+2026-10-30T00:07:10.727376Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7f_qdrant_4_40969846593/points/query HTTP/1.1" 200 468 "-" "python-client/1.19.1 python/3.12.15" 0.000535
+2026-10-30T00:07:10.927332Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7f_qdrant_4_40969846593/points/query HTTP/1.1" 200 476 "-" "python-client/1.19.1 python/3.12.15" 0.000503
+2026-10-30T00:07:11.127832Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7f_qdrant_4_40969846593/points/query HTTP/1.1" 200 465 "-" "python-client/1.19.1 python/3.12.15" 0.000551
+2026-10-30T00:07:11.327441Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7f_qdrant_4_40969846593/points/query HTTP/1.1" 200 483 "-" "python-client/1.19.1 python/3.12.15" 0.000500
+2026-10-30T00:07:11.527680Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7f_qdrant_4_40969846593/points/query HTTP/1.1" 200 479 "-" "python-client/1.19.1 python/3.12.15" 0.000535
+2026-10-30T00:07:11.728267Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7f_qdrant_4_40969846593/points/query HTTP/1.1" 200 468 "-" "python-client/1.19.1 python/3.12.15" 0.000935
+2026-10-30T00:07:11.928842Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7f_qdrant_4_40969846593/points/query HTTP/1.1" 200 464 "-" "python-client/1.19.1 python/3.12.15" 0.000892
+2026-10-30T00:07:12.127935Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7f_qdrant_4_40969846593/points/query HTTP/1.1" 200 456 "-" "python-client/1.19.1 python/3.12.15" 0.000574
+2026-10-30T00:07:12.328066Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7f_qdrant_4_40969846593/points/query HTTP/1.1" 200 469 "-" "python-client/1.19.1 python/3.12.15" 0.000525
+2026-10-30T00:07:12.528215Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7f_qdrant_4_40969846593/points/query HTTP/1.1" 200 454 "-" "python-client/1.19.1 python/3.12.15" 0.000561
+2026-10-30T00:07:12.728332Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7f_qdrant_4_40969846593/points/query HTTP/1.1" 200 468 "-" "python-client/1.19.1 python/3.12.15" 0.000593
+2026-10-30T00:07:12.928353Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7f_qdrant_4_40969846593/points/query HTTP/1.1" 200 477 "-" "python-client/1.19.1 python/3.12.15" 0.000556
+2026-10-30T00:07:12.930903Z  INFO actix_web::middleware::logger: 172.17.0.1 "POST /collections/x7f_qdrant_4_40969846593/points/query HTTP/1.1" 200 214 "-" "python-client/1.19.1 python/3.12.15" 0.000311

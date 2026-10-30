@@ -1,0 +1,8 @@
+VERDICT A2-H4b pgvector blackhole plain: CONFIRMED (1.000 [1.000, 1.000] over 340 requests)
+VERDICT A2-H4c pgvector blackhole plain: CONFIRMED (median latency of inside failures and hangs 5.000 s, at least 4.5 predicted)
+VERDICT A2-H4b pgvector blackhole stmt-timeout: CONFIRMED (1.000 [1.000, 1.000] over 340 requests)
+VERDICT A2-H4c pgvector blackhole stmt-timeout: CONFIRMED (median latency of inside failures and hangs 5.000 s, at least 4.5 predicted)
+VERDICT A2-H5 pgvector lock plain latency: CONFIRMED (median latency of inside failures and hangs 5.000 s, at least 4.5 predicted)
+VERDICT A2-H5 pgvector lock stmt-timeout failing: CONFIRMED (1.000 [1.000, 1.000] over 540 requests)
+VERDICT A2-H5 pgvector lock stmt-timeout latency: CONFIRMED (0 hangs; median latency of inside failures 1.003 s, at most 1.5 predicted)
+VERDICT A2-H7 store errors: CONFIRMED (2465 failures, 2465 SearchError with a fixed message, 0 naming a host, 0 leaks)

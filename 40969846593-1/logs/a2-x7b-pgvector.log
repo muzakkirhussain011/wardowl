@@ -1,0 +1,200 @@
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-7': connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-7': connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+discarding closed connection: <psycopg.Connection [BAD] at 0x7f427c1716a0>
+[2026-10-29T23:59:07.115+00:00] x7b pgvector seed 3: 877 s
+error connecting in 'pool-10': connection timeout expired
+error connecting in 'pool-10': connection timeout expired
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+discarding closed connection: <psycopg.Connection [BAD] at 0x7f428bb781a0>
+error connecting in 'pool-10': connection timeout expired
+error connecting in 'pool-10': connection timeout expired
+discarding closed connection: <psycopg.Connection [BAD] at 0x7f427c1eed20>
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-9': connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-9': connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-9': connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-9': connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-9': connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-9': connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-9': connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-9': connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-9': connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-9': connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-9': connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-9': connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-9': connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-9': connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-9': connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-9': connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-9': connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-9': connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-9': connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-9': connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-9': connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-9': connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-9': connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-9': connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-9': connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-9': connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-9': connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-9': connection failed: connection to server at "127.0.0.1", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+error connecting in 'pool-10': connection failed: connection to server at "127.0.0.1", port 15432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+discarding closed connection: <psycopg.Connection [BAD] at 0x7f427c54fa10>
+discarding closed connection: <psycopg.Connection [BAD] at 0x7f427c132720>
+[2026-10-30T00:02:45.806+00:00] x7b pgvector seed 4: 1096 s
+::notice title=x7 a2-x7b-pgvector%3A no harness errors::every call the harness made returned
+::notice title=x7 a2-x7b-pgvector records::64 records, 0 failed paths or targets, in results/x7-a2-x7b-pgvector.jsonl

@@ -1,0 +1,60 @@
+1:M 29 Oct 2026 23:55:56.091 * <timeseries> 	{ ts-retention-policy    :            0 }
+1:M 29 Oct 2026 23:55:56.091 * <timeseries> 	{ ts-duplicate-policy    :        block }
+1:M 29 Oct 2026 23:55:56.091 * <timeseries> 	{ ts-chunk-size-bytes    :         4096 }
+1:M 29 Oct 2026 23:55:56.091 * <timeseries> 	{ ts-encoding            :   compressed }
+1:M 29 Oct 2026 23:55:56.091 * <timeseries> 	{ ts-ignore-max-time-diff:            0 }
+1:M 29 Oct 2026 23:55:56.091 * <timeseries> 	{ ts-ignore-max-val-diff :     0.000000 }
+1:M 29 Oct 2026 23:55:56.091 * <timeseries> 	{ ts-topology-events     :         true }
+1:M 29 Oct 2026 23:55:56.091 * <timeseries> ]
+1:M 29 Oct 2026 23:55:56.091 * <timeseries> Detected redis oss (cluster-enabled=no)
+1:M 29 Oct 2026 23:55:56.091 * <timeseries> Subscribe to ASM events
+1:M 29 Oct 2026 23:55:56.091 * <timeseries> Subscribe to topology changes events
+1:M 29 Oct 2026 23:55:56.091 * <timeseries> Enabled diskless replication
+1:M 29 Oct 2026 23:55:56.091 * Module 'timeseries' loaded from /usr/local/lib/redis/modules//redistimeseries.so
+1:M 29 Oct 2026 23:55:56.092 * <ReJSON> Created new data type 'ReJSON-RL'
+1:M 29 Oct 2026 23:55:56.092 * <ReJSON> version: 81000 git sha: unknown branch: unknown
+1:M 29 Oct 2026 23:55:56.092 * <ReJSON> Exported RedisJSON_V1 API
+1:M 29 Oct 2026 23:55:56.092 * <ReJSON> Exported RedisJSON_V2 API
+1:M 29 Oct 2026 23:55:56.092 * <ReJSON> Exported RedisJSON_V3 API
+1:M 29 Oct 2026 23:55:56.092 * <ReJSON> Exported RedisJSON_V4 API
+1:M 29 Oct 2026 23:55:56.092 * <ReJSON> Exported RedisJSON_V5 API
+1:M 29 Oct 2026 23:55:56.092 * <ReJSON> Exported RedisJSON_V6 API
+1:M 29 Oct 2026 23:55:56.092 * <ReJSON> Exported RedisJSON_V7 API
+1:M 29 Oct 2026 23:55:56.092 * <ReJSON> Exported RedisJSON_V8 API
+1:M 29 Oct 2026 23:55:56.092 * <ReJSON> Enabled diskless replication
+1:M 29 Oct 2026 23:55:56.092 * <ReJSON> Initialized shared string cache, thread safe: true.
+1:M 29 Oct 2026 23:55:56.092 * Module 'ReJSON' loaded from /usr/local/lib/redis/modules//rejson.so
+1:M 29 Oct 2026 23:55:56.092 * <search> Acquired RedisJSON_V8 API
+1:M 29 Oct 2026 23:55:56.093 * Server initialized
+1:M 29 Oct 2026 23:55:56.093 * Ready to accept connections tcp
+1:M 29 Oct 2026 23:55:56.093 # WARNING: Redis does not require authentication and is not protected by network restrictions. Redis will accept connections from any IP address on any network interface.
+1:M 30 Oct 2026 00:02:10.610 * 100 changes in 300 seconds. Saving...
+1:M 30 Oct 2026 00:02:10.610 * Background saving started by pid 36
+36:C 30 Oct 2026 00:02:10.611 * BGSAVE done, 8 keys saved, 0 keys skipped, 1164 bytes written.
+36:C 30 Oct 2026 00:02:10.612 * DB saved on disk
+36:C 30 Oct 2026 00:02:10.612 * Fork CoW for RDB: current 0 MB, peak 0 MB, average 0 MB
+1:M 30 Oct 2026 00:02:10.710 * Background saving terminated with success
+1:M 30 Oct 2026 00:09:00.756 * 100 changes in 300 seconds. Saving...
+1:M 30 Oct 2026 00:09:00.757 * Background saving started by pid 37
+37:C 30 Oct 2026 00:09:00.758 * BGSAVE done, 16 keys saved, 0 keys skipped, 2233 bytes written.
+37:C 30 Oct 2026 00:09:00.758 * DB saved on disk
+37:C 30 Oct 2026 00:09:00.759 * Fork CoW for RDB: current 0 MB, peak 0 MB, average 0 MB
+1:M 30 Oct 2026 00:09:00.857 * Background saving terminated with success
+1:M 30 Oct 2026 00:15:50.404 * 100 changes in 300 seconds. Saving...
+1:M 30 Oct 2026 00:15:50.405 * Background saving started by pid 38
+38:C 30 Oct 2026 00:15:50.405 * BGSAVE done, 24 keys saved, 0 keys skipped, 3303 bytes written.
+38:C 30 Oct 2026 00:15:50.406 * DB saved on disk
+38:C 30 Oct 2026 00:15:50.407 * Fork CoW for RDB: current 0 MB, peak 0 MB, average 0 MB
+1:M 30 Oct 2026 00:15:50.505 * Background saving terminated with success
+1:M 30 Oct 2026 00:22:50.405 * 100 changes in 300 seconds. Saving...
+1:M 30 Oct 2026 00:22:50.406 * Background saving started by pid 39
+39:C 30 Oct 2026 00:22:50.407 * BGSAVE done, 32 keys saved, 0 keys skipped, 4372 bytes written.
+39:C 30 Oct 2026 00:22:50.408 * DB saved on disk
+39:C 30 Oct 2026 00:22:50.408 * Fork CoW for RDB: current 0 MB, peak 0 MB, average 0 MB
+1:M 30 Oct 2026 00:22:50.506 * Background saving terminated with success
+1:M 30 Oct 2026 00:29:35.336 * 100 changes in 300 seconds. Saving...
+1:M 30 Oct 2026 00:29:35.336 * Background saving started by pid 40
+40:C 30 Oct 2026 00:29:35.337 * BGSAVE done, 40 keys saved, 0 keys skipped, 5442 bytes written.
+40:C 30 Oct 2026 00:29:35.338 * DB saved on disk
+40:C 30 Oct 2026 00:29:35.339 * Fork CoW for RDB: current 0 MB, peak 0 MB, average 0 MB
+1:M 30 Oct 2026 00:29:35.437 * Background saving terminated with success

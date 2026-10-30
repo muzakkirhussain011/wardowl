@@ -1,0 +1,8 @@
+[2026-10-29T23:48:56.050+00:00] x7b qdrant: start
+[2026-10-29T23:52:36.020+00:00] x7b qdrant seed 0: 220 s
+[2026-10-29T23:56:15.186+00:00] x7b qdrant seed 1: 439 s
+[2026-10-29T23:59:54.378+00:00] x7b qdrant seed 2: 658 s
+[2026-10-30T00:03:33.544+00:00] x7b qdrant seed 3: 877 s
+[2026-10-30T00:07:12.931+00:00] x7b qdrant seed 4: 1097 s
+::notice title=x7 a2-x7b-qdrant%3A no harness errors::every call the harness made returned
+::notice title=x7 a2-x7b-qdrant records::64 records, 0 failed paths or targets, in results/x7-a2-x7b-qdrant.jsonl

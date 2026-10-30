@@ -1,0 +1,15 @@
+target,fault,condition,episodes,requests inside,failing [95% CI],succeeding [95% CI],leaks,failures not AuthorizationError,failures naming a host,recovery s [95% CI],median failed latency s,codes,errors
+pgvector,blackhole,plain,10,340,"1.000 [1.000, 1.000]","0.000 [0.000, 0.000]",0,299,0,"0.063 [0.057, 0.065]",5.000,"{'ok': 560, 'hang': 61, 'error': 299}",wardowl.retriever.SearchError: search failed
+pgvector,blackhole,stmt-timeout,10,340,"1.000 [1.000, 1.000]","0.000 [0.000, 0.000]",0,301,0,"0.070 [0.068, 0.072]",5.000,"{'ok': 560, 'hang': 59, 'error': 301}",wardowl.retriever.SearchError: search failed
+pgvector,down,plain,10,330,"1.000 [1.000, 1.000]","0.000 [0.000, 0.000]",0,471,0,"2.417 [2.039, 2.759]",5.000,"{'ok': 454, 'error': 471}",wardowl.retriever.SearchError: search failed
+pgvector,lock,plain,10,340,"1.000 [1.000, 1.000]","0.000 [0.000, 0.000]",0,261,0,"0.039 [0.037, 0.039]",5.000,"{'ok': 579, 'hang': 80, 'error': 261}",wardowl.retriever.SearchError: search failed
+pgvector,lock,stmt-timeout,10,540,"1.000 [1.000, 1.000]","0.000 [0.000, 0.000]",0,540,0,"0.012 [0.011, 0.012]",1.003,"{'ok': 380, 'error': 540}",wardowl.retriever.SearchError: search failed
+pgvector,refuse,plain,10,340,"1.000 [1.000, 1.000]","0.000 [0.000, 0.000]",0,473,0,"2.177 [1.911, 2.778]",5.000,"{'ok': 452, 'error': 473}",wardowl.retriever.SearchError: search failed
+qdrant,blackhole,plain,10,340,"1.000 [1.000, 1.000]","0.000 [0.000, 0.000]",0,600,0,"0.011 [0.010, 0.011]",5.006,"{'ok': 320, 'error': 600}",wardowl.retriever.SearchError: search failed
+qdrant,down,plain,10,568,"1.000 [1.000, 1.000]","0.000 [0.000, 0.000]",0,601,0,"0.212 [0.211, 0.216]",7.2e-04,"{'ok': 330, 'error': 601}",wardowl.retriever.SearchError: search failed
+qdrant,http500,plain,10,590,"1.000 [1.000, 1.000]","0.000 [0.000, 0.000]",0,600,0,"0.011 [0.011, 0.011]",0.001,"{'ok': 320, 'error': 600}",wardowl.retriever.SearchError: search failed
+qdrant,http503,plain,10,590,"1.000 [1.000, 1.000]","0.000 [0.000, 0.000]",0,600,0,"0.011 [0.010, 0.012]",0.001,"{'ok': 320, 'error': 600}",wardowl.retriever.SearchError: search failed
+qdrant,refuse,plain,10,590,"1.000 [1.000, 1.000]","0.000 [0.000, 0.000]",0,600,0,"0.012 [0.011, 0.012]",7.5e-04,"{'ok': 320, 'error': 600}",wardowl.retriever.SearchError: search failed
+qdrant,truncate,plain,10,590,"1.000 [1.000, 1.000]","0.000 [0.000, 0.000]",0,600,0,"0.011 [0.010, 0.012]",0.003,"{'ok': 320, 'error': 600}",wardowl.retriever.SearchError: search failed
+spicedb,empty,plain,10,3520,"1.000 [1.000, 1.000]","0.000 [0.000, 0.000]",0,0,0,"0.030 [0.024, 0.049]",0.012,"{'ok': 1790, 'authz': 3549}",wardowl.authz.AuthorizationError: SpiceDB CheckBulkPermissions returned invalid JSON
+spicedb,empty-lookup,plain,10,3180,"0.000 [0.000, 0.000]","1.000 [1.000, 1.000]",0,0,0,"0.042 [0.029, 0.059]",n/a,{'ok': 4964},

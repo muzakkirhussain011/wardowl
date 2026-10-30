@@ -1,0 +1,3 @@
+VERDICT A2-H6 spicedb empty: CONFIRMED (failing 1.000 [1.000, 1.000], deviating 0.000 [0.000, 0.000] over 3520 requests; full run 4,703 inside, failing 0.000; 4,746 deviating answers, 1 failure)
+VERDICT A2-H6 spicedb empty-lookup exact: CONFIRMED (1.000 [1.000, 1.000] over 3180 requests)
+VERDICT A2-H8 fail closed: CONFIRMED (10303 requests: 0 leaks (one-sided bound 0.000291), 0 failures not AuthorizationError, 0 naming a host)
