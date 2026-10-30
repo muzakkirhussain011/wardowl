@@ -14,6 +14,7 @@ so the retriever's re-check sees the true permissions, and arbitrary metadata ne
 from __future__ import annotations
 
 import asyncio
+import hashlib
 from collections.abc import Callable, Iterable, Mapping, Sequence
 from typing import Any
 
@@ -24,10 +25,18 @@ from wardowl.types import Document, Hit, Query
 TERMS_FIELD = "wardowl_terms"
 _SEP = "\x1f"  # the ASCII unit separator: field names may not contain it
 _LISTS = (list, tuple, set, frozenset)
+_DIGEST = f"{_SEP}sha256:"
 
 
 def tag(field: str, value: str | int) -> str:
     return f"{field}{_SEP}{'i' if isinstance(value, int) else 's'}:{value}"
+
+
+def digest(term: str) -> str:
+    """A short stand-in for a term too long for a store to index whole, which a store would cut
+    short and then never match: equal for equal terms, different for different ones (but for a
+    SHA-256 collision), and never equal to a term, which starts with its field's name, never empty."""
+    return _DIGEST + hashlib.sha256(term.encode("utf-8", "surrogatepass")).hexdigest()
 
 
 def terms(doc_id: str, metadata: Mapping[str, Any]) -> list[str]:

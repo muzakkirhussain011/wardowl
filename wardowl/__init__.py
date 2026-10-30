@@ -12,6 +12,7 @@ from wardowl.authz import (
     FunctionAuthorizer,
     MetadataACLAuthorizer,
     TenantAuthorizer,
+    UnsupportedSubject,
 )
 from wardowl.backends.memory import InMemoryBackend
 from wardowl.caching import CachingAuthorizer
@@ -54,6 +55,7 @@ __all__ = [
     "Strategy",
     "Subject",
     "TenantAuthorizer",
+    "UnsupportedSubject",
     "__version__",
     "filter_from_dict",
     "filter_to_dict",

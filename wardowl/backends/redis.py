@@ -8,8 +8,11 @@ Permissions are matched on one TAG field, `wardowl_terms`, holding a type-tagged
 string or integer in the chunk's metadata, as the other backends do, each term hex-encoded. A
 filter becomes `@wardowl_terms:{...}` conditions on those hex strings, which contain only `0-9`
 and `a-f`: no group name or user id can add query syntax, and Redis's case-insensitive TAG
-matching cannot merge two values. The metadata is stored as JSON in the hash and returned exactly
-as written, for the retriever's re-check.
+matching cannot merge two values. The Query Engine indexes at most 4,096 bytes of a TAG value and
+cuts a longer one short, while a query looks for the whole value, so a term whose hex is longer
+(over 2,048 bytes of field name and value) is stored and searched as the hex of its SHA-256 digest
+instead; its chunk is found, and a value that is only its first 2,048 bytes does not match it. The
+metadata is stored as JSON in the hash and returned exactly as written, for the retriever's re-check.
 
 `create_index` creates the index over the hashes under `prefix`, with an HNSW cosine vector and,
 with `content_field=`, the chunks' text for keyword search. A write is searchable as soon as it
@@ -26,7 +29,7 @@ import struct
 from collections.abc import Callable, Iterable, Mapping, Sequence
 from typing import Any
 
-from wardowl.backends._engines import _SEP, TERMS_FIELD, tag, terms
+from wardowl.backends._engines import _SEP, TERMS_FIELD, digest, tag, terms
 from wardowl.backends._errors import required
 from wardowl.backends._vectors import document_vectors
 from wardowl.filters import And, Filter, In, Or, _ordered
@@ -41,13 +44,18 @@ _SCORE = "__wardowl_distance"
 _BATCH = 500
 _WORDS = re.compile(r"\w+")
 _MAX_WORDS = 64  # a keyword query longer than this keeps its first 64 distinct words
+# The longest TAG value the Query Engine indexes whole, in bytes: it cuts longer ones short
+# (MAX_TAG_LEN in RediSearch's src/tag_index.c), and a query that names the whole value then misses it.
+_MAX_TAG = 4096
 _SET_IF_STORED = (
     "if redis.call('EXISTS', KEYS[1]) == 1 then redis.call('HSET', KEYS[1], ARGV[1], ARGV[2], ARGV[3], ARGV[4]) end"
 )
 
 
 def _hex(term: str) -> str:
-    return term.encode("utf-8", "surrogatepass").hex()
+    """`term` hex-encoded, or its digest hex-encoded when that would be longer than `_MAX_TAG`."""
+    encoded = term.encode("utf-8", "surrogatepass").hex()
+    return encoded if len(encoded) <= _MAX_TAG else digest(term).encode("utf-8").hex()
 
 
 def permission_terms(metadata: Mapping[str, Any]) -> str:

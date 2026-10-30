@@ -12,7 +12,7 @@ import pytest
 
 from wardowl import And, Document, In, MetadataACLAuthorizer, Or, PermissionedRetriever, Query, Subject
 from wardowl.backends import NothingMatches
-from wardowl.backends._engines import TERMS_FIELD, tag, terms
+from wardowl.backends._engines import TERMS_FIELD, digest, tag, terms
 from wardowl.backends.redis import RedisBackend, create_index, filter_to_query, permission_terms
 from wardowl.testing import QUERY, HashingEmbedder, check_backend
 
@@ -37,6 +37,24 @@ def test_hostile_values_become_hex_digits():
     query = filter_to_query(In("allowed_groups", ["x} | @wardowl_terms:{*"]))
     body = query.split("{", 1)[1].rstrip("}")
     assert set(body) <= set("0123456789abcdef")
+
+
+def test_a_term_longer_than_a_tag_redis_indexes_whole_becomes_its_digest():
+    # The Query Engine indexes at most 4,096 bytes of a TAG value and cuts a longer one short, while a
+    # query names the whole value: the conformance campaign's long values were never found.
+    edge = "g" * (2048 - len(tag("allowed_groups", "").encode()))  # the longest value kept as it is
+    longer = edge + "g"
+    assert permission_terms({"allowed_groups": [edge]}) == _h("allowed_groups", edge)
+    assert len(_h("allowed_groups", edge)) == 4096
+    stored = permission_terms({"allowed_groups": [longer]})
+    assert stored == digest(tag("allowed_groups", longer)).encode().hex() and len(stored) < 200
+    assert set(stored) <= set("0123456789abcdef")
+    assert filter_to_query(In("allowed_groups", [longer])) == f"@{TERMS_FIELD}:{{{stored}}}"
+    assert permission_terms({"allowed_groups": [longer + "a"]}) != permission_terms({"allowed_groups": [longer + "b"]})
+    client = FakeClient()
+    RedisBackend(client, "idx", EMBED).add([Document("d", "leave", {"allowed_groups": [longer]})])
+    _, _, mapping = client.calls[1]
+    assert mapping[TERMS_FIELD] == stored and json.loads(mapping["metadata"]) == {"allowed_groups": [longer]}
 
 
 def test_an_empty_in_matches_nothing_without_asking_redis():
@@ -375,6 +393,25 @@ def test_hashes_written_by_another_tool_need_their_permission_terms(redis_client
     redis_client.hset(f"{name}:raw-1", mapping={TERMS_FIELD: permission_terms(metadata)})
     assert [h.id for h in prefilter.retrieve("leave", hr, k=5).hits] == ["raw-1"]
     _drop(redis_client, name)
+
+
+def test_server_finds_values_longer_than_a_tag_it_indexes_whole(redis_client):
+    # Before, the Query Engine kept the first 4,096 bytes of the long value's term: the whole value
+    # never matched, and a value made of its first 2,031 letters did.
+    edge = "g" * (2048 - len(tag("allowed_groups", "").encode()))
+    long_group = edge + "g" * 3000
+    name, backend = _store(redis_client, "FLAT")
+    try:
+        backend.add(
+            [
+                Document("long", "leave", {"allowed_groups": [long_group]}),
+                Document("edge", "leave", {"allowed_groups": [edge]}),
+            ]
+        )
+        assert [h.id for h in backend.search("leave", 5, In("allowed_groups", [long_group]))] == ["long"]
+        assert [h.id for h in backend.search("leave", 5, In("allowed_groups", [edge]))] == ["edge"]
+    finally:
+        _drop(redis_client, name)
 
 
 def test_replaced_and_deleted_chunks(redis_client):
