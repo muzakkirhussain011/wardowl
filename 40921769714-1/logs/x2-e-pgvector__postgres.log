@@ -1,0 +1,72 @@
+The files belonging to this database system will be owned by user "postgres".
+This user must also own the server process.
+
+The database cluster will be initialized with locale "en_US.utf8".
+The default database encoding has accordingly been set to "UTF8".
+The default text search configuration will be set to "english".
+
+Data page checksums are disabled.
+
+fixing permissions on existing directory /var/lib/postgresql/data ... ok
+creating subdirectories ... ok
+selecting dynamic shared memory implementation ... posix
+selecting default "max_connections" ... 100
+selecting default "shared_buffers" ... 128MB
+selecting default time zone ... Etc/UTC
+creating configuration files ... ok
+running bootstrap script ... ok
+performing post-bootstrap initialization ... ok
+syncing data to disk ... ok
+
+
+initdb: warning: enabling "trust" authentication for local connections
+Success. You can now start the database server using:
+initdb: hint: You can change this by editing pg_hba.conf or using the option -A, or --auth-local and --auth-host, the next time you run initdb.
+
+    pg_ctl -D /var/lib/postgresql/data -l logfile start
+
+waiting for server to start....2026-10-29 19:56:07.734 UTC [48] LOG:  starting PostgreSQL 17.11 (Debian 17.11-1.pgdg12+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit
+2026-10-29 19:56:07.734 UTC [48] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+2026-10-29 19:56:07.737 UTC [51] LOG:  database system was shut down at 2026-10-29 19:56:07 UTC
+2026-10-29 19:56:07.742 UTC [48] LOG:  database system is ready to accept connections
+ done
+server started
+CREATE DATABASE
+
+
+/usr/local/bin/docker-entrypoint.sh: ignoring /docker-entrypoint-initdb.d/*
+
+waiting for server to shut down...2026-10-29 19:56:07.876 UTC [48] LOG:  received fast shutdown request
+.2026-10-29 19:56:07.876 UTC [48] LOG:  aborting any active transactions
+2026-10-29 19:56:07.880 UTC [48] LOG:  background worker "logical replication launcher" (PID 54) exited with exit code 1
+2026-10-29 19:56:07.880 UTC [49] LOG:  shutting down
+2026-10-29 19:56:07.881 UTC [49] LOG:  checkpoint starting: shutdown immediate
+2026-10-29 19:56:07.899 UTC [49] LOG:  checkpoint complete: wrote 921 buffers (0.2%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.017 s, sync=0.002 s, total=0.020 s; sync files=301, longest=0.001 s, average=0.001 s; distance=4238 kB, estimate=4238 kB; lsn=0/190A9B8, redo lsn=0/190A9B8
+2026-10-29 19:56:07.921 UTC [48] LOG:  database system is shut down
+ done
+server stopped
+
+PostgreSQL init process complete; ready for start up.
+
+2026-10-29 19:56:08.049 UTC [1] LOG:  starting PostgreSQL 17.11 (Debian 17.11-1.pgdg12+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit
+2026-10-29 19:56:08.049 UTC [1] LOG:  listening on IPv4 address "0.0.0.0", port 5432
+2026-10-29 19:56:08.049 UTC [1] LOG:  listening on IPv6 address "::", port 5432
+2026-10-29 19:56:08.050 UTC [1] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+2026-10-29 19:56:08.053 UTC [64] LOG:  database system was shut down at 2026-10-29 19:56:07 UTC
+2026-10-29 19:56:08.058 UTC [1] LOG:  database system is ready to accept connections
+2026-10-29 19:57:38.120 UTC [82] LOG:  skipping vacuum of "wardowl_x2x5" --- lock not available
+2026-10-29 19:57:52.656 UTC [62] LOG:  checkpoint starting: wal
+2026-10-29 20:02:22.076 UTC [62] LOG:  checkpoint complete: wrote 123641 buffers (31.4%); 0 WAL file(s) added, 0 removed, 34 recycled; write=269.410 s, sync=0.001 s, total=269.428 s; sync files=109, longest=0.001 s, average=0.001 s; distance=547929 kB, estimate=547929 kB; lsn=0/37C03C20, redo lsn=0/23020DF0
+2026-10-29 20:29:17.377 UTC [62] LOG:  checkpoint starting: wal
+2026-10-29 20:29:38.725 UTC [13343] LOG:  skipping vacuum of "wardowl_x2x5" --- lock not available
+2026-10-29 20:29:43.999 UTC [62] LOG:  checkpoint complete: wrote 27834 buffers (7.1%); 0 WAL file(s) added, 6 removed, 28 recycled; write=24.288 s, sync=2.205 s, total=26.622 s; sync files=57, longest=1.150 s, average=0.039 s; distance=557171 kB, estimate=557171 kB; lsn=0/68029500, redo lsn=0/4503DBD0
+2026-10-29 20:29:43.999 UTC [62] LOG:  checkpoints are occurring too frequently (26 seconds apart)
+2026-10-29 20:29:43.999 UTC [62] HINT:  Consider increasing the configuration parameter "max_wal_size".
+2026-10-29 20:29:43.999 UTC [62] LOG:  checkpoint starting: wal
+2026-10-29 20:29:45.468 UTC [13343] ERROR:  canceling autovacuum task
+2026-10-29 20:29:45.468 UTC [13343] CONTEXT:  while scanning block 15157 of relation "pg_toast.pg_toast_127489"
+	automatic vacuum of table "bench.pg_toast.pg_toast_127489"
+2026-10-29 20:34:13.068 UTC [62] LOG:  checkpoint complete: wrote 107578 buffers (27.4%); 0 WAL file(s) added, 0 removed, 36 recycled; write=269.061 s, sync=0.001 s, total=269.070 s; sync files=25, longest=0.001 s, average=0.001 s; distance=603321 kB, estimate=603321 kB; lsn=0/6DEB4190, redo lsn=0/69D6C120
+2026-10-29 20:51:19.611 UTC [62] LOG:  checkpoint starting: wal
+2026-10-29 20:51:39.095 UTC [19999] LOG:  skipping vacuum of "wardowl_x2x5" --- lock not available
+2026-10-29 20:55:49.044 UTC [62] LOG:  checkpoint complete: wrote 52375 buffers (13.3%); 0 WAL file(s) added, 0 removed, 33 recycled; write=269.424 s, sync=0.001 s, total=269.433 s; sync files=45, longest=0.001 s, average=0.001 s; distance=530183 kB, estimate=596007 kB; lsn=0/A4178A58, redo lsn=0/8A32DF50

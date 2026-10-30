@@ -1,0 +1,85 @@
+[19:35:37] data: 6 files match checksums.json
+[19:35:39] corpus e: 107,540 chunks, 1,489 pairs (2 s)
+[19:35:39] == mongodb default build 0: loading 107,540 chunks
+[19:36:43]    loaded: {'bulk_s': 36.8, 'index_s': 23.0, 'settle_s': 3.6, 'documents': 107540, 'version': '8.0.30', 'seconds': 63.6}
+[19:36:43] -- mongodb default b0 default: {'num_candidates': 100} (budget 14.9 min)
+[19:36:55]   mongodb default b0 default: pass 1, 1000 of 1489 pairs (12 s)
+[19:37:25]   mongodb default b0 default: 1489 of 1489 pairs, 3 passes, 0 errors, 42 s (cut: none)
+[19:37:25]    mongodb default b0 default: {'pairs': 1489, 'recall10': 0.952316076294278, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 9.7705, 'p95_ms': 14.175419999999999, 'p99_ms': 15.637083999999996, 'qps': 113.50434960254421}
+[19:37:25] -- mongodb default b0 nc20: {'num_candidates': 20} (budget 15.7 min)
+[19:37:33]   mongodb default b0 nc20: pass 1, 1000 of 1489 pairs (8 s)
+[19:37:54]   mongodb default b0 nc20: 1489 of 1489 pairs, 3 passes, 0 errors, 29 s (cut: none)
+[19:37:54]    mongodb default b0 nc20: {'pairs': 1489, 'recall10': 0.8670980926430518, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 6.7363, 'p95_ms': 10.308959999999999, 'p99_ms': 11.679795999999989, 'qps': 158.46358813242455}
+[19:37:54] -- mongodb default b0 nc50: {'num_candidates': 50} (budget 16.5 min)
+[19:38:03]   mongodb default b0 nc50: pass 1, 1000 of 1489 pairs (8 s)
+[19:38:26]   mongodb default b0 nc50: 1489 of 1489 pairs, 3 passes, 0 errors, 31 s (cut: none)
+[19:38:26]    mongodb default b0 nc50: {'pairs': 1489, 'recall10': 0.926975476839237, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 7.1735, 'p95_ms': 11.471279999999997, 'p99_ms': 12.818611999999987, 'qps': 149.9849204214159}
+[19:38:26] -- mongodb default b0 nc200: {'num_candidates': 200} (budget 17.3 min)
+[19:38:37]   mongodb default b0 nc200: pass 1, 1000 of 1489 pairs (12 s)
+[19:39:10]   mongodb default b0 nc200: 1489 of 1489 pairs, 3 passes, 0 errors, 45 s (cut: none)
+[19:39:10]    mongodb default b0 nc200: {'pairs': 1489, 'recall10': 0.9742506811989101, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 11.3253, 'p95_ms': 15.943259999999999, 'p99_ms': 17.458896, 'qps': 102.52626366202055}
+[19:39:10] -- mongodb default b0 nc1000: {'num_candidates': 1000} (budget 18.3 min)
+[19:39:32]   mongodb default b0 nc1000: pass 1, 1000 of 1489 pairs (21 s)
+[19:40:33]   mongodb default b0 nc1000: 1489 of 1489 pairs, 3 passes, 0 errors, 82 s (cut: none)
+[19:40:33]    mongodb default b0 nc1000: {'pairs': 1489, 'recall10': 0.9962534059945504, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 22.7771, 'p95_ms': 26.930519999999998, 'p99_ms': 27.517579999999995, 'qps': 55.38307371119626}
+[19:40:33] -- mongodb default b0 nc10000: {'num_candidates': 10000} (budget 19.4 min)
+[19:41:21]   mongodb default b0 nc10000: pass 1, 1000 of 1489 pairs (48 s)
+[19:43:39]   mongodb default b0 nc10000: 1489 of 1489 pairs, 3 passes, 0 errors, 186 s (cut: none)
+[19:43:39]    mongodb default b0 nc10000: {'pairs': 1489, 'recall10': 1.0, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 54.8462, 'p95_ms': 57.35386, 'p99_ms': 58.29694399999999, 'qps': 24.224810142727893}
+[19:43:39] -- mongodb default b0 exact: {'exact': True} (budget 20.5 min)
+[19:43:57]   mongodb default b0 exact: pass 1, 1000 of 1489 pairs (18 s)
+[19:44:48]   mongodb default b0 exact: 1489 of 1489 pairs, 3 passes, 0 errors, 69 s (cut: none)
+[19:44:48]    mongodb default b0 exact: {'pairs': 1489, 'recall10': 1.0, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 19.6057, 'p95_ms': 20.513679999999997, 'p99_ms': 20.889512, 'qps': 65.96063156759854}
+[19:44:48] == mongodb default build 1: loading 107,540 chunks
+[19:45:46]    loaded: {'bulk_s': 35.2, 'index_s': 19.8, 'settle_s': 2.5, 'documents': 107540, 'version': '8.0.30', 'seconds': 57.6}
+[19:45:46] -- mongodb default b1 default: {'num_candidates': 100} (budget 25.4 min)
+[19:45:56]   mongodb default b1 default: pass 1, 1000 of 1489 pairs (10 s)
+[19:46:25]   mongodb default b1 default: 1489 of 1489 pairs, 3 passes, 0 errors, 38 s (cut: none)
+[19:46:25]    mongodb default b1 default: {'pairs': 1489, 'recall10': 0.9556539509536786, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 9.4443, 'p95_ms': 12.859719999999998, 'p99_ms': 14.342699999999997, 'qps': 121.20254182812455}
+[19:46:25] -- mongodb default b1 nc20: {'num_candidates': 20} (budget 27.7 min)
+[19:46:32]   mongodb default b1 nc20: pass 1, 1000 of 1489 pairs (7 s)
+[19:46:52]   mongodb default b1 nc20: 1489 of 1489 pairs, 3 passes, 0 errors, 27 s (cut: none)
+[19:46:52]    mongodb default b1 nc20: {'pairs': 1489, 'recall10': 0.8771798365122616, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 6.2762, 'p95_ms': 9.357159999999999, 'p99_ms': 10.653576, 'qps': 169.2795247422205}
+[19:46:52] -- mongodb default b1 nc50: {'num_candidates': 50} (budget 30.4 min)
+[19:47:00]   mongodb default b1 nc50: pass 1, 1000 of 1489 pairs (8 s)
+[19:47:24]   mongodb default b1 nc50: 1489 of 1489 pairs, 3 passes, 0 errors, 32 s (cut: none)
+[19:47:24]    mongodb default b1 nc50: {'pairs': 1489, 'recall10': 0.9250681198910081, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 7.6133, 'p95_ms': 11.184959999999998, 'p99_ms': 12.380963999999995, 'qps': 143.25492645177587}
+[19:47:24] -- mongodb default b1 nc200: {'num_candidates': 200} (budget 33.7 min)
+[19:47:36]   mongodb default b1 nc200: pass 1, 1000 of 1489 pairs (12 s)
+[19:48:09]   mongodb default b1 nc200: 1489 of 1489 pairs, 3 passes, 0 errors, 45 s (cut: none)
+[19:48:09]    mongodb default b1 nc200: {'pairs': 1489, 'recall10': 0.9752043596730244, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 11.5775, 'p95_ms': 15.275639999999996, 'p99_ms': 16.866527999999995, 'qps': 102.12306793991887}
+[19:48:09] -- mongodb default b1 nc1000: {'num_candidates': 1000} (budget 37.8 min)
+[19:48:31]   mongodb default b1 nc1000: pass 1, 1000 of 1489 pairs (21 s)
+[19:49:33]   mongodb default b1 nc1000: 1489 of 1489 pairs, 3 passes, 0 errors, 84 s (cut: none)
+[19:49:33]    mongodb default b1 nc1000: {'pairs': 1489, 'recall10': 0.9950953678474116, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 23.3322, 'p95_ms': 27.48424, 'p99_ms': 28.475848, 'qps': 54.41340017647409}
+[19:49:33] -- mongodb default b1 nc10000: {'num_candidates': 10000} (budget 43.0 min)
+[19:50:18]   mongodb default b1 nc10000: pass 1, 1000 of 1489 pairs (45 s)
+[19:52:28]   mongodb default b1 nc10000: 1489 of 1489 pairs, 3 passes, 0 errors, 175 s (cut: none)
+[19:52:28]    mongodb default b1 nc10000: {'pairs': 1489, 'recall10': 1.0, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 51.279, 'p95_ms': 53.13662, 'p99_ms': 55.53677999999995, 'qps': 25.873905808553356}
+[19:52:28] == mongodb default build 2: loading 107,540 chunks
+[19:53:24]    loaded: {'bulk_s': 34.9, 'index_s': 18.1, 'settle_s': 3.2, 'documents': 107540, 'version': '8.0.30', 'seconds': 56.4}
+[19:53:24] -- mongodb default b2 default: {'num_candidates': 100} (budget 49.5 min)
+[19:53:35]   mongodb default b2 default: pass 1, 1000 of 1489 pairs (10 s)
+[19:54:03]   mongodb default b2 default: 1489 of 1489 pairs, 3 passes, 0 errors, 39 s (cut: none)
+[19:54:03]    mongodb default b2 default: {'pairs': 1489, 'recall10': 0.9496594005449592, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 9.5208, 'p95_ms': 13.0216, 'p99_ms': 13.993992, 'qps': 119.01801869657174}
+[19:54:03] -- mongodb default b2 nc20: {'num_candidates': 20} (budget 59.3 min)
+[19:54:10]   mongodb default b2 nc20: pass 1, 1000 of 1489 pairs (7 s)
+[19:54:31]   mongodb default b2 nc20: 1489 of 1489 pairs, 3 passes, 0 errors, 28 s (cut: none)
+[19:54:31]    mongodb default b2 nc20: {'pairs': 1489, 'recall10': 0.8732970027247956, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 6.4453, 'p95_ms': 9.619399999999999, 'p99_ms': 10.336219999999996, 'qps': 165.53475836933566}
+[19:54:31] -- mongodb default b2 nc50: {'num_candidates': 50} (budget 74.0 min)
+[19:54:40]   mongodb default b2 nc50: pass 1, 1000 of 1489 pairs (8 s)
+[19:55:04]   mongodb default b2 nc50: 1489 of 1489 pairs, 3 passes, 0 errors, 33 s (cut: none)
+[19:55:04]    mongodb default b2 nc50: {'pairs': 1489, 'recall10': 0.9292915531335152, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 7.7591, 'p95_ms': 11.3248, 'p99_ms': 12.183067999999997, 'qps': 140.55827670757353}
+[19:55:04] -- mongodb default b2 nc200: {'num_candidates': 200} (budget 98.5 min)
+[19:55:16]   mongodb default b2 nc200: pass 1, 1000 of 1489 pairs (12 s)
+[19:55:51]   mongodb default b2 nc200: 1489 of 1489 pairs, 3 passes, 0 errors, 47 s (cut: none)
+[19:55:51]    mongodb default b2 nc200: {'pairs': 1489, 'recall10': 0.9670299727520435, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 12.1537, 'p95_ms': 15.38206, 'p99_ms': 16.287484000000003, 'qps': 98.20714772331033}
+[19:55:51] -- mongodb default b2 nc1000: {'num_candidates': 1000} (budget 147.4 min)
+[19:56:12]   mongodb default b2 nc1000: pass 1, 1000 of 1489 pairs (21 s)
+[19:57:11]   mongodb default b2 nc1000: 1489 of 1489 pairs, 3 passes, 0 errors, 80 s (cut: none)
+[19:57:11]    mongodb default b2 nc1000: {'pairs': 1489, 'recall10': 0.9943460490463214, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 22.5373, 'p95_ms': 26.608399999999996, 'p99_ms': 27.329203999999997, 'qps': 56.51941057428827}
+[19:57:11] -- mongodb default b2 nc10000: {'num_candidates': 10000} (budget 293.4 min)
+[19:58:06]   mongodb default b2 nc10000: pass 1, 1000 of 1489 pairs (55 s)
+[20:00:46]   mongodb default b2 nc10000: 1489 of 1489 pairs, 3 passes, 0 errors, 215 s (cut: none)
+[20:00:46]    mongodb default b2 nc10000: {'pairs': 1489, 'recall10': 1.0, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 63.5445, 'p95_ms': 65.73248, 'p99_ms': 66.66477599999999, 'qps': 21.02898323073885}
+[20:00:46] X2 x2-e-mongodb: done

@@ -1,0 +1,393 @@
+{
+ "experiment": "x2",
+ "label": "x2-m-lancedb-b2",
+ "corpus": {
+  "name": "m",
+  "chunks": 1000000,
+  "dim": 384,
+  "pairs": 6200
+ },
+ "store": "lancedb",
+ "layouts": [
+  "default"
+ ],
+ "builds": [
+  2
+ ],
+ "minutes": 320.0,
+ "started": "2026-10-29T22:58:47+0000",
+ "environment": {
+  "python": "3.12.15",
+  "platform": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+  "cpus": 4,
+  "runner": "GitHub Actions 1000008219",
+  "run": "40921769714",
+  "job": "store",
+  "sha": "884ce18397966859ebb803427cc23a5023431739",
+  "memory_gib": 15.6,
+  "cpu_model": "INTEL(R) XEON(R) PLATINUM 8573C",
+  "wardowl": "2.1.0",
+  "numpy": "2.5.4",
+  "psycopg": "3.3.6",
+  "psycopg-pool": "3.3.3",
+  "pgvector": "0.5.1",
+  "qdrant-client": "1.19.1",
+  "elasticsearch": "9.5.1",
+  "opensearch-py": "3.2.0",
+  "weaviate-client": "4.23.1",
+  "redis": "8.1.0",
+  "pymilvus": "3.0.2",
+  "pymongo": "4.19.0",
+  "lancedb": "0.40.0",
+  "pyarrow": "26.0.0",
+  "chromadb": "1.5.9",
+  "faiss-cpu": "1.15.1",
+  "wardowl_path": "/home/runner/work/wardowl/wardowl/wardowl"
+ },
+ "units": [
+  {
+   "layout": "default",
+   "build": 2,
+   "settings": [
+    {
+     "id": "default",
+     "kind": "default",
+     "params": {},
+     "level": null,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 2347.9,
+     "effective": {},
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 6200,
+      "pairs_run": 6200,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 18600,
+      "sampled": 0,
+      "pass1_seconds": 92.4,
+      "seconds": 256.6,
+      "budget_seconds": 2347.9
+     },
+     "summary": {
+      "pairs": 6200,
+      "recall10": 0.43520967741935485,
+      "err10": 0.001935483870967742,
+      "short10": 0.015,
+      "p50_ms": 11.283750000000001,
+      "p95_ms": 21.853085,
+      "p99_ms": 22.72768900000001,
+      "qps": 74.70848892219635
+     }
+    },
+    {
+     "id": "np10",
+     "kind": "sweep",
+     "params": {
+      "nprobes": 10
+     },
+     "level": 1,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 2646.7,
+     "effective": {},
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 6200,
+      "pairs_run": 6200,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 18600,
+      "sampled": 0,
+      "pass1_seconds": 68.2,
+      "seconds": 202.8,
+      "budget_seconds": 2646.7
+     },
+     "summary": {
+      "pairs": 6200,
+      "recall10": 0.4221774193548387,
+      "err10": 0.009193548387096774,
+      "short10": 0.03483870967741935,
+      "p50_ms": 8.43805,
+      "p95_ms": 19.286874999999995,
+      "p99_ms": 20.016641000000003,
+      "qps": 92.50656300866628
+     }
+    },
+    {
+     "id": "np50",
+     "kind": "sweep",
+     "params": {
+      "nprobes": 50
+     },
+     "level": 2,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 3053.9,
+     "effective": {},
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 6200,
+      "pairs_run": 6200,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 18600,
+      "sampled": 0,
+      "pass1_seconds": 138.4,
+      "seconds": 414.7,
+      "budget_seconds": 3053.9
+     },
+     "summary": {
+      "pairs": 6200,
+      "recall10": 0.4461290322580645,
+      "err10": 0.0,
+      "short10": 0.0014516129032258066,
+      "p50_ms": 20.7835,
+      "p95_ms": 31.342555,
+      "p99_ms": 32.381532,
+      "qps": 45.06994048957061
+     }
+    },
+    {
+     "id": "np100",
+     "kind": "sweep",
+     "params": {
+      "nprobes": 100
+     },
+     "level": 3,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 3581.7,
+     "effective": {},
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 6200,
+      "pairs_run": 6200,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 18600,
+      "sampled": 0,
+      "pass1_seconds": 219.2,
+      "seconds": 647.0,
+      "budget_seconds": 3581.7
+     },
+     "summary": {
+      "pairs": 6200,
+      "recall10": 0.4492096774193549,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 34.21965,
+      "p95_ms": 44.66426499999999,
+      "p99_ms": 46.227443,
+      "qps": 28.959864579263854
+     }
+    },
+    {
+     "id": "np200",
+     "kind": "sweep",
+     "params": {
+      "nprobes": 200
+     },
+     "level": 4,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 4315.3,
+     "effective": {},
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 6200,
+      "pairs_run": 6200,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 18600,
+      "sampled": 0,
+      "pass1_seconds": 253.4,
+      "seconds": 750.2,
+      "budget_seconds": 4315.3
+     },
+     "summary": {
+      "pairs": 6200,
+      "recall10": 0.4494516129032259,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 40.2282,
+      "p95_ms": 50.928394999999995,
+      "p99_ms": 54.232736,
+      "qps": 24.914443779967296
+     }
+    },
+    {
+     "id": "np500",
+     "kind": "sweep",
+     "params": {
+      "nprobes": 500
+     },
+     "level": 5,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 5503.6,
+     "effective": {},
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 6200,
+      "pairs_run": 6200,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 18600,
+      "sampled": 0,
+      "pass1_seconds": 258.0,
+      "seconds": 753.0,
+      "budget_seconds": 5503.6
+     },
+     "summary": {
+      "pairs": 6200,
+      "recall10": 0.4494516129032259,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 40.2635,
+      "p95_ms": 51.146999999999984,
+      "p99_ms": 54.130067000000004,
+      "qps": 24.859313048136023
+     }
+    },
+    {
+     "id": "refine",
+     "kind": "specific",
+     "params": {
+      "nprobes": 50,
+      "refine_factor": 30
+     },
+     "level": null,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 7878.7,
+     "effective": {},
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 6200,
+      "pairs_run": 6200,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 18600,
+      "sampled": 0,
+      "pass1_seconds": 157.6,
+      "seconds": 460.2,
+      "budget_seconds": 7878.7
+     },
+     "summary": {
+      "pairs": 6200,
+      "recall10": 0.911258064516129,
+      "err10": 0.0,
+      "short10": 0.0014516129032258066,
+      "p50_ms": 23.335250000000002,
+      "p95_ms": 33.877039999999994,
+      "p99_ms": 35.231215,
+      "qps": 40.6182070941655
+     }
+    },
+    {
+     "id": "postfilter",
+     "kind": "specific",
+     "params": {
+      "prefilter": false
+     },
+     "level": null,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [
+      "prefilter=False"
+     ],
+     "budget_seconds": 15296.9,
+     "effective": {},
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 6200,
+      "pairs_run": 6200,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 18600,
+      "sampled": 0,
+      "pass1_seconds": 42.1,
+      "seconds": 124.8,
+      "budget_seconds": 15296.9
+     },
+     "summary": {
+      "pairs": 6200,
+      "recall10": 0.17370967741935484,
+      "err10": 0.5343548387096774,
+      "short10": 0.9174193548387096,
+      "p50_ms": 6.367900000000001,
+      "p95_ms": 9.57237,
+      "p99_ms": 10.108162000000002,
+      "qps": 150.75154557049504
+     }
+    }
+   ],
+   "load": {
+    "load_s": 52.9,
+    "index_s": 56.9,
+    "rows": 1000000,
+    "indices": [
+     "IndexConfig(name=\"id_idx\", index_type=\"BTree\", columns=[\"id\"], index_uuid=\"8a67574a-c078-49cc-8750-e70c1f2508af\", type_url=\"/lance.table.BTreeIndexDetails\", created_at=datetime.datetime(2026, 10, 29, 22, 59, 59, 313030, tzinfo=datetime.timezone.utc), num_indexed_rows=1_000_000, num_unindexed_rows=0, size_bytes=11_401_692, num_segments=1, index_version=0, index_details={})",
+     "IndexConfig(name=\"vector_idx\", index_type=\"IvfPq\", columns=[\"vector\"], index_uuid=\"e905fd4c-9775-41f0-979e-6999f3af587a\", type_url=\"/lance.index.pb.VectorIndexDetails\", created_at=datetime.datetime(2026, 10, 29, 23, 0, 38, 722811, tzinfo=datetime.timezone.utc), num_indexed_rows=1_000_000, num_unindexed_rows=0, size_bytes=29_298_430, num_segments=1, index_version=1, index_details={'metric_type': 'COSINE', 'compression': {'type': 'pq', 'num_bits': 8, 'num_sub_vectors': 24}, 'runtime_hints': {'lance.ivf.shuffle_partition_batches': '10240', 'lance.skip_transpose': 'false', 'lance.ivf.shuffle_partition_concurrency': '2', 'lance.pq.sample_rate': '256', 'lance.pq.max_iters': '50', 'lance.ivf.max_iters': '50', 'lance.ivf.sample_rate': '256', 'lance.pq.kmeans_redos': '1'}})",
+     "IndexConfig(name=\"wardowl_key_idx\", index_type=\"BTree\", columns=[\"wardowl_key\"], index_uuid=\"db058ef0-6ef8-4c85-a29c-489f075731cc\", type_url=\"/lance.table.BTreeIndexDetails\", created_at=datetime.datetime(2026, 10, 29, 22, 59, 59, 461735, tzinfo=datetime.timezone.utc), num_indexed_rows=1_000_000, num_unindexed_rows=0, size_bytes=12_722_509, num_segments=1, index_version=0, index_details={})",
+     "IndexConfig(name=\"wardowl_terms_idx\", index_type=\"LabelList\", columns=[\"wardowl_terms\"], index_uuid=\"256c776b-0939-44c0-993e-ef6d17b6310f\", type_url=\"/lance.table.LabelListIndexDetails\", created_at=datetime.datetime(2026, 10, 29, 22, 59, 59, 184428, tzinfo=datetime.timezone.utc), num_indexed_rows=1_000_000, num_unindexed_rows=0, size_bytes=87_443_452, num_segments=1, index_version=1, index_details={})"
+    ],
+    "detail": "bulk table.add in the backend's row layout; the default vector index (IVF_PQ), cosine",
+    "seconds": 109.9
+   }
+  }
+ ],
+ "failures": [],
+ "skipped": [],
+ "status": "done",
+ "finished": "2026-10-30T00:00:50+0000"
+}

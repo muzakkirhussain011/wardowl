@@ -1,0 +1,29 @@
+[21:24:30] data: 8 files match checksums.json
+[21:24:35] corpus m: 1,000,000 chunks, 6,200 pairs (5 s)
+[21:24:35] == chroma default build 1: loading 1,000,000 chunks
+[21:26:44]   loaded 100,000 of 1,000,000 chunks (128 s)
+[21:29:12]   loaded 200,000 of 1,000,000 chunks (276 s)
+[21:31:50]   loaded 300,000 of 1,000,000 chunks (435 s)
+[21:34:30]   loaded 400,000 of 1,000,000 chunks (594 s)
+[21:37:12]   loaded 500,000 of 1,000,000 chunks (756 s)
+[21:40:04]   loaded 600,000 of 1,000,000 chunks (928 s)
+[21:42:55]   loaded 700,000 of 1,000,000 chunks (1099 s)
+[21:45:50]   loaded 800,000 of 1,000,000 chunks (1274 s)
+[21:48:44]   loaded 900,000 of 1,000,000 chunks (1448 s)
+[21:51:41]   loaded 1,000,000 of 1,000,000 chunks (1625 s)
+[21:51:42]    loaded: {'load_s': 1625.4, 'records': 1000000, 'version': '1.5.9', 'config': {'hnsw': {'space': 'cosine', 'ef_construction': 100, 'ef_search': 100, 'max_neighbors': 16, 'resize_factor': 1.2, 'sync_threshold': 1000}, 'spann': None, 'embedding_function': '<chromadb.api.types.DefaultEmbeddingFunction object at 0x7ff8ba694bc0>'}, 'seconds': 1626.9}
+[21:51:42] -- chroma default b1 default: {'ef_search': 100} (budget 48.0 min)
+[23:05:24]   chroma default b1 default: 0 of 6200 pairs, 3 passes, 0 errors, 4421 s (cut: budget)
+[23:05:24]    chroma default b1 default: {'pairs': 0, 'recall10': None, 'err10': None, 'short10': None}
+[23:05:24] -- chroma default b1 ef10: {'ef_search': 10} (budget 42.8 min)
+[00:18:59]   chroma default b1 ef10: 0 of 6200 pairs, 3 passes, 0 errors, 4415 s (cut: budget)
+[00:18:59]    chroma default b1 ef10: {'pairs': 0, 'recall10': None, 'err10': None, 'short10': None}
+[00:18:59] -- chroma default b1 ef50: {'ef_search': 50} (budget 35.1 min)
+[01:32:37]   chroma default b1 ef50: 0 of 6200 pairs, 3 passes, 0 errors, 4418 s (cut: budget)
+[01:32:37]    chroma default b1 ef50: {'pairs': 0, 'recall10': None, 'err10': None, 'short10': None}
+[01:32:37] -- chroma default b1 ef200: {'ef_search': 200} (budget 22.3 min)
+[02:46:15]   chroma default b1 ef200: 0 of 6200 pairs, 3 passes, 0 errors, 4418 s (cut: budget)
+[02:46:15]    chroma default b1 ef200: {'pairs': 0, 'recall10': None, 'err10': None, 'short10': None}
+[02:46:15] -- chroma default b1 ef500: skipped, -2 min left
+[02:46:15] -- chroma default b1 ef1000: skipped, -2 min left
+[02:49:03] X2 x2-m-chroma-b1: done

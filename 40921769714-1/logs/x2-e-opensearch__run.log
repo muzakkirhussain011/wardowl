@@ -1,0 +1,118 @@
+[19:50:27] data: 6 files match checksums.json
+[19:50:29] corpus e: 107,540 chunks, 1,489 pairs (1 s)
+[19:50:29] == opensearch default build 0: loading 107,540 chunks
+[19:50:38]   loaded 10,000 of 107,540 chunks (9 s)
+[19:50:47]   loaded 20,000 of 107,540 chunks (18 s)
+[19:50:56]   loaded 30,000 of 107,540 chunks (27 s)
+[19:51:04]   loaded 40,000 of 107,540 chunks (35 s)
+[19:51:12]   loaded 50,000 of 107,540 chunks (43 s)
+[19:51:23]   loaded 60,000 of 107,540 chunks (54 s)
+[19:51:34]   loaded 70,000 of 107,540 chunks (65 s)
+[19:51:46]   loaded 80,000 of 107,540 chunks (77 s)
+[19:51:58]   loaded 90,000 of 107,540 chunks (90 s)
+[19:52:11]   loaded 100,000 of 107,540 chunks (102 s)
+[19:52:19]   loaded 107,540 of 107,540 chunks (110 s)
+[19:52:19]    loaded: {'load_s': 110.2, 'refresh_s': 0.1, 'documents': 107540, 'bytes': 364210378, 'segments': 15, 'version': '3.9.0', 'seconds': 110.4}
+[19:52:19] -- opensearch default b0 default: {} (budget 14.9 min)
+[19:52:24]   opensearch default b0 default: pass 1, 1000 of 1489 pairs (5 s)
+[19:52:35]   opensearch default b0 default: 1489 of 1489 pairs, 3 passes, 0 errors, 16 s (cut: none)
+[19:52:35]    opensearch default b0 default: {'pairs': 1489, 'recall10': 0.9480926430517712, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 3.2764, 'p95_ms': 4.27498, 'p99_ms': 4.858767999999999, 'qps': 315.7331169243277}
+[19:52:35] -- opensearch default b0 ef32: {'ef_search': 32} (budget 15.6 min)
+[19:52:39]   opensearch default b0 ef32: pass 1, 1000 of 1489 pairs (3 s)
+[19:52:48]   opensearch default b0 ef32: 1489 of 1489 pairs, 3 passes, 0 errors, 13 s (cut: none)
+[19:52:48]    opensearch default b0 ef32: {'pairs': 1489, 'recall10': 0.9153950953678476, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 2.7773, 'p95_ms': 3.5321, 'p99_ms': 3.8270879999999994, 'qps': 372.73318334389825}
+[19:52:48] -- opensearch default b0 ef64: {'ef_search': 64} (budget 16.5 min)
+[19:52:51]   opensearch default b0 ef64: pass 1, 1000 of 1489 pairs (3 s)
+[19:53:00]   opensearch default b0 ef64: 1489 of 1489 pairs, 3 passes, 0 errors, 12 s (cut: none)
+[19:53:01]    opensearch default b0 ef64: {'pairs': 1489, 'recall10': 0.9366485013623979, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 2.727, 'p95_ms': 3.3348799999999996, 'p99_ms': 3.590928, 'qps': 385.9211506328524}
+[19:53:01] -- opensearch default b0 ef128: {'ef_search': 128} (budget 17.4 min)
+[19:53:04]   opensearch default b0 ef128: pass 1, 1000 of 1489 pairs (3 s)
+[19:53:13]   opensearch default b0 ef128: 1489 of 1489 pairs, 3 passes, 0 errors, 12 s (cut: none)
+[19:53:13]    opensearch default b0 ef128: {'pairs': 1489, 'recall10': 0.9536784741144414, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 2.8464, 'p95_ms': 3.424619999999999, 'p99_ms': 3.7239239999999985, 'qps': 377.6249243608907}
+[19:53:13] -- opensearch default b0 ef256: {'ef_search': 256} (budget 18.4 min)
+[19:53:16]   opensearch default b0 ef256: pass 1, 1000 of 1489 pairs (3 s)
+[19:53:27]   opensearch default b0 ef256: 1489 of 1489 pairs, 3 passes, 0 errors, 14 s (cut: none)
+[19:53:27]    opensearch default b0 ef256: {'pairs': 1489, 'recall10': 0.969141689373297, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 3.2028, 'p95_ms': 3.7300799999999996, 'p99_ms': 3.934835999999999, 'qps': 345.72360449619003}
+[19:53:27] -- opensearch default b0 ef512: {'ef_search': 512} (budget 19.5 min)
+[19:53:30]   opensearch default b0 ef512: pass 1, 1000 of 1489 pairs (4 s)
+[19:53:42]   opensearch default b0 ef512: 1489 of 1489 pairs, 3 passes, 0 errors, 15 s (cut: none)
+[19:53:42]    opensearch default b0 ef512: {'pairs': 1489, 'recall10': 0.9824931880108994, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 3.5903, 'p95_ms': 4.1436399999999995, 'p99_ms': 4.406023999999999, 'qps': 313.6733191181108}
+[19:53:42] -- opensearch default b0 exact: {'exact': True} (budget 20.8 min)
+[19:54:29]   opensearch default b0 exact: pass 1, 1000 of 1489 pairs (47 s)
+[19:56:48]   opensearch default b0 exact: 1489 of 1489 pairs, 3 passes, 0 errors, 186 s (cut: none)
+[19:56:48]    opensearch default b0 exact: {'pairs': 1489, 'recall10': 1.0, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 54.2146, 'p95_ms': 59.46833999999999, 'p99_ms': 60.678328, 'qps': 24.393509969223693}
+[19:56:48] == opensearch default build 1: loading 107,540 chunks
+[19:56:55]   loaded 10,000 of 107,540 chunks (7 s)
+[19:57:03]   loaded 20,000 of 107,540 chunks (15 s)
+[19:57:11]   loaded 30,000 of 107,540 chunks (22 s)
+[19:57:18]   loaded 40,000 of 107,540 chunks (30 s)
+[19:57:26]   loaded 50,000 of 107,540 chunks (38 s)
+[19:57:36]   loaded 60,000 of 107,540 chunks (48 s)
+[19:57:48]   loaded 70,000 of 107,540 chunks (60 s)
+[19:58:01]   loaded 80,000 of 107,540 chunks (73 s)
+[19:58:14]   loaded 90,000 of 107,540 chunks (86 s)
+[19:58:27]   loaded 100,000 of 107,540 chunks (99 s)
+[19:58:35]   loaded 107,540 of 107,540 chunks (107 s)
+[19:58:35]    loaded: {'load_s': 106.7, 'refresh_s': 0.1, 'documents': 107540, 'bytes': 400104774, 'segments': 16, 'version': '3.9.0', 'seconds': 106.8}
+[19:58:35] -- opensearch default b1 default: {} (budget 25.6 min)
+[19:58:40]   opensearch default b1 default: pass 1, 1000 of 1489 pairs (5 s)
+[19:58:50]   opensearch default b1 default: 1489 of 1489 pairs, 3 passes, 0 errors, 15 s (cut: none)
+[19:58:50]    opensearch default b1 default: {'pairs': 1489, 'recall10': 0.9489100817438693, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 3.2535, 'p95_ms': 4.4963, 'p99_ms': 4.955795999999999, 'qps': 316.2945320237593}
+[19:58:50] -- opensearch default b1 ef32: {'ef_search': 32} (budget 27.9 min)
+[19:58:53]   opensearch default b1 ef32: pass 1, 1000 of 1489 pairs (3 s)
+[19:59:02]   opensearch default b1 ef32: 1489 of 1489 pairs, 3 passes, 0 errors, 12 s (cut: none)
+[19:59:02]    opensearch default b1 ef32: {'pairs': 1489, 'recall10': 0.9138283378746594, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 2.6603, 'p95_ms': 3.2426, 'p99_ms': 3.6150599999999984, 'qps': 393.4672076660202}
+[19:59:02] -- opensearch default b1 ef64: {'ef_search': 64} (budget 30.6 min)
+[19:59:05]   opensearch default b1 ef64: pass 1, 1000 of 1489 pairs (3 s)
+[19:59:14]   opensearch default b1 ef64: 1489 of 1489 pairs, 3 passes, 0 errors, 12 s (cut: none)
+[19:59:14]    opensearch default b1 ef64: {'pairs': 1489, 'recall10': 0.9386920980926431, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 2.7171, 'p95_ms': 3.2397, 'p99_ms': 3.4785639999999995, 'qps': 391.8824691574811}
+[19:59:14] -- opensearch default b1 ef128: {'ef_search': 128} (budget 34.0 min)
+[19:59:18]   opensearch default b1 ef128: pass 1, 1000 of 1489 pairs (3 s)
+[19:59:27]   opensearch default b1 ef128: 1489 of 1489 pairs, 3 passes, 0 errors, 13 s (cut: none)
+[19:59:27]    opensearch default b1 ef128: {'pairs': 1489, 'recall10': 0.9547683923705721, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 2.9051, 'p95_ms': 3.42284, 'p99_ms': 3.6713119999999995, 'qps': 373.6759849260764}
+[19:59:27] -- opensearch default b1 ef256: {'ef_search': 256} (budget 38.2 min)
+[19:59:30]   opensearch default b1 ef256: pass 1, 1000 of 1489 pairs (3 s)
+[19:59:41]   opensearch default b1 ef256: 1489 of 1489 pairs, 3 passes, 0 errors, 14 s (cut: none)
+[19:59:41]    opensearch default b1 ef256: {'pairs': 1489, 'recall10': 0.9704359673024524, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 3.203, 'p95_ms': 3.7410599999999996, 'p99_ms': 4.037503999999999, 'qps': 345.5356939184024}
+[19:59:41] -- opensearch default b1 ef512: {'ef_search': 512} (budget 43.7 min)
+[19:59:44]   opensearch default b1 ef512: pass 1, 1000 of 1489 pairs (4 s)
+[19:59:55]   opensearch default b1 ef512: 1489 of 1489 pairs, 3 passes, 0 errors, 15 s (cut: none)
+[19:59:55]    opensearch default b1 ef512: {'pairs': 1489, 'recall10': 0.9818119891008175, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 3.531, 'p95_ms': 4.0904799999999994, 'p99_ms': 4.394547999999999, 'qps': 317.6749386176921}
+[19:59:56] == opensearch default build 2: loading 107,540 chunks
+[20:00:03]   loaded 10,000 of 107,540 chunks (7 s)
+[20:00:11]   loaded 20,000 of 107,540 chunks (15 s)
+[20:00:19]   loaded 30,000 of 107,540 chunks (23 s)
+[20:00:26]   loaded 40,000 of 107,540 chunks (31 s)
+[20:00:34]   loaded 50,000 of 107,540 chunks (39 s)
+[20:00:45]   loaded 60,000 of 107,540 chunks (50 s)
+[20:00:57]   loaded 70,000 of 107,540 chunks (62 s)
+[20:01:10]   loaded 80,000 of 107,540 chunks (74 s)
+[20:01:23]   loaded 90,000 of 107,540 chunks (88 s)
+[20:01:37]   loaded 100,000 of 107,540 chunks (102 s)
+[20:01:45]   loaded 107,540 of 107,540 chunks (110 s)
+[20:01:45]    loaded: {'load_s': 109.6, 'refresh_s': 0.1, 'documents': 107540, 'bytes': 369774366, 'segments': 16, 'version': '3.9.0', 'seconds': 109.8}
+[20:01:45] -- opensearch default b2 default: {} (budget 50.6 min)
+[20:01:48]   opensearch default b2 default: pass 1, 1000 of 1489 pairs (3 s)
+[20:01:58]   opensearch default b2 default: 1489 of 1489 pairs, 3 passes, 0 errors, 13 s (cut: none)
+[20:01:58]    opensearch default b2 default: {'pairs': 1489, 'recall10': 0.9483651226158037, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 2.924, 'p95_ms': 3.43046, 'p99_ms': 3.698275999999999, 'qps': 370.98094837180975}
+[20:01:58] -- opensearch default b2 ef32: {'ef_search': 32} (budget 60.7 min)
+[20:02:01]   opensearch default b2 ef32: pass 1, 1000 of 1489 pairs (3 s)
+[20:02:10]   opensearch default b2 ef32: 1489 of 1489 pairs, 3 passes, 0 errors, 12 s (cut: none)
+[20:02:10]    opensearch default b2 ef32: {'pairs': 1489, 'recall10': 0.9128065395095368, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 2.6977, 'p95_ms': 3.2513799999999997, 'p99_ms': 3.5466479999999985, 'qps': 391.2761654767606}
+[20:02:10] -- opensearch default b2 ef64: {'ef_search': 64} (budget 75.8 min)
+[20:02:13]   opensearch default b2 ef64: pass 1, 1000 of 1489 pairs (3 s)
+[20:02:22]   opensearch default b2 ef64: 1489 of 1489 pairs, 3 passes, 0 errors, 12 s (cut: none)
+[20:02:23]    opensearch default b2 ef64: {'pairs': 1489, 'recall10': 0.9385558583106267, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 2.7861, 'p95_ms': 3.2764999999999995, 'p99_ms': 3.5228919999999997, 'qps': 384.2254524512745}
+[20:02:23] -- opensearch default b2 ef128: {'ef_search': 128} (budget 101.0 min)
+[20:02:26]   opensearch default b2 ef128: pass 1, 1000 of 1489 pairs (3 s)
+[20:02:35]   opensearch default b2 ef128: 1489 of 1489 pairs, 3 passes, 0 errors, 13 s (cut: none)
+[20:02:35]    opensearch default b2 ef128: {'pairs': 1489, 'recall10': 0.9549046321525887, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 2.9602, 'p95_ms': 3.5325399999999996, 'p99_ms': 3.783936, 'qps': 367.6404232719005}
+[20:02:35] -- opensearch default b2 ef256: {'ef_search': 256} (budget 151.4 min)
+[20:02:39]   opensearch default b2 ef256: pass 1, 1000 of 1489 pairs (3 s)
+[20:02:49]   opensearch default b2 ef256: 1489 of 1489 pairs, 3 passes, 0 errors, 14 s (cut: none)
+[20:02:50]    opensearch default b2 ef256: {'pairs': 1489, 'recall10': 0.9703678474114443, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 3.3176, 'p95_ms': 3.8892999999999995, 'p99_ms': 4.18174, 'qps': 333.63623500135395}
+[20:02:50] -- opensearch default b2 ef512: {'ef_search': 512} (budget 302.6 min)
+[20:02:53]   opensearch default b2 ef512: pass 1, 1000 of 1489 pairs (4 s)
+[20:03:05]   opensearch default b2 ef512: 1489 of 1489 pairs, 3 passes, 0 errors, 15 s (cut: none)
+[20:03:05]    opensearch default b2 ef512: {'pairs': 1489, 'recall10': 0.9816076294277929, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 3.6692, 'p95_ms': 4.2642, 'p99_ms': 4.5053319999999974, 'qps': 308.87542006745974}
+[20:03:05] X2 x2-e-opensearch: done

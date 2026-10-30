@@ -1,0 +1,307 @@
+{
+ "experiment": "x2",
+ "label": "x2-m-mongodb-b1",
+ "corpus": {
+  "name": "m",
+  "chunks": 1000000,
+  "dim": 384,
+  "pairs": 6200
+ },
+ "store": "mongodb",
+ "layouts": [
+  "default"
+ ],
+ "builds": [
+  1
+ ],
+ "minutes": 320.0,
+ "started": "2026-10-29T23:19:22+0000",
+ "environment": {
+  "python": "3.12.15",
+  "platform": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+  "cpus": 4,
+  "runner": "GitHub Actions 1000008239",
+  "run": "40921769714",
+  "job": "store",
+  "sha": "884ce18397966859ebb803427cc23a5023431739",
+  "memory_gib": 15.6,
+  "cpu_model": "AMD EPYC 7763 64-Core Processor",
+  "wardowl": "2.1.0",
+  "numpy": "2.5.4",
+  "psycopg": "3.3.6",
+  "psycopg-pool": "3.3.3",
+  "pgvector": "0.5.1",
+  "qdrant-client": "1.19.1",
+  "elasticsearch": "9.5.1",
+  "opensearch-py": "3.2.0",
+  "weaviate-client": "4.23.1",
+  "redis": "8.1.0",
+  "pymilvus": "3.0.2",
+  "pymongo": "4.19.0",
+  "lancedb": "0.40.0",
+  "pyarrow": "26.0.0",
+  "chromadb": "1.5.9",
+  "faiss-cpu": "1.15.1",
+  "wardowl_path": "/home/runner/work/wardowl/wardowl/wardowl"
+ },
+ "units": [
+  {
+   "layout": "default",
+   "build": 1,
+   "settings": [
+    {
+     "id": "default",
+     "kind": "default",
+     "params": {
+      "num_candidates": 100
+     },
+     "level": null,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 3056.9,
+     "effective": {},
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 6200,
+      "pairs_run": 6200,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 18600,
+      "sampled": 0,
+      "pass1_seconds": 315.4,
+      "seconds": 794.1,
+      "budget_seconds": 3056.9
+     },
+     "summary": {
+      "pairs": 6200,
+      "recall10": 0.9955645161290323,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 20.23215,
+      "p95_ms": 126.95572499999997,
+      "p99_ms": 147.338537,
+      "qps": 25.777809392644112
+     }
+    },
+    {
+     "id": "nc20",
+     "kind": "sweep",
+     "params": {
+      "num_candidates": 20
+     },
+     "level": 1,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 3509.4,
+     "effective": {},
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 6200,
+      "pairs_run": 6200,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 18600,
+      "sampled": 0,
+      "pass1_seconds": 207.8,
+      "seconds": 622.7,
+      "budget_seconds": 3509.4
+     },
+     "summary": {
+      "pairs": 6200,
+      "recall10": 0.9792741935483871,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 18.372799999999998,
+      "p95_ms": 113.94911499999998,
+      "p99_ms": 134.01594300000002,
+      "qps": 30.05671460137205
+     }
+    },
+    {
+     "id": "nc50",
+     "kind": "sweep",
+     "params": {
+      "num_candidates": 50
+     },
+     "level": 2,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 4231.0,
+     "effective": {},
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 6200,
+      "pairs_run": 6200,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 18600,
+      "sampled": 0,
+      "pass1_seconds": 225.8,
+      "seconds": 667.7,
+      "budget_seconds": 4231.0
+     },
+     "summary": {
+      "pairs": 6200,
+      "recall10": 0.9914032258064517,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 19.165,
+      "p95_ms": 120.77697499999991,
+      "p99_ms": 139.81894200000002,
+      "qps": 28.049636564478345
+     }
+    },
+    {
+     "id": "nc200",
+     "kind": "sweep",
+     "params": {
+      "num_candidates": 200
+     },
+     "level": 3,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 5418.7,
+     "effective": {},
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 6200,
+      "pairs_run": 6200,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 18600,
+      "sampled": 0,
+      "pass1_seconds": 262.7,
+      "seconds": 782.2,
+      "budget_seconds": 5418.7
+     },
+     "summary": {
+      "pairs": 6200,
+      "recall10": 0.998016129032258,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 24.36935,
+      "p95_ms": 133.22957499999998,
+      "p99_ms": 156.081616,
+      "qps": 23.90714843901307
+     }
+    },
+    {
+     "id": "nc1000",
+     "kind": "sweep",
+     "params": {
+      "num_candidates": 1000
+     },
+     "level": 4,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 7736.7,
+     "effective": {},
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 6200,
+      "pairs_run": 6200,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 18600,
+      "sampled": 0,
+      "pass1_seconds": 344.0,
+      "seconds": 1030.6,
+      "budget_seconds": 7736.7
+     },
+     "summary": {
+      "pairs": 6200,
+      "recall10": 0.9996935483870968,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 45.93065,
+      "p95_ms": 165.27215999999999,
+      "p99_ms": 193.584351,
+      "qps": 18.15882463668658
+     }
+    },
+    {
+     "id": "nc10000",
+     "kind": "sweep",
+     "params": {
+      "num_candidates": 10000
+     },
+     "level": 5,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 14442.5,
+     "effective": {},
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 6200,
+      "pairs_run": 6200,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 18600,
+      "sampled": 0,
+      "pass1_seconds": 605.3,
+      "seconds": 1812.1,
+      "budget_seconds": 14442.5
+     },
+     "summary": {
+      "pairs": 6200,
+      "recall10": 1.0,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 52.51575,
+      "p95_ms": 306.87566,
+      "p99_ms": 360.0451150000001,
+      "qps": 10.302695912870396
+     }
+    }
+   ],
+   "load": {
+    "bulk_s": 266.7,
+    "index_s": 271.2,
+    "settle_s": 3.9,
+    "documents": 1000000,
+    "version": "8.0.30",
+    "seconds": 552.3
+   }
+  }
+ ],
+ "failures": [],
+ "skipped": [],
+ "status": "done",
+ "finished": "2026-10-30T01:03:46+0000"
+}

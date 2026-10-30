@@ -1,0 +1,2 @@
+CONTAINER ID   NAME      CPU %     MEM USAGE / LIMIT     MEM %     NET I/O          BLOCK I/O         PIDS
+c3d115f9d4a8   qdrant    0.05%     1.006GiB / 15.61GiB   6.44%     9.11GB / 109MB   5.61GB / 19.3GB   36

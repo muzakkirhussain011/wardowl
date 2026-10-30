@@ -1,0 +1,102 @@
+[19:35:32] data: 6 files match checksums.json
+[19:35:34] corpus e: 107,540 chunks, 1,489 pairs (2 s)
+[19:35:34] == pgvector default build 0: loading 107,540 chunks
+[19:36:06] -- pgvector default b0 report: {'id': 'report', 'short_results': 'report', 'max_exact_rows': 10000, 'widen': False, 'recall_sample_rate': 0.0, 'base_overrides': {}} (budget 14.3 min)
+[19:36:46]   pgvector default b0 report: pass 1, 1000 of 1489 pairs (40 s)
+[19:38:39]   pgvector default b0 report: 1489 of 1489 pairs, 3 passes, 0 errors, 153 s (cut: none)
+[19:38:40]    pgvector default b0 report: {'pairs': 1489, 'recall10': 0.6796321525885559, 'err10': 0.07833787465940055, 'short10': 0.11444141689373297, 'p50_ms': 18.4905, 'p95_ms': 83.71307999999999, 'p99_ms': 93.77437199999999, 'qps': 38.89695060916413}
+[19:38:40] -- pgvector default b0 count: {'id': 'count', 'short_results': 'count', 'max_exact_rows': 10000, 'widen': False, 'recall_sample_rate': 0.0, 'base_overrides': {}} (budget 14.9 min)
+[19:39:20]   pgvector default b0 count: pass 1, 1000 of 1489 pairs (40 s)
+[19:41:22]   pgvector default b0 count: 1489 of 1489 pairs, 3 passes, 0 errors, 162 s (cut: none)
+[19:41:22]    pgvector default b0 count: {'pairs': 1489, 'recall10': 0.6796321525885559, 'err10': 0.07833787465940055, 'short10': 0.11444141689373297, 'p50_ms': 18.4161, 'p95_ms': 97.34565999999995, 'p99_ms': 112.91618399999994, 'qps': 36.51998031913979}
+[19:41:22] -- pgvector default b0 exact-1k: {'id': 'exact-1k', 'short_results': 'exact', 'max_exact_rows': 1000, 'widen': False, 'recall_sample_rate': 0.0, 'base_overrides': {}} (budget 15.5 min)
+[19:42:04]   pgvector default b0 exact-1k: pass 1, 1000 of 1489 pairs (42 s)
+[19:44:11]   pgvector default b0 exact-1k: 1489 of 1489 pairs, 3 passes, 0 errors, 169 s (cut: none)
+[19:44:11]    pgvector default b0 exact-1k: {'pairs': 1489, 'recall10': 0.792574931880109, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 18.4932, 'p95_ms': 110.30023999999999, 'p99_ms': 120.18656, 'qps': 35.051317765708376}
+[19:44:11] -- pgvector default b0 exact-10k: {'id': 'exact-10k', 'short_results': 'exact', 'max_exact_rows': 10000, 'widen': False, 'recall_sample_rate': 0.0, 'base_overrides': {}} (budget 16.1 min)
+[19:44:52]   pgvector default b0 exact-10k: pass 1, 1000 of 1489 pairs (41 s)
+[19:46:58]   pgvector default b0 exact-10k: 1489 of 1489 pairs, 3 passes, 0 errors, 167 s (cut: none)
+[19:46:58]    pgvector default b0 exact-10k: {'pairs': 1489, 'recall10': 0.792574931880109, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 18.1631, 'p95_ms': 110.83969999999997, 'p99_ms': 119.22244799999997, 'qps': 35.36438594007017}
+[19:46:58] -- pgvector default b0 exact-inf: {'id': 'exact-inf', 'short_results': 'exact', 'max_exact_rows': None, 'widen': False, 'recall_sample_rate': 0.0, 'base_overrides': {}} (budget 16.9 min)
+[19:47:42]   pgvector default b0 exact-inf: pass 1, 1000 of 1489 pairs (44 s)
+[19:49:54]   pgvector default b0 exact-inf: 1489 of 1489 pairs, 3 passes, 0 errors, 175 s (cut: none)
+[19:49:54]    pgvector default b0 exact-inf: {'pairs': 1489, 'recall10': 0.792574931880109, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 18.7332, 'p95_ms': 112.99601999999997, 'p99_ms': 128.97465999999997, 'qps': 33.883706753817165}
+[19:49:54] -- pgvector default b0 widen: {'id': 'widen', 'short_results': 'widen', 'max_exact_rows': 10000, 'widen': True, 'recall_sample_rate': 0.0, 'base_overrides': {}} (budget 17.7 min)
+[19:50:47]   pgvector default b0 widen: pass 1, 1000 of 1489 pairs (53 s)
+[19:53:48]   pgvector default b0 widen: 1489 of 1489 pairs, 3 passes, 0 errors, 235 s (cut: none)
+[19:53:49]    pgvector default b0 widen: {'pairs': 1489, 'recall10': 0.7842643051771117, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 18.9262, 'p95_ms': 187.91987999999967, 'p99_ms': 402.33780799999886, 'qps': 25.16632387958884}
+[19:53:49] -- pgvector default b0 monitor: {'id': 'monitor', 'short_results': 'report', 'max_exact_rows': 10000, 'widen': False, 'recall_sample_rate': 0.01, 'base_overrides': {}} (budget 18.5 min)
+[19:54:29]   pgvector default b0 monitor: pass 1, 1000 of 1489 pairs (41 s)
+[19:56:28]   pgvector default b0 monitor: 1489 of 1489 pairs, 3 passes, 0 errors, 160 s (cut: none)
+[19:56:28]    pgvector default b0 monitor: {'pairs': 1489, 'recall10': 0.6796321525885559, 'err10': 0.07833787465940055, 'short10': 0.11444141689373297, 'p50_ms': 18.3481, 'p95_ms': 84.23655999999998, 'p99_ms': 95.35414799999997, 'qps': 38.61695079099018}
+[19:56:28] -- pgvector default b0 native-scan1m: {'id': 'native-scan1m', 'short_results': 'report', 'max_exact_rows': 10000, 'widen': False, 'recall_sample_rate': 0.0, 'base_overrides': {'max_scan_tuples': 1000000}} (budget 19.6 min)
+[19:57:13]   pgvector default b0 native-scan1m: pass 1, 1000 of 1489 pairs (44 s)
+[19:59:25]   pgvector default b0 native-scan1m: 1489 of 1489 pairs, 3 passes, 0 errors, 177 s (cut: none)
+[19:59:25]    pgvector default b0 native-scan1m: {'pairs': 1489, 'recall10': 0.7043596730245232, 'err10': 0.06880108991825613, 'short10': 0.0885558583106267, 'p50_ms': 19.0414, 'p95_ms': 110.10201999999998, 'p99_ms': 129.897696, 'qps': 33.36299525433911}
+[19:59:25] == pgvector default build 1: loading 107,540 chunks
+[19:59:57] -- pgvector default b1 report: {'id': 'report', 'short_results': 'report', 'max_exact_rows': 10000, 'widen': False, 'recall_sample_rate': 0.0, 'base_overrides': {}} (budget 19.4 min)
+[20:00:38]   pgvector default b1 report: pass 1, 1000 of 1489 pairs (41 s)
+[20:02:30]   pgvector default b1 report: 1489 of 1489 pairs, 3 passes, 0 errors, 153 s (cut: none)
+[20:02:30]    pgvector default b1 report: {'pairs': 1489, 'recall10': 0.6447547683923706, 'err10': 0.09536784741144415, 'short10': 0.11920980926430517, 'p50_ms': 17.1461, 'p95_ms': 84.08521999999998, 'p99_ms': 91.89923599999997, 'qps': 38.94704251094539}
+[20:02:30] -- pgvector default b1 count: {'id': 'count', 'short_results': 'count', 'max_exact_rows': 10000, 'widen': False, 'recall_sample_rate': 0.0, 'base_overrides': {}} (budget 20.6 min)
+[20:03:11]   pgvector default b1 count: pass 1, 1000 of 1489 pairs (41 s)
+[20:05:14]   pgvector default b1 count: 1489 of 1489 pairs, 3 passes, 0 errors, 164 s (cut: none)
+[20:05:14]    pgvector default b1 count: {'pairs': 1489, 'recall10': 0.6447547683923706, 'err10': 0.09536784741144415, 'short10': 0.11920980926430517, 'p50_ms': 17.5001, 'p95_ms': 97.22223999999999, 'p99_ms': 114.24031599999996, 'qps': 36.135294834471495}
+[20:05:14] -- pgvector default b1 exact-1k: {'id': 'exact-1k', 'short_results': 'exact', 'max_exact_rows': 1000, 'widen': False, 'recall_sample_rate': 0.0, 'base_overrides': {}} (budget 21.9 min)
+[20:05:57]   pgvector default b1 exact-1k: pass 1, 1000 of 1489 pairs (43 s)
+[20:08:10]   pgvector default b1 exact-1k: 1489 of 1489 pairs, 3 passes, 0 errors, 176 s (cut: none)
+[20:08:10]    pgvector default b1 exact-1k: {'pairs': 1489, 'recall10': 0.762874659400545, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 17.762, 'p95_ms': 115.00987999999998, 'p99_ms': 125.00316399999997, 'qps': 33.508329100553254}
+[20:08:10] -- pgvector default b1 exact-10k: {'id': 'exact-10k', 'short_results': 'exact', 'max_exact_rows': 10000, 'widen': False, 'recall_sample_rate': 0.0, 'base_overrides': {}} (budget 23.5 min)
+[20:08:53]   pgvector default b1 exact-10k: pass 1, 1000 of 1489 pairs (43 s)
+[20:11:02]   pgvector default b1 exact-10k: 1489 of 1489 pairs, 3 passes, 0 errors, 172 s (cut: none)
+[20:11:02]    pgvector default b1 exact-10k: {'pairs': 1489, 'recall10': 0.762874659400545, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 17.3173, 'p95_ms': 114.30363999999994, 'p99_ms': 123.26079599999998, 'qps': 34.57006924101622}
+[20:11:03] -- pgvector default b1 exact-inf: {'id': 'exact-inf', 'short_results': 'exact', 'max_exact_rows': None, 'widen': False, 'recall_sample_rate': 0.0, 'base_overrides': {}} (budget 25.4 min)
+[20:11:44]   pgvector default b1 exact-inf: pass 1, 1000 of 1489 pairs (42 s)
+[20:13:57]   pgvector default b1 exact-inf: 1489 of 1489 pairs, 3 passes, 0 errors, 174 s (cut: none)
+[20:13:57]    pgvector default b1 exact-inf: {'pairs': 1489, 'recall10': 0.762874659400545, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 17.6947, 'p95_ms': 113.85651999999997, 'p99_ms': 130.96355599999995, 'qps': 33.94650432167042}
+[20:13:57] -- pgvector default b1 widen: {'id': 'widen', 'short_results': 'widen', 'max_exact_rows': 10000, 'widen': True, 'recall_sample_rate': 0.0, 'base_overrides': {}} (budget 27.7 min)
+[20:14:50]   pgvector default b1 widen: pass 1, 1000 of 1489 pairs (53 s)
+[20:17:56]   pgvector default b1 widen: 1489 of 1489 pairs, 3 passes, 0 errors, 239 s (cut: none)
+[20:17:56]    pgvector default b1 widen: {'pairs': 1489, 'recall10': 0.7566076294277928, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 17.9899, 'p95_ms': 129.82487999999992, 'p99_ms': 438.786296, 'qps': 24.645486307044777}
+[20:17:56] -- pgvector default b1 monitor: {'id': 'monitor', 'short_results': 'report', 'max_exact_rows': 10000, 'widen': False, 'recall_sample_rate': 0.01, 'base_overrides': {}} (budget 30.3 min)
+[20:18:38]   pgvector default b1 monitor: pass 1, 1000 of 1489 pairs (42 s)
+[20:20:38]   pgvector default b1 monitor: 1489 of 1489 pairs, 3 passes, 0 errors, 162 s (cut: none)
+[20:20:38]    pgvector default b1 monitor: {'pairs': 1489, 'recall10': 0.6447547683923706, 'err10': 0.09536784741144415, 'short10': 0.11920980926430517, 'p50_ms': 17.582, 'p95_ms': 86.02958, 'p99_ms': 96.00304399999997, 'qps': 38.15643404041007}
+[20:20:38] -- pgvector default b1 native-scan1m: {'id': 'native-scan1m', 'short_results': 'report', 'max_exact_rows': 10000, 'widen': False, 'recall_sample_rate': 0.0, 'base_overrides': {'max_scan_tuples': 1000000}} (budget 33.7 min)
+[20:21:23]   pgvector default b1 native-scan1m: pass 1, 1000 of 1489 pairs (45 s)
+[20:23:36]   pgvector default b1 native-scan1m: 1489 of 1489 pairs, 3 passes, 0 errors, 177 s (cut: none)
+[20:23:36]    pgvector default b1 native-scan1m: {'pairs': 1489, 'recall10': 0.6712534059945504, 'err10': 0.07697547683923706, 'short10': 0.09196185286103542, 'p50_ms': 17.7959, 'p95_ms': 111.88391999999999, 'p99_ms': 130.47839599999998, 'qps': 33.28879877796618}
+[20:23:36] == pgvector default build 2: loading 107,540 chunks
+[20:24:06] -- pgvector default b2 report: {'id': 'report', 'short_results': 'report', 'max_exact_rows': 10000, 'widen': False, 'recall_sample_rate': 0.0, 'base_overrides': {}} (budget 33.3 min)
+[20:24:46]   pgvector default b2 report: pass 1, 1000 of 1489 pairs (40 s)
+[20:26:37]   pgvector default b2 report: 1489 of 1489 pairs, 3 passes, 0 errors, 151 s (cut: none)
+[20:26:37]    pgvector default b2 report: {'pairs': 1489, 'recall10': 0.6751362397820163, 'err10': 0.09332425068119891, 'short10': 0.11580381471389646, 'p50_ms': 14.1037, 'p95_ms': 82.10947999999998, 'p99_ms': 91.27337199999995, 'qps': 39.471908595508324}
+[20:26:37] -- pgvector default b2 count: {'id': 'count', 'short_results': 'count', 'max_exact_rows': 10000, 'widen': False, 'recall_sample_rate': 0.0, 'base_overrides': {}} (budget 37.7 min)
+[20:27:18]   pgvector default b2 count: pass 1, 1000 of 1489 pairs (41 s)
+[20:29:22]   pgvector default b2 count: 1489 of 1489 pairs, 3 passes, 0 errors, 164 s (cut: none)
+[20:29:22]    pgvector default b2 count: {'pairs': 1489, 'recall10': 0.6751362397820163, 'err10': 0.09332425068119891, 'short10': 0.11580381471389646, 'p50_ms': 14.2336, 'p95_ms': 98.36794, 'p99_ms': 115.98812399999996, 'qps': 35.921605903159374}
+[20:29:22] -- pgvector default b2 exact-1k: {'id': 'exact-1k', 'short_results': 'exact', 'max_exact_rows': 1000, 'widen': False, 'recall_sample_rate': 0.0, 'base_overrides': {}} (budget 43.5 min)
+[20:30:03]   pgvector default b2 exact-1k: pass 1, 1000 of 1489 pairs (41 s)
+[20:32:10]   pgvector default b2 exact-1k: 1489 of 1489 pairs, 3 passes, 0 errors, 169 s (cut: none)
+[20:32:11]    pgvector default b2 exact-1k: {'pairs': 1489, 'recall10': 0.7895095367847411, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 13.8625, 'p95_ms': 109.56337999999997, 'p99_ms': 120.4399, 'qps': 34.91434744987306}
+[20:32:11] -- pgvector default b2 exact-10k: {'id': 'exact-10k', 'short_results': 'exact', 'max_exact_rows': 10000, 'widen': False, 'recall_sample_rate': 0.0, 'base_overrides': {}} (budget 51.7 min)
+[20:32:53]   pgvector default b2 exact-10k: pass 1, 1000 of 1489 pairs (42 s)
+[20:34:57]   pgvector default b2 exact-10k: 1489 of 1489 pairs, 3 passes, 0 errors, 167 s (cut: none)
+[20:34:57]    pgvector default b2 exact-10k: {'pairs': 1489, 'recall10': 0.7895095367847411, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 13.2023, 'p95_ms': 107.82831999999999, 'p99_ms': 118.56928799999999, 'qps': 35.653425525573155}
+[20:34:57] -- pgvector default b2 exact-inf: {'id': 'exact-inf', 'short_results': 'exact', 'max_exact_rows': None, 'widen': False, 'recall_sample_rate': 0.0, 'base_overrides': {}} (budget 63.9 min)
+[20:35:38]   pgvector default b2 exact-inf: pass 1, 1000 of 1489 pairs (40 s)
+[20:37:42]   pgvector default b2 exact-inf: 1489 of 1489 pairs, 3 passes, 0 errors, 164 s (cut: none)
+[20:37:42]    pgvector default b2 exact-inf: {'pairs': 1489, 'recall10': 0.7895095367847411, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 12.798, 'p95_ms': 107.32867999999998, 'p99_ms': 124.67254399999997, 'qps': 36.46205180247203}
+[20:37:42] -- pgvector default b2 widen: {'id': 'widen', 'short_results': 'widen', 'max_exact_rows': 10000, 'widen': True, 'recall_sample_rate': 0.0, 'base_overrides': {}} (budget 84.3 min)
+[20:38:29]   pgvector default b2 widen: pass 1, 1000 of 1489 pairs (48 s)
+[20:41:26]   pgvector default b2 widen: 1489 of 1489 pairs, 3 passes, 0 errors, 224 s (cut: none)
+[20:41:26]    pgvector default b2 widen: {'pairs': 1489, 'recall10': 0.7839918256130791, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 13.6252, 'p95_ms': 141.52677999999875, 'p99_ms': 404.9142479999996, 'qps': 25.987976017995532}
+[20:41:26] -- pgvector default b2 monitor: {'id': 'monitor', 'short_results': 'report', 'max_exact_rows': 10000, 'widen': False, 'recall_sample_rate': 0.01, 'base_overrides': {}} (budget 124.5 min)
+[20:42:09]   pgvector default b2 monitor: pass 1, 1000 of 1489 pairs (43 s)
+[20:44:08]   pgvector default b2 monitor: 1489 of 1489 pairs, 3 passes, 0 errors, 162 s (cut: none)
+[20:44:08]    pgvector default b2 monitor: {'pairs': 1489, 'recall10': 0.6751362397820163, 'err10': 0.09332425068119891, 'short10': 0.11580381471389646, 'p50_ms': 13.7601, 'p95_ms': 84.64872, 'p99_ms': 96.95478399999999, 'qps': 38.1639836971766}
+[20:44:08] -- pgvector default b2 native-scan1m: {'id': 'native-scan1m', 'short_results': 'report', 'max_exact_rows': 10000, 'widen': False, 'recall_sample_rate': 0.0, 'base_overrides': {'max_scan_tuples': 1000000}} (budget 246.4 min)
+[20:44:51]   pgvector default b2 native-scan1m: pass 1, 1000 of 1489 pairs (42 s)
+[20:46:56]   pgvector default b2 native-scan1m: 1489 of 1489 pairs, 3 passes, 0 errors, 167 s (cut: none)
+[20:46:56]    pgvector default b2 native-scan1m: {'pairs': 1489, 'recall10': 0.7061989100817437, 'err10': 0.07016348773841961, 'short10': 0.08923705722070845, 'p50_ms': 13.5708, 'p95_ms': 106.98495999999997, 'p99_ms': 124.912992, 'qps': 35.35449857181241}
+[20:46:56] X5 x5-e-pgvector: done

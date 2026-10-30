@@ -1,0 +1,436 @@
+{
+ "experiment": "x5",
+ "label": "x5-m-qdrant-b0",
+ "corpus": {
+  "name": "m",
+  "chunks": 1000000,
+  "dim": 384,
+  "pairs": 6200
+ },
+ "store": "qdrant",
+ "layouts": [
+  "as-run"
+ ],
+ "builds": [
+  0
+ ],
+ "minutes": 320.0,
+ "started": "2026-10-29T20:18:00+0000",
+ "environment": {
+  "python": "3.12.15",
+  "platform": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+  "cpus": 4,
+  "runner": "GitHub Actions 1000007994",
+  "run": "40921769714",
+  "job": "store",
+  "sha": "884ce18397966859ebb803427cc23a5023431739",
+  "memory_gib": 15.6,
+  "cpu_model": "AMD EPYC 7763 64-Core Processor",
+  "wardowl": "2.1.0",
+  "numpy": "2.5.4",
+  "psycopg": "3.3.6",
+  "psycopg-pool": "3.3.3",
+  "pgvector": "0.5.1",
+  "qdrant-client": "1.19.1",
+  "elasticsearch": "9.5.1",
+  "opensearch-py": "3.2.0",
+  "weaviate-client": "4.23.1",
+  "redis": "8.1.0",
+  "pymilvus": "3.0.2",
+  "pymongo": "4.19.0",
+  "lancedb": "0.40.0",
+  "pyarrow": "26.0.0",
+  "chromadb": "1.5.9",
+  "faiss-cpu": "1.15.1",
+  "wardowl_path": "/home/runner/work/wardowl/wardowl/wardowl"
+ },
+ "units": [
+  {
+   "layout": "as-run",
+   "build": 0,
+   "settings": [
+    {
+     "id": "report",
+     "short_results": "report",
+     "max_exact_rows": 10000,
+     "widen": false,
+     "recall_sample_rate": 0.0,
+     "base_overrides": {},
+     "budget_seconds": 2230.3,
+     "effective": {
+      "search_params": {
+       "hnsw_ef": 128,
+       "exact": false,
+       "indexed_only": false
+      }
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 6200,
+      "pairs_run": 6200,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 24800,
+      "sampled": 0,
+      "pass1_seconds": 73.7,
+      "seconds": 134.4,
+      "budget_seconds": 2230.3
+     },
+     "summary": {
+      "pairs": 6200,
+      "recall10": 0.7701935483870967,
+      "err10": 0.0,
+      "short10": 0.0532258064516129,
+      "p50_ms": 5.09185,
+      "p95_ms": 6.808814999999998,
+      "p99_ms": 7.551421,
+      "qps": 200.92092690164188
+     }
+    },
+    {
+     "id": "count",
+     "short_results": "count",
+     "max_exact_rows": 10000,
+     "widen": false,
+     "recall_sample_rate": 0.0,
+     "base_overrides": {},
+     "budget_seconds": 2529.6,
+     "effective": {
+      "search_params": {
+       "hnsw_ef": 128,
+       "exact": false,
+       "indexed_only": false
+      }
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 6200,
+      "pairs_run": 6200,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 24800,
+      "sampled": 0,
+      "pass1_seconds": 68.8,
+      "seconds": 139.1,
+      "budget_seconds": 2529.6
+     },
+     "summary": {
+      "pairs": 6200,
+      "recall10": 0.7701935483870967,
+      "err10": 0.0,
+      "short10": 0.0532258064516129,
+      "p50_ms": 5.0303,
+      "p95_ms": 10.033709999999996,
+      "p99_ms": 26.13132,
+      "qps": 180.2192407758706
+     }
+    },
+    {
+     "id": "exact-1k",
+     "short_results": "exact",
+     "max_exact_rows": 1000,
+     "widen": false,
+     "recall_sample_rate": 0.0,
+     "base_overrides": {},
+     "budget_seconds": 2928.0,
+     "effective": {
+      "search_params": {
+       "hnsw_ef": 128,
+       "exact": false,
+       "indexed_only": false
+      }
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 6200,
+      "pairs_run": 6200,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 24800,
+      "sampled": 0,
+      "pass1_seconds": 63.3,
+      "seconds": 129.6,
+      "budget_seconds": 2928.0
+     },
+     "summary": {
+      "pairs": 6200,
+      "recall10": 0.7701935483870967,
+      "err10": 0.0,
+      "short10": 0.0532258064516129,
+      "p50_ms": 4.65925,
+      "p95_ms": 9.470415,
+      "p99_ms": 25.190132000000006,
+      "qps": 193.48738078735346
+     }
+    },
+    {
+     "id": "exact-10k",
+     "short_results": "exact",
+     "max_exact_rows": 10000,
+     "widen": false,
+     "recall_sample_rate": 0.0,
+     "base_overrides": {},
+     "budget_seconds": 3487.5,
+     "effective": {
+      "search_params": {
+       "hnsw_ef": 128,
+       "exact": false,
+       "indexed_only": false
+      }
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 6200,
+      "pairs_run": 6200,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 24800,
+      "sampled": 0,
+      "pass1_seconds": 61.1,
+      "seconds": 132.1,
+      "budget_seconds": 3487.5
+     },
+     "summary": {
+      "pairs": 6200,
+      "recall10": 0.7701935483870967,
+      "err10": 0.0,
+      "short10": 0.0532258064516129,
+      "p50_ms": 4.882350000000001,
+      "p95_ms": 9.748034999999994,
+      "p99_ms": 25.786907,
+      "qps": 185.25503042630112
+     }
+    },
+    {
+     "id": "exact-inf",
+     "short_results": "exact",
+     "max_exact_rows": null,
+     "widen": false,
+     "recall_sample_rate": 0.0,
+     "base_overrides": {},
+     "budget_seconds": 4326.3,
+     "effective": {
+      "search_params": {
+       "hnsw_ef": 128,
+       "exact": false,
+       "indexed_only": false
+      }
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 6200,
+      "pairs_run": 6200,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 24800,
+      "sampled": 0,
+      "pass1_seconds": 81.4,
+      "seconds": 158.9,
+      "budget_seconds": 4326.3
+     },
+     "summary": {
+      "pairs": 6200,
+      "recall10": 0.8234032258064516,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 5.1553,
+      "p95_ms": 16.751114999999984,
+      "p99_ms": 43.213901,
+      "qps": 158.2268163803699
+     }
+    },
+    {
+     "id": "widen",
+     "short_results": "widen",
+     "max_exact_rows": 10000,
+     "widen": true,
+     "recall_sample_rate": 0.0,
+     "base_overrides": {},
+     "budget_seconds": 5715.2,
+     "effective": {
+      "search_params": {
+       "hnsw_ef": 128,
+       "exact": false,
+       "indexed_only": false
+      }
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 6200,
+      "pairs_run": 6200,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 24800,
+      "sampled": 0,
+      "pass1_seconds": 101.5,
+      "seconds": 212.0,
+      "budget_seconds": 5715.2
+     },
+     "summary": {
+      "pairs": 6200,
+      "recall10": 0.8221451612903226,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 4.584,
+      "p95_ms": 67.55929999999996,
+      "p99_ms": 98.979951,
+      "qps": 114.12141604960081
+     }
+    },
+    {
+     "id": "monitor",
+     "short_results": "report",
+     "max_exact_rows": 10000,
+     "widen": false,
+     "recall_sample_rate": 0.01,
+     "base_overrides": {},
+     "budget_seconds": 8466.6,
+     "effective": {
+      "search_params": {
+       "hnsw_ef": 128,
+       "exact": false,
+       "indexed_only": false
+      }
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 6200,
+      "pairs_run": 6200,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 24800,
+      "sampled": 210,
+      "pass1_seconds": 54.3,
+      "seconds": 114.4,
+      "budget_seconds": 8466.6
+     },
+     "summary": {
+      "pairs": 6200,
+      "recall10": 0.7701935483870967,
+      "err10": 0.0,
+      "short10": 0.0532258064516129,
+      "p50_ms": 4.32635,
+      "p95_ms": 5.801005,
+      "p99_ms": 6.322090000000002,
+      "qps": 237.7446396176256
+     }
+    },
+    {
+     "id": "native-acorn",
+     "short_results": "report",
+     "max_exact_rows": 10000,
+     "widen": false,
+     "recall_sample_rate": 0.0,
+     "base_overrides": {
+      "acorn": 1.0
+     },
+     "budget_seconds": 16818.3,
+     "effective": {
+      "search_params": {
+       "hnsw_ef": 128,
+       "exact": false,
+       "indexed_only": false,
+       "acorn": {
+        "enable": true,
+        "max_selectivity": 1.0
+       }
+      }
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 6200,
+      "pairs_run": 6200,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 24800,
+      "sampled": 0,
+      "pass1_seconds": 174.7,
+      "seconds": 347.2,
+      "budget_seconds": 16818.3
+     },
+     "summary": {
+      "pairs": 6200,
+      "recall10": 0.9819354838709677,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 12.27885,
+      "p95_ms": 30.870425,
+      "p99_ms": 35.471298000000004,
+      "qps": 72.46156826877538
+     }
+    }
+   ],
+   "load": {
+    "load_s": 739.6,
+    "index_s": 310.5,
+    "points": 1000000,
+    "indexed_vectors": 1000000,
+    "segments": 3,
+    "server": {
+     "title": "qdrant - vector search engine",
+     "version": "1.19.2",
+     "commit": "016542aa5deb6c66380bb137badf73d54f742bde"
+    },
+    "layout": "wardowl's create_collection, keyword indexes on the permission fields",
+    "keyword_fields": [
+     "tenant",
+     "u0",
+     "u1",
+     "u2",
+     "u3",
+     "u4",
+     "c0",
+     "c1",
+     "c2",
+     "c3",
+     "c4"
+    ],
+    "seconds": 1050.5
+   }
+  }
+ ],
+ "failures": [],
+ "skipped": [],
+ "status": "done",
+ "finished": "2026-10-29T20:58:24+0000"
+}

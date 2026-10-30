@@ -1,0 +1,36 @@
+[18:30:19] x2x5_prepare embed m: {'python': '3.12.15', 'platform': 'Linux-7.0.0-1017-azure-x86_64-with-glibc2.39', 'cpus': 4, 'runner': 'GitHub Actions 1000007909', 'run': '40921769714', 'job': 'embed-m', 'sha': '884ce18397966859ebb803427cc23a5023431739', 'memory_gib': 15.6, 'cpu_model': 'AMD EPYC 7763 64-Core Processor', 'wardowl': '2.1.0', 'numpy': '2.5.4', 'torch': '2.15.0+cpu', 'sentence-transformers': '6.2.0', 'transformers': '5.22.0', 'datasets': '5.1.0', 'faiss-cpu': None, 'wardowl_path': '/home/runner/work/wardowl/wardowl/wardowl'}
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[18:30:36]   read 200,000 passages
+[18:30:42]   read 400,000 passages
+[18:30:47]   read 600,000 passages
+[18:30:53]   read 800,000 passages
+[18:30:58]   read 1,000,000 passages
+[18:30:58] M shard 0 of 8: passages 0 to 125,000 of 1,000,000
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]Loading weights: 100%|██████████| 199/199 [00:00<00:00, 3900.26it/s]
+[18:34:37]   embedded 5,000 of 125,000 (210 s)
+[18:38:01]   embedded 10,000 of 125,000 (415 s)
+[18:41:20]   embedded 15,000 of 125,000 (614 s)
+[18:44:42]   embedded 20,000 of 125,000 (815 s)
+[18:48:17]   embedded 25,000 of 125,000 (1030 s)
+[18:51:51]   embedded 30,000 of 125,000 (1245 s)
+[18:55:21]   embedded 35,000 of 125,000 (1455 s)
+[18:58:44]   embedded 40,000 of 125,000 (1658 s)
+[19:02:08]   embedded 45,000 of 125,000 (1861 s)
+[19:05:44]   embedded 50,000 of 125,000 (2078 s)
+[19:09:10]   embedded 55,000 of 125,000 (2283 s)
+[19:12:27]   embedded 60,000 of 125,000 (2481 s)
+[19:16:00]   embedded 65,000 of 125,000 (2693 s)
+[19:19:27]   embedded 70,000 of 125,000 (2901 s)
+[19:22:51]   embedded 75,000 of 125,000 (3105 s)
+[19:26:07]   embedded 80,000 of 125,000 (3301 s)
+[19:29:23]   embedded 85,000 of 125,000 (3497 s)
+[19:32:53]   embedded 90,000 of 125,000 (3707 s)
+[19:36:21]   embedded 95,000 of 125,000 (3914 s)
+[19:39:53]   embedded 100,000 of 125,000 (4127 s)
+[19:43:30]   embedded 105,000 of 125,000 (4344 s)
+[19:47:08]   embedded 110,000 of 125,000 (4561 s)
+[19:50:57]   embedded 115,000 of 125,000 (4791 s)
+[19:54:39]   embedded 120,000 of 125,000 (5013 s)
+[19:58:14]   embedded 125,000 of 125,000 (5227 s)
+[19:58:14] wrote shards/m-00.npy (125,000 x 384), SHA-256 a6a86db150d6a714392c1a880501a908d7cf4896bb103a727e50874cf69f190a
+[19:58:14] done in 5275 s

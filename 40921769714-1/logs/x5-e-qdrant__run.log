@@ -1,0 +1,183 @@
+[19:35:31] data: 6 files match checksums.json
+[19:35:33] corpus e: 107,540 chunks, 1,489 pairs (2 s)
+[19:35:34] == qdrant as-run build 0: loading 107,540 chunks
+[19:35:43]   loaded 10,000 of 107,540 chunks (9 s)
+[19:35:52]   loaded 20,000 of 107,540 chunks (18 s)
+[19:36:02]   loaded 30,000 of 107,540 chunks (28 s)
+[19:36:12]   loaded 40,000 of 107,540 chunks (38 s)
+[19:36:24]   loaded 50,000 of 107,540 chunks (50 s)
+[19:36:37]   loaded 60,000 of 107,540 chunks (63 s)
+[19:36:55]   loaded 70,000 of 107,540 chunks (81 s)
+[19:37:08]   loaded 80,000 of 107,540 chunks (94 s)
+[19:37:18]   loaded 90,000 of 107,540 chunks (104 s)
+[19:37:31]   loaded 100,000 of 107,540 chunks (117 s)
+[19:37:40]   loaded 107,540 of 107,540 chunks (126 s)
+[19:38:15] -- qdrant as-run b0 report: {'id': 'report', 'short_results': 'report', 'max_exact_rows': 10000, 'widen': False, 'recall_sample_rate': 0.0, 'base_overrides': {}} (budget 7.3 min)
+[19:38:25]   qdrant as-run b0 report: pass 1, 1000 of 1489 pairs (10 s)
+[19:38:44]   qdrant as-run b0 report: 1489 of 1489 pairs, 3 passes, 0 errors, 28 s (cut: none)
+[19:38:44]    qdrant as-run b0 report: {'pairs': 1489, 'recall10': 0.6532016348773843, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 4.5762, 'p95_ms': 5.55466, 'p99_ms': 5.854164, 'qps': 219.59897068992328}
+[19:38:44] -- qdrant as-run b0 count: {'id': 'count', 'short_results': 'count', 'max_exact_rows': 10000, 'widen': False, 'recall_sample_rate': 0.0, 'base_overrides': {}} (budget 7.4 min)
+[19:38:53]   qdrant as-run b0 count: pass 1, 1000 of 1489 pairs (9 s)
+[19:39:11]   qdrant as-run b0 count: 1489 of 1489 pairs, 3 passes, 0 errors, 28 s (cut: none)
+[19:39:12]    qdrant as-run b0 count: {'pairs': 1489, 'recall10': 0.6532016348773843, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 4.5634, 'p95_ms': 5.50322, 'p99_ms': 5.812615999999999, 'qps': 220.23589853133123}
+[19:39:12] -- qdrant as-run b0 exact-1k: {'id': 'exact-1k', 'short_results': 'exact', 'max_exact_rows': 1000, 'widen': False, 'recall_sample_rate': 0.0, 'base_overrides': {}} (budget 7.6 min)
+[19:39:21]   qdrant as-run b0 exact-1k: pass 1, 1000 of 1489 pairs (9 s)
+[19:39:39]   qdrant as-run b0 exact-1k: 1489 of 1489 pairs, 3 passes, 0 errors, 28 s (cut: none)
+[19:39:39]    qdrant as-run b0 exact-1k: {'pairs': 1489, 'recall10': 0.6532016348773843, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 4.5873, 'p95_ms': 5.5430199999999985, 'p99_ms': 5.879512, 'qps': 218.9977568393632}
+[19:39:39] -- qdrant as-run b0 exact-10k: {'id': 'exact-10k', 'short_results': 'exact', 'max_exact_rows': 10000, 'widen': False, 'recall_sample_rate': 0.0, 'base_overrides': {}} (budget 7.8 min)
+[19:39:49]   qdrant as-run b0 exact-10k: pass 1, 1000 of 1489 pairs (9 s)
+[19:40:07]   qdrant as-run b0 exact-10k: 1489 of 1489 pairs, 3 passes, 0 errors, 28 s (cut: none)
+[19:40:07]    qdrant as-run b0 exact-10k: {'pairs': 1489, 'recall10': 0.6532016348773843, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 4.5961, 'p95_ms': 5.57234, 'p99_ms': 5.8991039999999995, 'qps': 218.48393134322205}
+[19:40:07] -- qdrant as-run b0 exact-inf: {'id': 'exact-inf', 'short_results': 'exact', 'max_exact_rows': None, 'widen': False, 'recall_sample_rate': 0.0, 'base_overrides': {}} (budget 8.0 min)
+[19:40:16]   qdrant as-run b0 exact-inf: pass 1, 1000 of 1489 pairs (9 s)
+[19:40:35]   qdrant as-run b0 exact-inf: 1489 of 1489 pairs, 3 passes, 0 errors, 28 s (cut: none)
+[19:40:35]    qdrant as-run b0 exact-inf: {'pairs': 1489, 'recall10': 0.6532016348773843, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 4.5891, 'p95_ms': 5.503799999999999, 'p99_ms': 5.8683559999999995, 'qps': 219.18855836314162}
+[19:40:35] -- qdrant as-run b0 widen: {'id': 'widen', 'short_results': 'widen', 'max_exact_rows': 10000, 'widen': True, 'recall_sample_rate': 0.0, 'base_overrides': {}} (budget 8.2 min)
+[19:40:44]   qdrant as-run b0 widen: pass 1, 1000 of 1489 pairs (9 s)
+[19:41:03]   qdrant as-run b0 widen: 1489 of 1489 pairs, 3 passes, 0 errors, 28 s (cut: none)
+[19:41:03]    qdrant as-run b0 widen: {'pairs': 1489, 'recall10': 0.6532016348773843, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 4.5828, 'p95_ms': 5.459599999999999, 'p99_ms': 5.861304, 'qps': 219.37980900726058}
+[19:41:03] -- qdrant as-run b0 monitor: {'id': 'monitor', 'short_results': 'report', 'max_exact_rows': 10000, 'widen': False, 'recall_sample_rate': 0.01, 'base_overrides': {}} (budget 8.4 min)
+[19:41:13]   qdrant as-run b0 monitor: pass 1, 1000 of 1489 pairs (10 s)
+[19:41:33]   qdrant as-run b0 monitor: 1489 of 1489 pairs, 3 passes, 0 errors, 30 s (cut: none)
+[19:41:33]    qdrant as-run b0 monitor: {'pairs': 1489, 'recall10': 0.6532016348773843, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 4.8553, 'p95_ms': 5.821839999999997, 'p99_ms': 6.062632, 'qps': 208.47697044234792}
+[19:41:33] -- qdrant as-run b0 native-acorn: {'id': 'native-acorn', 'short_results': 'report', 'max_exact_rows': 10000, 'widen': False, 'recall_sample_rate': 0.0, 'base_overrides': {'acorn': 1.0}} (budget 8.6 min)
+[19:41:43]   qdrant as-run b0 native-acorn: pass 1, 1000 of 1489 pairs (10 s)
+[19:42:02]   qdrant as-run b0 native-acorn: 1489 of 1489 pairs, 3 passes, 0 errors, 30 s (cut: none)
+[19:42:02]    qdrant as-run b0 native-acorn: {'pairs': 1489, 'recall10': 0.8536103542234332, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 4.8026, 'p95_ms': 5.77888, 'p99_ms': 6.175603999999996, 'qps': 208.362824579324}
+[19:42:03] == qdrant as-run build 1: loading 107,540 chunks
+[19:42:11]   loaded 10,000 of 107,540 chunks (9 s)
+[19:42:21]   loaded 20,000 of 107,540 chunks (18 s)
+[19:42:31]   loaded 30,000 of 107,540 chunks (29 s)
+[19:42:41]   loaded 40,000 of 107,540 chunks (39 s)
+[19:42:52]   loaded 50,000 of 107,540 chunks (49 s)
+[19:43:06]   loaded 60,000 of 107,540 chunks (63 s)
+[19:43:22]   loaded 70,000 of 107,540 chunks (79 s)
+[19:43:34]   loaded 80,000 of 107,540 chunks (91 s)
+[19:43:46]   loaded 90,000 of 107,540 chunks (103 s)
+[19:43:58]   loaded 100,000 of 107,540 chunks (115 s)
+[19:44:08]   loaded 107,540 of 107,540 chunks (125 s)
+[19:44:43] -- qdrant as-run b1 report: {'id': 'report', 'short_results': 'report', 'max_exact_rows': 10000, 'widen': False, 'recall_sample_rate': 0.0, 'base_overrides': {}} (budget 8.5 min)
+[19:44:53]   qdrant as-run b1 report: pass 1, 1000 of 1489 pairs (10 s)
+[19:45:12]   qdrant as-run b1 report: 1489 of 1489 pairs, 3 passes, 0 errors, 29 s (cut: none)
+[19:45:12]    qdrant as-run b1 report: {'pairs': 1489, 'recall10': 0.6359673024523161, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 4.7571, 'p95_ms': 5.78744, 'p99_ms': 6.079999999999998, 'qps': 211.52242333725616}
+[19:45:12] -- qdrant as-run b1 count: {'id': 'count', 'short_results': 'count', 'max_exact_rows': 10000, 'widen': False, 'recall_sample_rate': 0.0, 'base_overrides': {}} (budget 8.7 min)
+[19:45:21]   qdrant as-run b1 count: pass 1, 1000 of 1489 pairs (9 s)
+[19:45:40]   qdrant as-run b1 count: 1489 of 1489 pairs, 3 passes, 0 errors, 28 s (cut: none)
+[19:45:41]    qdrant as-run b1 count: {'pairs': 1489, 'recall10': 0.6359673024523161, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 4.6453, 'p95_ms': 5.648419999999999, 'p99_ms': 5.917675999999998, 'qps': 216.05232186525967}
+[19:45:41] -- qdrant as-run b1 exact-1k: {'id': 'exact-1k', 'short_results': 'exact', 'max_exact_rows': 1000, 'widen': False, 'recall_sample_rate': 0.0, 'base_overrides': {}} (budget 9.0 min)
+[19:45:50]   qdrant as-run b1 exact-1k: pass 1, 1000 of 1489 pairs (10 s)
+[19:46:09]   qdrant as-run b1 exact-1k: 1489 of 1489 pairs, 3 passes, 0 errors, 28 s (cut: none)
+[19:46:09]    qdrant as-run b1 exact-1k: {'pairs': 1489, 'recall10': 0.6359673024523161, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 4.6604, 'p95_ms': 5.625059999999998, 'p99_ms': 5.905156, 'qps': 216.1894382820533}
+[19:46:09] -- qdrant as-run b1 exact-10k: {'id': 'exact-10k', 'short_results': 'exact', 'max_exact_rows': 10000, 'widen': False, 'recall_sample_rate': 0.0, 'base_overrides': {}} (budget 9.2 min)
+[19:46:18]   qdrant as-run b1 exact-10k: pass 1, 1000 of 1489 pairs (9 s)
+[19:46:37]   qdrant as-run b1 exact-10k: 1489 of 1489 pairs, 3 passes, 0 errors, 28 s (cut: none)
+[19:46:37]    qdrant as-run b1 exact-10k: {'pairs': 1489, 'recall10': 0.6359673024523161, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 4.5999, 'p95_ms': 5.530919999999997, 'p99_ms': 5.818872, 'qps': 219.08730055091846}
+[19:46:37] -- qdrant as-run b1 exact-inf: {'id': 'exact-inf', 'short_results': 'exact', 'max_exact_rows': None, 'widen': False, 'recall_sample_rate': 0.0, 'base_overrides': {}} (budget 9.5 min)
+[19:46:46]   qdrant as-run b1 exact-inf: pass 1, 1000 of 1489 pairs (9 s)
+[19:47:05]   qdrant as-run b1 exact-inf: 1489 of 1489 pairs, 3 passes, 0 errors, 28 s (cut: none)
+[19:47:05]    qdrant as-run b1 exact-inf: {'pairs': 1489, 'recall10': 0.6359673024523161, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 4.635, 'p95_ms': 5.58062, 'p99_ms': 5.843224, 'qps': 217.31517709056104}
+[19:47:05] -- qdrant as-run b1 widen: {'id': 'widen', 'short_results': 'widen', 'max_exact_rows': 10000, 'widen': True, 'recall_sample_rate': 0.0, 'base_overrides': {}} (budget 9.8 min)
+[19:47:14]   qdrant as-run b1 widen: pass 1, 1000 of 1489 pairs (9 s)
+[19:47:33]   qdrant as-run b1 widen: 1489 of 1489 pairs, 3 passes, 0 errors, 28 s (cut: none)
+[19:47:33]    qdrant as-run b1 widen: {'pairs': 1489, 'recall10': 0.6359673024523161, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 4.608, 'p95_ms': 5.556219999999999, 'p99_ms': 5.837124, 'qps': 218.44264448748618}
+[19:47:33] -- qdrant as-run b1 monitor: {'id': 'monitor', 'short_results': 'report', 'max_exact_rows': 10000, 'widen': False, 'recall_sample_rate': 0.01, 'base_overrides': {}} (budget 10.1 min)
+[19:47:43]   qdrant as-run b1 monitor: pass 1, 1000 of 1489 pairs (10 s)
+[19:48:03]   qdrant as-run b1 monitor: 1489 of 1489 pairs, 3 passes, 0 errors, 30 s (cut: none)
+[19:48:03]    qdrant as-run b1 monitor: {'pairs': 1489, 'recall10': 0.6359673024523161, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 4.7065, 'p95_ms': 5.630199999999999, 'p99_ms': 5.981316, 'qps': 215.23573856886097}
+[19:48:03] -- qdrant as-run b1 native-acorn: {'id': 'native-acorn', 'short_results': 'report', 'max_exact_rows': 10000, 'widen': False, 'recall_sample_rate': 0.0, 'base_overrides': {'acorn': 1.0}} (budget 10.4 min)
+[19:48:13]   qdrant as-run b1 native-acorn: pass 1, 1000 of 1489 pairs (10 s)
+[19:48:33]   qdrant as-run b1 native-acorn: 1489 of 1489 pairs, 3 passes, 0 errors, 30 s (cut: none)
+[19:48:33]    qdrant as-run b1 native-acorn: {'pairs': 1489, 'recall10': 0.8547683923705723, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 4.961, 'p95_ms': 5.93558, 'p99_ms': 6.4844079999999975, 'qps': 201.94848688773837}
+[19:48:33] == qdrant as-run build 2: loading 107,540 chunks
+[19:48:42]   loaded 10,000 of 107,540 chunks (9 s)
+[19:48:52]   loaded 20,000 of 107,540 chunks (18 s)
+[19:49:03]   loaded 30,000 of 107,540 chunks (29 s)
+[19:49:13]   loaded 40,000 of 107,540 chunks (40 s)
+[19:49:24]   loaded 50,000 of 107,540 chunks (50 s)
+[19:49:40]   loaded 60,000 of 107,540 chunks (66 s)
+[19:49:56]   loaded 70,000 of 107,540 chunks (83 s)
+[19:50:08]   loaded 80,000 of 107,540 chunks (95 s)
+[19:50:21]   loaded 90,000 of 107,540 chunks (107 s)
+[19:50:32]   loaded 100,000 of 107,540 chunks (119 s)
+[19:50:43]   loaded 107,540 of 107,540 chunks (129 s)
+[19:51:13] -- qdrant as-run b2 report: {'id': 'report', 'short_results': 'report', 'max_exact_rows': 10000, 'widen': False, 'recall_sample_rate': 0.0, 'base_overrides': {}} (budget 10.3 min)
+[19:51:23]   qdrant as-run b2 report: pass 1, 1000 of 1489 pairs (10 s)
+[19:51:42]   qdrant as-run b2 report: 1489 of 1489 pairs, 3 passes, 0 errors, 30 s (cut: none)
+[19:51:42]    qdrant as-run b2 report: {'pairs': 1489, 'recall10': 0.671457765667575, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 4.8428, 'p95_ms': 5.9689799999999975, 'p99_ms': 6.340771999999997, 'qps': 208.09842482489825}
+[19:51:42] -- qdrant as-run b2 count: {'id': 'count', 'short_results': 'count', 'max_exact_rows': 10000, 'widen': False, 'recall_sample_rate': 0.0, 'base_overrides': {}} (budget 10.7 min)
+[19:51:52]   qdrant as-run b2 count: pass 1, 1000 of 1489 pairs (9 s)
+[19:52:10]   qdrant as-run b2 count: 1489 of 1489 pairs, 3 passes, 0 errors, 28 s (cut: none)
+[19:52:10]    qdrant as-run b2 count: {'pairs': 1489, 'recall10': 0.671457765667575, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 4.5977, 'p95_ms': 5.64868, 'p99_ms': 5.951747999999999, 'qps': 218.09084824011381}
+[19:52:10] -- qdrant as-run b2 exact-1k: {'id': 'exact-1k', 'short_results': 'exact', 'max_exact_rows': 1000, 'widen': False, 'recall_sample_rate': 0.0, 'base_overrides': {}} (budget 11.0 min)
+[19:52:20]   qdrant as-run b2 exact-1k: pass 1, 1000 of 1489 pairs (9 s)
+[19:52:38]   qdrant as-run b2 exact-1k: 1489 of 1489 pairs, 3 passes, 0 errors, 28 s (cut: none)
+[19:52:38]    qdrant as-run b2 exact-1k: {'pairs': 1489, 'recall10': 0.671457765667575, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 4.5681, 'p95_ms': 5.558899999999999, 'p99_ms': 5.853943999999999, 'qps': 219.85156903664839}
+[19:52:38] -- qdrant as-run b2 exact-10k: {'id': 'exact-10k', 'short_results': 'exact', 'max_exact_rows': 10000, 'widen': False, 'recall_sample_rate': 0.0, 'base_overrides': {}} (budget 11.5 min)
+[19:52:47]   qdrant as-run b2 exact-10k: pass 1, 1000 of 1489 pairs (9 s)
+[19:53:06]   qdrant as-run b2 exact-10k: 1489 of 1489 pairs, 3 passes, 0 errors, 28 s (cut: none)
+[19:53:06]    qdrant as-run b2 exact-10k: {'pairs': 1489, 'recall10': 0.671457765667575, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 4.5721, 'p95_ms': 5.539919999999999, 'p99_ms': 5.8739, 'qps': 219.87227148699927}
+[19:53:06] -- qdrant as-run b2 exact-inf: {'id': 'exact-inf', 'short_results': 'exact', 'max_exact_rows': None, 'widen': False, 'recall_sample_rate': 0.0, 'base_overrides': {}} (budget 11.9 min)
+[19:53:15]   qdrant as-run b2 exact-inf: pass 1, 1000 of 1489 pairs (9 s)
+[19:53:34]   qdrant as-run b2 exact-inf: 1489 of 1489 pairs, 3 passes, 0 errors, 28 s (cut: none)
+[19:53:34]    qdrant as-run b2 exact-inf: {'pairs': 1489, 'recall10': 0.671457765667575, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 4.5872, 'p95_ms': 5.56692, 'p99_ms': 5.875843999999999, 'qps': 219.46683178904985}
+[19:53:34] -- qdrant as-run b2 widen: {'id': 'widen', 'short_results': 'widen', 'max_exact_rows': 10000, 'widen': True, 'recall_sample_rate': 0.0, 'base_overrides': {}} (budget 12.4 min)
+[19:53:43]   qdrant as-run b2 widen: pass 1, 1000 of 1489 pairs (9 s)
+[19:54:01]   qdrant as-run b2 widen: 1489 of 1489 pairs, 3 passes, 0 errors, 28 s (cut: none)
+[19:54:02]    qdrant as-run b2 widen: {'pairs': 1489, 'recall10': 0.671457765667575, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 4.5906, 'p95_ms': 5.58852, 'p99_ms': 5.863623999999999, 'qps': 219.11620061749565}
+[19:54:02] -- qdrant as-run b2 monitor: {'id': 'monitor', 'short_results': 'report', 'max_exact_rows': 10000, 'widen': False, 'recall_sample_rate': 0.01, 'base_overrides': {}} (budget 12.9 min)
+[19:54:11]   qdrant as-run b2 monitor: pass 1, 1000 of 1489 pairs (10 s)
+[19:54:30]   qdrant as-run b2 monitor: 1489 of 1489 pairs, 3 passes, 0 errors, 29 s (cut: none)
+[19:54:31]    qdrant as-run b2 monitor: {'pairs': 1489, 'recall10': 0.671457765667575, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 4.5968, 'p95_ms': 5.64112, 'p99_ms': 5.842816, 'qps': 218.89101813121783}
+[19:54:31] -- qdrant as-run b2 native-acorn: {'id': 'native-acorn', 'short_results': 'report', 'max_exact_rows': 10000, 'widen': False, 'recall_sample_rate': 0.0, 'base_overrides': {'acorn': 1.0}} (budget 13.5 min)
+[19:54:41]   qdrant as-run b2 native-acorn: pass 1, 1000 of 1489 pairs (10 s)
+[19:55:00]   qdrant as-run b2 native-acorn: 1489 of 1489 pairs, 3 passes, 0 errors, 29 s (cut: none)
+[19:55:00]    qdrant as-run b2 native-acorn: {'pairs': 1489, 'recall10': 0.8569482288828338, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 4.7909, 'p95_ms': 5.78878, 'p99_ms': 6.3145759999999935, 'qps': 208.11634164736455}
+[19:55:00] == qdrant tenant build 0: loading 107,540 chunks
+[19:55:09]   loaded 10,000 of 107,540 chunks (9 s)
+[19:55:18]   loaded 20,000 of 107,540 chunks (18 s)
+[19:55:29]   loaded 30,000 of 107,540 chunks (29 s)
+[19:55:40]   loaded 40,000 of 107,540 chunks (40 s)
+[19:55:54]   loaded 50,000 of 107,540 chunks (53 s)
+[19:56:09]   loaded 60,000 of 107,540 chunks (69 s)
+[19:56:26]   loaded 70,000 of 107,540 chunks (86 s)
+[19:56:44]   loaded 80,000 of 107,540 chunks (103 s)
+[19:57:03]   loaded 90,000 of 107,540 chunks (123 s)
+[19:57:20]   loaded 100,000 of 107,540 chunks (140 s)
+[19:57:35]   loaded 107,540 of 107,540 chunks (155 s)
+[20:05:26] -- qdrant tenant b0 native-tenant: {'id': 'native-tenant', 'short_results': 'report', 'max_exact_rows': 10000, 'widen': False, 'recall_sample_rate': 0.0, 'base_overrides': {}} (budget 19.0 min)
+[20:05:37]   qdrant tenant b0 native-tenant: pass 1, 1000 of 1489 pairs (11 s)
+[20:05:57]   qdrant tenant b0 native-tenant: 1489 of 1489 pairs, 3 passes, 0 errors, 31 s (cut: none)
+[20:05:57]    qdrant tenant b0 native-tenant: {'pairs': 1489, 'recall10': 0.9362397820163488, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 4.6034, 'p95_ms': 7.252979999999999, 'p99_ms': 7.656135999999999, 'qps': 198.29744926355337}
+[20:05:58] == qdrant tenant build 1: loading 107,540 chunks
+[20:06:06]   loaded 10,000 of 107,540 chunks (9 s)
+[20:06:15]   loaded 20,000 of 107,540 chunks (18 s)
+[20:06:26]   loaded 30,000 of 107,540 chunks (29 s)
+[20:06:37]   loaded 40,000 of 107,540 chunks (40 s)
+[20:06:51]   loaded 50,000 of 107,540 chunks (53 s)
+[20:07:05]   loaded 60,000 of 107,540 chunks (68 s)
+[20:07:23]   loaded 70,000 of 107,540 chunks (85 s)
+[20:07:41]   loaded 80,000 of 107,540 chunks (103 s)
+[20:07:59]   loaded 90,000 of 107,540 chunks (121 s)
+[20:08:18]   loaded 100,000 of 107,540 chunks (141 s)
+[20:08:32]   loaded 107,540 of 107,540 chunks (154 s)
+[20:16:23] -- qdrant tenant b1 native-tenant: {'id': 'native-tenant', 'short_results': 'report', 'max_exact_rows': 10000, 'widen': False, 'recall_sample_rate': 0.0, 'base_overrides': {}} (budget 34.3 min)
+[20:16:34]   qdrant tenant b1 native-tenant: pass 1, 1000 of 1489 pairs (12 s)
+[20:16:56]   qdrant tenant b1 native-tenant: 1489 of 1489 pairs, 3 passes, 0 errors, 33 s (cut: none)
+[20:16:56]    qdrant tenant b1 native-tenant: {'pairs': 1489, 'recall10': 0.9414850136239782, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 4.8009, 'p95_ms': 7.8673399999999996, 'p99_ms': 8.424515999999999, 'qps': 187.66984893308177}
+[20:16:56] == qdrant tenant build 2: loading 107,540 chunks
+[20:17:05]   loaded 10,000 of 107,540 chunks (9 s)
+[20:17:14]   loaded 20,000 of 107,540 chunks (18 s)
+[20:17:25]   loaded 30,000 of 107,540 chunks (29 s)
+[20:17:36]   loaded 40,000 of 107,540 chunks (40 s)
+[20:17:50]   loaded 50,000 of 107,540 chunks (53 s)
+[20:18:04]   loaded 60,000 of 107,540 chunks (68 s)
+[20:18:20]   loaded 70,000 of 107,540 chunks (84 s)
+[20:18:37]   loaded 80,000 of 107,540 chunks (101 s)
+[20:18:57]   loaded 90,000 of 107,540 chunks (121 s)
+[20:19:16]   loaded 100,000 of 107,540 chunks (140 s)
+[20:19:31]   loaded 107,540 of 107,540 chunks (155 s)
+[20:27:27] -- qdrant tenant b2 native-tenant: {'id': 'native-tenant', 'short_results': 'report', 'max_exact_rows': 10000, 'widen': False, 'recall_sample_rate': 0.0, 'base_overrides': {}} (budget 263.1 min)
+[20:27:38]   qdrant tenant b2 native-tenant: pass 1, 1000 of 1489 pairs (11 s)
+[20:27:59]   qdrant tenant b2 native-tenant: 1489 of 1489 pairs, 3 passes, 0 errors, 32 s (cut: none)
+[20:28:00]    qdrant tenant b2 native-tenant: {'pairs': 1489, 'recall10': 0.9380790190735696, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 4.7078, 'p95_ms': 7.7497799999999994, 'p99_ms': 8.274396, 'qps': 191.1275191255237}
+[20:28:00] X5 x5-e-qdrant: done

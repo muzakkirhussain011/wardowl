@@ -1,0 +1,814 @@
+{
+ "experiment": "x2",
+ "label": "x2-e-milvus",
+ "corpus": {
+  "name": "e",
+  "chunks": 107540,
+  "dim": 768,
+  "pairs": 1489
+ },
+ "store": "milvus",
+ "layouts": [
+  "default"
+ ],
+ "builds": [
+  0,
+  1,
+  2
+ ],
+ "minutes": 320.0,
+ "started": "2026-10-29T19:35:45+0000",
+ "environment": {
+  "python": "3.12.15",
+  "platform": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+  "cpus": 4,
+  "runner": "GitHub Actions 1000007975",
+  "run": "40921769714",
+  "job": "store",
+  "sha": "884ce18397966859ebb803427cc23a5023431739",
+  "memory_gib": 15.6,
+  "cpu_model": "INTEL(R) XEON(R) PLATINUM 8573C",
+  "wardowl": "2.1.0",
+  "numpy": "2.5.4",
+  "psycopg": "3.3.6",
+  "psycopg-pool": "3.3.3",
+  "pgvector": "0.5.1",
+  "qdrant-client": "1.19.1",
+  "elasticsearch": "9.5.1",
+  "opensearch-py": "3.2.0",
+  "weaviate-client": "4.23.1",
+  "redis": "8.1.0",
+  "pymilvus": "3.0.2",
+  "pymongo": "4.19.0",
+  "lancedb": "0.40.0",
+  "pyarrow": "26.0.0",
+  "chromadb": "1.5.9",
+  "faiss-cpu": "1.15.1",
+  "wardowl_path": "/home/runner/work/wardowl/wardowl/wardowl"
+ },
+ "units": [
+  {
+   "layout": "default",
+   "build": 0,
+   "settings": [
+    {
+     "id": "default",
+     "kind": "default",
+     "params": {
+      "server_default": true
+     },
+     "level": null,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 1047.3,
+     "effective": {},
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 1489,
+      "pairs_run": 1489,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 4467,
+      "sampled": 0,
+      "pass1_seconds": 13.4,
+      "seconds": 35.2,
+      "budget_seconds": 1047.3
+     },
+     "summary": {
+      "pairs": 1489,
+      "recall10": 0.842983651226158,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 7.466,
+      "p95_ms": 10.74982,
+      "p99_ms": 11.914559999999998,
+      "qps": 133.42906413168052
+     }
+    },
+    {
+     "id": "ef32",
+     "kind": "sweep",
+     "params": {
+      "ef": 32
+     },
+     "level": 1,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 1106.8,
+     "effective": {},
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 1489,
+      "pairs_run": 1489,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 4467,
+      "sampled": 0,
+      "pass1_seconds": 7.6,
+      "seconds": 22.1,
+      "budget_seconds": 1106.8
+     },
+     "summary": {
+      "pairs": 1489,
+      "recall10": 0.9039509536784741,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 4.5001,
+      "p95_ms": 6.148579999999996,
+      "p99_ms": 6.980491999999996,
+      "qps": 214.9164951267865
+     }
+    },
+    {
+     "id": "ef64",
+     "kind": "sweep",
+     "params": {
+      "ef": 64
+     },
+     "level": 2,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 1174.6,
+     "effective": {},
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 1489,
+      "pairs_run": 1489,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 4467,
+      "sampled": 0,
+      "pass1_seconds": 10.7,
+      "seconds": 32.7,
+      "budget_seconds": 1174.6
+     },
+     "summary": {
+      "pairs": 1489,
+      "recall10": 0.9064713896457766,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 6.7973,
+      "p95_ms": 10.98696,
+      "p99_ms": 12.519092,
+      "qps": 142.40498550959933
+     }
+    },
+    {
+     "id": "ef100",
+     "kind": "sweep",
+     "params": {
+      "ef": 100
+     },
+     "level": 3,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 1250.7,
+     "effective": {},
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 1489,
+      "pairs_run": 1489,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 4467,
+      "sampled": 0,
+      "pass1_seconds": 9.9,
+      "seconds": 27.1,
+      "budget_seconds": 1250.7
+     },
+     "summary": {
+      "pairs": 1489,
+      "recall10": 0.9303133514986376,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 5.3338,
+      "p95_ms": 8.16016,
+      "p99_ms": 10.506755999999996,
+      "qps": 179.85465955832095
+     }
+    },
+    {
+     "id": "ef256",
+     "kind": "sweep",
+     "params": {
+      "ef": 256
+     },
+     "level": 4,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 1338.1,
+     "effective": {},
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 1489,
+      "pairs_run": 1489,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 4467,
+      "sampled": 0,
+      "pass1_seconds": 9.7,
+      "seconds": 26.5,
+      "budget_seconds": 1338.1
+     },
+     "summary": {
+      "pairs": 1489,
+      "recall10": 0.9711852861035424,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 5.5553,
+      "p95_ms": 8.255399999999998,
+      "p99_ms": 9.066659999999994,
+      "qps": 177.25199975134728
+     }
+    },
+    {
+     "id": "ef512",
+     "kind": "sweep",
+     "params": {
+      "ef": 512
+     },
+     "level": 5,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 1439.0,
+     "effective": {},
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 1489,
+      "pairs_run": 1489,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 4467,
+      "sampled": 0,
+      "pass1_seconds": 11.4,
+      "seconds": 32.6,
+      "budget_seconds": 1439.0
+     },
+     "summary": {
+      "pairs": 1489,
+      "recall10": 0.9831062670299726,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 7.374,
+      "p95_ms": 10.528899999999998,
+      "p99_ms": 11.440355999999996,
+      "qps": 141.5768550575712
+     }
+    }
+   ],
+   "load": {
+    "load_s": 33.9,
+    "index_s": 8.0,
+    "rows": 107540,
+    "index": "HNSW (M 16, efConstruction 200)",
+    "seconds": 46.3
+   }
+  },
+  {
+   "layout": "default",
+   "build": 1,
+   "settings": [
+    {
+     "id": "default",
+     "kind": "default",
+     "params": {
+      "server_default": true
+     },
+     "level": null,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 1552.3,
+     "effective": {},
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 1489,
+      "pairs_run": 1489,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 4467,
+      "sampled": 0,
+      "pass1_seconds": 12.8,
+      "seconds": 35.3,
+      "budget_seconds": 1552.3
+     },
+     "summary": {
+      "pairs": 1489,
+      "recall10": 0.8714577656675749,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 7.7171,
+      "p95_ms": 9.81744,
+      "p99_ms": 10.609807999999994,
+      "qps": 132.26035161534392
+     }
+    },
+    {
+     "id": "ef32",
+     "kind": "sweep",
+     "params": {
+      "ef": 32
+     },
+     "level": 1,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 1690.2,
+     "effective": {},
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 1489,
+      "pairs_run": 1489,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 4467,
+      "sampled": 0,
+      "pass1_seconds": 12.3,
+      "seconds": 29.8,
+      "budget_seconds": 1690.2
+     },
+     "summary": {
+      "pairs": 1489,
+      "recall10": 0.8974114441416893,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 6.0007,
+      "p95_ms": 9.9,
+      "p99_ms": 11.605919999999994,
+      "qps": 157.87401695857454
+     }
+    },
+    {
+     "id": "ef64",
+     "kind": "sweep",
+     "params": {
+      "ef": 64
+     },
+     "level": 2,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 1856.3,
+     "effective": {},
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 1489,
+      "pairs_run": 1489,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 4467,
+      "sampled": 0,
+      "pass1_seconds": 7.7,
+      "seconds": 22.9,
+      "budget_seconds": 1856.3
+     },
+     "summary": {
+      "pairs": 1489,
+      "recall10": 0.9245912806539511,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 4.6457,
+      "p95_ms": 6.326299999999999,
+      "p99_ms": 6.869759999999999,
+      "qps": 207.28796647553574
+     }
+    },
+    {
+     "id": "ef100",
+     "kind": "sweep",
+     "params": {
+      "ef": 100
+     },
+     "level": 3,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 2060.0,
+     "effective": {},
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 1489,
+      "pairs_run": 1489,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 4467,
+      "sampled": 0,
+      "pass1_seconds": 11.8,
+      "seconds": 30.0,
+      "budget_seconds": 2060.0
+     },
+     "summary": {
+      "pairs": 1489,
+      "recall10": 0.9114441416893733,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 6.6195,
+      "p95_ms": 9.50936,
+      "p99_ms": 11.259823999999997,
+      "qps": 152.6095145708623
+     }
+    },
+    {
+     "id": "ef256",
+     "kind": "sweep",
+     "params": {
+      "ef": 256
+     },
+     "level": 4,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 2313.7,
+     "effective": {},
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 1489,
+      "pairs_run": 1489,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 4467,
+      "sampled": 0,
+      "pass1_seconds": 9.7,
+      "seconds": 26.4,
+      "budget_seconds": 2313.7
+     },
+     "summary": {
+      "pairs": 1489,
+      "recall10": 0.9670980926430518,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 5.385,
+      "p95_ms": 8.07386,
+      "p99_ms": 8.91012,
+      "qps": 182.2583972159828
+     }
+    },
+    {
+     "id": "ef512",
+     "kind": "sweep",
+     "params": {
+      "ef": 512
+     },
+     "level": 5,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 2640.4,
+     "effective": {},
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 1489,
+      "pairs_run": 1489,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 4467,
+      "sampled": 0,
+      "pass1_seconds": 10.8,
+      "seconds": 32.7,
+      "budget_seconds": 2640.4
+     },
+     "summary": {
+      "pairs": 1489,
+      "recall10": 0.982425068119891,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 7.3274,
+      "p95_ms": 10.609359999999999,
+      "p99_ms": 11.64476,
+      "qps": 140.9738816581732
+     }
+    }
+   ],
+   "load": {
+    "load_s": 33.4,
+    "index_s": 8.0,
+    "rows": 107540,
+    "index": "HNSW (M 16, efConstruction 200)",
+    "seconds": 45.0
+   }
+  },
+  {
+   "layout": "default",
+   "build": 2,
+   "settings": [
+    {
+     "id": "default",
+     "kind": "default",
+     "params": {
+      "server_default": true
+     },
+     "level": null,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 3067.5,
+     "effective": {},
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 1489,
+      "pairs_run": 1489,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 4467,
+      "sampled": 0,
+      "pass1_seconds": 11.4,
+      "seconds": 24.3,
+      "budget_seconds": 3067.5
+     },
+     "summary": {
+      "pairs": 1489,
+      "recall10": 0.8769754768392372,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 4.3077,
+      "p95_ms": 5.542699999999999,
+      "p99_ms": 6.467879999999996,
+      "qps": 231.16730500048106
+     }
+    },
+    {
+     "id": "ef32",
+     "kind": "sweep",
+     "params": {
+      "ef": 32
+     },
+     "level": 1,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 3676.2,
+     "effective": {},
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 1489,
+      "pairs_run": 1489,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 4467,
+      "sampled": 0,
+      "pass1_seconds": 7.8,
+      "seconds": 33.5,
+      "budget_seconds": 3676.2
+     },
+     "summary": {
+      "pairs": 1489,
+      "recall10": 0.9134877384196185,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 7.1634,
+      "p95_ms": 10.520539999999999,
+      "p99_ms": 11.751191999999998,
+      "qps": 134.69095788391948
+     }
+    },
+    {
+     "id": "ef64",
+     "kind": "sweep",
+     "params": {
+      "ef": 64
+     },
+     "level": 2,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 4586.8,
+     "effective": {},
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 1489,
+      "pairs_run": 1489,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 4467,
+      "sampled": 0,
+      "pass1_seconds": 13.8,
+      "seconds": 30.9,
+      "budget_seconds": 4586.8
+     },
+     "summary": {
+      "pairs": 1489,
+      "recall10": 0.9516348773841962,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 5.3317,
+      "p95_ms": 9.884479999999998,
+      "p99_ms": 12.145511999999988,
+      "qps": 171.57700899882806
+     }
+    },
+    {
+     "id": "ef100",
+     "kind": "sweep",
+     "params": {
+      "ef": 100
+     },
+     "level": 3,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 6105.4,
+     "effective": {},
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 1489,
+      "pairs_run": 1489,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 4467,
+      "sampled": 0,
+      "pass1_seconds": 10.3,
+      "seconds": 28.9,
+      "budget_seconds": 6105.4
+     },
+     "summary": {
+      "pairs": 1489,
+      "recall10": 0.9195504087193461,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 5.2001,
+      "p95_ms": 9.359199999999998,
+      "p99_ms": 10.571056,
+      "qps": 175.3242235306373
+     }
+    },
+    {
+     "id": "ef256",
+     "kind": "sweep",
+     "params": {
+      "ef": 256
+     },
+     "level": 4,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 9143.7,
+     "effective": {},
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 1489,
+      "pairs_run": 1489,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 4467,
+      "sampled": 0,
+      "pass1_seconds": 14.1,
+      "seconds": 33.3,
+      "budget_seconds": 9143.7
+     },
+     "summary": {
+      "pairs": 1489,
+      "recall10": 0.9661444141689375,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 5.9518,
+      "p95_ms": 9.03236,
+      "p99_ms": 10.583019999999976,
+      "qps": 161.7874494727962
+     }
+    },
+    {
+     "id": "ef512",
+     "kind": "sweep",
+     "params": {
+      "ef": 512
+     },
+     "level": 5,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 18253.9,
+     "effective": {},
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 1489,
+      "pairs_run": 1489,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 4467,
+      "sampled": 0,
+      "pass1_seconds": 11.6,
+      "seconds": 34.0,
+      "budget_seconds": 18253.9
+     },
+     "summary": {
+      "pairs": 1489,
+      "recall10": 0.983514986376022,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 7.6893,
+      "p95_ms": 11.009979999999999,
+      "p99_ms": 11.965935999999997,
+      "qps": 135.06713820972146
+     }
+    }
+   ],
+   "load": {
+    "load_s": 34.4,
+    "index_s": 6.0,
+    "rows": 107540,
+    "index": "HNSW (M 16, efConstruction 200)",
+    "seconds": 44.2
+   }
+  }
+ ],
+ "failures": [],
+ "skipped": [],
+ "status": "done",
+ "finished": "2026-10-29T19:47:04+0000"
+}

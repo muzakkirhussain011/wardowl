@@ -1,0 +1,294 @@
+{
+ "H2.1": {
+  "verdict": "inconclusive",
+  "criteria": [
+   "pgvector: G 0.4242 [0.4154, 0.4332], positive in 5 of 5 seeds: gap",
+   "qdrant: G 0.0343 [0.0196, 0.0487], positive in 5 of 5 seeds: unclear",
+   "elasticsearch: G 0.1371 [0.1242, 0.1500], positive in 5 of 5 seeds: gap",
+   "opensearch: G -0.0014 [-0.0029, 0.0001], positive in 2 of 5 seeds: no gap",
+   "weaviate: G 0.0549 [0.0478, 0.0618], positive in 5 of 5 seeds: gap",
+   "redis: G -0.0794 [-0.0871, -0.0719], positive in 0 of 5 seeds: unclear",
+   "milvus: G 0.0136 [0.0080, 0.0194], positive in 5 of 5 seeds: no gap",
+   "mongodb: G -0.0037 [-0.0055, -0.0019], positive in 0 of 5 seeds: no gap",
+   "lancedb: G 0.2535 [0.2423, 0.2649], positive in 5 of 5 seeds: gap",
+   "stores with a gap: 4 (confirm at 6); with no gap: 3 (falsify at 5)"
+  ],
+  "data": {
+   "pgvector": {
+    "G": 0.4241666666666667,
+    "lo": 0.4153611111111112,
+    "hi": 0.4331666666666667,
+    "seeds_positive": 5,
+    "outcome": "gap",
+    "seeds": 5,
+    "pairs_u": 1200,
+    "pairs_n": 1200
+   },
+   "qdrant": {
+    "G": 0.034250000000000114,
+    "lo": 0.01961041666666653,
+    "hi": 0.04872291666666676,
+    "seeds_positive": 5,
+    "outcome": "unclear",
+    "seeds": 5,
+    "pairs_u": 1200,
+    "pairs_n": 1200
+   },
+   "elasticsearch": {
+    "G": 0.13713888888888892,
+    "lo": 0.1241659722222222,
+    "hi": 0.15000069444444455,
+    "seeds_positive": 5,
+    "outcome": "gap",
+    "seeds": 5,
+    "pairs_u": 1200,
+    "pairs_n": 1200
+   },
+   "opensearch": {
+    "G": -0.0013611111111112573,
+    "lo": -0.0029444444444446383,
+    "hi": 0.0001388888888889106,
+    "seeds_positive": 2,
+    "outcome": "no gap",
+    "seeds": 5,
+    "pairs_u": 1200,
+    "pairs_n": 1200
+   },
+   "weaviate": {
+    "G": 0.054916666666666725,
+    "lo": 0.04777708333333326,
+    "hi": 0.06180555555555545,
+    "seeds_positive": 5,
+    "outcome": "gap",
+    "seeds": 5,
+    "pairs_u": 1200,
+    "pairs_n": 1200
+   },
+   "redis": {
+    "G": -0.07938888888888884,
+    "lo": -0.08708402777777784,
+    "hi": -0.07194444444444426,
+    "seeds_positive": 0,
+    "outcome": "unclear",
+    "seeds": 5,
+    "pairs_u": 1200,
+    "pairs_n": 1200
+   },
+   "milvus": {
+    "G": 0.013611111111111018,
+    "lo": 0.008000000000000118,
+    "hi": 0.019361111111110833,
+    "seeds_positive": 5,
+    "outcome": "no gap",
+    "seeds": 5,
+    "pairs_u": 1200,
+    "pairs_n": 1200
+   },
+   "mongodb": {
+    "G": -0.0036944444444444446,
+    "lo": -0.005499999999999949,
+    "hi": -0.0019166666666665666,
+    "seeds_positive": 0,
+    "outcome": "no gap",
+    "seeds": 5,
+    "pairs_u": 1200,
+    "pairs_n": 1200
+   },
+   "lancedb": {
+    "G": 0.2534722222222222,
+    "lo": 0.24233333333333346,
+    "hi": 0.2648895833333334,
+    "seeds_positive": 5,
+    "outcome": "gap",
+    "seeds": 5,
+    "pairs_u": 1200,
+    "pairs_n": 1200
+   }
+  }
+ },
+ "H2.2": {
+  "verdict": "falsified",
+  "criteria": [
+   "pgvector: D 0.3650 [0.3321, 0.3989], 3578 pairs below 1: local",
+   "qdrant: D -0.2032 [-0.2194, -0.1876], 2760 pairs below 1: global",
+   "elasticsearch: D 0.2439 [0.2116, 0.2754], 4600 pairs below 1: local",
+   "opensearch: D -0.0601 [-0.0793, -0.0411], 94 pairs below 1: not assessable",
+   "weaviate: D -0.3900 [-0.4159, -0.3644], 1294 pairs below 1: global",
+   "redis: D -0.0757 [-0.0870, -0.0647], 899 pairs below 1: global",
+   "milvus: D -0.5307 [-0.5469, -0.5140], 1545 pairs below 1: global",
+   "mongodb: D -0.0804 [-0.1016, -0.0593], 318 pairs below 1: global",
+   "lancedb: D 0.5382 [0.5080, 0.5674], 6198 pairs below 1: local",
+   "assessable 8, local 3, global 5"
+  ],
+  "data": {}
+ },
+ "H2.3": {
+  "verdict": "confirmed",
+  "criteria": [
+   "pgvector (ef1000): G 0.4242 -> 0.1721 [0.1611, 0.1830], narrowing [0.2383, 0.2661]",
+   "elasticsearch (nc10000): G 0.1371 -> 0.1617 [0.1506, 0.1727], narrowing [-0.0342, -0.0147]",
+   "weaviate (ef1024): G 0.0549 -> 0.0041 [0.0014, 0.0068], narrowing [0.0448, 0.0567]",
+   "lancedb (np500): G 0.2535 -> 0.2523 [0.2411, 0.2636], narrowing [0.0002, 0.0022]",
+   "stores with a gap and a sweep: 4; narrowed and remaining: 2; closed: 1"
+  ],
+  "data": {}
+ },
+ "H2.4": {
+  "verdict": "confirmed",
+  "criteria": [
+   "pgvector: V 0.9267 [0.8867, 0.9600], 5 seeds: U-shaped",
+   "qdrant: V 0.5403 [0.5165, 0.5653], 5 seeds: U-shaped",
+   "elasticsearch: V 0.2338 [0.2032, 0.2650], 5 seeds: U-shaped",
+   "opensearch: V 0.0005 [0.0000, 0.0015], 1 seeds: neither",
+   "weaviate: V 0.1780 [0.1578, 0.1980], 5 seeds: U-shaped",
+   "redis: V 0.0000 [0.0000, 0.0000], 0 seeds: monotone",
+   "milvus: V 0.1037 [0.0925, 0.1150], 5 seeds: U-shaped",
+   "mongodb: V 0.0012 [0.0005, 0.0020], 4 seeds: neither",
+   "lancedb: V -0.0098 [-0.0332, 0.0212], 3 seeds: monotone",
+   "U-shaped 5 (confirm at 5), monotone 2 (falsify at 5)"
+  ],
+  "data": {}
+ },
+ "validity": {
+  "V1": true,
+  "V2": "8 of 9 stores within 0.03",
+  "V2_holds": true,
+  "V3": true,
+  "V4": [
+   1.0
+  ]
+ },
+ "H5.1": {
+  "verdict": "confirmed",
+  "criteria": [
+   "e pgvector: false alarms 0, detection 1.0000 of 992, exhausted without min(k, R) hits 0",
+   "e qdrant: 0 truly short first searches (< 10): not judged",
+   "m pgvector: false alarms 0, detection 1.0000 of 574, exhausted without min(k, R) hits 0",
+   "m qdrant: false alarms 0, detection 1.0000 of 1091, exhausted without min(k, R) hits 0"
+  ],
+  "data": {}
+ },
+ "H5.2": {
+  "verdict": "confirmed",
+  "criteria": [
+   "pgvector e: report short 992; exact-inf empty or short 0; recall@10 on 576 triggered 1.0000",
+   "pgvector m: report short 574; exact-inf empty or short 0; recall@10 on 323 triggered 1.0000",
+   "qdrant e: report has 0 short results (< 10) or no exact-inf: not judged",
+   "qdrant m: report short 1091; exact-inf empty or short 0; recall@10 on 644 triggered 1.0000"
+  ],
+  "data": {}
+ },
+ "H5.3": {
+  "verdict": "inconclusive",
+  "criteria": [
+   "e pgvector b0 count: median latency ratio on 1300 untriggered pairs 1.0038",
+   "e pgvector b0 exact-1k: median latency ratio on 1300 untriggered pairs 1.0010",
+   "e pgvector b0 exact-10k: median latency ratio on 1300 untriggered pairs 0.9852",
+   "e pgvector b0 exact-inf: median latency ratio on 1300 untriggered pairs 1.0190",
+   "e pgvector b0 widen: median latency ratio on 1300 untriggered pairs 1.0103",
+   "e pgvector b1 count: median latency ratio on 1293 untriggered pairs 1.0188",
+   "e pgvector b1 exact-1k: median latency ratio on 1293 untriggered pairs 1.0281",
+   "e pgvector b1 exact-10k: median latency ratio on 1293 untriggered pairs 0.9980",
+   "e pgvector b1 exact-inf: median latency ratio on 1293 untriggered pairs 1.0052",
+   "e pgvector b1 widen: median latency ratio on 1293 untriggered pairs 1.0493",
+   "e pgvector b2 count: median latency ratio on 1298 untriggered pairs 1.0153",
+   "e pgvector b2 exact-1k: median latency ratio on 1298 untriggered pairs 1.0068",
+   "e pgvector b2 exact-10k: median latency ratio on 1298 untriggered pairs 0.9773",
+   "e pgvector b2 exact-inf: median latency ratio on 1298 untriggered pairs 0.9427",
+   "e pgvector b2 widen: median latency ratio on 1298 untriggered pairs 0.9876",
+   "e qdrant b0 count: median latency ratio on 1468 untriggered pairs 0.9932",
+   "e qdrant b0 exact-1k: median latency ratio on 1468 untriggered pairs 0.9992",
+   "e qdrant b0 exact-10k: median latency ratio on 1468 untriggered pairs 1.0005",
+   "e qdrant b0 exact-inf: median latency ratio on 1468 untriggered pairs 0.9982",
+   "e qdrant b0 widen: median latency ratio on 1468 untriggered pairs 0.9971",
+   "e qdrant b1 count: median latency ratio on 1468 untriggered pairs 0.9758",
+   "e qdrant b1 exact-1k: median latency ratio on 1468 untriggered pairs 0.9750",
+   "e qdrant b1 exact-10k: median latency ratio on 1468 untriggered pairs 0.9638",
+   "e qdrant b1 exact-inf: median latency ratio on 1468 untriggered pairs 0.9699",
+   "e qdrant b1 widen: median latency ratio on 1468 untriggered pairs 0.9673",
+   "e qdrant b2 count: median latency ratio on 1468 untriggered pairs 0.9509",
+   "e qdrant b2 exact-1k: median latency ratio on 1468 untriggered pairs 0.9433",
+   "e qdrant b2 exact-10k: median latency ratio on 1468 untriggered pairs 0.9443",
+   "e qdrant b2 exact-inf: median latency ratio on 1468 untriggered pairs 0.9446",
+   "e qdrant b2 widen: median latency ratio on 1468 untriggered pairs 0.9480",
+   "m pgvector b0 count: median latency ratio on 6097 untriggered pairs 0.9991",
+   "m pgvector b0 exact-1k: median latency ratio on 6097 untriggered pairs 1.0014",
+   "m pgvector b0 exact-10k: median latency ratio on 6097 untriggered pairs 1.0060",
+   "m pgvector b0 exact-inf: median latency ratio on 6097 untriggered pairs 1.0071",
+   "m pgvector b0 widen: median latency ratio on 6097 untriggered pairs 1.0080",
+   "m pgvector b1 count: median latency ratio on 6072 untriggered pairs 1.0002",
+   "m pgvector b1 exact-1k: median latency ratio on 6072 untriggered pairs 1.0003",
+   "m pgvector b1 exact-10k: median latency ratio on 6072 untriggered pairs 1.0076",
+   "m pgvector b1 exact-inf: median latency ratio on 6072 untriggered pairs 1.0133",
+   "m pgvector b1 widen: median latency ratio on 6072 untriggered pairs 1.0111",
+   "m pgvector b2 count: median latency ratio on 6108 untriggered pairs 0.9678",
+   "m pgvector b2 exact-1k: median latency ratio on 6108 untriggered pairs 0.9663",
+   "m pgvector b2 exact-10k: median latency ratio on 6108 untriggered pairs 1.0269",
+   "m pgvector b2 exact-inf: median latency ratio on 6108 untriggered pairs 0.9663",
+   "m pgvector b2 widen: median latency ratio on 6108 untriggered pairs 0.9184",
+   "m qdrant b0 count: median latency ratio on 5870 untriggered pairs 0.9521",
+   "m qdrant b0 exact-1k: median latency ratio on 5870 untriggered pairs 0.8795",
+   "m qdrant b0 exact-10k: median latency ratio on 5870 untriggered pairs 0.9238",
+   "m qdrant b0 exact-inf: median latency ratio on 5870 untriggered pairs 0.9746",
+   "m qdrant b0 widen: median latency ratio on 5870 untriggered pairs 0.8662",
+   "m qdrant b1 count: median latency ratio on 5907 untriggered pairs 0.9438",
+   "m qdrant b1 exact-1k: median latency ratio on 5907 untriggered pairs 0.9464",
+   "m qdrant b1 exact-10k: median latency ratio on 5907 untriggered pairs 0.9324",
+   "m qdrant b1 exact-inf: median latency ratio on 5907 untriggered pairs 0.9478",
+   "m qdrant b1 widen: median latency ratio on 5907 untriggered pairs 0.8700",
+   "m qdrant b2 count: median latency ratio on 6179 untriggered pairs 0.9960",
+   "m qdrant b2 exact-1k: median latency ratio on 6179 untriggered pairs 1.0033",
+   "m qdrant b2 exact-10k: median latency ratio on 6179 untriggered pairs 1.0542",
+   "m qdrant b2 exact-inf: median latency ratio on 6179 untriggered pairs 1.0039",
+   "m qdrant b2 widen: median latency ratio on 6179 untriggered pairs 0.9882"
+  ],
+  "data": {}
+ },
+ "H5.4": {
+  "verdict": "confirmed",
+  "criteria": [
+   "report: false-completeness 0.5808 (confirm needs >= 0.20)",
+   "count: 0.5726, minus report -0.0082 [-0.0270, 0.0000]",
+   "exact-1k: 0.5726, minus report -0.0082 [-0.0270, 0.0000]",
+   "exact-10k: 0.5726, minus report -0.0082 [-0.0270, 0.0000]",
+   "exact-inf: 0.5726, minus report -0.0082 [-0.0270, 0.0000]",
+   "widen: 0.5726, minus report -0.0082 [-0.0270, 0.0000]"
+  ],
+  "data": {}
+ },
+ "H5.5": {
+  "verdict": "confirmed",
+  "criteria": [
+   "(a) x5-e-pgvector default b0: 52 of 5956 sampled: inside the 99.9% interval",
+   "(a) x5-e-pgvector default b1: 56 of 5956 sampled: inside the 99.9% interval",
+   "(a) x5-e-pgvector default b2: 55 of 5956 sampled: inside the 99.9% interval",
+   "(a) x5-e-qdrant as-run b0: 48 of 5956 sampled: inside the 99.9% interval",
+   "(a) x5-e-qdrant as-run b1: 65 of 5956 sampled: inside the 99.9% interval",
+   "(a) x5-e-qdrant as-run b2: 53 of 5956 sampled: inside the 99.9% interval",
+   "(a) x5-m-pgvector-b0 default b0: 255 of 24800 sampled: inside the 99.9% interval",
+   "(a) x5-m-pgvector-b1 default b1: 239 of 24800 sampled: inside the 99.9% interval",
+   "(a) x5-m-pgvector-b2 default b2: 219 of 24800 sampled: inside the 99.9% interval",
+   "(a) x5-m-qdrant-b0 as-run b0: 210 of 24800 sampled: inside the 99.9% interval",
+   "(a) x5-m-qdrant-b1 as-run b1: 267 of 24800 sampled: inside the 99.9% interval",
+   "(a) x5-m-qdrant-b2 as-run b2: 248 of 24800 sampled: inside the 99.9% interval",
+   "(b) agreement within 0.1 on 1767 sampled retrievals: 1.0000",
+   "(c) Qdrant e: mean sampled 0.6843 on 166, population 0.6541, difference 0.0302",
+   "(c) Qdrant m: mean sampled 0.8116 on 725, population 0.8074, difference 0.0042"
+  ],
+  "data": {}
+ },
+ "H5.6": {
+  "verdict": "confirmed",
+  "criteria": [
+   "exact-inf minus widen on 421 triggered pairs: 0.0849 [0.0640, 0.1096], Wilcoxon p 5.582e-30"
+  ],
+  "data": {}
+ },
+ "H5.7": {
+  "verdict": "confirmed",
+  "criteria": [
+   "per-tenant layout recall@10 0.9386; best library arm 0.6535"
+  ],
+  "data": {}
+ }
+}

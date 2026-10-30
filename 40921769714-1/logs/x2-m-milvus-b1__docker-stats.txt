@@ -1,0 +1,2 @@
+CONTAINER ID   NAME      CPU %     MEM USAGE / LIMIT     MEM %     NET I/O          BLOCK I/O         PIDS
+27a470e9f1ab   milvus    2.61%     627.1MiB / 15.61GiB   3.92%     2.91GB / 802MB   1.27GB / 24.7GB   85

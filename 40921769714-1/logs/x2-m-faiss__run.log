@@ -1,0 +1,24 @@
+[20:58:59] data: 8 files match checksums.json
+[20:59:03] corpus m: 1,000,000 chunks, 6,200 pairs (3 s)
+[20:59:03] == faiss default build 0: loading 1,000,000 chunks
+[20:59:10]   loaded 100,000 of 1,000,000 chunks (7 s)
+[20:59:17]   loaded 200,000 of 1,000,000 chunks (14 s)
+[20:59:23]   loaded 300,000 of 1,000,000 chunks (20 s)
+[20:59:30]   loaded 400,000 of 1,000,000 chunks (28 s)
+[20:59:36]   loaded 500,000 of 1,000,000 chunks (33 s)
+[20:59:43]   loaded 600,000 of 1,000,000 chunks (40 s)
+[20:59:49]   loaded 700,000 of 1,000,000 chunks (47 s)
+[20:59:57]   loaded 800,000 of 1,000,000 chunks (54 s)
+[21:00:03]   loaded 900,000 of 1,000,000 chunks (61 s)
+[21:00:08]   loaded 1,000,000 of 1,000,000 chunks (66 s)
+[21:00:08]    loaded: {'load_s': 65.7, 'rows': 1000000, 'detail': 'IndexFlatIP (exact), metadata matched in Python', 'seconds': 65.8}
+[21:00:08] -- faiss default b0 exact: {} (budget 313.8 min)
+[21:19:23]   faiss default b0 exact: pass 1, 1000 of 6200 pairs (1154 s)
+[21:37:29]   faiss default b0 exact: pass 1, 2000 of 6200 pairs (2240 s)
+[21:56:02]   faiss default b0 exact: pass 1, 3000 of 6200 pairs (3354 s)
+[22:14:27]   faiss default b0 exact: pass 1, 4000 of 6200 pairs (4459 s)
+[22:32:30]   faiss default b0 exact: pass 1, 5000 of 6200 pairs (5542 s)
+[22:50:29]   faiss default b0 exact: pass 1, 6000 of 6200 pairs (6621 s)
+[02:16:59]   faiss default b0 exact: 6200 of 6200 pairs, 2 passes, 0 errors, 19010 s (cut: deadline)
+[02:16:59]    faiss default b0 exact: {'pairs': 6200, 'recall10': 1.0, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 993.2351249999999, 'p95_ms': 1440.9815249999997, 'p99_ms': 1496.6162430000002, 'qps': 0.9132643978784125}
+[02:17:00] X2 x2-m-faiss: done

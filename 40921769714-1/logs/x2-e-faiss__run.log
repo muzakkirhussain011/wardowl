@@ -1,0 +1,20 @@
+[19:38:12] data: 6 files match checksums.json
+[19:38:13] corpus e: 107,540 chunks, 1,489 pairs (1 s)
+[19:38:13] == faiss default build 0: loading 107,540 chunks
+[19:38:14]   loaded 10,000 of 107,540 chunks (1 s)
+[19:38:14]   loaded 20,000 of 107,540 chunks (1 s)
+[19:38:15]   loaded 30,000 of 107,540 chunks (2 s)
+[19:38:16]   loaded 40,000 of 107,540 chunks (3 s)
+[19:38:17]   loaded 50,000 of 107,540 chunks (3 s)
+[19:38:17]   loaded 60,000 of 107,540 chunks (4 s)
+[19:38:18]   loaded 70,000 of 107,540 chunks (5 s)
+[19:38:19]   loaded 80,000 of 107,540 chunks (6 s)
+[19:38:20]   loaded 90,000 of 107,540 chunks (7 s)
+[19:38:20]   loaded 100,000 of 107,540 chunks (7 s)
+[19:38:21]   loaded 107,540 of 107,540 chunks (8 s)
+[19:38:21]    loaded: {'load_s': 7.9, 'rows': 107540, 'detail': 'IndexFlatIP (exact), metadata matched in Python', 'seconds': 8.0}
+[19:38:21] -- faiss default b0 exact: {} (budget 314.8 min)
+[19:43:15]   faiss default b0 exact: pass 1, 1000 of 1489 pairs (293 s)
+[19:58:54]   faiss default b0 exact: 1489 of 1489 pairs, 3 passes, 0 errors, 1232 s (cut: none)
+[19:58:54]    faiss default b0 exact: {'pairs': 1489, 'recall10': 1.0, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 276.7804, 'p95_ms': 326.84526, 'p99_ms': 339.46201199999996, 'qps': 3.6709329547658864}
+[19:58:54] X2 x2-e-faiss: done

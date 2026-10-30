@@ -1,0 +1,246 @@
+{
+ "experiment": "x2",
+ "label": "x2-m-qdrant-tenant-b2",
+ "corpus": {
+  "name": "m",
+  "chunks": 1000000,
+  "dim": 384,
+  "pairs": 6200
+ },
+ "store": "qdrant",
+ "layouts": [
+  "tenant"
+ ],
+ "builds": [
+  2
+ ],
+ "minutes": 320.0,
+ "started": "2026-10-29T22:03:37+0000",
+ "environment": {
+  "python": "3.12.15",
+  "platform": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+  "cpus": 4,
+  "runner": "GitHub Actions 1000008082",
+  "run": "40921769714",
+  "job": "store",
+  "sha": "884ce18397966859ebb803427cc23a5023431739",
+  "memory_gib": 15.6,
+  "cpu_model": "AMD EPYC 7763 64-Core Processor",
+  "wardowl": "2.1.0",
+  "numpy": "2.5.4",
+  "psycopg": "3.3.6",
+  "psycopg-pool": "3.3.3",
+  "pgvector": "0.5.1",
+  "qdrant-client": "1.19.1",
+  "elasticsearch": "9.5.1",
+  "opensearch-py": "3.2.0",
+  "weaviate-client": "4.23.1",
+  "redis": "8.1.0",
+  "pymilvus": "3.0.2",
+  "pymongo": "4.19.0",
+  "lancedb": "0.40.0",
+  "pyarrow": "26.0.0",
+  "chromadb": "1.5.9",
+  "faiss-cpu": "1.15.1",
+  "wardowl_path": "/home/runner/work/wardowl/wardowl/wardowl"
+ },
+ "units": [
+  {
+   "layout": "tenant",
+   "build": 2,
+   "settings": [
+    {
+     "id": "ef128",
+     "kind": "sweep",
+     "params": {
+      "hnsw_ef": 128
+     },
+     "level": 2,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [
+      "layout"
+     ],
+     "budget_seconds": 5841.8,
+     "effective": {
+      "search_params": {
+       "hnsw_ef": 128,
+       "exact": false,
+       "indexed_only": false
+      }
+     },
+     "qdrant_counters": {
+      "filtered_small_cardinality": 7518,
+      "filtered_large_cardinality": 10522
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 3000,
+      "pairs_run": 3000,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 9000,
+      "sampled": 0,
+      "pass1_seconds": 22.0,
+      "seconds": 56.4,
+      "budget_seconds": 5841.8
+     },
+     "summary": {
+      "pairs": 3000,
+      "recall10": 0.8567333333333332,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 6.03775,
+      "p95_ms": 7.675164999999999,
+      "p99_ms": 12.764466999999996,
+      "qps": 170.37965004542374
+     }
+    },
+    {
+     "id": "ef512",
+     "kind": "sweep",
+     "params": {
+      "hnsw_ef": 512
+     },
+     "level": 4,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [
+      "layout"
+     ],
+     "budget_seconds": 8734.3,
+     "effective": {
+      "search_params": {
+       "hnsw_ef": 512,
+       "exact": false,
+       "indexed_only": false
+      }
+     },
+     "qdrant_counters": {
+      "filtered_small_cardinality": 7518,
+      "filtered_large_cardinality": 10522
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 3000,
+      "pairs_run": 3000,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 9000,
+      "sampled": 0,
+      "pass1_seconds": 28.6,
+      "seconds": 84.0,
+      "budget_seconds": 8734.3
+     },
+     "summary": {
+      "pairs": 3000,
+      "recall10": 0.9254333333333334,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 10.0262,
+      "p95_ms": 14.459109999999997,
+      "p99_ms": 15.869856999999993,
+      "qps": 109.10009849302324
+     }
+    },
+    {
+     "id": "acorn-max",
+     "kind": "specific",
+     "params": {
+      "hnsw_ef": 512,
+      "acorn": 1.0
+     },
+     "level": null,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [
+      "layout"
+     ],
+     "budget_seconds": 17384.5,
+     "effective": {
+      "search_params": {
+       "hnsw_ef": 512,
+       "exact": false,
+       "indexed_only": false,
+       "acorn": {
+        "enable": true,
+        "max_selectivity": 1.0
+       }
+      }
+     },
+     "qdrant_counters": {
+      "filtered_small_cardinality": 7518,
+      "filtered_large_cardinality": 10522
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 3000,
+      "pairs_run": 3000,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 9000,
+      "sampled": 0,
+      "pass1_seconds": 28.6,
+      "seconds": 81.2,
+      "budget_seconds": 17384.5
+     },
+     "summary": {
+      "pairs": 3000,
+      "recall10": 0.9254333333333334,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 9.69965,
+      "p95_ms": 14.07026,
+      "p99_ms": 15.446890999999992,
+      "qps": 112.25802264026537
+     }
+    }
+   ],
+   "load": {
+    "load_s": 831.8,
+    "index_s": 535.5,
+    "points": 1000000,
+    "indexed_vectors": 1000000,
+    "segments": 3,
+    "server": {
+     "title": "qdrant - vector search engine",
+     "version": "1.19.2",
+     "commit": "016542aa5deb6c66380bb137badf73d54f742bde"
+    },
+    "layout": "tenant field is_tenant=true, hnsw m 0 and payload_m 16 (harness-level), other fields as as-run",
+    "keyword_fields": [
+     "u0",
+     "u1",
+     "u2",
+     "u3",
+     "u4",
+     "c0",
+     "c1",
+     "c2",
+     "c3",
+     "c4"
+    ],
+    "seconds": 1367.6
+   }
+  }
+ ],
+ "failures": [],
+ "skipped": [],
+ "status": "done",
+ "finished": "2026-10-29T22:30:08+0000"
+}

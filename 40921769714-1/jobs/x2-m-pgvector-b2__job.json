@@ -1,0 +1,482 @@
+{
+ "experiment": "x2",
+ "label": "x2-m-pgvector-b2",
+ "corpus": {
+  "name": "m",
+  "chunks": 1000000,
+  "dim": 384,
+  "pairs": 6200
+ },
+ "store": "pgvector",
+ "layouts": [
+  "default"
+ ],
+ "builds": [
+  2
+ ],
+ "minutes": 320.0,
+ "started": "2026-10-29T20:51:10+0000",
+ "environment": {
+  "python": "3.12.15",
+  "platform": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+  "cpus": 4,
+  "runner": "GitHub Actions 1000008001",
+  "run": "40921769714",
+  "job": "store",
+  "sha": "884ce18397966859ebb803427cc23a5023431739",
+  "memory_gib": 15.6,
+  "cpu_model": "AMD EPYC 7763 64-Core Processor",
+  "wardowl": "2.1.0",
+  "numpy": "2.5.4",
+  "psycopg": "3.3.6",
+  "psycopg-pool": "3.3.3",
+  "pgvector": "0.5.1",
+  "qdrant-client": "1.19.1",
+  "elasticsearch": "9.5.1",
+  "opensearch-py": "3.2.0",
+  "weaviate-client": "4.23.1",
+  "redis": "8.1.0",
+  "pymilvus": "3.0.2",
+  "pymongo": "4.19.0",
+  "lancedb": "0.40.0",
+  "pyarrow": "26.0.0",
+  "chromadb": "1.5.9",
+  "faiss-cpu": "1.15.1",
+  "wardowl_path": "/home/runner/work/wardowl/wardowl/wardowl"
+ },
+ "units": [
+  {
+   "layout": "default",
+   "build": 2,
+   "settings": [
+    {
+     "id": "default",
+     "kind": "default",
+     "params": {
+      "iterative_scan": null
+     },
+     "level": null,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 2322.2,
+     "effective": {
+      "hnsw.ef_search": "40",
+      "hnsw.iterative_scan": "off",
+      "hnsw.max_scan_tuples": "20000",
+      "hnsw.scan_mem_multiplier": "1",
+      "work_mem": "4MB",
+      "enable_indexscan": "on",
+      "plan_cache_mode": "auto",
+      "prepare_threshold": "None"
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 6200,
+      "pairs_run": 6200,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 18600,
+      "sampled": 0,
+      "pass1_seconds": 120.2,
+      "seconds": 306.4,
+      "budget_seconds": 2322.2
+     },
+     "summary": {
+      "pairs": 6200,
+      "recall10": 0.5835806451612904,
+      "err10": 0.31725806451612903,
+      "short10": 0.4406451612903226,
+      "p50_ms": 6.3467,
+      "p95_ms": 51.26231000000001,
+      "p99_ms": 200.40262700000008,
+      "qps": 66.80312073235133
+     }
+    },
+    {
+     "id": "ef40",
+     "kind": "sweep",
+     "params": {
+      "iterative_scan": "relaxed_order",
+      "ef_search": 40
+     },
+     "level": 1,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 2610.1,
+     "effective": {
+      "hnsw.ef_search": "40",
+      "hnsw.iterative_scan": "relaxed_order",
+      "hnsw.max_scan_tuples": "20000",
+      "hnsw.scan_mem_multiplier": "1",
+      "work_mem": "4MB",
+      "enable_indexscan": "on",
+      "plan_cache_mode": "auto",
+      "prepare_threshold": "None"
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 6200,
+      "pairs_run": 6200,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 18600,
+      "sampled": 0,
+      "pass1_seconds": 423.7,
+      "seconds": 1211.4,
+      "budget_seconds": 2610.1
+     },
+     "summary": {
+      "pairs": 6200,
+      "recall10": 0.8888387096774194,
+      "err10": 0.0032258064516129032,
+      "short10": 0.01806451612903226,
+      "p50_ms": 12.45185,
+      "p95_ms": 287.10367499999893,
+      "p99_ms": 548.6841680000005,
+      "qps": 15.795480714912514
+     }
+    },
+    {
+     "id": "ef100",
+     "kind": "sweep",
+     "params": {
+      "iterative_scan": "relaxed_order",
+      "ef_search": 100
+     },
+     "level": 2,
+     "asrun": true,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 2843.1,
+     "effective": {
+      "hnsw.ef_search": "100",
+      "hnsw.iterative_scan": "relaxed_order",
+      "hnsw.max_scan_tuples": "20000",
+      "hnsw.scan_mem_multiplier": "1",
+      "work_mem": "4MB",
+      "enable_indexscan": "on",
+      "plan_cache_mode": "auto",
+      "prepare_threshold": "None"
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 6200,
+      "pairs_run": 6200,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 18600,
+      "sampled": 0,
+      "pass1_seconds": 427.3,
+      "seconds": 1219.8,
+      "budget_seconds": 2843.1
+     },
+     "summary": {
+      "pairs": 6200,
+      "recall10": 0.9003548387096774,
+      "err10": 0.003064516129032258,
+      "short10": 0.017580645161290324,
+      "p50_ms": 13.37915,
+      "p95_ms": 284.86367499999903,
+      "p99_ms": 550.5468680000006,
+      "qps": 15.681282192603739
+     }
+    },
+    {
+     "id": "ef200",
+     "kind": "sweep",
+     "params": {
+      "iterative_scan": "relaxed_order",
+      "ef_search": 200
+     },
+     "level": 3,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 3167.7,
+     "effective": {
+      "hnsw.ef_search": "200",
+      "hnsw.iterative_scan": "relaxed_order",
+      "hnsw.max_scan_tuples": "20000",
+      "hnsw.scan_mem_multiplier": "1",
+      "work_mem": "4MB",
+      "enable_indexscan": "on",
+      "plan_cache_mode": "auto",
+      "prepare_threshold": "None"
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 6200,
+      "pairs_run": 6200,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 18600,
+      "sampled": 0,
+      "pass1_seconds": 426.3,
+      "seconds": 1217.4,
+      "budget_seconds": 3167.7
+     },
+     "summary": {
+      "pairs": 6200,
+      "recall10": 0.9101774193548388,
+      "err10": 0.003064516129032258,
+      "short10": 0.01564516129032258,
+      "p50_ms": 14.7183,
+      "p95_ms": 280.0257699999995,
+      "p99_ms": 549.2017010000006,
+      "qps": 15.715548809878728
+     }
+    },
+    {
+     "id": "ef400",
+     "kind": "sweep",
+     "params": {
+      "iterative_scan": "relaxed_order",
+      "ef_search": 400
+     },
+     "level": 4,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 3655.2,
+     "effective": {
+      "hnsw.ef_search": "400",
+      "hnsw.iterative_scan": "relaxed_order",
+      "hnsw.max_scan_tuples": "20000",
+      "hnsw.scan_mem_multiplier": "1",
+      "work_mem": "4MB",
+      "enable_indexscan": "on",
+      "plan_cache_mode": "auto",
+      "prepare_threshold": "None"
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 6200,
+      "pairs_run": 6200,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 18600,
+      "sampled": 0,
+      "pass1_seconds": 432.5,
+      "seconds": 1236.4,
+      "budget_seconds": 3655.2
+     },
+     "summary": {
+      "pairs": 6200,
+      "recall10": 0.9205967741935484,
+      "err10": 0.002903225806451613,
+      "short10": 0.014193548387096775,
+      "p50_ms": 17.35015,
+      "p95_ms": 279.24257499999993,
+      "p99_ms": 554.5519019999999,
+      "qps": 15.469953733747376
+     }
+    },
+    {
+     "id": "ef1000",
+     "kind": "sweep",
+     "params": {
+      "iterative_scan": "relaxed_order",
+      "ef_search": 1000
+     },
+     "level": 5,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 4461.3,
+     "effective": {
+      "hnsw.ef_search": "1000",
+      "hnsw.iterative_scan": "relaxed_order",
+      "hnsw.max_scan_tuples": "20000",
+      "hnsw.scan_mem_multiplier": "1",
+      "work_mem": "4MB",
+      "enable_indexscan": "on",
+      "plan_cache_mode": "auto",
+      "prepare_threshold": "None"
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 6200,
+      "pairs_run": 6200,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 18600,
+      "sampled": 0,
+      "pass1_seconds": 463.1,
+      "seconds": 1320.8,
+      "budget_seconds": 4461.3
+     },
+     "summary": {
+      "pairs": 6200,
+      "recall10": 0.9302580645161291,
+      "err10": 0.0025806451612903226,
+      "short10": 0.012419354838709677,
+      "p50_ms": 25.585900000000002,
+      "p95_ms": 288.39538999999974,
+      "p99_ms": 553.8478220000011,
+      "qps": 14.45216912158795
+     }
+    },
+    {
+     "id": "scan1m",
+     "kind": "specific",
+     "params": {
+      "iterative_scan": "relaxed_order",
+      "ef_search": 100,
+      "max_scan_tuples": 1000000,
+      "scan_mem_multiplier": 16
+     },
+     "level": null,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 6031.4,
+     "effective": {
+      "hnsw.ef_search": "100",
+      "hnsw.iterative_scan": "relaxed_order",
+      "hnsw.max_scan_tuples": "1000000",
+      "hnsw.scan_mem_multiplier": "16",
+      "work_mem": "4MB",
+      "enable_indexscan": "on",
+      "plan_cache_mode": "auto",
+      "prepare_threshold": "None"
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 6200,
+      "pairs_run": 6200,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 18600,
+      "sampled": 0,
+      "pass1_seconds": 543.0,
+      "seconds": 1561.7,
+      "budget_seconds": 6031.4
+     },
+     "summary": {
+      "pairs": 6200,
+      "recall10": 0.949467741935484,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 13.84185,
+      "p95_ms": 386.54929999999877,
+      "p99_ms": 781.2497760000015,
+      "qps": 12.198092400257572
+     }
+    },
+    {
+     "id": "strict",
+     "kind": "specific",
+     "params": {
+      "iterative_scan": "strict_order",
+      "ef_search": 100
+     },
+     "level": null,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 10500.7,
+     "effective": {
+      "hnsw.ef_search": "100",
+      "hnsw.iterative_scan": "strict_order",
+      "hnsw.max_scan_tuples": "20000",
+      "hnsw.scan_mem_multiplier": "1",
+      "work_mem": "4MB",
+      "enable_indexscan": "on",
+      "plan_cache_mode": "auto",
+      "prepare_threshold": "None"
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 6200,
+      "pairs_run": 6200,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 18600,
+      "sampled": 0,
+      "pass1_seconds": 425.6,
+      "seconds": 1213.2,
+      "budget_seconds": 10500.7
+     },
+     "summary": {
+      "pairs": 6200,
+      "recall10": 0.8820000000000001,
+      "err10": 0.003064516129032258,
+      "short10": 0.017580645161290324,
+      "p50_ms": 13.25665,
+      "p95_ms": 284.9506499999997,
+      "p99_ms": 547.8870510000005,
+      "qps": 15.773142824211877
+     }
+    }
+   ],
+   "load": {
+    "rows": 1000000,
+    "copy_s": 80.3,
+    "hnsw_index_s": 234.6,
+    "bytes": 4565008384,
+    "server": {
+     "server_version": "17.11 (Debian 17.11-1.pgdg12+2)",
+     "shared_buffers": "3GB",
+     "work_mem": "4MB",
+     "maintenance_work_mem": "2GB",
+     "effective_cache_size": "4GB",
+     "max_parallel_maintenance_workers": "2",
+     "hnsw.ef_search": "40",
+     "hnsw.iterative_scan": "off",
+     "hnsw.max_scan_tuples": "20000",
+     "hnsw.scan_mem_multiplier": "1",
+     "plan_cache_mode": "auto",
+     "pgvector": "0.8.7"
+    },
+    "index": "HNSW (vector_cosine_ops) with pgvector's defaults (m 16, ef_construction 64), GIN jsonb_path_ops",
+    "seconds": 316.6
+   }
+  }
+ ],
+ "failures": [],
+ "skipped": [],
+ "status": "done",
+ "finished": "2026-10-29T23:31:18+0000"
+}

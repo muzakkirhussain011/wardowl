@@ -1,0 +1,88 @@
+Starting Redis Server
+1:C 29 Oct 2026 22:35:48.461 # WARNING Memory overcommit must be enabled! Without it, a background save or replication may fail under low memory condition. Being disabled, it can also cause failures without low memory condition, see https://github.com/jemalloc/jemalloc/issues/1328. To fix this issue add 'vm.overcommit_memory = 1' to /etc/sysctl.conf and then reboot or run the command 'sysctl vm.overcommit_memory=1' for this to take effect.
+1:C 29 Oct 2026 22:35:48.461 * oO0OoO0OoO0Oo Redis is starting oO0OoO0OoO0Oo
+1:C 29 Oct 2026 22:35:48.461 * Redis version=8.10.2, bits=64, commit=00000000, modified=1, pid=1, just started
+1:C 29 Oct 2026 22:35:48.461 * Configuration loaded
+1:M 29 Oct 2026 22:35:48.461 * monotonic clock: POSIX clock_gettime
+1:M 29 Oct 2026 22:35:48.462 * Running mode=standalone, port=6379.
+1:M 29 Oct 2026 22:35:48.462 * <bf> RedisBloom version 8.10.1 (Git=unknown)
+1:M 29 Oct 2026 22:35:48.462 * <bf> Registering configuration options: [
+1:M 29 Oct 2026 22:35:48.462 * <bf> 	{ bf-error-rate       :      0.01 }
+1:M 29 Oct 2026 22:35:48.462 * <bf> 	{ bf-initial-size     :       100 }
+1:M 29 Oct 2026 22:35:48.462 * <bf> 	{ bf-expansion-factor :         2 }
+1:M 29 Oct 2026 22:35:48.462 * <bf> 	{ cf-bucket-size      :         2 }
+1:M 29 Oct 2026 22:35:48.462 * <bf> 	{ cf-initial-size     :      1024 }
+1:M 29 Oct 2026 22:35:48.462 * <bf> 	{ cf-max-iterations   :        20 }
+1:M 29 Oct 2026 22:35:48.462 * <bf> 	{ cf-expansion-factor :         1 }
+1:M 29 Oct 2026 22:35:48.462 * <bf> 	{ cf-max-expansions   :        32 }
+1:M 29 Oct 2026 22:35:48.462 * <bf> ]
+1:M 29 Oct 2026 22:35:48.463 * Module 'bf' loaded from /usr/local/lib/redis/modules//redisbloom.so
+1:M 29 Oct 2026 22:35:48.466 * <search> search-workers default: 4 (min of MAX_WORKER_THREADS=16 and CPU cores)
+1:M 29 Oct 2026 22:35:48.466 * <search> Redis version found by RedisSearch : 8.10.2 - oss
+1:M 29 Oct 2026 22:35:48.466 * <search> RediSearch version 8.10.1 (Git=)
+1:M 29 Oct 2026 22:35:48.466 * <search> gc: ON, prefix min length: 2, min word length to stem: 4, prefix max expansions: 200, query timeout (ms): 500, timeout policy: return, oom policy: return, cursor read size: 1000, cursor max idle (ms): 300000, max doctable size: 1000000, max number of search results:  1000000, default scorer: BM25STD, 
+1:M 29 Oct 2026 22:35:48.466 * <search> Initialized thread pools!
+1:M 29 Oct 2026 22:35:48.466 * <search> Enabled workers threadpool of size 4
+1:M 29 Oct 2026 22:35:48.466 * <search> Subscribe to config changes
+1:M 29 Oct 2026 22:35:48.466 * <search> Subscribe to cluster slot migration events
+1:M 29 Oct 2026 22:35:48.466 * <search> Subscribe to cluster topology change events
+1:M 29 Oct 2026 22:35:48.466 * <search> Enabled role change notification
+1:M 29 Oct 2026 22:35:48.466 * <search> Cluster configuration: AUTO partitions, type: 0, coordinator timeout: 0ms
+1:M 29 Oct 2026 22:35:48.467 * Module 'search' loaded from /usr/local/lib/redis/modules//redisearch.so
+1:M 29 Oct 2026 22:35:48.467 * <timeseries> RedisTimeSeries version 81001, git_sha=
+1:M 29 Oct 2026 22:35:48.467 * <timeseries> Redis version found by RedisTimeSeries : 8.10.2 - oss
+1:M 29 Oct 2026 22:35:48.467 * <timeseries> Registering configuration options: [
+1:M 29 Oct 2026 22:35:48.467 * <timeseries> 	{ ts-compaction-policy   :              }
+1:M 29 Oct 2026 22:35:48.467 * <timeseries> 	{ ts-num-threads         :            3 }
+1:M 29 Oct 2026 22:35:48.467 * <timeseries> 	{ ts-libmr-protocol      :     INTERNAL }
+1:M 29 Oct 2026 22:35:48.467 * <timeseries> 	{ ts-retention-policy    :            0 }
+1:M 29 Oct 2026 22:35:48.467 * <timeseries> 	{ ts-duplicate-policy    :        block }
+1:M 29 Oct 2026 22:35:48.467 * <timeseries> 	{ ts-chunk-size-bytes    :         4096 }
+1:M 29 Oct 2026 22:35:48.467 * <timeseries> 	{ ts-encoding            :   compressed }
+1:M 29 Oct 2026 22:35:48.467 * <timeseries> 	{ ts-ignore-max-time-diff:            0 }
+1:M 29 Oct 2026 22:35:48.467 * <timeseries> 	{ ts-ignore-max-val-diff :     0.000000 }
+1:M 29 Oct 2026 22:35:48.467 * <timeseries> 	{ ts-topology-events     :         true }
+1:M 29 Oct 2026 22:35:48.467 * <timeseries> ]
+1:M 29 Oct 2026 22:35:48.467 * <timeseries> Detected redis oss (cluster-enabled=no)
+1:M 29 Oct 2026 22:35:48.468 * <timeseries> Subscribe to ASM events
+1:M 29 Oct 2026 22:35:48.468 * <timeseries> Subscribe to topology changes events
+1:M 29 Oct 2026 22:35:48.468 * <timeseries> Enabled diskless replication
+1:M 29 Oct 2026 22:35:48.468 * Module 'timeseries' loaded from /usr/local/lib/redis/modules//redistimeseries.so
+1:M 29 Oct 2026 22:35:48.468 * <ReJSON> Created new data type 'ReJSON-RL'
+1:M 29 Oct 2026 22:35:48.468 * <ReJSON> version: 81000 git sha: unknown branch: unknown
+1:M 29 Oct 2026 22:35:48.468 * <ReJSON> Exported RedisJSON_V1 API
+1:M 29 Oct 2026 22:35:48.468 * <ReJSON> Exported RedisJSON_V2 API
+1:M 29 Oct 2026 22:35:48.468 * <ReJSON> Exported RedisJSON_V3 API
+1:M 29 Oct 2026 22:35:48.468 * <ReJSON> Exported RedisJSON_V4 API
+1:M 29 Oct 2026 22:35:48.468 * <ReJSON> Exported RedisJSON_V5 API
+1:M 29 Oct 2026 22:35:48.468 * <ReJSON> Exported RedisJSON_V6 API
+1:M 29 Oct 2026 22:35:48.468 * <ReJSON> Exported RedisJSON_V7 API
+1:M 29 Oct 2026 22:35:48.468 * <ReJSON> Exported RedisJSON_V8 API
+1:M 29 Oct 2026 22:35:48.468 * <ReJSON> Enabled diskless replication
+1:M 29 Oct 2026 22:35:48.468 * <ReJSON> Initialized shared string cache, thread safe: true.
+1:M 29 Oct 2026 22:35:48.468 * Module 'ReJSON' loaded from /usr/local/lib/redis/modules//rejson.so
+1:M 29 Oct 2026 22:35:48.468 * <search> Acquired RedisJSON_V8 API
+1:M 29 Oct 2026 22:35:48.469 * Server initialized
+1:M 29 Oct 2026 22:35:48.469 * Ready to accept connections tcp
+1:M 29 Oct 2026 22:35:48.469 # WARNING: Redis does not require authentication and is not protected by network restrictions. Redis will accept connections from any IP address on any network interface.
+1:M 29 Oct 2026 22:37:23.003 * <search> Creating vector index of type HNSW. Required memory for a block of 1024 vectors: 1758144B
+1:M 29 Oct 2026 22:37:23.003 * <search> Successfully created index wardowl_x2x5
+1:M 29 Oct 2026 22:37:23.256 * <search> DocTable capacity increase from 1000 to 1501
+1:M 29 Oct 2026 22:37:23.349 * <search> DocTable capacity increase from 1501 to 2252
+1:M 29 Oct 2026 22:37:23.429 * <search> DocTable capacity increase from 2252 to 3379
+1:M 29 Oct 2026 22:37:23.568 * <search> DocTable capacity increase from 3379 to 5069
+1:M 29 Oct 2026 22:37:24.058 * <search> DocTable capacity increase from 5069 to 7604
+1:M 29 Oct 2026 22:37:24.416 * <search> DocTable capacity increase from 7604 to 11407
+1:M 29 Oct 2026 22:37:25.202 * <search> DocTable capacity increase from 11407 to 17111
+1:M 29 Oct 2026 22:37:26.385 * <search> DocTable capacity increase from 17111 to 25667
+1:M 29 Oct 2026 22:37:28.272 * <search> DocTable capacity increase from 25667 to 38501
+1:M 29 Oct 2026 22:37:31.050 * <search> DocTable capacity increase from 38501 to 57752
+1:M 29 Oct 2026 22:37:35.428 * <search> DocTable capacity increase from 57752 to 86629
+1:M 29 Oct 2026 22:37:42.441 * <search> DocTable capacity increase from 86629 to 129944
+1:M 29 Oct 2026 22:37:52.666 * <search> DocTable capacity increase from 129944 to 194917
+1:M 29 Oct 2026 22:38:09.094 * <search> DocTable capacity increase from 194917 to 292376
+1:M 29 Oct 2026 22:38:34.303 * <search> DocTable capacity increase from 292376 to 438565
+1:M 29 Oct 2026 22:39:12.956 * <search> DocTable capacity increase from 438565 to 657848
+1:M 29 Oct 2026 22:40:13.754 * <search> DocTable capacity increase from 657848 to 986773
+1:M 29 Oct 2026 22:41:49.531 * <search> DocTable capacity increase from 986773 to 1000000
+1:M 29 Oct 2026 23:25:36.180 * <search> Successfully dropped index wardowl_x2x5

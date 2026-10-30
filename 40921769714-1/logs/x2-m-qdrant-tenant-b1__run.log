@@ -1,0 +1,33 @@
+[20:56:24] data: 8 files match checksums.json
+[20:56:28] corpus m: 1,000,000 chunks, 6,200 pairs (5 s)
+[20:56:30] == qdrant tenant build 1: loading 1,000,000 chunks
+[20:57:35]   loaded 100,000 of 1,000,000 chunks (65 s)
+[20:58:55]   loaded 200,000 of 1,000,000 chunks (145 s)
+[21:00:13]   loaded 300,000 of 1,000,000 chunks (223 s)
+[21:01:36]   loaded 400,000 of 1,000,000 chunks (306 s)
+[21:03:05]   loaded 500,000 of 1,000,000 chunks (395 s)
+[21:04:23]   loaded 600,000 of 1,000,000 chunks (473 s)
+[21:06:01]   loaded 700,000 of 1,000,000 chunks (570 s)
+[21:07:05]   loaded 800,000 of 1,000,000 chunks (635 s)
+[21:09:00]   loaded 900,000 of 1,000,000 chunks (750 s)
+[21:10:23]   loaded 1,000,000 of 1,000,000 chunks (832 s)
+[21:17:48]    loaded: {'load_s': 832.1, 'index_s': 445.5, 'points': 1000000, 'indexed_vectors': 1000000, 'segments': 3, 'server': {'title': 'qdrant - vector search engine', 'version': '1.19.2', 'commit': '016542aa5deb6c66380bb137badf73d54f742bde'}, 'layout': 'tenant field is_tenant=true, hnsw m 0 and payload_m 16 (harness-level), other fields as as-run', 'keyword_fields': ['u0', 'u1', 'u2', 'u3', 'u4', 'c0', 'c1', 'c2', 'c3', 'c4'], 'seconds': 1277.8}
+[21:17:48] -- qdrant tenant b1 ef128: {'hnsw_ef': 128} (budget 97.9 min)
+[21:17:55]   qdrant tenant b1 ef128: pass 1, 1000 of 3000 pairs (7 s)
+[21:18:01]   qdrant tenant b1 ef128: pass 1, 2000 of 3000 pairs (13 s)
+[21:18:07]   qdrant tenant b1 ef128: pass 1, 3000 of 3000 pairs (19 s)
+[21:18:39]   qdrant tenant b1 ef128: 3000 of 3000 pairs, 3 passes, 0 errors, 51 s (cut: none)
+[21:18:39]    qdrant tenant b1 ef128: {'pairs': 3000, 'recall10': 0.8417333333333332, 'err10': 0.0, 'short10': 0.009333333333333334, 'p50_ms': 5.65315, 'p95_ms': 6.9461949999999995, 'p99_ms': 7.855966999999987, 'qps': 184.82115937610956}
+[21:18:39] -- qdrant tenant b1 ef512: {'hnsw_ef': 512} (budget 146.4 min)
+[21:18:47]   qdrant tenant b1 ef512: pass 1, 1000 of 3000 pairs (8 s)
+[21:18:55]   qdrant tenant b1 ef512: pass 1, 2000 of 3000 pairs (16 s)
+[21:19:03]   qdrant tenant b1 ef512: pass 1, 3000 of 3000 pairs (24 s)
+[21:19:48]   qdrant tenant b1 ef512: 3000 of 3000 pairs, 3 passes, 0 errors, 69 s (cut: none)
+[21:19:48]    qdrant tenant b1 ef512: {'pairs': 3000, 'recall10': 0.9034, 'err10': 0.0, 'short10': 0.009333333333333334, 'p50_ms': 7.5423, 'p95_ms': 12.023119999999999, 'p99_ms': 13.253955999999993, 'qps': 134.44916580118752}
+[21:19:48] -- qdrant tenant b1 acorn-max: {'hnsw_ef': 512, 'acorn': 1.0} (budget 291.6 min)
+[21:19:56]   qdrant tenant b1 acorn-max: pass 1, 1000 of 3000 pairs (7 s)
+[21:20:03]   qdrant tenant b1 acorn-max: pass 1, 2000 of 3000 pairs (15 s)
+[21:20:11]   qdrant tenant b1 acorn-max: pass 1, 3000 of 3000 pairs (23 s)
+[21:20:54]   qdrant tenant b1 acorn-max: 3000 of 3000 pairs, 3 passes, 0 errors, 66 s (cut: none)
+[21:20:55]    qdrant tenant b1 acorn-max: {'pairs': 3000, 'recall10': 0.9034, 'err10': 0.0, 'short10': 0.009333333333333334, 'p50_ms': 7.36935, 'p95_ms': 11.448699999999997, 'p99_ms': 12.617353999999999, 'qps': 139.093251648874}
+[21:20:55] X2 x2-m-qdrant-tenant-b1: done

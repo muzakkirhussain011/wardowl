@@ -1,0 +1,352 @@
+{
+ "experiment": "x2",
+ "label": "x2-m-redis-b2",
+ "corpus": {
+  "name": "m",
+  "chunks": 1000000,
+  "dim": 384,
+  "pairs": 6200
+ },
+ "store": "redis",
+ "layouts": [
+  "default"
+ ],
+ "builds": [
+  2
+ ],
+ "minutes": 320.0,
+ "started": "2026-10-29T22:37:22+0000",
+ "environment": {
+  "python": "3.12.15",
+  "platform": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+  "cpus": 4,
+  "runner": "GitHub Actions 1000008153",
+  "run": "40921769714",
+  "job": "store",
+  "sha": "884ce18397966859ebb803427cc23a5023431739",
+  "memory_gib": 15.6,
+  "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+  "wardowl": "2.1.0",
+  "numpy": "2.5.4",
+  "psycopg": "3.3.6",
+  "psycopg-pool": "3.3.3",
+  "pgvector": "0.5.1",
+  "qdrant-client": "1.19.1",
+  "elasticsearch": "9.5.1",
+  "opensearch-py": "3.2.0",
+  "weaviate-client": "4.23.1",
+  "redis": "8.1.0",
+  "pymilvus": "3.0.2",
+  "pymongo": "4.19.0",
+  "lancedb": "0.40.0",
+  "pyarrow": "26.0.0",
+  "chromadb": "1.5.9",
+  "faiss-cpu": "1.15.1",
+  "wardowl_path": "/home/runner/work/wardowl/wardowl/wardowl"
+ },
+ "units": [
+  {
+   "layout": "default",
+   "build": 2,
+   "settings": [
+    {
+     "id": "default",
+     "kind": "default",
+     "params": {},
+     "level": null,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 2660.6,
+     "effective": {},
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 6200,
+      "pairs_run": 6200,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 18600,
+      "sampled": 0,
+      "pass1_seconds": 115.8,
+      "seconds": 343.8,
+      "budget_seconds": 2660.6
+     },
+     "summary": {
+      "pairs": 6200,
+      "recall10": 0.9705,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 4.2079,
+      "p95_ms": 145.10727,
+      "p99_ms": 204.0510610000001,
+      "qps": 54.530407878858
+     }
+    },
+    {
+     "id": "ef50",
+     "kind": "sweep",
+     "params": {
+      "ef_runtime": 50
+     },
+     "level": 1,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 3046.7,
+     "effective": {},
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 6200,
+      "pairs_run": 6200,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 18600,
+      "sampled": 0,
+      "pass1_seconds": 116.5,
+      "seconds": 350.4,
+      "budget_seconds": 3046.7
+     },
+     "summary": {
+      "pairs": 6200,
+      "recall10": 0.9817741935483871,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 4.3138000000000005,
+      "p95_ms": 146.954735,
+      "p99_ms": 207.99957400000002,
+      "qps": 53.570611650459554
+     }
+    },
+    {
+     "id": "ef100",
+     "kind": "sweep",
+     "params": {
+      "ef_runtime": 100
+     },
+     "level": 2,
+     "asrun": true,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 3585.9,
+     "effective": {},
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 6200,
+      "pairs_run": 6200,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 18600,
+      "sampled": 0,
+      "pass1_seconds": 116.1,
+      "seconds": 348.5,
+      "budget_seconds": 3585.9
+     },
+     "summary": {
+      "pairs": 6200,
+      "recall10": 0.9881935483870966,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 4.41125,
+      "p95_ms": 146.10338,
+      "p99_ms": 206.443867,
+      "qps": 53.83227231979479
+     }
+    },
+    {
+     "id": "ef200",
+     "kind": "sweep",
+     "params": {
+      "ef_runtime": 200
+     },
+     "level": 3,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 4395.2,
+     "effective": {},
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 6200,
+      "pairs_run": 6200,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 18600,
+      "sampled": 0,
+      "pass1_seconds": 120.5,
+      "seconds": 358.1,
+      "budget_seconds": 4395.2
+     },
+     "summary": {
+      "pairs": 6200,
+      "recall10": 0.9930806451612904,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 4.67685,
+      "p95_ms": 149.17428499999997,
+      "p99_ms": 209.7828,
+      "qps": 52.319325178592955
+     }
+    },
+    {
+     "id": "ef500",
+     "kind": "sweep",
+     "params": {
+      "ef_runtime": 500
+     },
+     "level": 4,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 5740.9,
+     "effective": {},
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 6200,
+      "pairs_run": 6200,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 18600,
+      "sampled": 0,
+      "pass1_seconds": 123.7,
+      "seconds": 368.3,
+      "budget_seconds": 5740.9
+     },
+     "summary": {
+      "pairs": 6200,
+      "recall10": 0.9970322580645162,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 5.19875,
+      "p95_ms": 149.617975,
+      "p99_ms": 210.57290100000003,
+      "qps": 50.925733361095304
+     }
+    },
+    {
+     "id": "ef1000",
+     "kind": "sweep",
+     "params": {
+      "ef_runtime": 1000
+     },
+     "level": 5,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 8427.0,
+     "effective": {},
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 6200,
+      "pairs_run": 6200,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 18600,
+      "sampled": 0,
+      "pass1_seconds": 128.1,
+      "seconds": 380.6,
+      "budget_seconds": 8427.0
+     },
+     "summary": {
+      "pairs": 6200,
+      "recall10": 0.9985161290322581,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 5.84125,
+      "p95_ms": 150.69339499999995,
+      "p99_ms": 212.2146470000001,
+      "qps": 49.23344643563578
+     }
+    },
+    {
+     "id": "batches",
+     "kind": "specific",
+     "params": {
+      "ef_runtime": 100,
+      "policy": "BATCHES"
+     },
+     "level": null,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [
+      "HYBRID_POLICY"
+     ],
+     "budget_seconds": 16473.2,
+     "effective": {},
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 6200,
+      "pairs_run": 6200,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 18600,
+      "sampled": 0,
+      "pass1_seconds": 157.3,
+      "seconds": 469.2,
+      "budget_seconds": 16473.2
+     },
+     "summary": {
+      "pairs": 6200,
+      "recall10": 0.9605322580645161,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 7.90105,
+      "p95_ms": 84.81874999999997,
+      "p99_ms": 273.061391,
+      "qps": 39.86791571757744
+     }
+    }
+   ],
+   "load": {
+    "load_s": 270.3,
+    "index_s": 0.0,
+    "documents": 1000000,
+    "used_memory": "5.50G",
+    "config": {
+     "search-on-timeout": "fail",
+     "search-timeout": "60000"
+    },
+    "version": "8.10.2",
+    "seconds": 270.4
+   }
+  }
+ ],
+ "failures": [],
+ "skipped": [],
+ "status": "done",
+ "finished": "2026-10-29T23:25:36+0000"
+}

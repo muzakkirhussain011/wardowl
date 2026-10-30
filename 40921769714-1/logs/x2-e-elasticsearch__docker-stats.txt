@@ -1,0 +1,2 @@
+CONTAINER ID   NAME            CPU %     MEM USAGE / LIMIT     MEM %     NET I/O           BLOCK I/O        PIDS
+35c56f59c78c   elasticsearch   0.30%     2.741GiB / 15.61GiB   17.56%    14.4GB / 2.45GB   139kB / 14.8GB   110

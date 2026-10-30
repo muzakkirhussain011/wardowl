@@ -1,0 +1,541 @@
+{
+ "experiment": "x2",
+ "label": "x2-m-qdrant-b0",
+ "corpus": {
+  "name": "m",
+  "chunks": 1000000,
+  "dim": 384,
+  "pairs": 6200
+ },
+ "store": "qdrant",
+ "layouts": [
+  "as-run"
+ ],
+ "builds": [
+  0
+ ],
+ "minutes": 320.0,
+ "started": "2026-10-29T20:30:42+0000",
+ "environment": {
+  "python": "3.12.15",
+  "platform": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+  "cpus": 4,
+  "runner": "GitHub Actions 1000007996",
+  "run": "40921769714",
+  "job": "store",
+  "sha": "884ce18397966859ebb803427cc23a5023431739",
+  "memory_gib": 15.6,
+  "cpu_model": "AMD EPYC 7763 64-Core Processor",
+  "wardowl": "2.1.0",
+  "numpy": "2.5.4",
+  "psycopg": "3.3.6",
+  "psycopg-pool": "3.3.3",
+  "pgvector": "0.5.1",
+  "qdrant-client": "1.19.1",
+  "elasticsearch": "9.5.1",
+  "opensearch-py": "3.2.0",
+  "weaviate-client": "4.23.1",
+  "redis": "8.1.0",
+  "pymilvus": "3.0.2",
+  "pymongo": "4.19.0",
+  "lancedb": "0.40.0",
+  "pyarrow": "26.0.0",
+  "chromadb": "1.5.9",
+  "faiss-cpu": "1.15.1",
+  "wardowl_path": "/home/runner/work/wardowl/wardowl/wardowl"
+ },
+ "units": [
+  {
+   "layout": "as-run",
+   "build": 0,
+   "settings": [
+    {
+     "id": "default",
+     "kind": "default",
+     "params": {},
+     "level": null,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 1983.5,
+     "effective": {
+      "search_params": null
+     },
+     "qdrant_counters": {
+      "filtered_small_cardinality": 14790,
+      "filtered_large_cardinality": 22450
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 6200,
+      "pairs_run": 6200,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 18600,
+      "sampled": 0,
+      "pass1_seconds": 40.4,
+      "seconds": 100.5,
+      "budget_seconds": 1983.5
+     },
+     "summary": {
+      "pairs": 6200,
+      "recall10": 0.7598387096774194,
+      "err10": 0.0,
+      "short10": 0.049193548387096775,
+      "p50_ms": 4.95565,
+      "p95_ms": 6.98844,
+      "p99_ms": 12.423253,
+      "qps": 199.44008226272908
+     }
+    },
+    {
+     "id": "ef64",
+     "kind": "sweep",
+     "params": {
+      "hnsw_ef": 64
+     },
+     "level": 1,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 2218.8,
+     "effective": {
+      "search_params": {
+       "hnsw_ef": 64,
+       "exact": false,
+       "indexed_only": false
+      }
+     },
+     "qdrant_counters": {
+      "filtered_small_cardinality": 14790,
+      "filtered_large_cardinality": 22450
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 6200,
+      "pairs_run": 6200,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 18600,
+      "sampled": 0,
+      "pass1_seconds": 30.0,
+      "seconds": 87.0,
+      "budget_seconds": 2218.8
+     },
+     "summary": {
+      "pairs": 6200,
+      "recall10": 0.7305967741935484,
+      "err10": 0.0,
+      "short10": 0.049193548387096775,
+      "p50_ms": 4.3863,
+      "p95_ms": 6.604814999999999,
+      "p99_ms": 12.184931000000011,
+      "qps": 219.62318103122237
+     }
+    },
+    {
+     "id": "ef128",
+     "kind": "sweep",
+     "params": {
+      "hnsw_ef": 128
+     },
+     "level": 2,
+     "asrun": true,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 2523.3,
+     "effective": {
+      "search_params": {
+       "hnsw_ef": 128,
+       "exact": false,
+       "indexed_only": false
+      }
+     },
+     "qdrant_counters": {
+      "filtered_small_cardinality": 14790,
+      "filtered_large_cardinality": 22450
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 6200,
+      "pairs_run": 6200,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 18600,
+      "sampled": 0,
+      "pass1_seconds": 34.6,
+      "seconds": 98.5,
+      "budget_seconds": 2523.3
+     },
+     "summary": {
+      "pairs": 6200,
+      "recall10": 0.7748225806451612,
+      "err10": 0.0,
+      "short10": 0.049193548387096775,
+      "p50_ms": 5.2158,
+      "p95_ms": 7.0108049999999995,
+      "p99_ms": 12.511199000000003,
+      "qps": 193.54004050630724
+     }
+    },
+    {
+     "id": "ef256",
+     "kind": "sweep",
+     "params": {
+      "hnsw_ef": 256
+     },
+     "level": 3,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 2927.4,
+     "effective": {
+      "search_params": {
+       "hnsw_ef": 256,
+       "exact": false,
+       "indexed_only": false
+      }
+     },
+     "qdrant_counters": {
+      "filtered_small_cardinality": 14790,
+      "filtered_large_cardinality": 22450
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 6200,
+      "pairs_run": 6200,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 18600,
+      "sampled": 0,
+      "pass1_seconds": 38.4,
+      "seconds": 114.1,
+      "budget_seconds": 2927.4
+     },
+     "summary": {
+      "pairs": 6200,
+      "recall10": 0.8133387096774195,
+      "err10": 0.0,
+      "short10": 0.049193548387096775,
+      "p50_ms": 6.37805,
+      "p95_ms": 8.854175,
+      "p99_ms": 12.466492000000008,
+      "qps": 166.59658414125732
+     }
+    },
+    {
+     "id": "ef512",
+     "kind": "sweep",
+     "params": {
+      "hnsw_ef": 512
+     },
+     "level": 4,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 3490.0,
+     "effective": {
+      "search_params": {
+       "hnsw_ef": 512,
+       "exact": false,
+       "indexed_only": false
+      }
+     },
+     "qdrant_counters": {
+      "filtered_small_cardinality": 14790,
+      "filtered_large_cardinality": 22450
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 6200,
+      "pairs_run": 6200,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 18600,
+      "sampled": 0,
+      "pass1_seconds": 49.9,
+      "seconds": 145.3,
+      "budget_seconds": 3490.0
+     },
+     "summary": {
+      "pairs": 6200,
+      "recall10": 0.845983870967742,
+      "err10": 0.0,
+      "short10": 0.049193548387096775,
+      "p50_ms": 7.8056,
+      "p95_ms": 12.759134999999999,
+      "p99_ms": 14.027217000000014,
+      "qps": 129.94228975781314
+     }
+    },
+    {
+     "id": "ef1024",
+     "kind": "sweep",
+     "params": {
+      "hnsw_ef": 1024
+     },
+     "level": 5,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 4326.1,
+     "effective": {
+      "search_params": {
+       "hnsw_ef": 1024,
+       "exact": false,
+       "indexed_only": false
+      }
+     },
+     "qdrant_counters": {
+      "filtered_small_cardinality": 14790,
+      "filtered_large_cardinality": 22450
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 6200,
+      "pairs_run": 6200,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 18600,
+      "sampled": 0,
+      "pass1_seconds": 65.7,
+      "seconds": 192.8,
+      "budget_seconds": 4326.1
+     },
+     "summary": {
+      "pairs": 6200,
+      "recall10": 0.8687258064516128,
+      "err10": 0.0,
+      "short10": 0.049193548387096775,
+      "p50_ms": 10.68615,
+      "p95_ms": 18.865535,
+      "p99_ms": 21.002156,
+      "qps": 98.06636785064069
+     }
+    },
+    {
+     "id": "acorn",
+     "kind": "specific",
+     "params": {
+      "hnsw_ef": null,
+      "acorn": "default"
+     },
+     "level": null,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 5703.7,
+     "effective": {
+      "search_params": {
+       "exact": false,
+       "indexed_only": false,
+       "acorn": {
+        "enable": true
+       }
+      }
+     },
+     "qdrant_counters": {
+      "filtered_small_cardinality": 14790,
+      "filtered_large_cardinality": 1200,
+      "filtered_acorn": 21250
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 6200,
+      "pairs_run": 6200,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 18600,
+      "sampled": 0,
+      "pass1_seconds": 92.8,
+      "seconds": 272.9,
+      "budget_seconds": 5703.7
+     },
+     "summary": {
+      "pairs": 6200,
+      "recall10": 0.9785806451612904,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 12.56495,
+      "p95_ms": 32.80951499999999,
+      "p99_ms": 38.57371700000001,
+      "qps": 68.9772063842472
+     }
+    },
+    {
+     "id": "acorn-max",
+     "kind": "specific",
+     "params": {
+      "hnsw_ef": 512,
+      "acorn": 1.0
+     },
+     "level": null,
+     "asrun": false,
+     "build0": false,
+     "harness_level": [],
+     "budget_seconds": 8418.9,
+     "effective": {
+      "search_params": {
+       "hnsw_ef": 512,
+       "exact": false,
+       "indexed_only": false,
+       "acorn": {
+        "enable": true,
+        "max_selectivity": 1.0
+       }
+      }
+     },
+     "qdrant_counters": {
+      "filtered_small_cardinality": 14790,
+      "filtered_large_cardinality": 0,
+      "filtered_acorn": 22450
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 6200,
+      "pairs_run": 6200,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 18600,
+      "sampled": 0,
+      "pass1_seconds": 219.3,
+      "seconds": 652.9,
+      "budget_seconds": 8418.9
+     },
+     "summary": {
+      "pairs": 6200,
+      "recall10": 0.9965967741935483,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 29.92455,
+      "p95_ms": 87.64411999999999,
+      "p99_ms": 100.03990400000002,
+      "qps": 28.67558409404775
+     }
+    },
+    {
+     "id": "exact",
+     "kind": "exact",
+     "params": {
+      "exact": true
+     },
+     "level": null,
+     "asrun": false,
+     "build0": true,
+     "harness_level": [],
+     "budget_seconds": 16184.6,
+     "effective": {
+      "search_params": {
+       "exact": true,
+       "indexed_only": false
+      }
+     },
+     "qdrant_counters": {
+      "filtered_small_cardinality": 0,
+      "filtered_large_cardinality": 0,
+      "filtered_acorn": 0,
+      "filtered_exact": 37240
+     },
+     "status": "done",
+     "sweep": {
+      "pairs_listed": 6200,
+      "pairs_run": 6200,
+      "cut": "none",
+      "passes": 3,
+      "errors": 0,
+      "error_examples": [],
+      "later_pass_errors": 0,
+      "later_error_examples": [],
+      "warmup_errors": 0,
+      "retrievals": 18600,
+      "sampled": 0,
+      "pass1_seconds": 282.1,
+      "seconds": 823.8,
+      "budget_seconds": 16184.6
+     },
+     "summary": {
+      "pairs": 6200,
+      "recall10": 1.0,
+      "err10": 0.0,
+      "short10": 0.0,
+      "p50_ms": 16.00425,
+      "p95_ms": 195.83371999999997,
+      "p99_ms": 207.41226500000002,
+      "qps": 22.743852495510595
+     }
+    }
+   ],
+   "load": {
+    "load_s": 755.6,
+    "index_s": 285.3,
+    "points": 1000000,
+    "indexed_vectors": 1000000,
+    "segments": 3,
+    "server": {
+     "title": "qdrant - vector search engine",
+     "version": "1.19.2",
+     "commit": "016542aa5deb6c66380bb137badf73d54f742bde"
+    },
+    "layout": "wardowl's create_collection, keyword indexes on the permission fields",
+    "keyword_fields": [
+     "tenant",
+     "u0",
+     "u1",
+     "u2",
+     "u3",
+     "u4",
+     "c0",
+     "c1",
+     "c2",
+     "c3",
+     "c4"
+    ],
+    "seconds": 1041.3
+   }
+  }
+ ],
+ "failures": [],
+ "skipped": [],
+ "status": "done",
+ "finished": "2026-10-29T21:29:36+0000"
+}

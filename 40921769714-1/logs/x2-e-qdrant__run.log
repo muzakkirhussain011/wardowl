@@ -1,0 +1,200 @@
+[19:38:37]   qdrant as-run b0 ef64: 1489 of 1489 pairs, 3 passes, 0 errors, 20 s (cut: none)
+[19:38:37]    qdrant as-run b0 ef64: {'pairs': 1489, 'recall10': 0.6076294277929155, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 4.2481, 'p95_ms': 5.42098, 'p99_ms': 5.6984439999999985, 'qps': 231.2297682687939}
+[19:38:37] -- qdrant as-run b0 ef128: {'hnsw_ef': 128} (budget 6.0 min)
+[19:38:42]   qdrant as-run b0 ef128: pass 1, 1000 of 1489 pairs (6 s)
+[19:39:00]   qdrant as-run b0 ef128: 1489 of 1489 pairs, 3 passes, 0 errors, 24 s (cut: none)
+[19:39:01]    qdrant as-run b0 ef128: {'pairs': 1489, 'recall10': 0.6561307901907357, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 5.2234, 'p95_ms': 5.90858, 'p99_ms': 6.170436, 'qps': 194.90148704991535}
+[19:39:01] -- qdrant as-run b0 ef256: {'hnsw_ef': 256} (budget 6.1 min)
+[19:39:08]   qdrant as-run b0 ef256: pass 1, 1000 of 1489 pairs (7 s)
+[19:39:29]   qdrant as-run b0 ef256: 1489 of 1489 pairs, 3 passes, 0 errors, 29 s (cut: none)
+[19:39:29]    qdrant as-run b0 ef256: {'pairs': 1489, 'recall10': 0.7153950953678474, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 6.4628, 'p95_ms': 7.53752, 'p99_ms': 7.775379999999999, 'qps': 160.05398624180663}
+[19:39:29] -- qdrant as-run b0 ef512: {'hnsw_ef': 512} (budget 6.2 min)
+[19:39:38]   qdrant as-run b0 ef512: pass 1, 1000 of 1489 pairs (8 s)
+[19:40:04]   qdrant as-run b0 ef512: 1489 of 1489 pairs, 3 passes, 0 errors, 34 s (cut: none)
+[19:40:04]    qdrant as-run b0 ef512: {'pairs': 1489, 'recall10': 0.78358310626703, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 7.919, 'p95_ms': 9.85648, 'p99_ms': 10.256568, 'qps': 133.9200247600048}
+[19:40:04] -- qdrant as-run b0 ef1024: {'hnsw_ef': 1024} (budget 6.3 min)
+[19:40:15]   qdrant as-run b0 ef1024: pass 1, 1000 of 1489 pairs (11 s)
+[19:40:48]   qdrant as-run b0 ef1024: 1489 of 1489 pairs, 3 passes, 0 errors, 44 s (cut: none)
+[19:40:48]    qdrant as-run b0 ef1024: {'pairs': 1489, 'recall10': 0.8548365122615803, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 10.6833, 'p95_ms': 13.582659999999999, 'p99_ms': 14.25894799999999, 'qps': 103.6674696242478}
+[19:40:48] -- qdrant as-run b0 acorn: {'hnsw_ef': None, 'acorn': 'default'} (budget 6.4 min)
+[19:40:54]   qdrant as-run b0 acorn: pass 1, 1000 of 1489 pairs (5 s)
+[19:41:11]   qdrant as-run b0 acorn: 1489 of 1489 pairs, 3 passes, 0 errors, 23 s (cut: none)
+[19:41:11]    qdrant as-run b0 acorn: {'pairs': 1489, 'recall10': 0.8403950953678473, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 4.9631, 'p95_ms': 5.819159999999998, 'p99_ms': 6.374143999999999, 'qps': 202.27127136785765}
+[19:41:11] -- qdrant as-run b0 acorn-max: {'hnsw_ef': 512, 'acorn': 1.0} (budget 6.6 min)
+[19:41:20]   qdrant as-run b0 acorn-max: pass 1, 1000 of 1489 pairs (9 s)
+[19:41:49]   qdrant as-run b0 acorn-max: 1489 of 1489 pairs, 3 passes, 0 errors, 37 s (cut: none)
+[19:41:49]    qdrant as-run b0 acorn-max: {'pairs': 1489, 'recall10': 0.9561307901907357, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 8.8843, 'p95_ms': 10.679039999999999, 'p99_ms': 11.775575999999996, 'qps': 122.78392335090307}
+[19:41:49] -- qdrant as-run b0 exact: {'exact': True} (budget 6.7 min)
+[19:42:12]   qdrant as-run b0 exact: pass 1, 1000 of 1489 pairs (23 s)
+[19:43:22]   qdrant as-run b0 exact: 1489 of 1489 pairs, 3 passes, 0 errors, 93 s (cut: none)
+[19:43:22]    qdrant as-run b0 exact: {'pairs': 1489, 'recall10': 1.0, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 25.4602, 'p95_ms': 27.8884, 'p99_ms': 28.243567999999996, 'qps': 48.731857962205986}
+[19:43:22] == qdrant as-run build 1: loading 107,540 chunks
+[19:43:31]   loaded 10,000 of 107,540 chunks (9 s)
+[19:43:40]   loaded 20,000 of 107,540 chunks (18 s)
+[19:43:49]   loaded 30,000 of 107,540 chunks (27 s)
+[19:44:00]   loaded 40,000 of 107,540 chunks (38 s)
+[19:44:11]   loaded 50,000 of 107,540 chunks (49 s)
+[19:44:25]   loaded 60,000 of 107,540 chunks (63 s)
+[19:44:42]   loaded 70,000 of 107,540 chunks (80 s)
+[19:44:54]   loaded 80,000 of 107,540 chunks (92 s)
+[19:45:06]   loaded 90,000 of 107,540 chunks (104 s)
+[19:45:17]   loaded 100,000 of 107,540 chunks (115 s)
+[19:45:25]   loaded 107,540 of 107,540 chunks (123 s)
+[19:45:46]    loaded: {'load_s': 123.5, 'index_s': 20.0, 'points': 107540, 'indexed_vectors': 105512, 'segments': 2, 'server': {'title': 'qdrant - vector search engine', 'version': '1.19.2', 'commit': '016542aa5deb6c66380bb137badf73d54f742bde'}, 'layout': "wardowl's create_collection, keyword indexes on the permission fields", 'keyword_fields': ['allowed_users', 'allowed_groups', 'tenant'], 'seconds': 143.6}
+[19:45:46] -- qdrant as-run b1 default: {} (budget 7.6 min)
+[19:45:51]   qdrant as-run b1 default: pass 1, 1000 of 1489 pairs (6 s)
+[19:46:09]   qdrant as-run b1 default: 1489 of 1489 pairs, 3 passes, 0 errors, 23 s (cut: none)
+[19:46:09]    qdrant as-run b1 default: {'pairs': 1489, 'recall10': 0.6525204359673025, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 4.9235, 'p95_ms': 6.04212, 'p99_ms': 6.358523999999997, 'qps': 201.14042432983769}
+[19:46:09] -- qdrant as-run b1 ef64: {'hnsw_ef': 64} (budget 7.8 min)
+[19:46:14]   qdrant as-run b1 ef64: pass 1, 1000 of 1489 pairs (5 s)
+[19:46:29]   qdrant as-run b1 ef64: 1489 of 1489 pairs, 3 passes, 0 errors, 20 s (cut: none)
+[19:46:29]    qdrant as-run b1 ef64: {'pairs': 1489, 'recall10': 0.6099455040871934, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 4.2414, 'p95_ms': 5.404279999999999, 'p99_ms': 5.607944, 'qps': 230.71772363636293}
+[19:46:29] -- qdrant as-run b1 ef128: {'hnsw_ef': 128} (budget 8.0 min)
+[19:46:34]   qdrant as-run b1 ef128: pass 1, 1000 of 1489 pairs (5 s)
+[19:46:51]   qdrant as-run b1 ef128: 1489 of 1489 pairs, 3 passes, 0 errors, 22 s (cut: none)
+[19:46:51]    qdrant as-run b1 ef128: {'pairs': 1489, 'recall10': 0.6796321525885559, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 4.7858, 'p95_ms': 5.40482, 'p99_ms': 5.5579519999999984, 'qps': 212.70189734806445}
+[19:46:51] -- qdrant as-run b1 ef256: {'hnsw_ef': 256} (budget 8.2 min)
+[19:46:57]   qdrant as-run b1 ef256: pass 1, 1000 of 1489 pairs (6 s)
+[19:47:17]   qdrant as-run b1 ef256: 1489 of 1489 pairs, 3 passes, 0 errors, 26 s (cut: none)
+[19:47:17]    qdrant as-run b1 ef256: {'pairs': 1489, 'recall10': 0.7487057220708446, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 5.7138, 'p95_ms': 6.67364, 'p99_ms': 6.9969399999999995, 'qps': 180.67503030674993}
+[19:47:17] -- qdrant as-run b1 ef512: {'hnsw_ef': 512} (budget 8.4 min)
+[19:47:25]   qdrant as-run b1 ef512: pass 1, 1000 of 1489 pairs (8 s)
+[19:47:48]   qdrant as-run b1 ef512: 1489 of 1489 pairs, 3 passes, 0 errors, 32 s (cut: none)
+[19:47:48]    qdrant as-run b1 ef512: {'pairs': 1489, 'recall10': 0.8100136239782015, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 7.2692, 'p95_ms': 9.00554, 'p99_ms': 9.431091999999996, 'qps': 145.91007208506318}
+[19:47:48] -- qdrant as-run b1 ef1024: {'hnsw_ef': 1024} (budget 8.6 min)
+[19:47:59]   qdrant as-run b1 ef1024: pass 1, 1000 of 1489 pairs (10 s)
+[19:48:30]   qdrant as-run b1 ef1024: 1489 of 1489 pairs, 3 passes, 0 errors, 42 s (cut: none)
+[19:48:30]    qdrant as-run b1 ef1024: {'pairs': 1489, 'recall10': 0.8802452316076295, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 10.0279, 'p95_ms': 12.8197, 'p99_ms': 13.649959999999993, 'qps': 109.02675404515433}
+[19:48:30] -- qdrant as-run b1 acorn: {'hnsw_ef': None, 'acorn': 'default'} (budget 8.9 min)
+[19:48:36]   qdrant as-run b1 acorn: pass 1, 1000 of 1489 pairs (6 s)
+[19:48:54]   qdrant as-run b1 acorn: 1489 of 1489 pairs, 3 passes, 0 errors, 23 s (cut: none)
+[19:48:54]    qdrant as-run b1 acorn: {'pairs': 1489, 'recall10': 0.8291553133514987, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 4.9974, 'p95_ms': 5.84378, 'p99_ms': 6.333504, 'qps': 200.32014899836898}
+[19:48:54] -- qdrant as-run b1 acorn-max: {'hnsw_ef': 512, 'acorn': 1.0} (budget 9.1 min)
+[19:49:03]   qdrant as-run b1 acorn-max: pass 1, 1000 of 1489 pairs (9 s)
+[19:49:31]   qdrant as-run b1 acorn-max: 1489 of 1489 pairs, 3 passes, 0 errors, 37 s (cut: none)
+[19:49:31]    qdrant as-run b1 acorn-max: {'pairs': 1489, 'recall10': 0.9580381471389646, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 8.8426, 'p95_ms': 10.716499999999998, 'p99_ms': 12.039423999999993, 'qps': 122.98425888211274}
+[19:49:31] == qdrant as-run build 2: loading 107,540 chunks
+[19:49:40]   loaded 10,000 of 107,540 chunks (9 s)
+[19:49:49]   loaded 20,000 of 107,540 chunks (18 s)
+[19:49:59]   loaded 30,000 of 107,540 chunks (28 s)
+[19:50:09]   loaded 40,000 of 107,540 chunks (38 s)
+[19:50:20]   loaded 50,000 of 107,540 chunks (49 s)
+[19:50:33]   loaded 60,000 of 107,540 chunks (62 s)
+[19:50:50]   loaded 70,000 of 107,540 chunks (79 s)
+[19:51:02]   loaded 80,000 of 107,540 chunks (91 s)
+[19:51:13]   loaded 90,000 of 107,540 chunks (102 s)
+[19:51:25]   loaded 100,000 of 107,540 chunks (113 s)
+[19:51:33]   loaded 107,540 of 107,540 chunks (121 s)
+[19:52:03]    loaded: {'load_s': 121.5, 'index_s': 30.0, 'points': 107540, 'indexed_vectors': 107540, 'segments': 2, 'server': {'title': 'qdrant - vector search engine', 'version': '1.19.2', 'commit': '016542aa5deb6c66380bb137badf73d54f742bde'}, 'layout': "wardowl's create_collection, keyword indexes on the permission fields", 'keyword_fields': ['allowed_users', 'allowed_groups', 'tenant'], 'seconds': 151.6}
+[19:52:03] -- qdrant as-run b2 default: {} (budget 9.3 min)
+[19:52:09]   qdrant as-run b2 default: pass 1, 1000 of 1489 pairs (6 s)
+[19:52:26]   qdrant as-run b2 default: 1489 of 1489 pairs, 3 passes, 0 errors, 23 s (cut: none)
+[19:52:26]    qdrant as-run b2 default: {'pairs': 1489, 'recall10': 0.6297683923705722, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 4.8464, 'p95_ms': 5.82224, 'p99_ms': 6.157443999999999, 'qps': 206.03809512924144}
+[19:52:26] -- qdrant as-run b2 ef64: {'hnsw_ef': 64} (budget 9.6 min)
+[19:52:31]   qdrant as-run b2 ef64: pass 1, 1000 of 1489 pairs (5 s)
+[19:52:46]   qdrant as-run b2 ef64: 1489 of 1489 pairs, 3 passes, 0 errors, 20 s (cut: none)
+[19:52:46]    qdrant as-run b2 ef64: {'pairs': 1489, 'recall10': 0.5938692098092644, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 4.1039, 'p95_ms': 5.36222, 'p99_ms': 5.669584, 'qps': 237.8034271514435}
+[19:52:46] -- qdrant as-run b2 ef128: {'hnsw_ef': 128} (budget 9.9 min)
+[19:52:51]   qdrant as-run b2 ef128: pass 1, 1000 of 1489 pairs (5 s)
+[19:53:08]   qdrant as-run b2 ef128: 1489 of 1489 pairs, 3 passes, 0 errors, 22 s (cut: none)
+[19:53:08]    qdrant as-run b2 ef128: {'pairs': 1489, 'recall10': 0.6526566757493188, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 4.7465, 'p95_ms': 5.51522, 'p99_ms': 5.799691999999998, 'qps': 212.62694464048295}
+[19:53:08] -- qdrant as-run b2 ef256: {'hnsw_ef': 256} (budget 10.2 min)
+[19:53:14]   qdrant as-run b2 ef256: pass 1, 1000 of 1489 pairs (6 s)
+[19:53:33]   qdrant as-run b2 ef256: 1489 of 1489 pairs, 3 passes, 0 errors, 25 s (cut: none)
+[19:53:33]    qdrant as-run b2 ef256: {'pairs': 1489, 'recall10': 0.71566757493188, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 5.6583, 'p95_ms': 6.63932, 'p99_ms': 6.930636, 'qps': 182.1658306082883}
+[19:53:33] -- qdrant as-run b2 ef512: {'hnsw_ef': 512} (budget 10.6 min)
+[19:53:41]   qdrant as-run b2 ef512: pass 1, 1000 of 1489 pairs (8 s)
+[19:54:05]   qdrant as-run b2 ef512: 1489 of 1489 pairs, 3 passes, 0 errors, 32 s (cut: none)
+[19:54:05]    qdrant as-run b2 ef512: {'pairs': 1489, 'recall10': 0.7886920980926431, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 7.3423, 'p95_ms': 9.17162, 'p99_ms': 9.7117, 'qps': 145.38297928721178}
+[19:54:05] -- qdrant as-run b2 ef1024: {'hnsw_ef': 1024} (budget 11.0 min)
+[19:54:16]   qdrant as-run b2 ef1024: pass 1, 1000 of 1489 pairs (10 s)
+[19:54:48]   qdrant as-run b2 ef1024: 1489 of 1489 pairs, 3 passes, 0 errors, 42 s (cut: none)
+[19:54:48]    qdrant as-run b2 ef1024: {'pairs': 1489, 'recall10': 0.8568801089918257, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 10.2104, 'p95_ms': 12.93768, 'p99_ms': 13.755163999999999, 'qps': 107.96231420621059}
+[19:54:48] -- qdrant as-run b2 acorn: {'hnsw_ef': None, 'acorn': 'default'} (budget 11.4 min)
+[19:54:53]   qdrant as-run b2 acorn: pass 1, 1000 of 1489 pairs (6 s)
+[19:55:11]   qdrant as-run b2 acorn: 1489 of 1489 pairs, 3 passes, 0 errors, 23 s (cut: none)
+[19:55:11]    qdrant as-run b2 acorn: {'pairs': 1489, 'recall10': 0.8198910081743869, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 5.0103, 'p95_ms': 5.85806, 'p99_ms': 6.305472, 'qps': 198.81444901165784}
+[19:55:11] -- qdrant as-run b2 acorn-max: {'hnsw_ef': 512, 'acorn': 1.0} (budget 11.8 min)
+[19:55:21]   qdrant as-run b2 acorn-max: pass 1, 1000 of 1489 pairs (9 s)
+[19:55:50]   qdrant as-run b2 acorn-max: 1489 of 1489 pairs, 3 passes, 0 errors, 39 s (cut: none)
+[19:55:50]    qdrant as-run b2 acorn-max: {'pairs': 1489, 'recall10': 0.9459128065395095, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 9.2392, 'p95_ms': 11.314879999999999, 'p99_ms': 12.161695999999994, 'qps': 116.9054497771911}
+[19:55:50] == qdrant tenant build 0: loading 107,540 chunks
+[19:55:59]   loaded 10,000 of 107,540 chunks (9 s)
+[19:56:08]   loaded 20,000 of 107,540 chunks (17 s)
+[19:56:19]   loaded 30,000 of 107,540 chunks (28 s)
+[19:56:29]   loaded 40,000 of 107,540 chunks (39 s)
+[19:56:43]   loaded 50,000 of 107,540 chunks (53 s)
+[19:56:59]   loaded 60,000 of 107,540 chunks (68 s)
+[19:57:17]   loaded 70,000 of 107,540 chunks (86 s)
+[19:57:35]   loaded 80,000 of 107,540 chunks (105 s)
+[19:57:51]   loaded 90,000 of 107,540 chunks (121 s)
+[19:58:12]   loaded 100,000 of 107,540 chunks (141 s)
+[19:58:27]   loaded 107,540 of 107,540 chunks (157 s)
+[20:06:08]    loaded: {'load_s': 156.7, 'index_s': 460.5, 'points': 107540, 'indexed_vectors': 107540, 'segments': 2, 'server': {'title': 'qdrant - vector search engine', 'version': '1.19.2', 'commit': '016542aa5deb6c66380bb137badf73d54f742bde'}, 'layout': 'tenant field is_tenant=true, hnsw m 0 and payload_m 16 (harness-level), other fields as as-run', 'keyword_fields': ['allowed_users', 'allowed_groups'], 'seconds': 617.3}
+[20:06:08] -- qdrant tenant b0 ef128: {'hnsw_ef': 128} (budget 23.7 min)
+[20:06:14]   qdrant tenant b0 ef128: pass 1, 1000 of 1489 pairs (6 s)
+[20:06:32]   qdrant tenant b0 ef128: 1489 of 1489 pairs, 3 passes, 0 errors, 24 s (cut: none)
+[20:06:32]    qdrant tenant b0 ef128: {'pairs': 1489, 'recall10': 0.9376702997275205, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 4.6108, 'p95_ms': 7.2645599999999995, 'p99_ms': 7.668328, 'qps': 195.5542314895345}
+[20:06:32] -- qdrant tenant b0 ef512: {'hnsw_ef': 512} (budget 25.8 min)
+[20:06:41]   qdrant tenant b0 ef512: pass 1, 1000 of 1489 pairs (9 s)
+[20:07:11]   qdrant tenant b0 ef512: 1489 of 1489 pairs, 3 passes, 0 errors, 39 s (cut: none)
+[20:07:11]    qdrant tenant b0 ef512: {'pairs': 1489, 'recall10': 0.9829019073569483, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 8.5835, 'p95_ms': 13.515199999999998, 'p99_ms': 14.383211999999997, 'qps': 117.73095742087952}
+[20:07:11] -- qdrant tenant b0 acorn-max: {'hnsw_ef': 512, 'acorn': 1.0} (budget 28.3 min)
+[20:07:20]   qdrant tenant b0 acorn-max: pass 1, 1000 of 1489 pairs (9 s)
+[20:07:49]   qdrant tenant b0 acorn-max: 1489 of 1489 pairs, 3 passes, 0 errors, 38 s (cut: none)
+[20:07:49]    qdrant tenant b0 acorn-max: {'pairs': 1489, 'recall10': 0.9829019073569483, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 8.4044, 'p95_ms': 13.012739999999997, 'p99_ms': 14.056375999999995, 'qps': 121.26190628635568}
+[20:07:49] -- qdrant tenant b0 exact: {'exact': True} (budget 31.4 min)
+[20:08:09]   qdrant tenant b0 exact: pass 1, 1000 of 1489 pairs (20 s)
+[20:09:08]   qdrant tenant b0 exact: 1489 of 1489 pairs, 3 passes, 0 errors, 79 s (cut: none)
+[20:09:08]    qdrant tenant b0 exact: {'pairs': 1489, 'recall10': 1.0, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 21.5289, 'p95_ms': 24.34364, 'p99_ms': 25.20618399999999, 'qps': 57.19414717273237}
+[20:09:08] == qdrant tenant build 1: loading 107,540 chunks
+[20:09:17]   loaded 10,000 of 107,540 chunks (8 s)
+[20:09:26]   loaded 20,000 of 107,540 chunks (17 s)
+[20:09:36]   loaded 30,000 of 107,540 chunks (28 s)
+[20:09:47]   loaded 40,000 of 107,540 chunks (38 s)
+[20:10:01]   loaded 50,000 of 107,540 chunks (52 s)
+[20:10:16]   loaded 60,000 of 107,540 chunks (67 s)
+[20:10:31]   loaded 70,000 of 107,540 chunks (83 s)
+[20:10:51]   loaded 80,000 of 107,540 chunks (102 s)
+[20:11:08]   loaded 90,000 of 107,540 chunks (119 s)
+[20:11:24]   loaded 100,000 of 107,540 chunks (136 s)
+[20:11:39]   loaded 107,540 of 107,540 chunks (151 s)
+[20:19:55]    loaded: {'load_s': 150.9, 'index_s': 495.8, 'points': 107540, 'indexed_vectors': 107540, 'segments': 2, 'server': {'title': 'qdrant - vector search engine', 'version': '1.19.2', 'commit': '016542aa5deb6c66380bb137badf73d54f742bde'}, 'layout': 'tenant field is_tenant=true, hnsw m 0 and payload_m 16 (harness-level), other fields as as-run', 'keyword_fields': ['allowed_users', 'allowed_groups'], 'seconds': 646.8}
+[20:19:55] -- qdrant tenant b1 ef128: {'hnsw_ef': 128} (budget 45.1 min)
+[20:20:02]   qdrant tenant b1 ef128: pass 1, 1000 of 1489 pairs (6 s)
+[20:20:20]   qdrant tenant b1 ef128: 1489 of 1489 pairs, 3 passes, 0 errors, 25 s (cut: none)
+[20:20:20]    qdrant tenant b1 ef128: {'pairs': 1489, 'recall10': 0.9452316076294277, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 4.655, 'p95_ms': 7.41828, 'p99_ms': 7.708939999999998, 'qps': 191.68966223830935}
+[20:20:20] -- qdrant tenant b1 ef512: {'hnsw_ef': 512} (budget 54.0 min)
+[20:20:30]   qdrant tenant b1 ef512: pass 1, 1000 of 1489 pairs (10 s)
+[20:21:01]   qdrant tenant b1 ef512: 1489 of 1489 pairs, 3 passes, 0 errors, 41 s (cut: none)
+[20:21:01]    qdrant tenant b1 ef512: {'pairs': 1489, 'recall10': 0.9834468664850134, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 9.1704, 'p95_ms': 14.51192, 'p99_ms': 15.393419999999995, 'qps': 110.47516376978503}
+[20:21:01] -- qdrant tenant b1 acorn-max: {'hnsw_ef': 512, 'acorn': 1.0} (budget 67.3 min)
+[20:21:11]   qdrant tenant b1 acorn-max: pass 1, 1000 of 1489 pairs (9 s)
+[20:21:42]   qdrant tenant b1 acorn-max: 1489 of 1489 pairs, 3 passes, 0 errors, 41 s (cut: none)
+[20:21:42]    qdrant tenant b1 acorn-max: {'pairs': 1489, 'recall10': 0.9834468664850134, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 8.9776, 'p95_ms': 14.337579999999999, 'p99_ms': 15.405443999999997, 'qps': 112.23993614821546}
+[20:21:42] == qdrant tenant build 2: loading 107,540 chunks
+[20:21:50]   loaded 10,000 of 107,540 chunks (8 s)
+[20:21:59]   loaded 20,000 of 107,540 chunks (17 s)
+[20:22:10]   loaded 30,000 of 107,540 chunks (28 s)
+[20:22:21]   loaded 40,000 of 107,540 chunks (39 s)
+[20:22:34]   loaded 50,000 of 107,540 chunks (52 s)
+[20:22:50]   loaded 60,000 of 107,540 chunks (68 s)
+[20:23:07]   loaded 70,000 of 107,540 chunks (85 s)
+[20:23:26]   loaded 80,000 of 107,540 chunks (103 s)
+[20:23:41]   loaded 90,000 of 107,540 chunks (119 s)
+[20:24:02]   loaded 100,000 of 107,540 chunks (140 s)
+[20:24:17]   loaded 107,540 of 107,540 chunks (155 s)
+[20:32:08]    loaded: {'load_s': 155.3, 'index_s': 470.5, 'points': 107540, 'indexed_vectors': 107540, 'segments': 2, 'server': {'title': 'qdrant - vector search engine', 'version': '1.19.2', 'commit': '016542aa5deb6c66380bb137badf73d54f742bde'}, 'layout': 'tenant field is_tenant=true, hnsw m 0 and payload_m 16 (harness-level), other fields as as-run', 'keyword_fields': ['allowed_users', 'allowed_groups'], 'seconds': 625.9}
+[20:32:08] -- qdrant tenant b2 ef128: {'hnsw_ef': 128} (budget 86.0 min)
+[20:32:14]   qdrant tenant b2 ef128: pass 1, 1000 of 1489 pairs (6 s)
+[20:32:33]   qdrant tenant b2 ef128: 1489 of 1489 pairs, 3 passes, 0 errors, 25 s (cut: none)
+[20:32:33]    qdrant tenant b2 ef128: {'pairs': 1489, 'recall10': 0.9396457765667575, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 4.742, 'p95_ms': 7.51448, 'p99_ms': 7.934891999999997, 'qps': 189.08470026925713}
+[20:32:33] -- qdrant tenant b2 ef512: {'hnsw_ef': 512} (budget 128.8 min)
+[20:32:43]   qdrant tenant b2 ef512: pass 1, 1000 of 1489 pairs (10 s)
+[20:33:12]   qdrant tenant b2 ef512: 1489 of 1489 pairs, 3 passes, 0 errors, 39 s (cut: none)
+[20:33:12]    qdrant tenant b2 ef512: {'pairs': 1489, 'recall10': 0.983174386920981, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 8.8674, 'p95_ms': 13.63902, 'p99_ms': 14.429972, 'qps': 116.63105868487148}
+[20:33:12] -- qdrant tenant b2 acorn-max: {'hnsw_ef': 512, 'acorn': 1.0} (budget 257.0 min)
+[20:33:22]   qdrant tenant b2 acorn-max: pass 1, 1000 of 1489 pairs (9 s)
+[20:33:51]   qdrant tenant b2 acorn-max: 1489 of 1489 pairs, 3 passes, 0 errors, 38 s (cut: none)
+[20:33:51]    qdrant tenant b2 acorn-max: {'pairs': 1489, 'recall10': 0.983174386920981, 'err10': 0.0, 'short10': 0.0, 'p50_ms': 8.4498, 'p95_ms': 13.22488, 'p99_ms': 14.228767999999999, 'qps': 120.40163202835429}
+[20:33:51] X2 x2-e-qdrant: done

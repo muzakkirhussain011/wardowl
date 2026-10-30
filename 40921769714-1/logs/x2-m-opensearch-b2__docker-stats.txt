@@ -1,0 +1,2 @@
+CONTAINER ID   NAME         CPU %     MEM USAGE / LIMIT     MEM %     NET I/O           BLOCK I/O       PIDS
+10f8f4a032ff   opensearch   0.92%     2.736GiB / 15.61GiB   17.53%    10.5GB / 1.66GB   41kB / 8.99GB   79

@@ -1,0 +1,93 @@
+{
+ "corpus": "e",
+ "smoke": false,
+ "model": "BAAI/bge-base-en-v1.5",
+ "query_prefix": "Represent this sentence for searching relevant passages: ",
+ "chunks": 107540,
+ "dim": 768,
+ "people": 213,
+ "pairs": 1489,
+ "original_questions": 1105,
+ "readable_min_median_max": [
+  0,
+  58433,
+  59265
+ ],
+ "vectors_sha256": "7742f49ed68e0641d9e861d4c4509d705921976ddaf1effbd2b674e40954072c",
+ "shards": [
+  {
+   "shard": 0,
+   "start": 0,
+   "end": 17923,
+   "sha256": "94f4a01f8a511748152cb5c014909c270619a23593d0193f9bed79d72dad8fb7"
+  },
+  {
+   "shard": 1,
+   "start": 17923,
+   "end": 35846,
+   "sha256": "afe5c90e1fe6765fe888b13cb54d94117e9a67e9dce610ff60dee3e06f3d1471"
+  },
+  {
+   "shard": 2,
+   "start": 35846,
+   "end": 53770,
+   "sha256": "0f191a243ab89343daa2c8d6788f25f9d1ac2d0163bfec97d4f0bf7987fc361c"
+  },
+  {
+   "shard": 3,
+   "start": 53770,
+   "end": 71693,
+   "sha256": "142c96c62d9ae1f2af15efd10c71eeda9f96f5c5ca734aa95f350015f59a8083"
+  },
+  {
+   "shard": 4,
+   "start": 71693,
+   "end": 89616,
+   "sha256": "40c404bb0de4a0c2a821f65a870fe4c1caf3184fdd074588b845705bc9d7adad"
+  },
+  {
+   "shard": 5,
+   "start": 89616,
+   "end": 107540,
+   "sha256": "776299434253b7d606913884c870b9f1dca3043e0923fa18000f80bc38dc36fa"
+  }
+ ],
+ "embedding_environment": {
+  "python": "3.12.15",
+  "platform": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+  "cpus": 4,
+  "runner": "GitHub Actions 1000007892",
+  "run": "40921769714",
+  "job": "embed-e",
+  "sha": "884ce18397966859ebb803427cc23a5023431739",
+  "memory_gib": 15.6,
+  "cpu_model": "Intel(R) Xeon(R) 6973P-C",
+  "wardowl": "2.1.0",
+  "numpy": "2.5.4",
+  "torch": "2.15.0+cpu",
+  "sentence-transformers": "6.2.0",
+  "transformers": "5.22.0",
+  "datasets": "5.1.0",
+  "faiss-cpu": null,
+  "wardowl_path": "/home/runner/work/wardowl/wardowl/wardowl"
+ },
+ "environment": {
+  "python": "3.12.15",
+  "platform": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+  "cpus": 4,
+  "runner": "GitHub Actions 1000007968",
+  "run": "40921769714",
+  "job": "prepare-e",
+  "sha": "884ce18397966859ebb803427cc23a5023431739",
+  "memory_gib": 15.6,
+  "cpu_model": "AMD EPYC 9V45 96-Core Processor",
+  "wardowl": "2.1.0",
+  "numpy": "2.5.4",
+  "torch": "2.15.0+cpu",
+  "sentence-transformers": "6.2.0",
+  "transformers": "5.22.0",
+  "datasets": "5.1.0",
+  "faiss-cpu": "1.15.1",
+  "wardowl_path": "/home/runner/work/wardowl/wardowl/wardowl"
+ }
+}

@@ -1,0 +1,308 @@
+{
+ "corpus": "m",
+ "smoke": false,
+ "model": "BAAI/bge-small-en-v1.5",
+ "query_prefix": "Represent this sentence for searching relevant passages: ",
+ "chunks": 1000000,
+ "dim": 384,
+ "pool": 20000,
+ "divisions": 100,
+ "seeds": 5,
+ "subjects_per_cell": 10,
+ "queries_per_subject": 4,
+ "subjects": 1050,
+ "pairs": 6200,
+ "query_selection_fallbacks": 684,
+ "group_sizes": {
+  "u0": {
+   "division": {
+    "min": 10000,
+    "median": 10000.0,
+    "max": 10000,
+    "empty": 0
+   },
+   "department": {
+    "min": 1000,
+    "median": 1000.0,
+    "max": 1000,
+    "empty": 0
+   },
+   "team": {
+    "min": 100,
+    "median": 100.0,
+    "max": 100,
+    "empty": 0
+   }
+  },
+  "u1": {
+   "division": {
+    "min": 10000,
+    "median": 10000.0,
+    "max": 10000,
+    "empty": 0
+   },
+   "department": {
+    "min": 1000,
+    "median": 1000.0,
+    "max": 1000,
+    "empty": 0
+   },
+   "team": {
+    "min": 100,
+    "median": 100.0,
+    "max": 100,
+    "empty": 0
+   }
+  },
+  "u2": {
+   "division": {
+    "min": 10000,
+    "median": 10000.0,
+    "max": 10000,
+    "empty": 0
+   },
+   "department": {
+    "min": 1000,
+    "median": 1000.0,
+    "max": 1000,
+    "empty": 0
+   },
+   "team": {
+    "min": 100,
+    "median": 100.0,
+    "max": 100,
+    "empty": 0
+   }
+  },
+  "u3": {
+   "division": {
+    "min": 10000,
+    "median": 10000.0,
+    "max": 10000,
+    "empty": 0
+   },
+   "department": {
+    "min": 1000,
+    "median": 1000.0,
+    "max": 1000,
+    "empty": 0
+   },
+   "team": {
+    "min": 100,
+    "median": 100.0,
+    "max": 100,
+    "empty": 0
+   }
+  },
+  "u4": {
+   "division": {
+    "min": 10000,
+    "median": 10000.0,
+    "max": 10000,
+    "empty": 0
+   },
+   "department": {
+    "min": 1000,
+    "median": 1000.0,
+    "max": 1000,
+    "empty": 0
+   },
+   "team": {
+    "min": 100,
+    "median": 100.0,
+    "max": 100,
+    "empty": 0
+   }
+  },
+  "c0": {
+   "division": {
+    "min": 958,
+    "median": 9889.0,
+    "max": 17365,
+    "empty": 0
+   },
+   "department": {
+    "min": 24,
+    "median": 928.5,
+    "max": 2926,
+    "empty": 0
+   },
+   "team": {
+    "min": 1,
+    "median": 90.0,
+    "max": 457,
+    "empty": 0
+   }
+  },
+  "c1": {
+   "division": {
+    "min": 4381,
+    "median": 9554.5,
+    "max": 20664,
+    "empty": 0
+   },
+   "department": {
+    "min": 1,
+    "median": 905.5,
+    "max": 3490,
+    "empty": 0
+   },
+   "team": {
+    "min": 0,
+    "median": 88.0,
+    "max": 598,
+    "empty": 23
+   }
+  },
+  "c2": {
+   "division": {
+    "min": 4249,
+    "median": 9499.5,
+    "max": 21335,
+    "empty": 0
+   },
+   "department": {
+    "min": 1,
+    "median": 918.0,
+    "max": 4577,
+    "empty": 0
+   },
+   "team": {
+    "min": 0,
+    "median": 89.0,
+    "max": 741,
+    "empty": 9
+   }
+  },
+  "c3": {
+   "division": {
+    "min": 3689,
+    "median": 9760.5,
+    "max": 18187,
+    "empty": 0
+   },
+   "department": {
+    "min": 172,
+    "median": 937.0,
+    "max": 2998,
+    "empty": 0
+   },
+   "team": {
+    "min": 1,
+    "median": 92.0,
+    "max": 922,
+    "empty": 0
+   }
+  },
+  "c4": {
+   "division": {
+    "min": 3759,
+    "median": 9834.5,
+    "max": 21278,
+    "empty": 0
+   },
+   "department": {
+    "min": 90,
+    "median": 927.0,
+    "max": 3381,
+    "empty": 0
+   },
+   "team": {
+    "min": 1,
+    "median": 89.0,
+    "max": 520,
+    "empty": 0
+   }
+  }
+ },
+ "tenant_a_share": 0.500341,
+ "vectors_sha256": "b285211c4d55f406703874106630b606b5df7bacad4047f416289eb916510bd9",
+ "shards": [
+  {
+   "shard": 0,
+   "start": 0,
+   "end": 125000,
+   "sha256": "a6a86db150d6a714392c1a880501a908d7cf4896bb103a727e50874cf69f190a"
+  },
+  {
+   "shard": 1,
+   "start": 125000,
+   "end": 250000,
+   "sha256": "4d7491c4e36d903f75dcff23ef7b1f60760d5c2be9dd5794c0af944fc446f8e0"
+  },
+  {
+   "shard": 2,
+   "start": 250000,
+   "end": 375000,
+   "sha256": "f119647050fb02ee7a672e29d9498bb046c0a090bd10853ba610d1125b877a54"
+  },
+  {
+   "shard": 3,
+   "start": 375000,
+   "end": 500000,
+   "sha256": "2bed927aeef7d91af4d966419748a52b0fbd20cf9d9646362b20042a010024f7"
+  },
+  {
+   "shard": 4,
+   "start": 500000,
+   "end": 625000,
+   "sha256": "5816464433233daa08f5d2fc07cbba29521c420728bdfed494b162bee2c04d9d"
+  },
+  {
+   "shard": 5,
+   "start": 625000,
+   "end": 750000,
+   "sha256": "3f2a683af5c05b6efaedb3bd31f12ca0ae069c3a655a7c7a35ce8cfb16ff4816"
+  },
+  {
+   "shard": 6,
+   "start": 750000,
+   "end": 875000,
+   "sha256": "78322c4a0d0ce2c12e632608d619296ea44976dc048f7d26b822e1101ac31ba6"
+  },
+  {
+   "shard": 7,
+   "start": 875000,
+   "end": 1000000,
+   "sha256": "c1e1f1c797f29640f6d6c7b19662b0a0b54667de4651220685c59e6058b13b17"
+  }
+ ],
+ "embedding_environment": {
+  "python": "3.12.15",
+  "platform": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+  "cpus": 4,
+  "runner": "GitHub Actions 1000007909",
+  "run": "40921769714",
+  "job": "embed-m",
+  "sha": "884ce18397966859ebb803427cc23a5023431739",
+  "memory_gib": 15.6,
+  "cpu_model": "AMD EPYC 7763 64-Core Processor",
+  "wardowl": "2.1.0",
+  "numpy": "2.5.4",
+  "torch": "2.15.0+cpu",
+  "sentence-transformers": "6.2.0",
+  "transformers": "5.22.0",
+  "datasets": "5.1.0",
+  "faiss-cpu": null,
+  "wardowl_path": "/home/runner/work/wardowl/wardowl/wardowl"
+ },
+ "environment": {
+  "python": "3.12.15",
+  "platform": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+  "cpus": 4,
+  "runner": "GitHub Actions 1000007985",
+  "run": "40921769714",
+  "job": "prepare-m",
+  "sha": "884ce18397966859ebb803427cc23a5023431739",
+  "memory_gib": 15.6,
+  "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+  "wardowl": "2.1.0",
+  "numpy": "2.5.4",
+  "torch": "2.15.0+cpu",
+  "sentence-transformers": "6.2.0",
+  "transformers": "5.22.0",
+  "datasets": "5.1.0",
+  "faiss-cpu": "1.15.1",
+  "wardowl_path": "/home/runner/work/wardowl/wardowl/wardowl"
+ }
+}

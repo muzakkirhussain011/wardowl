@@ -1,0 +1,2 @@
+CONTAINER ID   NAME      CPU %     MEM USAGE / LIMIT     MEM %     NET I/O           BLOCK I/O    PIDS
+83f1c8c2b3d3   redis     24.27%    3.827GiB / 15.61GiB   24.52%    3.59GB / 1.18GB   139kB / 0B   14

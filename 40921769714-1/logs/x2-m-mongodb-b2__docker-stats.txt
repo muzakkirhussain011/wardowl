@@ -1,0 +1,2 @@
+CONTAINER ID   NAME      CPU %     MEM USAGE / LIMIT     MEM %     NET I/O           BLOCK I/O       PIDS
+001ab0413ea1   mongodb   2.42%     6.937GiB / 15.61GiB   44.44%    7.28GB / 1.06GB   9.55GB / 19GB   238
