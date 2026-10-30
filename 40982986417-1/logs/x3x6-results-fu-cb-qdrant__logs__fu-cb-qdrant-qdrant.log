@@ -1,0 +1,200 @@
+[01:46:52]   seed 1: building w0 group 6 (57,638 chunks)
+[01:47:50]   seed 1: w0 group 6 built in 58 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 11.0}
+[01:47:50]   seed 1: building w0 group 6 (57,638 chunks)
+[01:48:46]   seed 1: w0 group 6 built in 56 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 11.0}
+[01:48:49]   seed 1: group 6 done, 4,536 retrievals
+[01:48:49]   seed 1: building w0 group 7 (57,638 chunks)
+[01:49:48]   seed 1: w0 group 7 built in 59 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 14.0}
+[01:49:48]   seed 1: building w1 group 7 (57,638 chunks)
+[01:50:44]   seed 1: w1 group 7 built in 56 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 11.0}
+[01:50:44]   seed 1: building w0 group 7 (57,638 chunks)
+[01:51:40]   seed 1: w0 group 7 built in 56 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 11.0}
+[01:51:44]   seed 1: group 7 done, 5,184 retrievals
+[01:51:44] x6cb qdrant: seed 1 done in 25.4 min
+[01:51:44] x6cb qdrant: seed 2
+[01:51:44]   seed 2: building w1 (57,638 chunks)
+[01:52:45]   seed 2: w1 built in 60 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 14.3}
+[01:52:45]   seed 2: building sep (49,221 chunks)
+[01:53:32]   seed 2: sep built in 47 s {'points': 49221, 'indexed_vectors': 98404, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 8.0}
+[01:53:32]   seed 2: building w1 group 0 (57,638 chunks)
+[01:54:31]   seed 2: w1 group 0 built in 60 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 14.0}
+[01:54:31]   seed 2: building w0 group 0 (57,638 chunks)
+[01:55:31]   seed 2: w0 group 0 built in 59 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 14.0}
+[01:55:31]   seed 2: building w0 group 0 (57,638 chunks)
+[01:56:26]   seed 2: w0 group 0 built in 56 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 11.0}
+[01:56:30]   seed 2: group 0 done, 648 retrievals
+[01:56:30]   seed 2: building w0 group 1 (57,638 chunks)
+[01:57:29]   seed 2: w0 group 1 built in 59 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 14.0}
+[01:57:29]   seed 2: building w1 group 1 (57,638 chunks)
+[01:58:25]   seed 2: w1 group 1 built in 56 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 11.0}
+[01:58:25]   seed 2: building w0 group 1 (57,638 chunks)
+[01:59:23]   seed 2: w0 group 1 built in 57 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 11.4}
+[01:59:26]   seed 2: group 1 done, 1,296 retrievals
+[01:59:26]   seed 2: building w1 group 2 (57,638 chunks)
+[02:00:23]   seed 2: w1 group 2 built in 56 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 11.0}
+[02:00:23]   seed 2: building w0 group 2 (57,638 chunks)
+[02:01:19]   seed 2: w0 group 2 built in 56 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 11.0}
+[02:01:19]   seed 2: building w0 group 2 (57,638 chunks)
+[02:02:19]   seed 2: w0 group 2 built in 60 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 14.0}
+[02:02:23]   seed 2: group 2 done, 1,944 retrievals
+[02:02:23]   seed 2: building w0 group 3 (57,638 chunks)
+[02:03:23]   seed 2: w0 group 3 built in 60 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 14.3}
+[02:03:24]   seed 2: building w0 group 3 (57,638 chunks)
+[02:04:20]   seed 2: w0 group 3 built in 57 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 11.0}
+[02:04:20]   seed 2: building w1 group 3 (57,638 chunks)
+[02:05:21]   seed 2: w1 group 3 built in 60 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 14.0}
+[02:05:24]   seed 2: group 3 done, 2,592 retrievals
+[02:05:24]   seed 2: building w1 group 4 (57,638 chunks)
+[02:06:22]   seed 2: w1 group 4 built in 57 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 11.1}
+[02:06:22]   seed 2: building w0 group 4 (57,638 chunks)
+[02:07:23]   seed 2: w0 group 4 built in 61 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 14.0}
+[02:07:23]   seed 2: building w0 group 4 (57,638 chunks)
+[02:08:20]   seed 2: w0 group 4 built in 57 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 11.0}
+[02:08:24]   seed 2: group 4 done, 3,240 retrievals
+[02:08:24]   seed 2: building w0 group 5 (57,638 chunks)
+[02:09:22]   seed 2: w0 group 5 built in 57 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 11.0}
+[02:09:22]   seed 2: building w0 group 5 (57,638 chunks)
+[02:10:21]   seed 2: w0 group 5 built in 60 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 14.0}
+[02:10:21]   seed 2: building w1 group 5 (57,638 chunks)
+[02:11:18]   seed 2: w1 group 5 built in 57 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 11.0}
+[02:11:22]   seed 2: group 5 done, 3,888 retrievals
+[02:11:22]   seed 2: building w1 group 6 (57,638 chunks)
+[02:12:19]   seed 2: w1 group 6 built in 57 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 11.0}
+[02:12:19]   seed 2: building w0 group 6 (57,638 chunks)
+[02:13:19]   seed 2: w0 group 6 built in 60 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 14.0}
+[02:13:19]   seed 2: building w0 group 6 (57,638 chunks)
+[02:14:16]   seed 2: w0 group 6 built in 57 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 11.0}
+[02:14:20]   seed 2: group 6 done, 4,536 retrievals
+[02:14:20]   seed 2: building w0 group 7 (57,638 chunks)
+[02:15:19]   seed 2: w0 group 7 built in 60 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 14.0}
+[02:15:19]   seed 2: building w0 group 7 (57,638 chunks)
+[02:16:16]   seed 2: w0 group 7 built in 57 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 11.0}
+[02:16:16]   seed 2: building w1 group 7 (57,638 chunks)
+[02:17:16]   seed 2: w1 group 7 built in 59 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 14.0}
+[02:17:19]   seed 2: group 7 done, 5,184 retrievals
+[02:17:19] x6cb qdrant: seed 2 done in 25.6 min
+[02:17:19] x6cb qdrant: seed 3
+[02:17:20]   seed 3: building w1 (57,638 chunks)
+[02:18:20]   seed 3: w1 built in 60 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 14.0}
+[02:18:20]   seed 3: building sep (50,639 chunks)
+[02:19:07]   seed 3: sep built in 47 s {'points': 50639, 'indexed_vectors': 101240, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 8.0}
+[02:19:07]   seed 3: building w1 group 0 (57,638 chunks)
+[02:20:03]   seed 3: w1 group 0 built in 56 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 11.0}
+[02:20:03]   seed 3: building w0 group 0 (57,638 chunks)
+[02:21:00]   seed 3: w0 group 0 built in 56 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 11.0}
+[02:21:00]   seed 3: building w0 group 0 (57,638 chunks)
+[02:21:56]   seed 3: w0 group 0 built in 56 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 11.0}
+[02:22:00]   seed 3: group 0 done, 648 retrievals
+[02:22:00]   seed 3: building w1 group 1 (57,638 chunks)
+[02:23:01]   seed 3: w1 group 1 built in 61 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 14.0}
+[02:23:01]   seed 3: building w0 group 1 (57,638 chunks)
+[02:23:58]   seed 3: w0 group 1 built in 57 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 11.1}
+[02:23:58]   seed 3: building w0 group 1 (57,638 chunks)
+[02:24:55]   seed 3: w0 group 1 built in 56 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 11.0}
+[02:24:59]   seed 3: group 1 done, 1,296 retrievals
+[02:24:59]   seed 3: building w0 group 2 (57,638 chunks)
+[02:25:58]   seed 3: w0 group 2 built in 59 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 14.0}
+[02:25:58]   seed 3: building w1 group 2 (57,638 chunks)
+[02:26:54]   seed 3: w1 group 2 built in 56 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 11.0}
+[02:26:54]   seed 3: building w0 group 2 (57,638 chunks)
+[02:27:50]   seed 3: w0 group 2 built in 56 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 11.0}
+[02:27:54]   seed 3: group 2 done, 1,944 retrievals
+[02:27:54]   seed 3: building w0 group 3 (57,638 chunks)
+[02:28:50]   seed 3: w0 group 3 built in 57 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 11.0}
+[02:28:51]   seed 3: building w1 group 3 (57,638 chunks)
+[02:29:47]   seed 3: w1 group 3 built in 56 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 11.0}
+[02:29:47]   seed 3: building w0 group 3 (57,638 chunks)
+[02:30:46]   seed 3: w0 group 3 built in 59 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 14.0}
+[02:30:49]   seed 3: group 3 done, 2,592 retrievals
+[02:30:49]   seed 3: building w1 group 4 (57,638 chunks)
+[02:31:49]   seed 3: w1 group 4 built in 59 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 14.0}
+[02:31:49]   seed 3: building w0 group 4 (57,638 chunks)
+[02:32:45]   seed 3: w0 group 4 built in 57 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 11.0}
+[02:32:45]   seed 3: building w0 group 4 (57,638 chunks)
+[02:33:44]   seed 3: w0 group 4 built in 59 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 14.0}
+[02:33:47]   seed 3: group 4 done, 3,240 retrievals
+[02:33:48]   seed 3: building w0 group 5 (57,638 chunks)
+[02:34:44]   seed 3: w0 group 5 built in 56 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 11.0}
+[02:34:44]   seed 3: building w1 group 5 (57,638 chunks)
+[02:35:40]   seed 3: w1 group 5 built in 56 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 11.0}
+[02:35:40]   seed 3: building w0 group 5 (57,638 chunks)
+[02:36:40]   seed 3: w0 group 5 built in 60 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 15.0}
+[02:36:44]   seed 3: group 5 done, 3,888 retrievals
+[02:36:44]   seed 3: building w1 group 6 (57,638 chunks)
+[02:37:43]   seed 3: w1 group 6 built in 59 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 14.0}
+[02:37:43]   seed 3: building w0 group 6 (57,638 chunks)
+[02:38:40]   seed 3: w0 group 6 built in 56 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 11.0}
+[02:38:40]   seed 3: building w0 group 6 (57,638 chunks)
+[02:39:36]   seed 3: w0 group 6 built in 57 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 11.0}
+[02:39:40]   seed 3: group 6 done, 4,536 retrievals
+[02:39:40]   seed 3: building w0 group 7 (57,638 chunks)
+[02:40:37]   seed 3: w0 group 7 built in 57 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 11.3}
+[02:40:37]   seed 3: building w1 group 7 (57,638 chunks)
+[02:41:35]   seed 3: w1 group 7 built in 57 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 11.5}
+[02:41:35]   seed 3: building w0 group 7 (57,638 chunks)
+[02:42:31]   seed 3: w0 group 7 built in 56 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 11.0}
+[02:42:35]   seed 3: group 7 done, 5,184 retrievals
+[02:42:35] x6cb qdrant: seed 3 done in 25.3 min
+[02:42:35] x6cb qdrant: seed 4
+[02:42:36]   seed 4: building w1 (57,638 chunks)
+[02:43:33]   seed 4: w1 built in 57 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 11.0}
+[02:43:33]   seed 4: building sep (48,653 chunks)
+[02:44:19]   seed 4: sep built in 46 s {'points': 48653, 'indexed_vectors': 97268, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 8.0}
+[02:44:19]   seed 4: building w1 group 0 (57,638 chunks)
+[02:45:16]   seed 4: w1 group 0 built in 58 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 11.0}
+[02:45:16]   seed 4: building w0 group 0 (57,638 chunks)
+[02:46:14]   seed 4: w0 group 0 built in 58 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 11.1}
+[02:46:14]   seed 4: building w0 group 0 (57,638 chunks)
+[02:47:10]   seed 4: w0 group 0 built in 56 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 11.0}
+[02:47:14]   seed 4: group 0 done, 648 retrievals
+[02:47:14]   seed 4: building w1 group 1 (57,638 chunks)
+[02:48:11]   seed 4: w1 group 1 built in 57 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 11.9}
+[02:48:11]   seed 4: building w0 group 1 (57,638 chunks)
+[02:49:12]   seed 4: w0 group 1 built in 60 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 14.0}
+[02:49:12]   seed 4: building w0 group 1 (57,638 chunks)
+[02:50:09]   seed 4: w0 group 1 built in 57 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 11.0}
+[02:50:13]   seed 4: group 1 done, 1,296 retrievals
+[02:50:13]   seed 4: building w0 group 2 (57,638 chunks)
+[02:51:14]   seed 4: w0 group 2 built in 61 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 14.0}
+[02:51:14]   seed 4: building w1 group 2 (57,638 chunks)
+[02:52:10]   seed 4: w1 group 2 built in 56 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 11.0}
+[02:52:10]   seed 4: building w0 group 2 (57,638 chunks)
+[02:53:07]   seed 4: w0 group 2 built in 57 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 11.0}
+[02:53:10]   seed 4: group 2 done, 1,944 retrievals
+[02:53:10]   seed 4: building w0 group 3 (57,638 chunks)
+[02:54:10]   seed 4: w0 group 3 built in 60 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 14.0}
+[02:54:10]   seed 4: building w1 group 3 (57,638 chunks)
+[02:55:10]   seed 4: w1 group 3 built in 59 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 14.0}
+[02:55:10]   seed 4: building w0 group 3 (57,638 chunks)
+[02:56:07]   seed 4: w0 group 3 built in 58 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 11.0}
+[02:56:11]   seed 4: group 3 done, 2,592 retrievals
+[02:56:11]   seed 4: building w0 group 4 (57,638 chunks)
+[02:57:11]   seed 4: w0 group 4 built in 59 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 14.0}
+[02:57:11]   seed 4: building w1 group 4 (57,638 chunks)
+[02:58:07]   seed 4: w1 group 4 built in 57 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 11.0}
+[02:58:08]   seed 4: building w0 group 4 (57,638 chunks)
+[02:59:05]   seed 4: w0 group 4 built in 57 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 11.0}
+[02:59:09]   seed 4: group 4 done, 3,240 retrievals
+[02:59:09]   seed 4: building w1 group 5 (57,638 chunks)
+[03:00:09]   seed 4: w1 group 5 built in 60 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 14.0}
+[03:00:09]   seed 4: building w0 group 5 (57,638 chunks)
+[03:01:09]   seed 4: w0 group 5 built in 60 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 14.0}
+[03:01:09]   seed 4: building w0 group 5 (57,638 chunks)
+[03:02:06]   seed 4: w0 group 5 built in 58 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 11.0}
+[03:02:10]   seed 4: group 5 done, 3,888 retrievals
+[03:02:10]   seed 4: building w0 group 6 (57,638 chunks)
+[03:03:07]   seed 4: w0 group 6 built in 57 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 11.0}
+[03:03:07]   seed 4: building w0 group 6 (57,638 chunks)
+[03:04:08]   seed 4: w0 group 6 built in 60 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 14.0}
+[03:04:08]   seed 4: building w1 group 6 (57,638 chunks)
+[03:05:07]   seed 4: w1 group 6 built in 59 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 14.0}
+[03:05:11]   seed 4: group 6 done, 4,536 retrievals
+[03:05:11]   seed 4: building w0 group 7 (57,638 chunks)
+[03:06:08]   seed 4: w0 group 7 built in 57 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 11.2}
+[03:06:08]   seed 4: building w1 group 7 (57,638 chunks)
+[03:07:05]   seed 4: w1 group 7 built in 57 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 11.7}
+[03:07:06]   seed 4: building w0 group 7 (57,638 chunks)
+[03:08:05]   seed 4: w0 group 7 built in 60 s {'points': 57638, 'indexed_vectors': 115238, 'segments': 2, 'status': 'green', 'optimizer': 'ok', 'wait_s': 14.0}
+[03:08:09]   seed 4: group 7 done, 5,184 retrievals
+[03:08:09] x6cb qdrant: seed 4 done in 25.6 min
+::notice title=x6cb qdrant::seeds done [0, 1, 2, 3, 4]

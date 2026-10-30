@@ -1,0 +1,21 @@
+run: https://github.com/muzakkirhussain011/wardowl/actions/runs/40982986417
+commit: 9e22b895c6323e9d5198ce150c415757680994aa
+configuration: followup
+mode: full
+reads the artifacts of run: 40940385704
+seeds: 5
+published: 2026-10-30T03:09:28Z
+
+raw result files (in the artifacts x3x6-results-*):
+40542849 bytes  x3x6-results-fu-cb-faiss/x6cb-faiss.jsonl
+24470610 bytes  x3x6-results-fu-cb-pgvector/x6cb-pgvector.jsonl
+18630552 bytes  x3x6-results-fu-cb-qdrant/x6cb-qdrant.jsonl
+23181 bytes  x3x6-results-fu-chroma-bisect/x3bisect-chroma.jsonl
+93 bytes  x3x6-results-fu-x3-chroma/crashes.jsonl
+138676 bytes  x3x6-results-fu-x3-chroma/x3-chroma.jsonl
+52103 x3x6-results-fu-cb-faiss/x6cb-faiss.jsonl
+26744 x3x6-results-fu-cb-pgvector/x6cb-pgvector.jsonl
+26183 x3x6-results-fu-cb-qdrant/x6cb-qdrant.jsonl
+18 x3x6-results-fu-chroma-bisect/x3bisect-chroma.jsonl
+1 x3x6-results-fu-x3-chroma/crashes.jsonl
+470 x3x6-results-fu-x3-chroma/x3-chroma.jsonl

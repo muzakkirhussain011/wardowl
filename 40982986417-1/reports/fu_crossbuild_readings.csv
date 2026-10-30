@@ -1,0 +1,4 @@
+store,config,level,main_side,reading,replication,age,matched-content,cross-build-aa
+faiss,post,1,above,inconclusive,"0.597 [0.539, 0.656] (120 clusters)","0.600 [0.547, 0.653] (120 clusters)","0.447 [0.392, 0.506] (120 clusters)","0.361 [0.308, 0.414] (120 clusters)"
+faiss,pre,all,below,inconclusive,"0.293 [0.260, 0.326] (360 clusters)","0.426 [0.392, 0.460] (360 clusters)","0.384 [0.342, 0.428] (360 clusters)","0.257 [0.227, 0.288] (360 clusters)"
+pgvector,pre-exact,all,below,inconclusive,"0.202 [0.179, 0.225] (360 clusters)","0.186 [0.163, 0.209] (360 clusters)","0.567 [0.530, 0.602] (360 clusters)","0.789 [0.759, 0.818] (360 clusters)"

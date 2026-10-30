@@ -1,0 +1,200 @@
+[01:40:14]   seed 1: building w0 group 6 (57,638 chunks)
+[01:40:50]   seed 1: w0 group 6 built in 35 s {}
+[01:40:50]   seed 1: building w0 group 6 (57,638 chunks)
+[01:41:25]   seed 1: w0 group 6 built in 36 s {}
+[01:42:21]   seed 1: group 6 done, 4,536 retrievals
+[01:42:21]   seed 1: building w0 group 7 (57,638 chunks)
+[01:42:57]   seed 1: w0 group 7 built in 36 s {}
+[01:42:57]   seed 1: building w1 group 7 (57,638 chunks)
+[01:43:32]   seed 1: w1 group 7 built in 35 s {}
+[01:43:33]   seed 1: building w0 group 7 (57,638 chunks)
+[01:44:08]   seed 1: w0 group 7 built in 36 s {}
+[01:44:54]   seed 1: group 7 done, 5,184 retrievals
+[01:44:54] x6cb pgvector: seed 1 done in 21.9 min
+[01:44:54] x6cb pgvector: seed 2
+[01:44:55]   seed 2: building w1 (57,638 chunks)
+[01:45:30]   seed 2: w1 built in 35 s {}
+[01:45:31]   seed 2: building sep (49,221 chunks)
+[01:46:01]   seed 2: sep built in 30 s {}
+[01:46:01]   seed 2: building w1 group 0 (57,638 chunks)
+[01:46:36]   seed 2: w1 group 0 built in 35 s {}
+[01:46:36]   seed 2: building w0 group 0 (57,638 chunks)
+[01:47:12]   seed 2: w0 group 0 built in 35 s {}
+[01:47:12]   seed 2: building w0 group 0 (57,638 chunks)
+[01:47:47]   seed 2: w0 group 0 built in 35 s {}
+[01:48:40]   seed 2: group 0 done, 648 retrievals
+[01:48:40]   seed 2: building w0 group 1 (57,638 chunks)
+[01:49:15]   seed 2: w0 group 1 built in 35 s {}
+[01:49:15]   seed 2: building w1 group 1 (57,638 chunks)
+[01:49:50]   seed 2: w1 group 1 built in 35 s {}
+[01:49:51]   seed 2: building w0 group 1 (57,638 chunks)
+[01:50:26]   seed 2: w0 group 1 built in 36 s {}
+[01:51:22]   seed 2: group 1 done, 1,296 retrievals
+[01:51:22]   seed 2: building w1 group 2 (57,638 chunks)
+[01:51:57]   seed 2: w1 group 2 built in 35 s {}
+[01:51:57]   seed 2: building w0 group 2 (57,638 chunks)
+[01:52:32]   seed 2: w0 group 2 built in 35 s {}
+[01:52:32]   seed 2: building w0 group 2 (57,638 chunks)
+[01:53:08]   seed 2: w0 group 2 built in 35 s {}
+[01:53:54]   seed 2: group 2 done, 1,944 retrievals
+[01:53:54]   seed 2: building w0 group 3 (57,638 chunks)
+[01:54:30]   seed 2: w0 group 3 built in 35 s {}
+[01:54:30]   seed 2: building w0 group 3 (57,638 chunks)
+[01:55:05]   seed 2: w0 group 3 built in 35 s {}
+[01:55:05]   seed 2: building w1 group 3 (57,638 chunks)
+[01:55:40]   seed 2: w1 group 3 built in 35 s {}
+[01:56:32]   seed 2: group 3 done, 2,592 retrievals
+[01:56:33]   seed 2: building w1 group 4 (57,638 chunks)
+[01:57:08]   seed 2: w1 group 4 built in 36 s {}
+[01:57:08]   seed 2: building w0 group 4 (57,638 chunks)
+[01:57:44]   seed 2: w0 group 4 built in 36 s {}
+[01:57:44]   seed 2: building w0 group 4 (57,638 chunks)
+[01:58:21]   seed 2: w0 group 4 built in 37 s {}
+[01:59:03]   seed 2: group 4 done, 3,240 retrievals
+[01:59:03]   seed 2: building w0 group 5 (57,638 chunks)
+[01:59:40]   seed 2: w0 group 5 built in 37 s {}
+[01:59:40]   seed 2: building w0 group 5 (57,638 chunks)
+[02:00:17]   seed 2: w0 group 5 built in 37 s {}
+[02:00:17]   seed 2: building w1 group 5 (57,638 chunks)
+[02:00:56]   seed 2: w1 group 5 built in 39 s {}
+[02:01:44]   seed 2: group 5 done, 3,888 retrievals
+[02:01:44]   seed 2: building w1 group 6 (57,638 chunks)
+[02:02:22]   seed 2: w1 group 6 built in 38 s {}
+[02:02:22]   seed 2: building w0 group 6 (57,638 chunks)
+[02:03:00]   seed 2: w0 group 6 built in 38 s {}
+[02:03:01]   seed 2: building w0 group 6 (57,638 chunks)
+[02:03:39]   seed 2: w0 group 6 built in 38 s {}
+[02:04:32]   seed 2: group 6 done, 4,536 retrievals
+[02:04:33]   seed 2: building w0 group 7 (57,638 chunks)
+[02:05:10]   seed 2: w0 group 7 built in 38 s {}
+[02:05:10]   seed 2: building w0 group 7 (57,638 chunks)
+[02:05:48]   seed 2: w0 group 7 built in 38 s {}
+[02:05:48]   seed 2: building w1 group 7 (57,638 chunks)
+[02:06:27]   seed 2: w1 group 7 built in 38 s {}
+[02:07:24]   seed 2: group 7 done, 5,184 retrievals
+[02:07:24] x6cb pgvector: seed 2 done in 22.5 min
+[02:07:24] x6cb pgvector: seed 3
+[02:07:25]   seed 3: building w1 (57,638 chunks)
+[02:08:03]   seed 3: w1 built in 38 s {}
+[02:08:04]   seed 3: building sep (50,639 chunks)
+[02:08:37]   seed 3: sep built in 34 s {}
+[02:08:37]   seed 3: building w1 group 0 (57,638 chunks)
+[02:09:14]   seed 3: w1 group 0 built in 37 s {}
+[02:09:14]   seed 3: building w0 group 0 (57,638 chunks)
+[02:09:52]   seed 3: w0 group 0 built in 38 s {}
+[02:09:52]   seed 3: building w0 group 0 (57,638 chunks)
+[02:10:31]   seed 3: w0 group 0 built in 39 s {}
+[02:11:31]   seed 3: group 0 done, 648 retrievals
+[02:11:31]   seed 3: building w1 group 1 (57,638 chunks)
+[02:12:09]   seed 3: w1 group 1 built in 38 s {}
+[02:12:09]   seed 3: building w0 group 1 (57,638 chunks)
+[02:12:47]   seed 3: w0 group 1 built in 38 s {}
+[02:12:47]   seed 3: building w0 group 1 (57,638 chunks)
+[02:13:25]   seed 3: w0 group 1 built in 38 s {}
+[02:14:22]   seed 3: group 1 done, 1,296 retrievals
+[02:14:22]   seed 3: building w0 group 2 (57,638 chunks)
+[02:15:01]   seed 3: w0 group 2 built in 38 s {}
+[02:15:01]   seed 3: building w1 group 2 (57,638 chunks)
+[02:15:38]   seed 3: w1 group 2 built in 38 s {}
+[02:15:38]   seed 3: building w0 group 2 (57,638 chunks)
+[02:16:17]   seed 3: w0 group 2 built in 38 s {}
+[02:17:01]   seed 3: group 2 done, 1,944 retrievals
+[02:17:02]   seed 3: building w0 group 3 (57,638 chunks)
+[02:17:39]   seed 3: w0 group 3 built in 38 s {}
+[02:17:39]   seed 3: building w1 group 3 (57,638 chunks)
+[02:18:17]   seed 3: w1 group 3 built in 38 s {}
+[02:18:17]   seed 3: building w0 group 3 (57,638 chunks)
+[02:18:55]   seed 3: w0 group 3 built in 38 s {}
+[02:19:45]   seed 3: group 3 done, 2,592 retrievals
+[02:19:45]   seed 3: building w1 group 4 (57,638 chunks)
+[02:20:23]   seed 3: w1 group 4 built in 38 s {}
+[02:20:23]   seed 3: building w0 group 4 (57,638 chunks)
+[02:21:02]   seed 3: w0 group 4 built in 39 s {}
+[02:21:02]   seed 3: building w0 group 4 (57,638 chunks)
+[02:21:41]   seed 3: w0 group 4 built in 38 s {}
+[02:22:34]   seed 3: group 4 done, 3,240 retrievals
+[02:22:34]   seed 3: building w0 group 5 (57,638 chunks)
+[02:23:13]   seed 3: w0 group 5 built in 38 s {}
+[02:23:13]   seed 3: building w1 group 5 (57,638 chunks)
+[02:23:50]   seed 3: w1 group 5 built in 38 s {}
+[02:23:51]   seed 3: building w0 group 5 (57,638 chunks)
+[02:24:29]   seed 3: w0 group 5 built in 38 s {}
+[02:25:26]   seed 3: group 5 done, 3,888 retrievals
+[02:25:26]   seed 3: building w1 group 6 (57,638 chunks)
+[02:26:04]   seed 3: w1 group 6 built in 38 s {}
+[02:26:04]   seed 3: building w0 group 6 (57,638 chunks)
+[02:26:42]   seed 3: w0 group 6 built in 38 s {}
+[02:26:42]   seed 3: building w0 group 6 (57,638 chunks)
+[02:27:20]   seed 3: w0 group 6 built in 38 s {}
+[02:28:03]   seed 3: group 6 done, 4,536 retrievals
+[02:28:04]   seed 3: building w0 group 7 (57,638 chunks)
+[02:28:42]   seed 3: w0 group 7 built in 38 s {}
+[02:28:42]   seed 3: building w1 group 7 (57,638 chunks)
+[02:29:19]   seed 3: w1 group 7 built in 38 s {}
+[02:29:19]   seed 3: building w0 group 7 (57,638 chunks)
+[02:29:58]   seed 3: w0 group 7 built in 38 s {}
+[02:30:46]   seed 3: group 7 done, 5,184 retrievals
+[02:30:46] x6cb pgvector: seed 3 done in 23.4 min
+[02:30:46] x6cb pgvector: seed 4
+[02:30:47]   seed 4: building w1 (57,638 chunks)
+[02:31:26]   seed 4: w1 built in 38 s {}
+[02:31:26]   seed 4: building sep (48,653 chunks)
+[02:32:00]   seed 4: sep built in 34 s {}
+[02:32:00]   seed 4: building w1 group 0 (57,638 chunks)
+[02:32:37]   seed 4: w1 group 0 built in 37 s {}
+[02:32:37]   seed 4: building w0 group 0 (57,638 chunks)
+[02:33:14]   seed 4: w0 group 0 built in 37 s {}
+[02:33:14]   seed 4: building w0 group 0 (57,638 chunks)
+[02:33:50]   seed 4: w0 group 0 built in 37 s {}
+[02:34:43]   seed 4: group 0 done, 648 retrievals
+[02:34:44]   seed 4: building w1 group 1 (57,638 chunks)
+[02:35:22]   seed 4: w1 group 1 built in 38 s {}
+[02:35:22]   seed 4: building w0 group 1 (57,638 chunks)
+[02:36:00]   seed 4: w0 group 1 built in 38 s {}
+[02:36:00]   seed 4: building w0 group 1 (57,638 chunks)
+[02:36:38]   seed 4: w0 group 1 built in 38 s {}
+[02:37:32]   seed 4: group 1 done, 1,296 retrievals
+[02:37:32]   seed 4: building w0 group 2 (57,638 chunks)
+[02:38:08]   seed 4: w0 group 2 built in 37 s {}
+[02:38:08]   seed 4: building w1 group 2 (57,638 chunks)
+[02:38:44]   seed 4: w1 group 2 built in 36 s {}
+[02:38:45]   seed 4: building w0 group 2 (57,638 chunks)
+[02:39:22]   seed 4: w0 group 2 built in 38 s {}
+[02:40:04]   seed 4: group 2 done, 1,944 retrievals
+[02:40:04]   seed 4: building w0 group 3 (57,638 chunks)
+[02:40:42]   seed 4: w0 group 3 built in 39 s {}
+[02:40:42]   seed 4: building w1 group 3 (57,638 chunks)
+[02:41:20]   seed 4: w1 group 3 built in 38 s {}
+[02:41:20]   seed 4: building w0 group 3 (57,638 chunks)
+[02:41:58]   seed 4: w0 group 3 built in 38 s {}
+[02:42:46]   seed 4: group 3 done, 2,592 retrievals
+[02:42:46]   seed 4: building w0 group 4 (57,638 chunks)
+[02:43:25]   seed 4: w0 group 4 built in 38 s {}
+[02:43:25]   seed 4: building w1 group 4 (57,638 chunks)
+[02:44:03]   seed 4: w1 group 4 built in 38 s {}
+[02:44:03]   seed 4: building w0 group 4 (57,638 chunks)
+[02:44:42]   seed 4: w0 group 4 built in 38 s {}
+[02:45:35]   seed 4: group 4 done, 3,240 retrievals
+[02:45:35]   seed 4: building w1 group 5 (57,638 chunks)
+[02:46:12]   seed 4: w1 group 5 built in 37 s {}
+[02:46:12]   seed 4: building w0 group 5 (57,638 chunks)
+[02:46:50]   seed 4: w0 group 5 built in 38 s {}
+[02:46:50]   seed 4: building w0 group 5 (57,638 chunks)
+[02:47:28]   seed 4: w0 group 5 built in 38 s {}
+[02:48:25]   seed 4: group 5 done, 3,888 retrievals
+[02:48:25]   seed 4: building w0 group 6 (57,638 chunks)
+[02:49:02]   seed 4: w0 group 6 built in 37 s {}
+[02:49:02]   seed 4: building w0 group 6 (57,638 chunks)
+[02:49:39]   seed 4: w0 group 6 built in 37 s {}
+[02:49:39]   seed 4: building w1 group 6 (57,638 chunks)
+[02:50:17]   seed 4: w1 group 6 built in 37 s {}
+[02:51:00]   seed 4: group 6 done, 4,536 retrievals
+[02:51:00]   seed 4: building w0 group 7 (57,638 chunks)
+[02:51:38]   seed 4: w0 group 7 built in 38 s {}
+[02:51:38]   seed 4: building w1 group 7 (57,638 chunks)
+[02:52:15]   seed 4: w1 group 7 built in 37 s {}
+[02:52:16]   seed 4: building w0 group 7 (57,638 chunks)
+[02:52:52]   seed 4: w0 group 7 built in 36 s {}
+[02:53:41]   seed 4: group 7 done, 5,184 retrievals
+[02:53:41] x6cb pgvector: seed 4 done in 22.9 min
+::notice title=x6cb pgvector::seeds done [0, 1, 2, 3, 4]

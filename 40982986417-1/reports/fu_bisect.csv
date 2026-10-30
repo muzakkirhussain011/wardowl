@@ -1,0 +1,8 @@
+G,gdb,result,returncode,seconds,translation_chars,translate_ms,build_s,docs,error,latency_ms
+13750,False,error,0,102.4,899233,9.239,94.3,100000,InternalError: Error executing plan: Internal error: error returned from database: (code: 1) Expression tree is too large (maximum depth 1000),4788.3945
+15500,False,error,0,103.8,1016483,10.237,96.0,100000,InternalError: Error executing plan: Internal error: error returned from database: (code: 1) Expression tree is too large (maximum depth 1000),4474.8508
+16500,False,crash,-11,115.7,1083483,11.177,93.5,100000,,
+17500,False,crash,-11,118.0,1150483,11.792,96.0,100000,,
+25000,False,crash,-11,118.5,1652983,19.844,95.4,100000,,
+40000,False,crash,-11,118.6,2657983,34.248,95.0,100000,,
+40000,True,crash,0,103.6,2657983,34.248,95.0,100000,,

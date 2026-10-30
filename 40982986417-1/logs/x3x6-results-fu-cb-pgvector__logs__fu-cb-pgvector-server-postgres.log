@@ -1,0 +1,200 @@
+2026-10-30 00:59:52.932 UTC [48] LOG:  database system is shut down
+ done
+server stopped
+
+PostgreSQL init process complete; ready for start up.
+
+2026-10-30 00:59:53.053 UTC [1] LOG:  starting PostgreSQL 17.11 (Debian 17.11-1.pgdg12+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit
+2026-10-30 00:59:53.053 UTC [1] LOG:  listening on IPv4 address "0.0.0.0", port 5432
+2026-10-30 00:59:53.053 UTC [1] LOG:  listening on IPv6 address "::", port 5432
+2026-10-30 00:59:53.055 UTC [1] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+2026-10-30 00:59:53.058 UTC [64] LOG:  database system was shut down at 2026-10-30 00:59:52 UTC
+2026-10-30 00:59:53.062 UTC [1] LOG:  database system is ready to accept connections
+2026-10-30 01:02:32.876 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 01:03:23.717 UTC [62] LOG:  checkpoint complete: wrote 68299 buffers (26.1%); 0 WAL file(s) added, 1 removed, 32 recycled; write=50.009 s, sync=0.780 s, total=50.841 s; sync files=148, longest=0.299 s, average=0.006 s; distance=534762 kB, estimate=534762 kB; lsn=0/411E80A8, redo lsn=0/22345450
+2026-10-30 01:03:23.996 UTC [98] LOG:  skipping vacuum of "x6s0w0g01d00d6c2" --- lock not available
+2026-10-30 01:03:45.326 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 01:05:23.202 UTC [622] LOG:  skipping vacuum of "x6s0w0g11a7be995" --- lock not available
+2026-10-30 01:05:23.816 UTC [62] LOG:  checkpoint complete: wrote 38299 buffers (14.6%); 0 WAL file(s) added, 1 removed, 32 recycled; write=97.935 s, sync=0.546 s, total=98.491 s; sync files=60, longest=0.321 s, average=0.010 s; distance=538260 kB, estimate=538260 kB; lsn=0/62AB30A0, redo lsn=0/430EA7F8
+2026-10-30 01:05:45.081 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 01:06:35.573 UTC [62] LOG:  checkpoint complete: wrote 36475 buffers (13.9%); 0 WAL file(s) added, 2 removed, 31 recycled; write=49.822 s, sync=0.661 s, total=50.493 s; sync files=74, longest=0.298 s, average=0.009 s; distance=540798 kB, estimate=540798 kB; lsn=0/84027D80, redo lsn=0/6410A250
+2026-10-30 01:07:46.446 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 01:08:37.070 UTC [62] LOG:  checkpoint complete: wrote 833 buffers (0.3%); 0 WAL file(s) added, 2 removed, 31 recycled; write=50.015 s, sync=0.598 s, total=50.624 s; sync files=58, longest=0.204 s, average=0.011 s; distance=542251 kB, estimate=542251 kB; lsn=0/A5692260, redo lsn=0/85294F18
+2026-10-30 01:08:44.268 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 01:10:23.304 UTC [1599] LOG:  skipping vacuum of "x6s0w0g306be7736" --- lock not available
+2026-10-30 01:10:27.877 UTC [62] LOG:  checkpoint complete: wrote 39857 buffers (15.2%); 0 WAL file(s) added, 2 removed, 31 recycled; write=102.928 s, sync=0.607 s, total=103.610 s; sync files=63, longest=0.298 s, average=0.010 s; distance=538781 kB, estimate=541904 kB; lsn=0/C6C99318, redo lsn=0/A60BC588
+2026-10-30 01:10:35.399 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 01:11:39.725 UTC [62] LOG:  checkpoint complete: wrote 35019 buffers (13.4%); 0 WAL file(s) added, 3 removed, 30 recycled; write=63.592 s, sync=0.714 s, total=64.327 s; sync files=68, longest=0.299 s, average=0.011 s; distance=546808 kB, estimate=546808 kB; lsn=0/E818B7B8, redo lsn=0/C76BA5C8
+2026-10-30 01:12:49.707 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 01:13:40.618 UTC [62] LOG:  checkpoint complete: wrote 807 buffers (0.3%); 0 WAL file(s) added, 3 removed, 31 recycled; write=50.307 s, sync=0.589 s, total=50.912 s; sync files=58, longest=0.300 s, average=0.011 s; distance=553786 kB, estimate=553786 kB; lsn=1/97B6988, redo lsn=0/E9389030
+2026-10-30 01:13:47.842 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 01:14:24.487 UTC [2130] LOG:  skipping vacuum of "x6s0w1g4b5aa4a95" --- lock not available
+2026-10-30 01:15:47.273 UTC [62] LOG:  checkpoint complete: wrote 39869 buffers (15.2%); 0 WAL file(s) added, 2 removed, 31 recycled; write=118.829 s, sync=0.578 s, total=119.431 s; sync files=60, longest=0.342 s, average=0.010 s; distance=538975 kB, estimate=552305 kB; lsn=1/2AC0F430, redo lsn=1/A1E0DA8
+2026-10-30 01:15:54.499 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 01:16:25.610 UTC [2682] LOG:  skipping vacuum of "x6s0w1g557656f44" --- lock not available
+2026-10-30 01:16:58.463 UTC [62] LOG:  checkpoint complete: wrote 35031 buffers (13.4%); 0 WAL file(s) added, 3 removed, 30 recycled; write=63.189 s, sync=0.709 s, total=63.965 s; sync files=66, longest=0.370 s, average=0.011 s; distance=545101 kB, estimate=551585 kB; lsn=1/4C048DC0, redo lsn=1/2B6342D8
+2026-10-30 01:18:04.731 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 01:18:23.408 UTC [3174] LOG:  skipping vacuum of "x6s0w1g6ae686600" --- lock not available
+2026-10-30 01:18:55.179 UTC [62] LOG:  checkpoint complete: wrote 897 buffers (0.3%); 0 WAL file(s) added, 3 removed, 31 recycled; write=49.805 s, sync=0.631 s, total=50.448 s; sync files=58, longest=0.255 s, average=0.011 s; distance=555053 kB, estimate=555053 kB; lsn=1/6D62FA10, redo lsn=1/4D43FA38
+2026-10-30 01:19:02.335 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 01:19:26.067 UTC [3183] LOG:  skipping vacuum of "x6s0w0g6e15ad41c" --- lock not available
+2026-10-30 01:20:57.323 UTC [62] LOG:  checkpoint complete: wrote 39729 buffers (15.2%); 0 WAL file(s) added, 2 removed, 31 recycled; write=114.409 s, sync=0.559 s, total=114.988 s; sync files=60, longest=0.190 s, average=0.010 s; distance=536642 kB, estimate=553212 kB; lsn=1/8ED24980, redo lsn=1/6E050298
+2026-10-30 01:21:04.517 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 01:21:25.737 UTC [3711] LOG:  skipping vacuum of "x6s0w0g7b6a49d62" --- lock not available
+2026-10-30 01:22:08.464 UTC [62] LOG:  checkpoint complete: wrote 35012 buffers (13.4%); 0 WAL file(s) added, 3 removed, 30 recycled; write=63.218 s, sync=0.709 s, total=63.948 s; sync files=66, longest=0.268 s, average=0.011 s; distance=547815 kB, estimate=552673 kB; lsn=1/B017F208, redo lsn=1/8F74A288
+2026-10-30 01:23:10.713 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 01:23:23.489 UTC [4179] LOG:  skipping vacuum of "x6s1w1ac05d1aa" --- lock not available
+2026-10-30 01:23:37.168 UTC [62] LOG:  checkpoint complete: wrote 308 buffers (0.1%); 0 WAL file(s) added, 0 removed, 34 recycled; write=26.055 s, sync=0.392 s, total=26.455 s; sync files=56, longest=0.192 s, average=0.007 s; distance=549860 kB, estimate=552391 kB; lsn=1/C18739F8, redo lsn=1/B10435C8
+2026-10-30 01:24:18.047 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 01:24:26.089 UTC [4188] LOG:  skipping vacuum of "x6s1w0g0d2d6b001" --- lock not available
+2026-10-30 01:25:07.413 UTC [62] LOG:  checkpoint complete: wrote 69722 buffers (26.6%); 0 WAL file(s) added, 0 removed, 33 recycled; write=48.705 s, sync=0.652 s, total=49.367 s; sync files=79, longest=0.282 s, average=0.009 s; distance=545914 kB, estimate=551744 kB; lsn=1/F0626020, redo lsn=1/D2562088
+2026-10-30 01:25:29.008 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 01:27:08.963 UTC [62] LOG:  checkpoint complete: wrote 40357 buffers (15.4%); 0 WAL file(s) added, 0 removed, 33 recycled; write=99.465 s, sync=0.482 s, total=99.955 s; sync files=70, longest=0.341 s, average=0.007 s; distance=537899 kB, estimate=550359 kB; lsn=2/11DB74C8, redo lsn=1/F32ACFB0
+2026-10-30 01:27:30.600 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 01:28:21.020 UTC [62] LOG:  checkpoint complete: wrote 37740 buffers (14.4%); 0 WAL file(s) added, 1 removed, 32 recycled; write=49.717 s, sync=0.692 s, total=50.421 s; sync files=66, longest=0.345 s, average=0.011 s; distance=538056 kB, estimate=549129 kB; lsn=2/3323B6E0, redo lsn=2/1401F050
+2026-10-30 01:28:24.161 UTC [4739] LOG:  skipping vacuum of "x6s1w0g1ca13f1d8" --- lock not available
+2026-10-30 01:29:38.120 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 01:30:24.198 UTC [5291] LOG:  skipping vacuum of "x6s1w0g2e155ed3f" --- lock not available
+2026-10-30 01:30:29.074 UTC [62] LOG:  checkpoint complete: wrote 3886 buffers (1.5%); 0 WAL file(s) added, 1 removed, 32 recycled; write=50.324 s, sync=0.620 s, total=50.954 s; sync files=62, longest=0.349 s, average=0.010 s; distance=556930 kB, estimate=556930 kB; lsn=2/54B3F368, redo lsn=2/35FFFA08
+2026-10-30 01:30:50.875 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 01:32:23.660 UTC [5761] LOG:  skipping vacuum of "x6s1w0g30820e7cd" --- lock not available
+2026-10-30 01:32:24.383 UTC [62] LOG:  checkpoint complete: wrote 37296 buffers (14.2%); 0 WAL file(s) added, 2 removed, 32 recycled; write=92.841 s, sync=0.646 s, total=93.508 s; sync files=65, longest=0.299 s, average=0.010 s; distance=540675 kB, estimate=555304 kB; lsn=2/761A1190, redo lsn=2/570008D0
+2026-10-30 01:32:46.583 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 01:33:36.225 UTC [62] LOG:  checkpoint complete: wrote 39307 buffers (15.0%); 0 WAL file(s) added, 1 removed, 32 recycled; write=48.925 s, sync=0.708 s, total=49.643 s; sync files=66, longest=0.300 s, average=0.011 s; distance=557053 kB, estimate=557053 kB; lsn=2/97778920, redo lsn=2/78FFFEF8
+2026-10-30 01:34:47.713 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 01:35:37.670 UTC [62] LOG:  checkpoint complete: wrote 1631 buffers (0.6%); 0 WAL file(s) added, 1 removed, 32 recycled; write=49.312 s, sync=0.593 s, total=49.957 s; sync files=59, longest=0.249 s, average=0.011 s; distance=524813 kB, estimate=553829 kB; lsn=2/B8D823D8, redo lsn=2/99083408
+2026-10-30 01:35:59.183 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 01:37:23.748 UTC [6732] LOG:  skipping vacuum of "x6s1w0g5e1913417" --- lock not available
+2026-10-30 01:37:28.082 UTC [62] LOG:  checkpoint complete: wrote 37655 buffers (14.4%); 0 WAL file(s) added, 2 removed, 31 recycled; write=88.353 s, sync=0.532 s, total=88.899 s; sync files=66, longest=0.298 s, average=0.009 s; distance=556526 kB, estimate=556526 kB; lsn=2/DA48F648, redo lsn=2/BAFFEE88
+2026-10-30 01:37:49.572 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 01:38:39.272 UTC [62] LOG:  checkpoint complete: wrote 37087 buffers (14.1%); 0 WAL file(s) added, 2 removed, 31 recycled; write=48.986 s, sync=0.703 s, total=49.700 s; sync files=73, longest=0.344 s, average=0.010 s; distance=540673 kB, estimate=554941 kB; lsn=2/FBA25868, redo lsn=2/DBFFF488
+2026-10-30 01:38:46.448 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 01:40:39.329 UTC [62] LOG:  checkpoint complete: wrote 15317 buffers (5.8%); 0 WAL file(s) added, 2 removed, 31 recycled; write=112.197 s, sync=0.618 s, total=112.882 s; sync files=59, longest=0.315 s, average=0.011 s; distance=528654 kB, estimate=552312 kB; lsn=3/1CFA37A8, redo lsn=2/FC442F70
+2026-10-30 01:40:46.649 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 01:41:24.917 UTC [7263] LOG:  skipping vacuum of "x6s1w0g6e5d151a3" --- lock not available
+2026-10-30 01:42:46.027 UTC [62] LOG:  checkpoint complete: wrote 39946 buffers (15.2%); 0 WAL file(s) added, 3 removed, 30 recycled; write=118.688 s, sync=0.623 s, total=119.378 s; sync files=61, longest=0.388 s, average=0.011 s; distance=546330 kB, estimate=551714 kB; lsn=3/3E3F77F8, redo lsn=3/1D9C9AE8
+2026-10-30 01:43:07.810 UTC [62] LOG:  checkpoints are occurring too frequently (21 seconds apart)
+2026-10-30 01:43:07.810 UTC [62] HINT:  Consider increasing the configuration parameter "max_wal_size".
+2026-10-30 01:43:07.810 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 01:43:26.054 UTC [7815] LOG:  skipping vacuum of "x6s1w1g73c589446" --- lock not available
+2026-10-30 01:43:57.473 UTC [62] LOG:  checkpoint complete: wrote 37141 buffers (14.2%); 0 WAL file(s) added, 3 removed, 31 recycled; write=48.880 s, sync=0.724 s, total=49.663 s; sync files=66, longest=0.304 s, average=0.011 s; distance=563414 kB, estimate=563414 kB; lsn=3/5F8BED88, redo lsn=3/3FFFF590
+2026-10-30 01:44:05.000 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 01:45:23.878 UTC [8307] LOG:  skipping vacuum of "x6s2w1943e1aad" --- lock not available
+2026-10-30 01:45:51.668 UTC [62] LOG:  checkpoint complete: wrote 16007 buffers (6.1%); 0 WAL file(s) added, 0 removed, 33 recycled; write=106.285 s, sync=0.366 s, total=106.669 s; sync files=62, longest=0.151 s, average=0.006 s; distance=527245 kB, estimate=559797 kB; lsn=3/7E8431F0, redo lsn=3/602E2BF0
+2026-10-30 01:46:12.729 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 01:46:26.451 UTC [8316] LOG:  skipping vacuum of "x6s2w1g01678f334" --- lock not available
+2026-10-30 01:47:01.483 UTC [62] LOG:  checkpoint complete: wrote 70282 buffers (26.8%); 0 WAL file(s) added, 0 removed, 33 recycled; write=48.050 s, sync=0.696 s, total=48.755 s; sync files=82, longest=0.289 s, average=0.009 s; distance=554098 kB, estimate=559227 kB; lsn=3/9FCDFA88, redo lsn=3/81FFF688
+2026-10-30 01:47:23.440 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 01:49:04.621 UTC [62] LOG:  checkpoint complete: wrote 38280 buffers (14.6%); 0 WAL file(s) added, 1 removed, 32 recycled; write=100.703 s, sync=0.419 s, total=101.182 s; sync files=70, longest=0.258 s, average=0.006 s; distance=540673 kB, estimate=557372 kB; lsn=3/C1400610, redo lsn=3/A2FFFB28
+2026-10-30 01:49:26.179 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 01:50:15.727 UTC [62] LOG:  checkpoint complete: wrote 37387 buffers (14.3%); 0 WAL file(s) added, 1 removed, 32 recycled; write=48.867 s, sync=0.673 s, total=49.549 s; sync files=64, longest=0.304 s, average=0.011 s; distance=527942 kB, estimate=554429 kB; lsn=3/E2853780, redo lsn=3/C3391570
+2026-10-30 01:50:24.509 UTC [8879] LOG:  skipping vacuum of "x6s2w0g1b00187df" --- lock not available
+2026-10-30 01:51:32.631 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 01:52:21.931 UTC [62] LOG:  checkpoint complete: wrote 2006 buffers (0.8%); 0 WAL file(s) added, 1 removed, 32 recycled; write=48.709 s, sync=0.581 s, total=49.300 s; sync files=56, longest=0.205 s, average=0.011 s; distance=542219 kB, estimate=553208 kB; lsn=4/3CC0570, redo lsn=3/E4514230
+2026-10-30 01:52:24.434 UTC [9431] LOG:  skipping vacuum of "x6s2w0g280ac69a4" --- lock not available
+2026-10-30 01:52:43.149 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 01:54:19.284 UTC [62] LOG:  checkpoint complete: wrote 38840 buffers (14.8%); 0 WAL file(s) added, 2 removed, 31 recycled; write=95.578 s, sync=0.549 s, total=96.135 s; sync files=67, longest=0.207 s, average=0.009 s; distance=540229 kB, estimate=551910 kB; lsn=4/25472910, redo lsn=4/54A59A0
+2026-10-30 01:54:24.058 UTC [9931] LOG:  skipping vacuum of "x6s2w0g32f9836d6" --- lock not available
+2026-10-30 01:54:40.335 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 01:55:24.418 UTC [9940] LOG:  skipping vacuum of "x6s2w1g355b38926" --- lock not available
+2026-10-30 01:55:30.235 UTC [62] LOG:  checkpoint complete: wrote 35525 buffers (13.6%); 0 WAL file(s) added, 2 removed, 31 recycled; write=49.168 s, sync=0.722 s, total=49.900 s; sync files=74, longest=0.300 s, average=0.010 s; distance=539633 kB, estimate=550682 kB; lsn=4/46AA0C00, redo lsn=4/263A1F60
+2026-10-30 01:55:37.329 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 01:57:24.462 UTC [10468] LOG:  skipping vacuum of "x6s2w0g4c78c0d54" --- lock not available
+2026-10-30 01:57:33.021 UTC [62] LOG:  checkpoint complete: wrote 16334 buffers (6.2%); 0 WAL file(s) added, 2 removed, 31 recycled; write=114.999 s, sync=0.591 s, total=115.693 s; sync files=61, longest=0.304 s, average=0.010 s; distance=541728 kB, estimate=549787 kB; lsn=4/67FAD828, redo lsn=4/474AA228
+2026-10-30 01:57:40.742 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 01:59:24.151 UTC [10936] LOG:  skipping vacuum of "x6s2w0g51b077dcc" --- lock not available
+2026-10-30 01:59:28.828 UTC [62] LOG:  checkpoint complete: wrote 39800 buffers (15.2%); 0 WAL file(s) added, 3 removed, 30 recycled; write=107.384 s, sync=0.636 s, total=108.087 s; sync files=64, longest=0.351 s, average=0.010 s; distance=545972 kB, estimate=549405 kB; lsn=4/894D6EB0, redo lsn=4/689D7228
+2026-10-30 01:59:51.052 UTC [62] LOG:  checkpoints are occurring too frequently (23 seconds apart)
+2026-10-30 01:59:51.052 UTC [62] HINT:  Consider increasing the configuration parameter "max_wal_size".
+2026-10-30 01:59:51.052 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 02:00:44.492 UTC [62] LOG:  checkpoint complete: wrote 37028 buffers (14.1%); 0 WAL file(s) added, 3 removed, 31 recycled; write=52.629 s, sync=0.795 s, total=53.440 s; sync files=73, longest=0.297 s, average=0.011 s; distance=563362 kB, estimate=563362 kB; lsn=4/AAA0A268, redo lsn=4/8AFFFDF8
+2026-10-30 02:00:52.622 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 02:02:49.123 UTC [62] LOG:  checkpoint complete: wrote 15068 buffers (5.7%); 0 WAL file(s) added, 2 removed, 31 recycled; write=115.919 s, sync=0.469 s, total=116.501 s; sync files=64, longest=0.199 s, average=0.008 s; distance=528462 kB, estimate=559872 kB; lsn=4/CBF37278, redo lsn=4/AB413808
+2026-10-30 02:02:57.250 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 02:03:24.569 UTC [11459] LOG:  skipping vacuum of "x6s2w0g6482469fc" --- lock not available
+2026-10-30 02:04:59.092 UTC [62] LOG:  checkpoint complete: wrote 39897 buffers (15.2%); 0 WAL file(s) added, 3 removed, 30 recycled; write=121.157 s, sync=0.664 s, total=121.843 s; sync files=63, longest=0.361 s, average=0.011 s; distance=546108 kB, estimate=558496 kB; lsn=4/ED445FF0, redo lsn=4/CC962A78
+2026-10-30 02:05:20.939 UTC [62] LOG:  checkpoints are occurring too frequently (21 seconds apart)
+2026-10-30 02:05:20.939 UTC [62] HINT:  Consider increasing the configuration parameter "max_wal_size".
+2026-10-30 02:05:20.939 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 02:06:15.538 UTC [62] LOG:  checkpoint complete: wrote 35701 buffers (13.6%); 0 WAL file(s) added, 3 removed, 31 recycled; write=53.806 s, sync=0.719 s, total=54.599 s; sync files=65, longest=0.276 s, average=0.012 s; distance=552116 kB, estimate=557858 kB; lsn=5/E7FB6F0, redo lsn=4/EE48FBF0
+2026-10-30 02:06:23.573 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 02:06:24.633 UTC [12001] LOG:  skipping vacuum of "x6s2w1g78f8b696d" --- lock not available
+2026-10-30 02:08:24.671 UTC [12553] LOG:  skipping vacuum of "x6s3sepf2385e70" --- lock not available
+2026-10-30 02:08:27.126 UTC [62] LOG:  checkpoint complete: wrote 18329 buffers (7.0%); 0 WAL file(s) added, 0 removed, 33 recycled; write=123.170 s, sync=0.365 s, total=123.553 s; sync files=65, longest=0.187 s, average=0.006 s; distance=538068 kB, estimate=555879 kB; lsn=5/2DFBC058, redo lsn=5/F204CA8
+2026-10-30 02:08:48.831 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 02:09:41.291 UTC [62] LOG:  checkpoint complete: wrote 70322 buffers (26.8%); 0 WAL file(s) added, 1 removed, 32 recycled; write=51.689 s, sync=0.695 s, total=52.461 s; sync files=86, longest=0.294 s, average=0.009 s; distance=554982 kB, estimate=555789 kB; lsn=5/4F419BC8, redo lsn=5/30FFE518
+2026-10-30 02:10:03.566 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 02:10:25.272 UTC [12568] LOG:  skipping vacuum of "x6s3w0g0631ecc3c" --- lock not available
+2026-10-30 02:11:57.935 UTC [62] LOG:  checkpoint complete: wrote 35841 buffers (13.7%); 0 WAL file(s) added, 1 removed, 32 recycled; write=113.771 s, sync=0.585 s, total=114.370 s; sync files=67, longest=0.340 s, average=0.009 s; distance=528754 kB, estimate=553086 kB; lsn=5/70A9B0F8, redo lsn=5/5145AF08
+2026-10-30 02:12:19.940 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 02:13:13.642 UTC [62] LOG:  checkpoint complete: wrote 36469 buffers (13.9%); 0 WAL file(s) added, 1 removed, 32 recycled; write=53.090 s, sync=0.604 s, total=53.703 s; sync files=64, longest=0.287 s, average=0.010 s; distance=537592 kB, estimate=551536 kB; lsn=5/91F1D4F0, redo lsn=5/72159120
+2026-10-30 02:13:24.398 UTC [13158] LOG:  skipping vacuum of "x6s3w0g1b43882af" --- lock not available
+2026-10-30 02:14:33.112 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 02:15:24.857 UTC [13710] LOG:  skipping vacuum of "x6s3w1g2e33a07b3" --- lock not available
+2026-10-30 02:15:27.294 UTC [62] LOG:  checkpoint complete: wrote 1281 buffers (0.5%); 0 WAL file(s) added, 2 removed, 31 recycled; write=53.524 s, sync=0.644 s, total=54.183 s; sync files=61, longest=0.360 s, average=0.011 s; distance=544958 kB, estimate=550878 kB; lsn=5/B364D9E0, redo lsn=5/935889E8
+2026-10-30 02:15:35.197 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 02:17:24.476 UTC [14180] LOG:  skipping vacuum of "x6s3w0g31f2b3f30" --- lock not available
+2026-10-30 02:17:28.132 UTC [62] LOG:  checkpoint complete: wrote 39808 buffers (15.2%); 0 WAL file(s) added, 2 removed, 31 recycled; write=112.275 s, sync=0.638 s, total=112.936 s; sync files=61, longest=0.340 s, average=0.011 s; distance=535355 kB, estimate=549326 kB; lsn=5/D4C19790, redo lsn=5/B4057828
+2026-10-30 02:17:36.064 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 02:18:43.885 UTC [62] LOG:  checkpoint complete: wrote 35068 buffers (13.4%); 0 WAL file(s) added, 3 removed, 30 recycled; write=67.027 s, sync=0.725 s, total=67.821 s; sync files=70, longest=0.357 s, average=0.011 s; distance=546739 kB, estimate=549067 kB; lsn=5/F601C618, redo lsn=5/D56447D8
+2026-10-30 02:18:43.885 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 02:20:50.683 UTC [62] LOG:  checkpoint complete: wrote 17750 buffers (6.8%); 0 WAL file(s) added, 3 removed, 30 recycled; write=126.057 s, sync=0.631 s, total=126.798 s; sync files=63, longest=0.346 s, average=0.011 s; distance=535289 kB, estimate=547690 kB; lsn=6/170294B0, redo lsn=5/F6102BF0
+2026-10-30 02:20:50.683 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 02:21:24.907 UTC [14699] LOG:  skipping vacuum of "x6s3w0g40a41e568" --- lock not available
+2026-10-30 02:23:01.184 UTC [62] LOG:  checkpoint complete: wrote 40033 buffers (15.3%); 0 WAL file(s) added, 3 removed, 30 recycled; write=129.826 s, sync=0.616 s, total=130.501 s; sync files=63, longest=0.345 s, average=0.010 s; distance=546266 kB, estimate=547547 kB; lsn=6/38C39F08, redo lsn=6/17679510
+2026-10-30 02:23:09.388 UTC [62] LOG:  checkpoints are occurring too frequently (8 seconds apart)
+2026-10-30 02:23:09.388 UTC [62] HINT:  Consider increasing the configuration parameter "max_wal_size".
+2026-10-30 02:23:09.388 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 02:24:17.646 UTC [62] LOG:  checkpoint complete: wrote 35008 buffers (13.4%); 0 WAL file(s) added, 3 removed, 31 recycled; write=67.529 s, sync=0.654 s, total=68.258 s; sync files=68, longest=0.245 s, average=0.010 s; distance=556961 kB, estimate=556961 kB; lsn=6/59FE2468, redo lsn=6/39661AE0
+2026-10-30 02:24:24.646 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 02:24:24.895 UTC [15233] LOG:  skipping vacuum of "x6s3w0g54659de34" --- lock not available
+2026-10-30 02:26:25.003 UTC [15785] LOG:  skipping vacuum of "x6s3w0g62fbed01c" --- lock not available
+2026-10-30 02:26:31.043 UTC [62] LOG:  checkpoint complete: wrote 17067 buffers (6.5%); 0 WAL file(s) added, 3 removed, 30 recycled; write=125.748 s, sync=0.634 s, total=126.398 s; sync files=66, longest=0.232 s, average=0.010 s; distance=534176 kB, estimate=554682 kB; lsn=6/7B7BD108, redo lsn=6/5A009B28
+2026-10-30 02:26:38.901 UTC [62] LOG:  checkpoints are occurring too frequently (7 seconds apart)
+2026-10-30 02:26:38.901 UTC [62] HINT:  Consider increasing the configuration parameter "max_wal_size".
+2026-10-30 02:26:38.901 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 02:28:24.681 UTC [16253] LOG:  skipping vacuum of "x6s3w0g7817c1cc6" --- lock not available
+2026-10-30 02:28:30.285 UTC [62] LOG:  checkpoint complete: wrote 39892 buffers (15.2%); 0 WAL file(s) added, 3 removed, 31 recycled; write=110.757 s, sync=0.557 s, total=111.384 s; sync files=65, longest=0.325 s, average=0.009 s; distance=558982 kB, estimate=558982 kB; lsn=6/9CD8C7C8, redo lsn=6/7C1EB3E8
+2026-10-30 02:28:38.429 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 02:29:46.033 UTC [62] LOG:  checkpoint complete: wrote 35015 buffers (13.4%); 0 WAL file(s) added, 3 removed, 30 recycled; write=66.818 s, sync=0.719 s, total=67.604 s; sync files=70, longest=0.367 s, average=0.011 s; distance=546606 kB, estimate=557744 kB; lsn=6/BE2553C0, redo lsn=6/9D7B6CC8
+2026-10-30 02:30:58.213 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 02:31:24.716 UTC [16763] LOG:  skipping vacuum of "x6s4w144dfdc21" --- lock not available
+2026-10-30 02:31:55.085 UTC [62] LOG:  checkpoint complete: wrote 2174 buffers (0.8%); 0 WAL file(s) added, 0 removed, 34 recycled; write=56.657 s, sync=0.207 s, total=56.873 s; sync files=58, longest=0.098 s, average=0.004 s; distance=565536 kB, estimate=565536 kB; lsn=6/DCF3ACF8, redo lsn=6/BFFFEDB8
+2026-10-30 02:32:11.716 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 02:32:24.992 UTC [16772] LOG:  skipping vacuum of "x6s4w1g0d78db303" --- lock not available
+2026-10-30 02:33:02.992 UTC [62] LOG:  checkpoint complete: wrote 67997 buffers (25.9%); 0 WAL file(s) added, 0 removed, 33 recycled; write=50.558 s, sync=0.711 s, total=51.277 s; sync files=82, longest=0.300 s, average=0.009 s; distance=526925 kB, estimate=561675 kB; lsn=6/FE3CFB70, redo lsn=6/E0292278
+2026-10-30 02:33:25.280 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 02:35:10.489 UTC [62] LOG:  checkpoint complete: wrote 39971 buffers (15.2%); 0 WAL file(s) added, 0 removed, 33 recycled; write=104.691 s, sync=0.403 s, total=105.209 s; sync files=72, longest=0.193 s, average=0.006 s; distance=543171 kB, estimate=559824 kB; lsn=7/1FB8D650, redo lsn=7/15031D8
+2026-10-30 02:35:33.128 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 02:36:25.163 UTC [17335] LOG:  skipping vacuum of "x6s4w0g1acbfa1b9" --- lock not available
+2026-10-30 02:36:27.155 UTC [62] LOG:  checkpoint complete: wrote 38568 buffers (14.7%); 0 WAL file(s) added, 1 removed, 32 recycled; write=53.316 s, sync=0.695 s, total=54.027 s; sync files=73, longest=0.367 s, average=0.010 s; distance=540540 kB, estimate=557896 kB; lsn=7/412CDAB0, redo lsn=7/224E2338
+2026-10-30 02:37:42.681 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 02:38:25.315 UTC [17875] LOG:  skipping vacuum of "x6s4w1g2c6e4edf7" --- lock not available
+2026-10-30 02:38:33.889 UTC [62] LOG:  checkpoint complete: wrote 2342 buffers (0.9%); 0 WAL file(s) added, 1 removed, 32 recycled; write=50.623 s, sync=0.532 s, total=51.209 s; sync files=65, longest=0.343 s, average=0.009 s; distance=537066 kB, estimate=555813 kB; lsn=7/6293F270, redo lsn=7/4315CE08
+2026-10-30 02:38:55.343 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 02:40:24.909 UTC [18343] LOG:  skipping vacuum of "x6s4w0g39897e9d4" --- lock not available
+2026-10-30 02:40:30.743 UTC [62] LOG:  checkpoint complete: wrote 38678 buffers (14.8%); 0 WAL file(s) added, 1 removed, 32 recycled; write=94.852 s, sync=0.431 s, total=95.401 s; sync files=64, longest=0.261 s, average=0.007 s; distance=539562 kB, estimate=554188 kB; lsn=7/83F71168, redo lsn=7/640478B0
+2026-10-30 02:40:53.606 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 02:41:47.235 UTC [62] LOG:  checkpoint complete: wrote 37666 buffers (14.4%); 0 WAL file(s) added, 2 removed, 31 recycled; write=52.899 s, sync=0.719 s, total=53.630 s; sync files=67, longest=0.280 s, average=0.011 s; distance=556767 kB, estimate=556767 kB; lsn=7/A54FE1D8, redo lsn=7/85FFF7D8
+2026-10-30 02:42:25.233 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 02:43:24.943 UTC [18849] LOG:  skipping vacuum of "x6s4w0g43563479d" --- lock not available
+2026-10-30 02:43:52.043 UTC [62] LOG:  checkpoint complete: wrote 6136 buffers (2.3%); 0 WAL file(s) added, 2 removed, 31 recycled; write=86.200 s, sync=0.586 s, total=86.810 s; sync files=58, longest=0.207 s, average=0.011 s; distance=524814 kB, estimate=553572 kB; lsn=7/C697FCE8, redo lsn=7/A6083348
+2026-10-30 02:44:00.098 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 02:44:27.608 UTC [18858] LOG:  skipping vacuum of "x6s4w0g4f19ac436" --- lock not available
+2026-10-30 02:46:01.084 UTC [62] LOG:  checkpoint complete: wrote 40106 buffers (15.3%); 0 WAL file(s) added, 3 removed, 30 recycled; write=120.333 s, sync=0.585 s, total=120.986 s; sync files=68, longest=0.356 s, average=0.009 s; distance=543768 kB, estimate=552592 kB; lsn=7/E8033450, redo lsn=7/C7389498
+2026-10-30 02:46:22.964 UTC [62] LOG:  checkpoints are occurring too frequently (21 seconds apart)
+2026-10-30 02:46:22.964 UTC [62] HINT:  Consider increasing the configuration parameter "max_wal_size".
+2026-10-30 02:46:22.964 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 02:47:16.653 UTC [62] LOG:  checkpoint complete: wrote 35743 buffers (13.6%); 0 WAL file(s) added, 3 removed, 31 recycled; write=52.926 s, sync=0.749 s, total=53.689 s; sync files=70, longest=0.340 s, average=0.011 s; distance=554022 kB, estimate=554022 kB; lsn=8/9456A80, redo lsn=7/E9093078
+2026-10-30 02:47:25.387 UTC [19392] LOG:  skipping vacuum of "x6s4w0g5a97315f5" --- lock not available
+2026-10-30 02:47:25.660 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 02:49:25.416 UTC [19944] LOG:  skipping vacuum of "x6s4w0g6972de199" --- lock not available
+2026-10-30 02:49:28.147 UTC [62] LOG:  checkpoint complete: wrote 17765 buffers (6.8%); 0 WAL file(s) added, 2 removed, 31 recycled; write=121.847 s, sync=0.630 s, total=122.488 s; sync files=61, longest=0.347 s, average=0.011 s; distance=540422 kB, estimate=552662 kB; lsn=8/2AB0D6B0, redo lsn=8/A0548D8
+2026-10-30 02:49:36.022 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 02:51:25.100 UTC [20422] LOG:  skipping vacuum of "x6s4w0g7c4a9e3f1" --- lock not available
+2026-10-30 02:51:26.700 UTC [62] LOG:  checkpoint complete: wrote 39806 buffers (15.2%); 0 WAL file(s) added, 3 removed, 30 recycled; write=109.959 s, sync=0.650 s, total=110.679 s; sync files=60, longest=0.342 s, average=0.011 s; distance=545626 kB, estimate=551959 kB; lsn=8/4C08D188, redo lsn=8/2B52B2D0
+2026-10-30 02:51:49.354 UTC [62] LOG:  checkpoints are occurring too frequently (23 seconds apart)
+2026-10-30 02:51:49.354 UTC [62] HINT:  Consider increasing the configuration parameter "max_wal_size".
+2026-10-30 02:51:49.354 UTC [62] LOG:  checkpoint starting: wal
+2026-10-30 02:52:41.251 UTC [62] LOG:  checkpoint complete: wrote 37564 buffers (14.3%); 0 WAL file(s) added, 3 removed, 31 recycled; write=51.086 s, sync=0.800 s, total=51.898 s; sync files=70, longest=0.302 s, average=0.012 s; distance=568143 kB, estimate=568143 kB; lsn=8/6D636980, redo lsn=8/4DFFEFA0
+2026-10-30 02:52:48.538 UTC [62] LOG:  checkpoint starting: wal
