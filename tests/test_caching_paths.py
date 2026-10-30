@@ -18,6 +18,7 @@ from wardowl import (
     MetadataACLAuthorizer,
     Or,
     PermissionedRetriever,
+    SearchError,
     Subject,
     TenantAuthorizer,
 )
@@ -86,7 +87,8 @@ def test_an_answer_that_is_not_a_filter_is_never_cached_and_fails_closed(answer)
     authz = CachingAuthorizer(bogus, shared=shared, namespace=NS)
     retriever = PermissionedRetriever(InMemoryBackend([Document("d", "leave", {})]), authz)
     for _ in range(2):
-        with pytest.raises((AuthorizationError, TypeError)):  # refused by the retriever, or by the store
+        # refused by the retriever, or by the store (whose failure the retriever raises as SearchError)
+        with pytest.raises((AuthorizationError, SearchError)):
             retriever.retrieve("leave", BOB)
     assert bogus.filters == 2 and shared.data == {}  # asked again: neither cache kept it
 

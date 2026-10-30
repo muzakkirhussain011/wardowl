@@ -550,7 +550,7 @@ def test_pgvector_sets_a_statement_timeout_in_each_search_and_count():
     ]
     counted = Recorder([(2,)])
     assert PgVectorBackend(counted, EMBED, statement_timeout=0.0012).count(f, 4) == 2
-    assert [s for s, _ in counted.statements][0] == "SET LOCAL statement_timeout = 1"  # whole milliseconds
+    assert counted.statements[0][0] == "SET LOCAL statement_timeout = 1"  # whole milliseconds
     # The native async paths send the same.
     async_pool, acount_pool = AsyncRecorder([ROW]), AsyncRecorder([(2,)])
     native = PgVectorBackend(None, EMBED, async_pool=async_pool, statement_timeout=1.5, work_mem="64MB")
@@ -580,7 +580,7 @@ def test_pgvector_statement_timeout_cancels_a_search_held_up_by_a_lock(pgvector_
     with pgvector_pool.connection() as holder:
         holder.execute('LOCK TABLE "wo_timeout" IN ACCESS EXCLUSIVE MODE')  # held until this transaction ends
         started = time.monotonic()
-        with pytest.raises(SearchError, match="^search failed$") as failure:
+        with pytest.raises(SearchError, match=r"^search failed$") as failure:
             retriever.retrieve("leave", Subject("bob"), 1)
         waited = time.monotonic() - started
         holder.rollback()
