@@ -178,8 +178,8 @@ All notable changes are recorded here. The format follows
   HTTP 400. The conformance campaign's users `zoë` and `7.0` made 117 and 124 of 140 SpiceDB runs
   fail that way.
 - `RedisBackend` and `MongoDBBackend` find chunks whose metadata holds a long value. The Redis Query
-  Engine indexes at most 4,096 bytes of a TAG value and Atlas Search at most 8,181 characters of a
-  string; both cut a longer one short at indexing, while a filter names the whole value, so a
+  Engine indexes at most 4,096 bytes of a TAG value and a vector-search filter field at most 8,191
+  characters of a string; both cut a longer one short at indexing, while a filter names the whole value, so a
   pre-filtered search missed such chunks, and a value made of the first part of a longer one
   matched it (the retriever's re-check dropped those). A permission term longer than that, field
   name and value together (over 2,048 bytes in Redis, whose terms are hex-encoded, and over 8,181

@@ -68,11 +68,12 @@ An `In` with no values matches nothing without a call to MongoDB; `filter_to_mon
 without a filter matches everything. Only one field needs indexing, whatever your metadata looks
 like.
 
-Atlas Search indexes at most 8,181 characters of a string (the limit its `token` field type
-documents; Java characters, so one outside the Basic Multilingual Plane counts twice) and cuts a
-longer one short, while a filter names the whole value. A term longer than that, field name and
-value together, is therefore stored and searched as its SHA-256 digest. Its chunk is found like any
-other, and a value that is only the first 8,181 characters of a longer one does not match it.
+A vector-search index cuts a long string short when it indexes a filter field, while a filter names
+the whole value. The limit is not documented for this field type: it measured 8,191 characters on
+Atlas Local 8.0 and 8.3, and the `token` field type documents 8,181 (Java characters, so one outside
+the Basic Multilingual Plane counts twice). A term longer than 8,181, field name and value together,
+is therefore stored and searched as its SHA-256 digest. Its chunk is found like any other, and a
+value that is only the first part of a longer one does not match it.
 `permission_terms` writes the same form.
 
 ## Collections written by other tools
