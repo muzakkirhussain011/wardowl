@@ -20,7 +20,15 @@ from wardowl.events import JsonLinesAudit, RetrievalEvent
 from wardowl.filters import And, Filter, In, Or, filter_from_dict, filter_to_dict, matches
 from wardowl.fusion import RankFusion
 from wardowl.redaction import PatternRedactor, Redactor, SpanRedactor
-from wardowl.retriever import PermissionedRetriever, Reranker, RetrievalResult, SearchBackend, ShortResults, Strategy
+from wardowl.retriever import (
+    PermissionedRetriever,
+    Reranker,
+    RetrievalResult,
+    SearchBackend,
+    SearchError,
+    ShortResults,
+    Strategy,
+)
 from wardowl.types import Document, Hit, InvalidQuery, Query, Subject
 
 __version__ = "2.1.0"
@@ -51,6 +59,7 @@ __all__ = [
     "RetrievalEvent",
     "RetrievalResult",
     "SearchBackend",
+    "SearchError",
     "ShortResults",
     "SpanRedactor",
     "Strategy",

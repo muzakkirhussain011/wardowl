@@ -49,6 +49,17 @@ authorizer = CachingAuthorizer(openfga, ttl=30, maxsize=100_000)
   role change you handled yourself; `invalidate()` drops everything. An answer the permission
   service gave before the call, to a retrieval still in progress, is not cached after it: once
   `invalidate()` returns, no retrieval that starts in this process uses an answer from before it.
+- **A service that is behind:** a permission service can answer from data some seconds old
+  (SpiceDB under `minimizeLatency`, OpenFGA's check cache, a policy engine that has not reloaded),
+  and so give an answer from before the change just after `invalidate()`. For `source_staleness`
+  seconds after the call, answers for that subject (for everyone, after `invalidate()`) are passed
+  on but cached nowhere, so such an answer is never kept for `ttl`. It defaults to the wrapped
+  authorizer's `max_staleness`: 11 seconds for `SpiceDBAuthorizer` with its default consistency, 0
+  with `fullyConsistent`, and 0 for an authorizer that declares none. Pass it for a service whose
+  delay you know better ([Revocation and consistency](revocation.md#bounded-staleness)). If the
+  service is never staler than `source_staleness`, a revocation reported with `invalidate()` stops
+  granting access within `source_staleness` in this process and within `source_staleness` plus
+  `local_ttl` in the others: the cache adds nothing to the service's own delay.
 
 It works for `retrieve` and `aretrieve`, using the wrapped authorizer's async methods when it has
 them.
@@ -83,10 +94,13 @@ authorizer = CachingAuthorizer(openfga, ttl=30, shared=shared, namespace="openfg
 - **A late answer from another replica is never read.** A replica may have asked the permission
   service just before the revocation and write its answer to Redis just after. `invalidate()`
   therefore also stores a new random epoch (one per subject id, and one for `invalidate()` of
-  everything), and an entry is used only under the epoch it was written in. Epochs stay in Redis
-  for `ttl` plus an hour. An attacker who can write to your Redis and copies back a signed entry
-  together with its old epoch can extend a decision only until that entry's own expiry, at most
-  `ttl` after the permission service gave it.
+  everything), and an entry is used only under the epoch it was written in. The epoch also carries
+  the end of the invalidation's hold (on the wall clock, like entries' expiry times), so every
+  replica that reads it keeps nothing for that subject until then, whatever its own
+  `source_staleness`. Epochs stay in Redis for `ttl` plus `source_staleness` plus an hour. During a
+  rolling upgrade, replicas of earlier versions ignore the hold. An attacker who can write to your
+  Redis and copies back a signed entry together with its old epoch can extend a decision only until
+  that entry's own expiry, at most `ttl` after the permission service gave it.
 - **One namespace per policy.** `namespace` is required with a shared cache. Every
   `CachingAuthorizer` with the same Redis and `namespace` uses the same answers, whatever authorizer
   it wraps, so give each differently configured authorizer (another policy, OpenFGA store, tenant
@@ -193,6 +207,13 @@ failed: ConnectionRefusedError", never the text of the exception behind it: that
 hosts, users or credentials, and agent frameworks show a tool's error to the model. The exception
 itself is the error's `__cause__`, so a log that records the traceback (`logging.exception`, or the
 HTTP service's log) keeps the details, and `RetrievalEvent.cause` names its type.
+
+The vector store is held to the same rule. When the backend's search or count raises, the retriever
+raises `wardowl.SearchError` with a fixed message, "search failed" or "count failed", and the
+store client's exception as its `__cause__` (a driver's `OperationalError` or pool timeout, an HTTP
+client's error with the response it got). The one exception is `InvalidQuery`, which says the query
+itself cannot be searched, such as a vector of the wrong length, and is raised as it is. Catch
+`SearchError` where you caught your store client's exceptions, and read `__cause__` for the details.
 
 ## Subjects in very many groups
 

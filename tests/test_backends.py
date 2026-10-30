@@ -10,6 +10,7 @@ import asyncio
 import contextlib
 import json
 import os
+import time
 import uuid
 from types import SimpleNamespace
 
@@ -18,7 +19,17 @@ from helpers import QUERY, HashingEmbedder, corpora, expected_ids, filters, labe
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 
-from wardowl import Document, In, InMemoryBackend, MetadataACLAuthorizer, PermissionedRetriever, Query, Subject, matches
+from wardowl import (
+    Document,
+    In,
+    InMemoryBackend,
+    MetadataACLAuthorizer,
+    PermissionedRetriever,
+    Query,
+    SearchError,
+    Subject,
+    matches,
+)
 from wardowl.testing import QUERY as KIT_QUERY
 from wardowl.testing import check_backend
 
@@ -515,6 +526,67 @@ def test_pgvector_counts_the_rows_a_filter_matches_no_further_than_a_limit():
     assert keyword.count(In("allowed_groups", ["hr"]), 11) is None
     assert asyncio.run(keyword.acount(In("allowed_groups", ["hr"]), 11)) is None
     assert len(pool.statements) == 3 and backend.supports_exact and not keyword.supports_exact
+
+
+def test_pgvector_sets_a_statement_timeout_in_each_search_and_count():
+    pytest.importorskip("psycopg")
+    from wardowl.backends.pgvector import PgVectorBackend
+
+    pool = Recorder([ROW])
+    backend = PgVectorBackend(pool, EMBED, statement_timeout=1.5, work_mem="64MB")
+    f = In("allowed_groups", ["hr"])
+    backend.search("leave", 5, f)
+    backend.search("leave", 5, f, exact=True)
+    PgVectorBackend(pool, None, mode="keyword", statement_timeout=0.25).search("leave", 5, f)
+    sent = [s for s, _ in pool.statements if s.startswith("SET")]
+    assert sent == [
+        "SET LOCAL statement_timeout = 1500",
+        "SET LOCAL work_mem = '64MB'",
+        "SET LOCAL hnsw.iterative_scan = 'relaxed_order'",
+        "SET LOCAL statement_timeout = 1500",
+        "SET LOCAL work_mem = '64MB'",
+        "SET LOCAL enable_indexscan = off",
+        "SET LOCAL statement_timeout = 250",  # a keyword search is bounded too
+    ]
+    counted = Recorder([(2,)])
+    assert PgVectorBackend(counted, EMBED, statement_timeout=0.0012).count(f, 4) == 2
+    assert counted.statements[0][0] == "SET LOCAL statement_timeout = 1"  # whole milliseconds
+    # The native async paths send the same.
+    async_pool, acount_pool = AsyncRecorder([ROW]), AsyncRecorder([(2,)])
+    native = PgVectorBackend(None, EMBED, async_pool=async_pool, statement_timeout=1.5, work_mem="64MB")
+    asyncio.run(native.asearch("leave", 5, f))
+    acounter = PgVectorBackend(None, EMBED, async_pool=acount_pool, statement_timeout=0.0012)
+    assert asyncio.run(acounter.acount(f, 4)) == 2
+    assert async_pool.statements == pool.statements[:4] and acount_pool.statements == counted.statements
+
+
+@pytest.mark.parametrize("bad", [0, -1, 2_147_484, float("nan"), float("inf"), True, "1s"])
+def test_pgvector_statement_timeout_is_checked(bad):
+    from wardowl.backends.pgvector import PgVectorBackend
+
+    with pytest.raises(ValueError, match="statement_timeout"):
+        PgVectorBackend(None, EMBED, statement_timeout=bad)
+    PgVectorBackend(None, EMBED, statement_timeout=2_147_483.647)  # the largest PostgreSQL takes
+
+
+def test_pgvector_statement_timeout_cancels_a_search_held_up_by_a_lock(pgvector_pool):
+    from wardowl.backends.pgvector import PgVectorBackend, create_schema
+
+    create_schema(pgvector_pool, EMBED.dim, table="wo_timeout", hnsw=False)
+    backend = PgVectorBackend(pgvector_pool, EMBED, table="wo_timeout", iterative_scan=None, statement_timeout=0.3)
+    backend.add([Document("d1", "leave policy", {"allowed_groups": ["*"]})])
+    retriever = PermissionedRetriever(backend, MetadataACLAuthorizer())
+    assert [h.id for h in retriever.retrieve("leave", Subject("bob"), 1).hits] == ["d1"]
+    with pgvector_pool.connection() as holder:
+        holder.execute('LOCK TABLE "wo_timeout" IN ACCESS EXCLUSIVE MODE')  # held until this transaction ends
+        started = time.monotonic()
+        with pytest.raises(SearchError, match=r"^search failed$") as failure:
+            retriever.retrieve("leave", Subject("bob"), 1)
+        waited = time.monotonic() - started
+        holder.rollback()
+    # PostgreSQL cancelled the statement waiting for the lock; without the timeout it would wait.
+    assert type(failure.value.__cause__).__name__ == "QueryCanceled" and waited < 5
+    assert [h.id for h in retriever.retrieve("leave", Subject("bob"), 1).hits] == ["d1"]  # the pool is fine
 
 
 def test_pgvector_native_async_paths_send_what_the_sync_ones_send():

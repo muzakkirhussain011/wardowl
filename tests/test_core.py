@@ -17,9 +17,11 @@ from wardowl import (
     Hit,
     In,
     InMemoryBackend,
+    InvalidQuery,
     MetadataACLAuthorizer,
     Or,
     PermissionedRetriever,
+    SearchError,
     Subject,
     TenantAuthorizer,
     matches,
@@ -373,8 +375,8 @@ class _LeakyAsync:
     filter_for = _Leaky.filter_for
 
 
-def _fails_without_the_secret(call):
-    with pytest.raises(AuthorizationError) as failure:
+def _fails_without_the_secret(call, raised=AuthorizationError):
+    with pytest.raises(raised) as failure:
         call()
     error = failure.value
     assert "hunter2" not in str(error) and "hunter2" not in repr(error) and "opa.internal" not in str(error)
@@ -398,6 +400,64 @@ def test_a_redactor_error_reaches_no_message_but_stays_the_cause():
     retriever = PermissionedRetriever(InMemoryBackend(corpus()), MetadataACLAuthorizer(), redactor=redact)
     assert str(_fails_without_the_secret(lambda: retriever.retrieve("leave", BOB))) == "redaction failed"
     _fails_without_the_secret(lambda: asyncio.run(retriever.aretrieve("leave", BOB)))
+
+
+class _LeakyStore(InMemoryBackend):
+    """A store whose searches fail with an error that names a host and a password, as drivers' do."""
+
+    def search(self, query, k, filter=None):
+        _leaks()
+
+
+class _LeakyAsyncStore(_LeakyStore):
+    async def asearch(self, query, k, filter=None):
+        _leaks()
+
+
+class _LeakyCount(InMemoryBackend):
+    """A store whose count fails that way; it searches approximately, so a short result is counted."""
+
+    exact_search = False
+
+    def count(self, filter, limit):
+        _leaks()
+
+
+class _LeakyAsyncCount(_LeakyCount):
+    async def acount(self, filter, limit):
+        _leaks()
+
+
+@pytest.mark.parametrize("store", [_LeakyStore, _LeakyAsyncStore], ids=["sync", "async"])
+def test_a_store_error_reaches_no_message_but_stays_the_cause(store):
+    # A store's driver names its host and credentials too, and a tool's error reaches the model.
+    events = []
+    retriever = PermissionedRetriever(store(corpus()), MetadataACLAuthorizer(), observers=[events.append])
+    error = _fails_without_the_secret(lambda: retriever.retrieve("leave", BOB), SearchError)
+    assert str(error) == "search failed" and not isinstance(error, AuthorizationError)
+    _fails_without_the_secret(lambda: asyncio.run(retriever.aretrieve("leave", BOB)), SearchError)
+    assert [(e.error, e.cause, e.returned_ids) for e in events] == [("SearchError", "ConnectionError", ())] * 2
+
+
+@pytest.mark.parametrize("store", [_LeakyCount, _LeakyAsyncCount], ids=["sync", "async"])
+def test_a_count_error_reaches_no_message_but_stays_the_cause(store):
+    retriever = PermissionedRetriever(store(corpus()), MetadataACLAuthorizer(), short_results="count")
+    error = _fails_without_the_secret(lambda: retriever.retrieve("leave", BOB, k=10), SearchError)
+    assert str(error) == "count failed"
+    _fails_without_the_secret(lambda: asyncio.run(retriever.aretrieve("leave", BOB, k=10)), SearchError)
+
+
+def test_a_query_the_store_cannot_search_is_raised_as_it_is():
+    # InvalidQuery says the request is at fault (the HTTP service answers it with 422): not wrapped.
+    class TextOnly(InMemoryBackend):
+        def search(self, query, k, filter=None):
+            raise InvalidQuery("this store searches text only")
+
+    retriever = PermissionedRetriever(TextOnly(corpus()), MetadataACLAuthorizer())
+    with pytest.raises(InvalidQuery, match="text only"):
+        retriever.retrieve("leave", BOB)
+    with pytest.raises(InvalidQuery, match="text only"):
+        asyncio.run(retriever.aretrieve("leave", BOB))
 
 
 @pytest.mark.parametrize(

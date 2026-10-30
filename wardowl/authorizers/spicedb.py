@@ -7,7 +7,10 @@ library.
   on `document:<resource id>` for every chunk, in batches.
 * `filter_for` asks LookupResources for every document the user may view and turns the answer into
   an `In` filter, so the vector store pre-filters. If the answer reaches `lookup_limit` it may be
-  truncated, so no filter is returned and the retriever post-filters instead.
+  truncated, so no filter is returned and the retriever post-filters instead. An answer with no
+  document returns no filter either: SpiceDB marks no end to the stream, so one that a proxy or a
+  fault ended early cannot be told from a subject who may read nothing, and post-filtering lets
+  CheckBulkPermissions decide every candidate (`trust_empty_lookup=True` takes it as nothing).
 * Only the user is checked by default (`group_subjects=False`): SpiceDB follows the group
   memberships it stores, and applies exclusions (`viewer - banned`) and intersections to them.
   With `group_subjects=True` the subject's groups (from your identity provider, say) are also
@@ -35,9 +38,15 @@ transient failures are retried once, and a `CircuitBreaker` can pause requests t
 see `wardowl.authorizers`.
 
 Consistency: the default, `{"minimizeLatency": true}`, lets SpiceDB answer from a recent snapshot,
-so a revoked permission can keep granting access for up to the datastore's revision quantization
-interval (5 seconds by default). Pass `consistency={"fullyConsistent": True}`, or
-`{"atLeastAsFresh": {"token": zedtoken}}` after a write, for fresher answers.
+so a revoked permission can keep granting access for a while. SpiceDB documents the bound as its
+revision quantization interval plus a share of it (`--datastore-revision-quantization-interval`,
+5 s, and `--datastore-revision-quantization-max-staleness-percent`, 10%: 5.5 s by default), plus
+the follower read delay when it reads from replicas. Measured against SpiceDB 1.56 on Postgres with
+the defaults, it reached 8.7 s, and successive answers moved backwards: a revoked permission granted
+access again after it had stopped. `max_staleness` declares twice the documented bound, 11 s, which
+`CachingAuthorizer` reads; pass `max_staleness=` for a server with other settings. Pass
+`consistency={"fullyConsistent": True}` (`max_staleness` 0), or `{"atLeastAsFresh": {"token":
+zedtoken}}` with the token of the change, for answers that include it.
 """
 
 from __future__ import annotations
@@ -48,11 +57,18 @@ from collections.abc import Callable, Mapping, Sequence
 from typing import Any
 
 from wardowl.authorizers._http import DEFAULT_MAX_RESPONSE_BYTES, CircuitBreaker, JsonClient
-from wardowl.authz import AuthorizationError, UnsupportedSubject, _shown
+from wardowl.authz import AuthorizationError, UnsupportedSubject, _shown, _staleness
 from wardowl.filters import Filter, In
 from wardowl.types import Hit, Subject
 
 __all__ = ["SpiceDBAuthorizer"]
+
+# How stale a read that is not fullyConsistent can be, with `spicedb serve`'s defaults. SpiceDB
+# rounds the revision such a read uses down to --datastore-revision-quantization-interval (5 s), and
+# may pick one older still by --datastore-revision-quantization-max-staleness-percent of it (0.1):
+# 5.5 s in all (https://authzed.com/docs/spicedb/concepts/commands). SpiceDB 1.56.2 on Postgres was
+# measured up to 8.7 s stale with those defaults, so twice that bound is declared: 2 x 5 x 1.1 s.
+_DEFAULT_STALENESS = 11.0
 
 _HAS = "PERMISSIONSHIP_HAS_PERMISSION"
 _NO = "PERMISSIONSHIP_NO_PERMISSION"
@@ -88,6 +104,14 @@ class SpiceDBAuthorizer:
     `retries`, `circuit_breaker`, `ssl_context`, `max_response_bytes` and `allow_insecure` work as
     in `OPAAuthorizer`: a `token` sent over http:// to a host other than this machine needs
     `allow_insecure=True`. Every failure raises `AuthorizationError`.
+
+    `max_staleness` is how many seconds old SpiceDB's answers can be: 0 with
+    `{"fullyConsistent": True}`, and otherwise 11 by default, twice the bound SpiceDB documents for
+    its default quantization settings (see the module docstring). Pass it for a server with other
+    settings, or 0 if you send `atLeastAsFresh` with the token of every change you report with
+    `CachingAuthorizer.invalidate()`. `trust_empty_lookup=True` takes a LookupResources answer with
+    no document as "nothing is readable" and returns a filter that matches nothing, as earlier
+    versions did; by default it returns no filter, so the retriever post-filters.
     """
 
     def __init__(
@@ -103,8 +127,10 @@ class SpiceDBAuthorizer:
         group_relation: str = "member",
         group_subjects: bool = False,
         consistency: Mapping[str, Any] | None = None,
+        max_staleness: float | None = None,
         caveat_context: Callable[[Subject], Mapping[str, Any]] | None = None,
         lookup_limit: int = 1000,
+        trust_empty_lookup: bool = False,
         batch_size: int = 100,
         timeout: float = 2.0,
         headers: Mapping[str, str] | None = None,
@@ -136,9 +162,19 @@ class SpiceDBAuthorizer:
         self.group_relation = group_relation
         self.group_subjects = group_subjects
         self.consistency = dict(consistency or {"minimizeLatency": True})
+        self._max_staleness = None if max_staleness is None else _staleness(max_staleness)
         self.caveat_context = caveat_context
         self.lookup_limit = lookup_limit
+        self.trust_empty_lookup = trust_empty_lookup
         self.batch_size = batch_size
+
+    @property
+    def max_staleness(self) -> float:
+        """How many seconds old SpiceDB's answers can be: as passed, or 0 for `fullyConsistent`
+        and 11 for any other consistency, which may answer from a quantized revision."""
+        if self._max_staleness is not None:
+            return self._max_staleness
+        return 0.0 if self.consistency.get("fullyConsistent") is True else _DEFAULT_STALENESS
 
     # ---- helpers ---------------------------------------------------------------------------
 
@@ -255,4 +291,8 @@ class SpiceDBAuthorizer:
                 found.add(resource)
             if len(lines) >= self.lookup_limit:
                 return None  # possibly truncated: post-filter instead of trusting an incomplete list
+        if not found and not self.trust_empty_lookup:
+            # The stream has no end marker: one a proxy or a server fault cut off before its first
+            # result reads as no readable document. Post-filtering lets the check decide instead.
+            return None
         return In(self.resource_field, found)

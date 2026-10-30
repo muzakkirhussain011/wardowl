@@ -173,6 +173,16 @@ def _scan_mem_multiplier(value: Any) -> float | None:
     raise ValueError("scan_mem_multiplier must be None or a number from 1 to 1000")
 
 
+def _statement_timeout(value: Any) -> int | None:
+    """Seconds, as the milliseconds `statement_timeout` takes: 0.001 to 2,147,483.647 (its range,
+    less 0, which would turn it off)."""
+    if value is None:
+        return None
+    if isinstance(value, (int, float)) and not isinstance(value, bool) and 0.001 <= value <= 2_147_483.647:
+        return max(1, round(float(value) * 1000))
+    raise ValueError("statement_timeout must be None or a number of seconds from 0.001 to 2,147,483.647")
+
+
 def _work_mem(value: Any) -> int | str | None:
     """A `work_mem` setting: kilobytes (at least 64, PostgreSQL's minimum), or text with a unit."""
     if value is None:
@@ -245,6 +255,14 @@ class PgVectorBackend:
     `work_mem` (kilobytes, or text such as `"64MB"`; it also sizes the query's sorts). Each is set
     with `SET LOCAL` in the search's transaction, so other users of the pool keep their own.
 
+    `statement_timeout` (seconds, None by default) bounds each search and count: PostgreSQL
+    cancels a statement that runs longer, time spent waiting for a lock included, and the retriever
+    raises `SearchError`. It is set with `SET LOCAL` like the settings above. The server keeps that
+    time, so it cannot bound a statement that never reaches the server, or an answer that never
+    comes back: bound those on the client, with libpq's `connect_timeout`, `tcp_user_timeout` and
+    keepalive parameters in the pool's connection string, and the pool's `timeout` for a free
+    connection.
+
     In vector mode the backend also offers what `PermissionedRetriever(short_results=...)` uses to
     check a short result: `count(filter, limit)` counts the rows the filter matches, up to
     `limit`, and `search(..., exact=True)` (`supports_exact`) searches without the HNSW index
@@ -270,6 +288,7 @@ class PgVectorBackend:
         max_scan_tuples: int | None = None,
         scan_mem_multiplier: float | None = None,
         work_mem: int | str | None = None,
+        statement_timeout: float | None = None,
         mode: str = "vector",
         text_search: str = "english",
         async_pool: Any = None,
@@ -291,6 +310,8 @@ class PgVectorBackend:
         self.max_scan_tuples = _max_scan_tuples(max_scan_tuples)
         self.scan_mem_multiplier = _scan_mem_multiplier(scan_mem_multiplier)
         self.work_mem = _work_mem(work_mem)
+        self._timeout_ms = _statement_timeout(statement_timeout)
+        self.statement_timeout = statement_timeout
         self.mode = mode
         self.text_search = _text_search_config(text_search)
 
@@ -381,13 +402,21 @@ class PgVectorBackend:
             return None
         return _vector(query.embedded(self.embed))
 
+    def _timeout(self) -> list[Any]:
+        """`SET LOCAL statement_timeout` for the statement's transaction, when there is a timeout."""
+        from psycopg import sql
+
+        if self._timeout_ms is None:
+            return []
+        return [sql.SQL("SET LOCAL statement_timeout = {}").format(sql.Literal(self._timeout_ms))]
+
     def _settings(self, exact: bool = False) -> list[Any]:
         """`SET LOCAL` statements for the search's transaction, so pooled connections keep their own."""
         from psycopg import sql
 
+        settings: list[Any] = self._timeout()
         if self.mode == "keyword":
-            return []
-        settings: list[Any] = []
+            return settings
         if self.work_mem is not None:
             settings.append(sql.SQL("SET LOCAL work_mem = {}").format(sql.Literal(self.work_mem)))
         if exact:
@@ -427,7 +456,9 @@ class PgVectorBackend:
         if self.mode == "keyword":
             return None
         statement, params = self._count_query(filter, limit)
-        with self.pool.connection() as conn:
+        with self.pool.connection() as conn, conn.transaction():
+            for setting in self._timeout():
+                conn.execute(setting)
             row = conn.execute(statement, params).fetchone()
         return int(row[0])
 
@@ -437,7 +468,9 @@ class PgVectorBackend:
         if self.mode == "keyword":
             return None
         statement, params = self._count_query(filter, limit)
-        async with self.async_pool.connection() as conn:
+        async with self.async_pool.connection() as conn, conn.transaction():
+            for setting in self._timeout():
+                await conn.execute(setting)
             cursor = await conn.execute(statement, params)
             row = await cursor.fetchone()
         return int(row[0])
