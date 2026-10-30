@@ -127,6 +127,11 @@ All notable changes are recorded here. The format follows
   count and the exact search; the Qdrant page describes `exact_search`, the count, the exact
   search and ACORN as a wider search. The extending guide and operations describe the new backend
   members, event fields, span attributes and metrics.
+- The OpenFGA page says to raise `OPENFGA_REQUEST_TIMEOUT` together with the ListObjects deadline,
+  since OpenFGA refuses to start when the deadline is the longer of the two. The Kaggle acceptance
+  run did exactly that: it set a 20-second deadline and left the request timeout at its default, so
+  OpenFGA never started and its configuration was reported as a start-up timeout. The run now sets
+  the request timeout as well.
 
 ## [2.1.0] - 2026-10-24
 
