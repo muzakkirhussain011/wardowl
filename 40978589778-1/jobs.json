@@ -1,0 +1,22 @@
+{
+  "data": {
+    "result": "skipped",
+    "outputs": {}
+  },
+  "run": {
+    "result": "skipped",
+    "outputs": {}
+  },
+  "summary": {
+    "result": "skipped",
+    "outputs": {}
+  },
+  "followup": {
+    "result": "cancelled",
+    "outputs": {}
+  },
+  "followup-analysis": {
+    "result": "cancelled",
+    "outputs": {}
+  }
+}

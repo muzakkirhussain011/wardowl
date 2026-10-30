@@ -1,0 +1,59 @@
+[00:26:23] x6cb pgvector: loading the data
+[00:26:23] x6cb pgvector: seed 0
+[00:26:24]   seed 0: building w1 (57,638 chunks)
+[00:26:56]   seed 0: w1 built in 32 s {}
+[00:26:56]   seed 0: building sep (49,444 chunks)
+[00:27:23]   seed 0: sep built in 27 s {}
+[00:27:23]   seed 0: building w1 group 0 (57,638 chunks)
+[00:27:56]   seed 0: w1 group 0 built in 32 s {}
+[00:27:56]   seed 0: building w0 group 0 (57,638 chunks)
+[00:28:29]   seed 0: w0 group 0 built in 33 s {}
+[00:28:29]   seed 0: building w0 group 0 (57,638 chunks)
+[00:28:59]   seed 0: w0 group 0 built in 31 s {}
+[00:29:41]   seed 0: group 0 done, 648 retrievals
+[00:29:41]   seed 0: building w0 group 1 (57,638 chunks)
+::error title=x6cb pgvector::DiskFull: could not resize shared memory segment "/PostgreSQL.3815604990" to 1070648864 bytes: No space left on device%0ATraceback (most recent call last):%0A  File "/home/runner/work/wardowl/wardowl/benchmarks/paper/x6_crossbuild.py", line 367, in main%0A    return run(args)%0A           ^^^^^^^^^%0A  File "/home/runner/work/wardowl/wardowl/benchmarks/paper/x6_crossbuild.py", line 335, in run%0A    outcome = play_seed(seed, args, target, data, fiqa, queries, scid, records, hard_deadline)%0A              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^%0A  File "/home/runner/work/wardowl/wardowl/benchmarks/paper/x6_crossbuild.py", line 197, in play_seed%0A    live[slot] = x6.build(target, args, worlds, world, seed, group, records)%0A                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^%0A  File "/home/runner/work/wardowl/wardowl/benchmarks/paper/x6_side_channels.py", line 239, in build%0A    built = target.build(name, docs, vectors, keyword=args.store in KEYWORD_STORES)%0A            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^%0A  File "/home/runner/work/wardowl/wardowl/benchmarks/paper/x3x6_common.py", line 341, in build%0A    create_schema(self.pool, DIM, table=table, hnsw=True, text_search="english" if keyword else None)%0A  File "/home/runner/work/wardowl/wardowl/wardowl/backends/pgvector.py", line 196, in create_schema%0A    conn.execute(statement)%0A  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/psycopg/connection.py", line 304, in execute%0A    raise ex.with_traceback(None)%0Apsycopg.errors.DiskFull: could not resize shared memory segment "/PostgreSQL.3815604990" to 1070648864 bytes: No space left on device%0A
+Traceback (most recent call last):
+  File "/home/runner/work/wardowl/wardowl/benchmarks/paper/x6_crossbuild.py", line 367, in main
+    return run(args)
+           ^^^^^^^^^
+  File "/home/runner/work/wardowl/wardowl/benchmarks/paper/x6_crossbuild.py", line 335, in run
+    outcome = play_seed(seed, args, target, data, fiqa, queries, scid, records, hard_deadline)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/wardowl/wardowl/benchmarks/paper/x6_crossbuild.py", line 197, in play_seed
+    live[slot] = x6.build(target, args, worlds, world, seed, group, records)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/wardowl/wardowl/benchmarks/paper/x6_side_channels.py", line 239, in build
+    built = target.build(name, docs, vectors, keyword=args.store in KEYWORD_STORES)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/wardowl/wardowl/benchmarks/paper/x3x6_common.py", line 341, in build
+    create_schema(self.pool, DIM, table=table, hnsw=True, text_search="english" if keyword else None)
+  File "/home/runner/work/wardowl/wardowl/wardowl/backends/pgvector.py", line 196, in create_schema
+    conn.execute(statement)
+  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/psycopg/connection.py", line 304, in execute
+    raise ex.with_traceback(None)
+psycopg.errors.DiskFull: could not resize shared memory segment "/PostgreSQL.3815604990" to 1070648864 bytes: No space left on device
+
+Traceback (most recent call last):
+  File "/home/runner/work/wardowl/wardowl/benchmarks/paper/x6_crossbuild.py", line 375, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/runner/work/wardowl/wardowl/benchmarks/paper/x6_crossbuild.py", line 367, in main
+    return run(args)
+           ^^^^^^^^^
+  File "/home/runner/work/wardowl/wardowl/benchmarks/paper/x6_crossbuild.py", line 335, in run
+    outcome = play_seed(seed, args, target, data, fiqa, queries, scid, records, hard_deadline)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/wardowl/wardowl/benchmarks/paper/x6_crossbuild.py", line 197, in play_seed
+    live[slot] = x6.build(target, args, worlds, world, seed, group, records)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/wardowl/wardowl/benchmarks/paper/x6_side_channels.py", line 239, in build
+    built = target.build(name, docs, vectors, keyword=args.store in KEYWORD_STORES)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/wardowl/wardowl/benchmarks/paper/x3x6_common.py", line 341, in build
+    create_schema(self.pool, DIM, table=table, hnsw=True, text_search="english" if keyword else None)
+  File "/home/runner/work/wardowl/wardowl/wardowl/backends/pgvector.py", line 196, in create_schema
+    conn.execute(statement)
+  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/psycopg/connection.py", line 304, in execute
+    raise ex.with_traceback(None)
+psycopg.errors.DiskFull: could not resize shared memory segment "/PostgreSQL.3815604990" to 1070648864 bytes: No space left on device

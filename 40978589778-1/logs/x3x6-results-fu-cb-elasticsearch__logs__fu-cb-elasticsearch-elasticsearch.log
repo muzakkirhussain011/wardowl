@@ -1,0 +1,163 @@
+[00:18:11] x6cb elasticsearch: loading the data
+[00:18:12] x6cb elasticsearch: seed 0
+[00:18:13]   seed 0: building w1 (57,638 chunks)
+[00:18:55]   seed 0: w1 built in 43 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 9, 'docs': 57638}
+[00:18:55]   seed 0: building sep (49,444 chunks)
+[00:19:24]   seed 0: sep built in 29 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 8, 'docs': 49444}
+[00:19:24]   seed 0: building w1 group 0 (57,638 chunks)
+[00:19:57]   seed 0: w1 group 0 built in 33 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 10, 'docs': 57638}
+[00:19:57]   seed 0: building w0 group 0 (57,638 chunks)
+[00:20:31]   seed 0: w0 group 0 built in 34 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 10, 'docs': 57638}
+[00:20:32]   seed 0: building w0 group 0 (57,638 chunks)
+[00:21:06]   seed 0: w0 group 0 built in 34 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 10, 'docs': 57638}
+[00:21:12]   seed 0: group 0 done, 648 retrievals
+[00:21:12]   seed 0: building w0 group 1 (57,638 chunks)
+[00:21:47]   seed 0: w0 group 1 built in 34 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 10, 'docs': 57638}
+[00:21:47]   seed 0: building w1 group 1 (57,638 chunks)
+[00:22:21]   seed 0: w1 group 1 built in 34 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 10, 'docs': 57638}
+[00:22:21]   seed 0: building w0 group 1 (57,638 chunks)
+[00:22:55]   seed 0: w0 group 1 built in 34 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 10, 'docs': 57638}
+[00:23:00]   seed 0: group 1 done, 1,296 retrievals
+[00:23:00]   seed 0: building w0 group 2 (57,638 chunks)
+[00:23:33]   seed 0: w0 group 2 built in 33 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 10, 'docs': 57638}
+[00:23:33]   seed 0: building w0 group 2 (57,638 chunks)
+[00:24:09]   seed 0: w0 group 2 built in 35 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 9, 'docs': 57638}
+[00:24:09]   seed 0: building w1 group 2 (57,638 chunks)
+[00:24:44]   seed 0: w1 group 2 built in 35 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 9, 'docs': 57638}
+[00:24:49]   seed 0: group 2 done, 1,944 retrievals
+[00:24:49]   seed 0: building w0 group 3 (57,638 chunks)
+[00:25:23]   seed 0: w0 group 3 built in 34 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 10, 'docs': 57638}
+[00:25:23]   seed 0: building w0 group 3 (57,638 chunks)
+[00:25:57]   seed 0: w0 group 3 built in 34 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 10, 'docs': 57638}
+[00:25:57]   seed 0: building w1 group 3 (57,638 chunks)
+[00:26:32]   seed 0: w1 group 3 built in 35 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 9, 'docs': 57638}
+[00:26:36]   seed 0: group 3 done, 2,592 retrievals
+[00:26:36]   seed 0: building w0 group 4 (57,638 chunks)
+[00:27:10]   seed 0: w0 group 4 built in 34 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 10, 'docs': 57638}
+[00:27:10]   seed 0: building w0 group 4 (57,638 chunks)
+[00:27:45]   seed 0: w0 group 4 built in 35 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 10, 'docs': 57638}
+[00:27:45]   seed 0: building w1 group 4 (57,638 chunks)
+[00:28:20]   seed 0: w1 group 4 built in 35 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 9, 'docs': 57638}
+[00:28:25]   seed 0: group 4 done, 3,240 retrievals
+[00:28:25]   seed 0: building w0 group 5 (57,638 chunks)
+[00:29:00]   seed 0: w0 group 5 built in 35 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 9, 'docs': 57638}
+[00:29:00]   seed 0: building w1 group 5 (57,638 chunks)
+[00:29:34]   seed 0: w1 group 5 built in 34 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 10, 'docs': 57638}
+[00:29:34]   seed 0: building w0 group 5 (57,638 chunks)
+[00:30:09]   seed 0: w0 group 5 built in 35 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 10, 'docs': 57638}
+[00:30:13]   seed 0: group 5 done, 3,888 retrievals
+[00:30:13]   seed 0: building w1 group 6 (57,638 chunks)
+[00:30:48]   seed 0: w1 group 6 built in 35 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 9, 'docs': 57638}
+[00:30:48]   seed 0: building w0 group 6 (57,638 chunks)
+[00:31:24]   seed 0: w0 group 6 built in 35 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 9, 'docs': 57638}
+[00:31:24]   seed 0: building w0 group 6 (57,638 chunks)
+[00:31:58]   seed 0: w0 group 6 built in 34 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 10, 'docs': 57638}
+[00:32:02]   seed 0: group 6 done, 4,536 retrievals
+[00:32:02]   seed 0: building w0 group 7 (57,638 chunks)
+[00:32:35]   seed 0: w0 group 7 built in 34 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 10, 'docs': 57638}
+[00:32:35]   seed 0: building w0 group 7 (57,638 chunks)
+[00:33:09]   seed 0: w0 group 7 built in 34 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 10, 'docs': 57638}
+[00:33:09]   seed 0: building w1 group 7 (57,638 chunks)
+[00:33:44]   seed 0: w1 group 7 built in 34 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 10, 'docs': 57638}
+[00:33:48]   seed 0: group 7 done, 5,184 retrievals
+[00:33:48] x6cb elasticsearch: seed 0 done in 15.6 min
+[00:33:48] x6cb elasticsearch: seed 1
+[00:33:49]   seed 1: building w1 (57,638 chunks)
+[00:34:25]   seed 1: w1 built in 35 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 9, 'docs': 57638}
+[00:34:25]   seed 1: building sep (49,128 chunks)
+[00:34:53]   seed 1: sep built in 29 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 15, 'docs': 49128}
+[00:34:54]   seed 1: building w0 group 0 (57,638 chunks)
+[00:35:28]   seed 1: w0 group 0 built in 34 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 10, 'docs': 57638}
+[00:35:28]   seed 1: building w0 group 0 (57,638 chunks)
+[00:36:02]   seed 1: w0 group 0 built in 34 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 10, 'docs': 57638}
+[00:36:02]   seed 1: building w1 group 0 (57,638 chunks)
+[00:36:35]   seed 1: w1 group 0 built in 33 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 10, 'docs': 57638}
+[00:36:39]   seed 1: group 0 done, 648 retrievals
+[00:36:39]   seed 1: building w1 group 1 (57,638 chunks)
+[00:37:14]   seed 1: w1 group 1 built in 35 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 9, 'docs': 57638}
+[00:37:14]   seed 1: building w0 group 1 (57,638 chunks)
+[00:37:48]   seed 1: w0 group 1 built in 34 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 10, 'docs': 57638}
+[00:37:48]   seed 1: building w0 group 1 (57,638 chunks)
+[00:38:23]   seed 1: w0 group 1 built in 35 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 9, 'docs': 57638}
+[00:38:27]   seed 1: group 1 done, 1,296 retrievals
+[00:38:27]   seed 1: building w0 group 2 (57,638 chunks)
+[00:39:02]   seed 1: w0 group 2 built in 35 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 9, 'docs': 57638}
+[00:39:02]   seed 1: building w0 group 2 (57,638 chunks)
+[00:39:36]   seed 1: w0 group 2 built in 34 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 10, 'docs': 57638}
+[00:39:36]   seed 1: building w1 group 2 (57,638 chunks)
+[00:40:11]   seed 1: w1 group 2 built in 35 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 9, 'docs': 57638}
+[00:40:15]   seed 1: group 2 done, 1,944 retrievals
+[00:40:16]   seed 1: building w0 group 3 (57,638 chunks)
+[00:40:50]   seed 1: w0 group 3 built in 34 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 10, 'docs': 57638}
+[00:40:50]   seed 1: building w1 group 3 (57,638 chunks)
+[00:41:24]   seed 1: w1 group 3 built in 34 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 10, 'docs': 57638}
+[00:41:24]   seed 1: building w0 group 3 (57,638 chunks)
+[00:41:58]   seed 1: w0 group 3 built in 34 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 10, 'docs': 57638}
+[00:42:02]   seed 1: group 3 done, 2,592 retrievals
+[00:42:02]   seed 1: building w0 group 4 (57,638 chunks)
+[00:42:36]   seed 1: w0 group 4 built in 34 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 10, 'docs': 57638}
+[00:42:36]   seed 1: building w1 group 4 (57,638 chunks)
+[00:43:10]   seed 1: w1 group 4 built in 34 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 10, 'docs': 57638}
+[00:43:10]   seed 1: building w0 group 4 (57,638 chunks)
+[00:43:44]   seed 1: w0 group 4 built in 34 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 17, 'docs': 57638}
+[00:43:48]   seed 1: group 4 done, 3,240 retrievals
+[00:43:48]   seed 1: building w0 group 5 (57,638 chunks)
+[00:44:22]   seed 1: w0 group 5 built in 34 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 10, 'docs': 57638}
+[00:44:22]   seed 1: building w1 group 5 (57,638 chunks)
+[00:44:56]   seed 1: w1 group 5 built in 34 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 10, 'docs': 57638}
+[00:44:56]   seed 1: building w0 group 5 (57,638 chunks)
+[00:45:29]   seed 1: w0 group 5 built in 34 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 10, 'docs': 57638}
+[00:45:34]   seed 1: group 5 done, 3,888 retrievals
+[00:45:34]   seed 1: building w1 group 6 (57,638 chunks)
+[00:46:08]   seed 1: w1 group 6 built in 35 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 9, 'docs': 57638}
+[00:46:09]   seed 1: building w0 group 6 (57,638 chunks)
+[00:46:42]   seed 1: w0 group 6 built in 34 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 10, 'docs': 57638}
+[00:46:42]   seed 1: building w0 group 6 (57,638 chunks)
+[00:47:16]   seed 1: w0 group 6 built in 34 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 10, 'docs': 57638}
+[00:47:20]   seed 1: group 6 done, 4,536 retrievals
+[00:47:20]   seed 1: building w0 group 7 (57,638 chunks)
+[00:47:53]   seed 1: w0 group 7 built in 34 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 10, 'docs': 57638}
+[00:47:53]   seed 1: building w1 group 7 (57,638 chunks)
+[00:48:28]   seed 1: w1 group 7 built in 35 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 9, 'docs': 57638}
+[00:48:28]   seed 1: building w0 group 7 (57,638 chunks)
+[00:49:02]   seed 1: w0 group 7 built in 34 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 17, 'docs': 57638}
+[00:49:06]   seed 1: group 7 done, 5,184 retrievals
+[00:49:06] x6cb elasticsearch: seed 1 done in 15.3 min
+[00:49:06] x6cb elasticsearch: seed 2
+[00:49:07]   seed 2: building w1 (57,638 chunks)
+[00:49:40]   seed 2: w1 built in 34 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 10, 'docs': 57638}
+[00:49:40]   seed 2: building sep (49,221 chunks)
+[00:50:08]   seed 2: sep built in 28 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 15, 'docs': 49221}
+[00:50:08]   seed 2: building w1 group 0 (57,638 chunks)
+[00:50:41]   seed 2: w1 group 0 built in 32 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 18, 'docs': 57638}
+[00:50:41]   seed 2: building w0 group 0 (57,638 chunks)
+[00:51:16]   seed 2: w0 group 0 built in 35 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 9, 'docs': 57638}
+[00:51:16]   seed 2: building w0 group 0 (57,638 chunks)
+[00:51:50]   seed 2: w0 group 0 built in 34 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 10, 'docs': 57638}
+[00:51:53]   seed 2: group 0 done, 648 retrievals
+[00:51:54]   seed 2: building w0 group 1 (57,638 chunks)
+[00:52:27]   seed 2: w0 group 1 built in 34 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 10, 'docs': 57638}
+[00:52:27]   seed 2: building w1 group 1 (57,638 chunks)
+[00:53:01]   seed 2: w1 group 1 built in 34 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 10, 'docs': 57638}
+[00:53:01]   seed 2: building w0 group 1 (57,638 chunks)
+[00:53:34]   seed 2: w0 group 1 built in 33 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 17, 'docs': 57638}
+[00:53:37]   seed 2: group 1 done, 1,296 retrievals
+[00:53:38]   seed 2: building w1 group 2 (57,638 chunks)
+[00:54:11]   seed 2: w1 group 2 built in 34 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 10, 'docs': 57638}
+[00:54:11]   seed 2: building w0 group 2 (57,638 chunks)
+[00:54:45]   seed 2: w0 group 2 built in 34 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 10, 'docs': 57638}
+[00:54:45]   seed 2: building w0 group 2 (57,638 chunks)
+[00:55:19]   seed 2: w0 group 2 built in 34 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 17, 'docs': 57638}
+[00:55:23]   seed 2: group 2 done, 1,944 retrievals
+[00:55:23]   seed 2: building w0 group 3 (57,638 chunks)
+[00:55:56]   seed 2: w0 group 3 built in 33 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 10, 'docs': 57638}
+[00:55:56]   seed 2: building w0 group 3 (57,638 chunks)
+[00:56:30]   seed 2: w0 group 3 built in 34 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 10, 'docs': 57638}
+[00:56:30]   seed 2: building w1 group 3 (57,638 chunks)
+[00:57:04]   seed 2: w1 group 3 built in 34 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 17, 'docs': 57638}
+[00:57:08]   seed 2: group 3 done, 2,592 retrievals
+[00:57:08]   seed 2: building w1 group 4 (57,638 chunks)
+[00:57:41]   seed 2: w1 group 4 built in 33 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 10, 'docs': 57638}
+[00:57:41]   seed 2: building w0 group 4 (57,638 chunks)
+[00:58:14]   seed 2: w0 group 4 built in 33 s {'vector_mapping': {'type': 'dense_vector', 'dims': 384, 'index': True, 'similarity': 'cosine', 'index_options': {'type': 'bbq_hnsw', 'm': 16, 'ef_construction': 100, 'rescore_vector': {'oversample': 3.0}}}, 'segments': 10, 'docs': 57638}
+[00:58:15]   seed 2: building w0 group 4 (57,638 chunks)

@@ -1,0 +1,23 @@
+run: https://github.com/muzakkirhussain011/wardowl/actions/runs/40978589778
+commit: fe3f17729f401e1336b6d2ddd93f12848c7c2aac
+configuration: followup
+mode: full
+reads the artifacts of run: 40940385704
+seeds: 5
+published: 2026-10-30T00:59:31Z
+
+raw result files (in the artifacts x3x6-results-*):
+9327996 bytes  x3x6-results-fu-cb-elasticsearch/x6cb-elasticsearch.jsonl
+31413985 bytes  x3x6-results-fu-cb-faiss/x6cb-faiss.jsonl
+97 bytes  x3x6-results-fu-cb-pgvector/crashes.jsonl
+1190689 bytes  x3x6-results-fu-cb-pgvector/x6cb-pgvector.jsonl
+5591821 bytes  x3x6-results-fu-cb-qdrant/x6cb-qdrant.jsonl
+23194 bytes  x3x6-results-fu-chroma-bisect/x3bisect-chroma.jsonl
+131394 bytes  x3x6-results-fu-x3-chroma/x3-chroma.jsonl
+13097 x3x6-results-fu-cb-elasticsearch/x6cb-elasticsearch.jsonl
+40435 x3x6-results-fu-cb-faiss/x6cb-faiss.jsonl
+1 x3x6-results-fu-cb-pgvector/crashes.jsonl
+717 x3x6-results-fu-cb-pgvector/x6cb-pgvector.jsonl
+7859 x3x6-results-fu-cb-qdrant/x6cb-qdrant.jsonl
+18 x3x6-results-fu-chroma-bisect/x3bisect-chroma.jsonl
+447 x3x6-results-fu-x3-chroma/x3-chroma.jsonl

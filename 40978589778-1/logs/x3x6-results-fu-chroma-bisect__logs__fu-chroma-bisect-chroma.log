@@ -1,0 +1,144 @@
+[00:17:40] x3 bisect: G=40,000
+child G=40000: built in 131.4 s, where of 2,657,983 characters, querying
+
+Fatal Python error: Segmentation fault
+
+Current thread 0x00007f5d61b95b80 (most recent call first):
+  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/chromadb/api/rust.py", line 582 in _query
+  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/chromadb/api/models/Collection.py", line 265 in query
+  File "/home/runner/work/wardowl/wardowl/wardowl/backends/chroma.py", line 233 in search
+  File "/home/runner/work/wardowl/wardowl/wardowl/retriever.py", line 502 in _run
+  File "/home/runner/work/wardowl/wardowl/wardowl/retriever.py", line 285 in retrieve
+  File "/home/runner/work/wardowl/wardowl/benchmarks/paper/x3_filter_scaling.py", line 102 in measure
+  File "/home/runner/work/wardowl/wardowl/benchmarks/paper/x3_chroma_bisect.py", line 66 in child
+  File "/home/runner/work/wardowl/wardowl/benchmarks/paper/x3_chroma_bisect.py", line 164 in main
+  File "/home/runner/work/wardowl/wardowl/benchmarks/paper/x3_chroma_bisect.py", line 172 in <module>
+
+Extension modules: numpy._core._multiarray_umath, numpy.linalg._umath_linalg, numpy.random._common, numpy.random.bit_generator, numpy.random._bounded_integers, numpy.random._pcg64, numpy.random._generator, numpy.random._mt19937, numpy.random._philox, numpy.random._sfc64, numpy.random.mtrand, pybase64._pybase64, zstandard.backend_c, yaml._yaml, grpc._cython.cygrpc, google._upb._message (total: 16)
+
+[00:20:17] x3 bisect: G=40,000: crash (exit status -11, 158 s)
+[00:20:17] x3 bisect: G=25,000
+child G=25000: built in 129.4 s, where of 1,652,983 characters, querying
+
+Fatal Python error: Segmentation fault
+
+Current thread 0x00007f24bdf8fb80 (most recent call first):
+  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/chromadb/api/rust.py", line 582 in _query
+  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/chromadb/api/models/Collection.py", line 265 in query
+  File "/home/runner/work/wardowl/wardowl/wardowl/backends/chroma.py", line 233 in search
+  File "/home/runner/work/wardowl/wardowl/wardowl/retriever.py", line 502 in _run
+  File "/home/runner/work/wardowl/wardowl/wardowl/retriever.py", line 285 in retrieve
+  File "/home/runner/work/wardowl/wardowl/benchmarks/paper/x3_filter_scaling.py", line 102 in measure
+  File "/home/runner/work/wardowl/wardowl/benchmarks/paper/x3_chroma_bisect.py", line 66 in child
+  File "/home/runner/work/wardowl/wardowl/benchmarks/paper/x3_chroma_bisect.py", line 164 in main
+  File "/home/runner/work/wardowl/wardowl/benchmarks/paper/x3_chroma_bisect.py", line 172 in <module>
+
+Extension modules: numpy._core._multiarray_umath, numpy.linalg._umath_linalg, numpy.random._common, numpy.random.bit_generator, numpy.random._bounded_integers, numpy.random._pcg64, numpy.random._generator, numpy.random._mt19937, numpy.random._philox, numpy.random._sfc64, numpy.random.mtrand, pybase64._pybase64, zstandard.backend_c, yaml._yaml, grpc._cython.cygrpc, google._upb._message (total: 16)
+
+[00:22:53] x3 bisect: G=25,000: crash (exit status -11, 155 s)
+[00:22:53] x3 bisect: G=17,500
+child G=17500: built in 130.4 s, where of 1,150,483 characters, querying
+
+Fatal Python error: Segmentation fault
+
+Current thread 0x00007f70e0d0eb80 (most recent call first):
+  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/chromadb/api/rust.py", line 582 in _query
+  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/chromadb/api/models/Collection.py", line 265 in query
+  File "/home/runner/work/wardowl/wardowl/wardowl/backends/chroma.py", line 233 in search
+  File "/home/runner/work/wardowl/wardowl/wardowl/retriever.py", line 502 in _run
+  File "/home/runner/work/wardowl/wardowl/wardowl/retriever.py", line 285 in retrieve
+  File "/home/runner/work/wardowl/wardowl/benchmarks/paper/x3_filter_scaling.py", line 102 in measure
+  File "/home/runner/work/wardowl/wardowl/benchmarks/paper/x3_chroma_bisect.py", line 66 in child
+  File "/home/runner/work/wardowl/wardowl/benchmarks/paper/x3_chroma_bisect.py", line 164 in main
+  File "/home/runner/work/wardowl/wardowl/benchmarks/paper/x3_chroma_bisect.py", line 172 in <module>
+
+Extension modules: numpy._core._multiarray_umath, numpy.linalg._umath_linalg, numpy.random._common, numpy.random.bit_generator, numpy.random._bounded_integers, numpy.random._pcg64, numpy.random._generator, numpy.random._mt19937, numpy.random._philox, numpy.random._sfc64, numpy.random.mtrand, pybase64._pybase64, zstandard.backend_c, yaml._yaml, grpc._cython.cygrpc, google._upb._message (total: 16)
+
+[00:25:29] x3 bisect: G=17,500: crash (exit status -11, 157 s)
+[00:25:29] x3 bisect: G=13,750
+child G=13750: built in 129.6 s, where of 899,233 characters, querying
+child G=13750: error InternalError: Error executing plan: Internal error: error returned from database: (code: 1) Expression tree is too large (maximum depth 1000)
+
+
+[00:27:50] x3 bisect: G=13,750: error (exit status 0, 140 s)
+[00:27:50] x3 bisect: G=15,500
+child G=15500: built in 134.1 s, where of 1,016,483 characters, querying
+child G=15500: error InternalError: Error executing plan: Internal error: error returned from database: (code: 1) Expression tree is too large (maximum depth 1000)
+
+
+[00:30:15] x3 bisect: G=15,500: error (exit status 0, 145 s)
+[00:30:15] x3 bisect: G=16,500
+child G=16500: built in 132.9 s, where of 1,083,483 characters, querying
+
+Fatal Python error: Segmentation fault
+
+Current thread 0x00007f4dec691b80 (most recent call first):
+  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/chromadb/api/rust.py", line 582 in _query
+  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/chromadb/api/models/Collection.py", line 265 in query
+  File "/home/runner/work/wardowl/wardowl/wardowl/backends/chroma.py", line 233 in search
+  File "/home/runner/work/wardowl/wardowl/wardowl/retriever.py", line 502 in _run
+  File "/home/runner/work/wardowl/wardowl/wardowl/retriever.py", line 285 in retrieve
+  File "/home/runner/work/wardowl/wardowl/benchmarks/paper/x3_filter_scaling.py", line 102 in measure
+  File "/home/runner/work/wardowl/wardowl/benchmarks/paper/x3_chroma_bisect.py", line 66 in child
+  File "/home/runner/work/wardowl/wardowl/benchmarks/paper/x3_chroma_bisect.py", line 164 in main
+  File "/home/runner/work/wardowl/wardowl/benchmarks/paper/x3_chroma_bisect.py", line 172 in <module>
+
+Extension modules: numpy._core._multiarray_umath, numpy.linalg._umath_linalg, numpy.random._common, numpy.random.bit_generator, numpy.random._bounded_integers, numpy.random._pcg64, numpy.random._generator, numpy.random._mt19937, numpy.random._philox, numpy.random._sfc64, numpy.random.mtrand, pybase64._pybase64, zstandard.backend_c, yaml._yaml, grpc._cython.cygrpc, google._upb._message (total: 16)
+
+[00:32:53] x3 bisect: G=16,500: crash (exit status -11, 159 s)
+[00:32:53] x3 bisect: G=40,000 under gdb
+ 0x00007fffbad9a46c in ?? () from /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/chromadb_rust_bindings/chromadb_rust_bindings.abi3.so
+#6  0x00007fffbad9a46c in ?? () from /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/chromadb_rust_bindings/chromadb_rust_bindings.abi3.so
+#7  0x00007fffbad9a46c in ?? () from /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/chromadb_rust_bindings/chromadb_rust_bindings.abi3.so
+#8  0x00007fffbad9a46c in ?? () from /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/chromadb_rust_bindings/chromadb_rust_bindings.abi3.so
+#9  0x00007fffbad9a46c in ?? () from /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/chromadb_rust_bindings/chromadb_rust_bindings.abi3.so
+#10 0x00007fffbad9a46c in ?? () from /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/chromadb_rust_bindings/chromadb_rust_bindings.abi3.so
+#11 0x00007fffbad9a46c in ?? () from /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/chromadb_rust_bindings/chromadb_rust_bindings.abi3.so
+#12 0x00007fffbad9a46c in ?? () from /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/chromadb_rust_bindings/chromadb_rust_bindings.abi3.so
+#13 0x00007fffbad9a46c in ?? () from /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/chromadb_rust_bindings/chromadb_rust_bindings.abi3.so
+#14 0x00007fffbad9a46c in ?? () from /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/chromadb_rust_bindings/chromadb_rust_bindings.abi3.so
+#15 0x00007fffbad9a46c in ?? () from /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/chromadb_rust_bindings/chromadb_rust_bindings.abi3.so
+#16 0x00007fffbad9a46c in ?? () from /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/chromadb_rust_bindings/chromadb_rust_bindings.abi3.so
+#17 0x00007fffbad9a46c in ?? () from /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/chromadb_rust_bindings/chromadb_rust_bindings.abi3.so
+#18 0x00007fffbad9a46c in ?? () from /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/chromadb_rust_bindings/chromadb_rust_bindings.abi3.so
+#19 0x00007fffbad9a46c in ?? () from /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/chromadb_rust_bindings/chromadb_rust_bindings.abi3.so
+#20 0x00007fffbad9a46c in ?? () from /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/chromadb_rust_bindings/chromadb_rust_bindings.abi3.so
+#21 0x00007fffbad9a46c in ?? () from /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/chromadb_rust_bindings/chromadb_rust_bindings.abi3.so
+#22 0x00007fffbad9a46c in ?? () from /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/chromadb_rust_bindings/chromadb_rust_bindings.abi3.so
+#23 0x00007fffbad9a46c in ?? () from /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/chromadb_rust_bindings/chromadb_rust_bindings.abi3.so
+#24 0x00007fffbad9a46c in ?? () from /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/chromadb_rust_bindings/chromadb_rust_bindings.abi3.so
+#25 0x00007fffbad9a46c in ?? () from /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/chromadb_rust_bindings/chromadb_rust_bindings.abi3.so
+#26 0x00007fffbad9a46c in ?? () from /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/chromadb_rust_bindings/chromadb_rust_bindings.abi3.so
+#27 0x00007fffbad9a46c in ?? () from /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/chromadb_rust_bindings/chromadb_rust_bindings.abi3.so
+#28 0x00007fffbad9a46c in ?? () from /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/chromadb_rust_bindings/chromadb_rust_bindings.abi3.so
+#29 0x00007fffbad9a46c in ?? () from /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/chromadb_rust_bindings/chromadb_rust_bindings.abi3.so
+#30 0x00007fffbad9a46c in ?? () from /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/chromadb_rust_bindings/chromadb_rust_bindings.abi3.so
+#31 0x00007fffbad9a46c in ?? () from /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/chromadb_rust_bindings/chromadb_rust_bindings.abi3.so
+#32 0x00007fffbad9a46c in ?? () from /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/chromadb_rust_bindings/chromadb_rust_bindings.abi3.so
+#33 0x00007fffbad9a46c in ?? () from /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/chromadb_rust_bindings/chromadb_rust_bindings.abi3.so
+#34 0x00007fffbad9a46c in ?? () from /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/chromadb_rust_bindings/chromadb_rust_bindings.abi3.so
+#35 0x00007fffbad9a46c in ?? () from /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/chromadb_rust_bindings/chromadb_rust_bindings.abi3.so
+#36 0x00007fffbad9a46c in ?? () from /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/chromadb_rust_bindings/chromadb_rust_bindings.abi3.so
+#37 0x00007fffbad9a46c in ?? () from /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/chromadb_rust_bindings/chromadb_rust_bindings.abi3.so
+#38 0x00007fffbad9a46c in ?? () from /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/chromadb_rust_bindings/chromadb_rust_bindings.abi3.so
+#39 0x00007fffbad9a46c in ?? () from /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/chromadb_rust_bindings/chromadb_rust_bindings.abi3.so
+#16521 0x00007ffff798d830 in _PyEval_EvalFrameDefault (tstate=<optimized out>, frame=0x7ffff7ea1560, throwflag=<optimized out>) at Python/bytecodes.c:3263
+#16522 0x00007ffff7ae8f36 in PyEval_EvalCode (co=co@entry=0x7ffff7764730, globals=globals@entry=0x7ffff779eac0, locals=locals@entry=0x7ffff779eac0) at Python/ceval.c:580
+#16523 0x00007ffff7b09f77 in run_eval_code_obj (tstate=tstate@entry=0x7ffff7e8c6f0 <_PyRuntime+458992>, co=co@entry=0x7ffff7764730, globals=globals@entry=0x7ffff779eac0, locals=locals@entry=0x7ffff779eac0) at Python/pythonrun.c:1757
+#16524 0x00007ffff7b09aab in run_mod (mod=mod@entry=0x55555569af68, filename=filename@entry=0x7ffff76f14c0, globals=globals@entry=0x7ffff779eac0, locals=locals@entry=0x7ffff779eac0, flags=flags@entry=0x7fffffffcf00, arena=arena@entry=0x7ffff76c3e30) at Python/pythonrun.c:1778
+#16525 0x00007ffff7b099f2 in pyrun_file (fp=fp@entry=0x555555559490, filename=filename@entry=0x7ffff76f14c0, start=start@entry=257, globals=globals@entry=0x7ffff779eac0, locals=locals@entry=0x7ffff779eac0, closeit=closeit@entry=1, flags=0x7fffffffcf00) at Python/pythonrun.c:1674
+#16526 0x00007ffff7b09853 in _PyRun_SimpleFileObject (fp=0x555555559490, filename=0x7ffff76f14c0, closeit=1, flags=0x7fffffffcf00) at Python/pythonrun.c:459
+#16527 0x00007ffff7b09668 in _PyRun_AnyFileObject (fp=fp@entry=0x555555559490, filename=filename@entry=0x7ffff76f14c0, closeit=closeit@entry=1, flags=flags@entry=0x7fffffffcf00) at Python/pythonrun.c:78
+#16528 0x00007ffff7b12944 in pymain_run_file_obj (skip_source_first_line=0, filename=0x7ffff76f14c0, program_name=0x7ffff7341110) at Modules/main.c:361
+#16529 pymain_run_file (config=0x7ffff7e2f2d0 <_PyRuntime+77008>) at Modules/main.c:380
+#16530 pymain_run_python (exitcode=0x7fffffffced4) at Modules/main.c:634
+#16531 Py_RunMain () at Modules/main.c:714
+#16532 0x00007ffff7b1243b in Py_BytesMain (argc=<optimized out>, argv=<optimized out>) at Modules/main.c:768
+#16533 0x00007ffff742a1ca in __libc_start_call_main (main=main@entry=0x555555555060 <main>, argc=argc@entry=11, argv=argv@entry=0x7fffffffd168) at ../sysdeps/nptl/libc_start_call_main.h:58
+#16534 0x00007ffff742a28b in __libc_start_main_impl (main=0x555555555060 <main>, argc=11, argv=0x7fffffffd168, init=<optimized out>, fini=<optimized out>, rtld_fini=<optimized out>, stack_end=0x7fffffffd158) at ../csu/libc-start.c:360
+#16535 0x0000555555555095 in _start ()
+
+Python Exception <class 'ModuleNotFoundError'>: No module named 'math'
+
+[00:35:17] x3 bisect: G=40,000: crash (exit status 0, 144 s)
+::notice title=x3 chroma bisect::{13750: 'error', 15500: 'error', 16500: 'crash', 17500: 'crash', 25000: 'crash', 40000: 'crash'}; bracket [15,500, 16,500]

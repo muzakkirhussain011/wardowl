@@ -1,0 +1,1 @@
+{"schema": 1, "type": "crash", "store": "pgvector", "group": "fu-cb-pgvector", "exit_status": 1}
