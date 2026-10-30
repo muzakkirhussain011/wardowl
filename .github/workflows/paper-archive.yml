@@ -1,0 +1,65 @@
+name: paper-archive
+
+# Copies the CI artifacts behind the research paper's results, which GitHub deletes after 90 days, to
+# the branch results/archive. Prepared corpora and embeddings (x2x5-data, x2x5-emb, x3x6-data) stay
+# out: they can be rebuilt from the seeds, and the corpora's licenses limit redistribution.
+on:
+  push:
+    branches: [paper/archive]
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  archive:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - name: Download the artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          out="$RUNNER_TEMP/archive"
+          mkdir -p "$out"
+          printf 'run\tname\tid\tsize_in_bytes\tdigest\tcreated_at\texpires_at\tstatus\n' > "$out/MANIFEST.tsv"
+          runs="40313285885 40905549149 40910291702 40915647544 40916767636 40918333147 40918774649
+                40919304635 40921769714 40937668791 40939098036 40940385704 40952219346 40969846593
+                40973718886 40974904217 40978589778 40982986417 41008616635"
+          for run in $runs; do
+            gh api --paginate "repos/$GITHUB_REPOSITORY/actions/runs/$run/artifacts?per_page=100" \
+              --jq '.artifacts[] | [.name, .id, .size_in_bytes, .digest, .created_at, .expires_at, .expired] | @tsv' \
+              > "$RUNNER_TEMP/list.tsv" || { printf '%s\t\t\t\t\t\t\tlisting failed\n' "$run" >> "$out/MANIFEST.tsv"; continue; }
+            while IFS=$'\t' read -r name id size digest created expires expired; do
+              status=copied
+              case "$name" in
+                x2x5-data*|x2x5-emb*|x3x6-data*) status="left out: corpus or embeddings" ;;
+                *)
+                  if [ "$expired" = "true" ]; then
+                    status="expired"
+                  elif [ "$size" -gt 95000000 ]; then
+                    status="left out: above the 95 MB limit"
+                  else
+                    mkdir -p "$out/$run"
+                    gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$id/zip" > "$out/$run/$name.zip" || status="download failed"
+                  fi
+                  ;;
+              esac
+              printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' "$run" "$name" "$id" "$size" "$digest" "$created" "$expires" "$status" >> "$out/MANIFEST.tsv"
+            done < "$RUNNER_TEMP/list.tsv"
+          done
+          (cd "$out" && find . -name '*.zip' -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS)
+          echo "### Archive" >> "$GITHUB_STEP_SUMMARY"
+          cut -f8 "$out/MANIFEST.tsv" | sort | uniq -c >> "$GITHUB_STEP_SUMMARY"
+          du -sh "$out" >> "$GITHUB_STEP_SUMMARY"
+          echo "out=$out" >> "$GITHUB_ENV"
+      - name: Publish to results/archive
+        env:
+          TOKEN: ${{ github.token }}
+        run: |
+          cd "$out"
+          git init -q
+          git checkout -q -b results/archive
+          git add -A
+          git -c user.name="paper archive" -c user.email="archive@localhost" commit -q -m "CI artifacts of the paper's runs, from $GITHUB_SHA"
+          git push -q -f "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" results/archive
