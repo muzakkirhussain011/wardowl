@@ -625,8 +625,11 @@ lists them. 2.1 added acceptance scenarios that run the documentation against re
 the fixes they found. 3.0 reports a short result from an approximate index as possibly incomplete,
 tells why and can search again, raises `SearchError` for a failing vector store, and adds write
 revisions, time bounds and audit observers that must record every retrieval; Upgrading lists what
-changes. Next, in rough order: permission sync from SharePoint and Confluence, and an Azure AI
-Search backend. Contributions are welcome; see
+changes. 3.1 lets every SpiceDB request carry the latest ZedToken, can refuse OIDC tokens without
+groups, invalidates a subject in a shared Redis cache without scanning the database, and refuses
+malformed filters and search replies, and stores left in needtoknow 1.x's layout, with an error
+that says why. Next, in rough order: permission sync from SharePoint and Confluence, and an Azure
+AI Search backend. Contributions are welcome; see
 [CONTRIBUTING.md](https://github.com/muzakkirhussain011/wardowl/blob/main/CONTRIBUTING.md).
 
 ## Example deployment

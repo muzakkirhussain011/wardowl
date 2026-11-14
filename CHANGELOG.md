@@ -6,6 +6,23 @@ All notable changes are recorded here. The format follows
 
 ## [Unreleased]
 
+## [3.1.0] - 2026-11-14
+
+A minor release that adds `require_groups` and a log line for each refused token to
+`OIDCAuthenticator`, a `consistency` function for `SpiceDBAuthorizer` so that every request can
+carry the ZedToken of the latest write, `CachingAuthorizer.ainvalidate`, `SpanRedactor` arguments
+for the authorizer's field names and marker, and an index that lets `RedisCache` invalidate one
+subject without scanning the database; `VespaBackend` with `approximate=False` and `MongoDBBackend`
+with `exact=True` now declare exact search, so their short results are reported as complete. Some
+wrong input now fails closed, sooner and with an error that says why, where most of it failed later
+with a less clear error or gave a wrong result without one: an authorizer's filter that is not a
+tree of `In`, `And` and `Or` at most 100 levels deep, a search reply that is not hits, a store left
+in needtoknow 1.x's layout, and an OIDC `leeway` that is not finite; group names that are empty or
+only whitespace now grant nothing. Hits that are not `Hit` objects, or whose ids are not strings,
+still work but are deprecated, and 4.0 will refuse them. Nothing else documented changes;
+[Upgrading](https://muzakkirhussain011.github.io/wardowl/upgrading.html#from-30-to-31) lists what
+to check.
+
 ### Changed
 
 - `VespaBackend` declares `exact_search` when it searches vectors with `approximate=False`, and
@@ -20,6 +37,15 @@ All notable changes are recorded here. The format follows
   CI. A query for more hits than the query profile's `maxHits` gets an error from Vespa's search
   handler rather than fewer hits (read in Vespa's source, not run), and the backend raises it, so a
   short result is not a cut one.
+- `MongoDBBackend.exact_search` is True for a vector backend created with `exact=True`, which runs
+  `$vectorSearch` as an ENN search: MongoDB documents that it "exhaustively searches all the
+  indexed vector embeddings", with the permission filter as its pre-filter. The retriever therefore
+  reports a short result from such a backend as complete (`shortfall="exhausted"`), where 3.0
+  reported `complete=False` and `shortfall="unknown"`, and `check_backend` checks it as exact. The
+  hits returned do not change. Only what the index has caught up with counts: a chunk written with
+  `wait=False` or by another tool can be missing from a search made just after it. Keyword mode and
+  `exact=False` are unchanged. CI runs the conformance kit against Atlas Local with `exact=True`
+  (U20 in the readiness review).
 
 ### Added
 
@@ -47,6 +73,31 @@ All notable changes are recorded here. The format follows
   `max_staleness` as before. The tests cover a token per call, one evaluation for a call of several
   requests, the failures, a mapping, `max_staleness` for both forms, and, against a real SpiceDB, a
   revocation reported to the cache with the token of its write.
+- `OIDCAuthenticator(require_groups=True)` refuses a token without the groups claim
+  (`groups_claim`) as invalid, which the HTTP service answers with 401. The claim was read as "no
+  groups" when it was absent, so a token that lost its groups (a group mapper removed, or a
+  provider that leaves a long group list out of the token, as Microsoft Entra ID does for a user in
+  more than 200 groups) quietly stripped the user's group access: 200 with fewer hits, and no log
+  line (M21). An empty list is a claim, and passes. The default, `False`, keeps that reading, and
+  now logs each token without the claim at DEBUG on the `wardowl` logger, naming the claim and
+  nothing else. `subject()` applies the same rule to claims passed to it directly.
+- `OIDCAuthenticator` logs every token it refuses at INFO on the `wardowl` logger, with the check
+  that failed: PyJWT's exception class (such as `ImmatureSignatureError`, `ExpiredSignatureError`
+  or `InvalidAudienceError`, and the claim's name for `MissingRequiredClaimError`) or wardowl's own
+  reason (such as a `kid` that no published key matches). The token, its signature and its claims'
+  values are not logged, and the 401 the HTTP service answers is unchanged, so the caller is still
+  not told why. Every PyJWT error became `InvalidToken` and a 401 with no reason recorded anywhere
+  (M20). `create_app` still logs nothing for a 401 from an authenticator of your own.
+- `CachingAuthorizer.ainvalidate(subject=None)`: `invalidate()` for async code, with the same
+  effect and errors. It drops this process's answers at once, then runs the shared cache's calls in
+  a worker thread with `asyncio.to_thread`, as the other async methods already do for their shared
+  reads and writes, so an `async def` handler that reports a revocation no longer holds up the
+  event loop while Redis is cleared. If the task awaiting it is cancelled, the thread still
+  finishes, and the caller is not told whether it succeeded.
+- `RedisCache.set_many_indexed(entries, ttl, index)` and `RedisCache.delete_indexed(index, prefix)`,
+  which keep and use the index of each subject's entries described under Fixed. A shared cache of
+  your own can have the same two methods; one with only `get_many`, `set_many` and `delete_prefix`
+  works as before.
 
 ### Deprecated
 
@@ -141,9 +192,11 @@ All notable changes are recorded here. The format follows
   checked. No layout version marker is stored: the one layout change so far is told apart by its
   field names, and a marker would need a write to existing objects and a migration story.
 - `ChromaBackend` reads a record whose `wardowl_metadata` is not JSON text for an object as
-  carrying no permissions, so the re-check denies it, as it does a record without the copy and as
-  the Redis, LanceDB and Weaviate backends do. Such a record, written by another tool or a manual
-  edit, made every search that returned it fail with `SearchError` (U19 in the readiness review).
+  carrying no permissions, as it does a record without the copy and as the Redis, LanceDB and
+  Weaviate backends do: a filtered search leaves it out before the re-check, so it is not counted in
+  `violations`, and post-filtering's check denies it. Such a record, written by another tool or a
+  manual edit, made every search that returned it fail with `SearchError` (U19 in the readiness
+  review).
 - `QdrantBackend` and `WeaviateBackend` never report one id for two points. A point another tool
   wrote at the UUID `u`, and a chunk added with the id `u` (stored at `point_id(u)`), were both
   reported as `u`, and so were a point holding `wardowl_id` `x` at another point id and the chunk
@@ -172,11 +225,11 @@ All notable changes are recorded here. The format follows
   write sends three more commands in its pipeline, so no extra round trip, and Redis holds one
   sorted set per subject id written in the last `ttl` plus a minute. The revocation guarantee does
   not change: the new epoch makes every replica refuse the entries written before it, which is
-  also what protected against a write racing the scan. An entry that no index lists, such as one a 3.0 replica writes
-  during a rolling upgrade, is refused the same way and stays in Redis until it expires, within
-  `ttl`; call `invalidate()` once every replica runs 3.1 to delete such entries at once.
-  `invalidate()` of everyone still scans the database. A shared cache without the new methods is
-  still cleared with `delete_prefix`. Tests, with a stand-in store and against Redis in CI: a
+  also what protected against a write racing the scan. An entry that no index lists, such as one a
+  3.0 replica writes during a rolling upgrade, is refused the same way and stays in Redis until it
+  expires, within `ttl`; call `invalidate()` once every replica runs 3.1 to delete such entries at
+  once. `invalidate()` of everyone still scans the database. A shared cache without the new methods
+  is still cleared with `delete_prefix`. Tests, with a stand-in store and against Redis in CI: a
   subject's invalidation deletes only that id's entries and never scans, entries without an index
   are refused and then deleted by `invalidate()` of everyone, a write racing an invalidation stays
   listed and is never read, the index drops long-expired names and deletes only under its prefix,
@@ -196,13 +249,12 @@ All notable changes are recorded here. The format follows
   page documents for this case; U16 in the readiness review notes the same missing handler. Any
   other exception from the retrieval (an `AuditError` from a required observer, a reranker or
   redactor that raises) is answered the same way, with "the retrieval failed on the server, so
-  nothing was returned", instead of leaving the application. The
-  MCP tool needed no change: the MCP SDK catches the error, logs it with its traceback, and ends
-  the call with an error that names only the tool ("Error executing tool search"), as the MCP page
-  says. Tests: a store whose search fails and one whose
-  count fails each answer that 500 without the test client raising, log the error with its cause,
-  and the client's next request succeeds. The test client keeps no connection alive, so the reset
-  itself was seen only under uvicorn, in the acceptance run.
+  nothing was returned", instead of leaving the application. The MCP tool needed no change: the MCP
+  SDK catches the error, logs it with its traceback, and ends the call with an error that names
+  only the tool ("Error executing tool search"), as the MCP page says. Tests: a store whose search
+  fails and one whose count fails each answer that 500 without the test client raising, log the
+  error with its cause, and the client's next request succeeds. The test client keeps no
+  connection alive, so the reset itself was seen only under uvicorn, in the acceptance run.
 
 ### Documentation
 
@@ -211,15 +263,6 @@ All notable changes are recorded here. The format follows
   redactor needs lists where the authorizer also takes a single string. The page now names the
   fields and the marker, shows how to give the redactor the authorizer's own, and says how the two
   differ. The threat model's T14 says where the 100-level bound is enforced.
-- `MongoDBBackend.exact_search` is True for a vector backend created with `exact=True`, which runs
-  `$vectorSearch` as an ENN search: MongoDB documents that it "exhaustively searches all the
-  indexed vector embeddings", with the permission filter as its pre-filter. The retriever therefore
-  reports a short result from such a backend as complete (`shortfall="exhausted"`), where 3.0
-  reported `complete=False` and `shortfall="unknown"`, and `check_backend` checks it as exact. The
-  hits returned do not change. Only what the index has caught up with counts: a chunk written with
-  `wait=False` or by another tool can be missing from a search made just after it. Keyword mode and
-  `exact=False` are unchanged. CI runs the conformance kit against Atlas Local with `exact=True`
-  (U20 in the readiness review).
 - The module docstring, the SpiceDB page and
   [Revocation and consistency](https://muzakkirhussain011.github.io/wardowl/revocation.html) said
   to declare `max_staleness=0` when sending `atLeastAsFresh` with "the token of every change you
@@ -230,21 +273,6 @@ All notable changes are recorded here. The format follows
   to the cache, kept before `invalidate()` is called. The SpiceDB page shows a thread-safe function
   that does it, says what it relies on, and says what it does not cover: writes in other processes,
   unless the token is shared, and changes made directly in SpiceDB.
-- `OIDCAuthenticator(require_groups=True)` refuses a token without the groups claim
-  (`groups_claim`) as invalid, which the HTTP service answers with 401. The claim was read as "no
-  groups" when it was absent, so a token that lost its groups (a group mapper removed, or a
-  provider that leaves a long group list out of the token, as Microsoft Entra ID does for a user in
-  more than 200 groups) quietly stripped the user's group access: 200 with fewer hits, and no log
-  line (M21). An empty list is a claim, and passes. The default, `False`, keeps that reading, and
-  now logs each token without the claim at DEBUG on the `wardowl` logger, naming the claim and
-  nothing else. `subject()` applies the same rule to claims passed to it directly.
-- `OIDCAuthenticator` logs every token it refuses at INFO on the `wardowl` logger, with the check
-  that failed: PyJWT's exception class (such as `ImmatureSignatureError`, `ExpiredSignatureError`
-  or `InvalidAudienceError`, and the claim's name for `MissingRequiredClaimError`) or wardowl's own
-  reason (such as a `kid` that no published key matches). The token, its signature and its claims'
-  values are not logged, and the 401 the HTTP service answers is unchanged, so the caller is still
-  not told why. Every PyJWT error became `InvalidToken` and a 401 with no reason recorded anywhere
-  (M20). `create_app` still logs nothing for a 401 from an authenticator of your own.
 - The HTTP service page and the `OIDCAuthenticator` docstring say that `exp`, and `nbf` and `iat`
   when the token has them, are checked against the service's clock, and that `leeway` applies to
   all three. With the default leeway of 0, an identity provider whose clock runs ahead of the
@@ -254,16 +282,6 @@ All notable changes are recorded here. The format follows
   since a minor release never weakens a default that keeps a protection on. New sections cover
   tokens without groups and where to find why a token was refused; the MCP page's stdio example and
   the production failure table say the same.
-- `CachingAuthorizer.ainvalidate(subject=None)`: `invalidate()` for async code, with the same
-  effect and errors. It drops this process's answers at once, then runs the shared cache's calls in
-  a worker thread with `asyncio.to_thread`, as the other async methods already do for their shared
-  reads and writes, so an `async def` handler that reports a revocation no longer holds up the
-  event loop while Redis is cleared. If the task awaiting it is cancelled, the thread still
-  finishes, and the caller is not told whether it succeeded.
-- `RedisCache.set_many_indexed(entries, ttl, index)` and `RedisCache.delete_indexed(index, prefix)`,
-  which keep and use the index of each subject's entries described under Fixed. A shared cache of
-  your own can have the same two methods; one with only `get_many`, `set_many` and `delete_prefix`
-  works as before.
 - Operations: what each form of `invalidate()` costs and where it waits, what `invalidate(subject)`
   leaves in Redis, and why the Redis behind the cache should not evict keys: an evicted epoch or
   index weakens what an invalidation deletes or refuses. Revocation, the runbook and the security
@@ -275,17 +293,16 @@ All notable changes are recorded here. The format follows
   when a permission changes between the filter and the check. The runbook lists each cause with how
   to tell it and what to do, and shows how to find the rejected chunks; the production page's
   failure table and its identity checklist (ids and groups are compared exactly, never lowercased)
-  are updated too. The security model and the
-  Milvus, Redis and LanceDB pages say that terms are recomputed in the same write as the metadata,
-  and what stale terms do; the extending guide says that `check_backend` cannot see other writers,
-  and that a backend should return at most `k` hits. The Google Drive page shows how to enforce
-  `access_expires_at` inside wardowl, with its cost, says that no backend lists chunks by
-  metadata, that `with_access` needs the authorizer's field names, how tenants and case work, and
-  that OpenFGA refuses the default `domain:` groups (use `domain_prefix="domain/"`) and SpiceDB
-  refuses email ids; the OpenFGA page and ADR 0006 say the same. The OPA, Cerbos, Cedar and Casbin
-  pages say how to keep tenants apart, Combining that a tenant from `OIDCAuthenticator` is a
-  string, the MCP page which group names permission services refuse, and the pgvector and
-  Cassandra pages what very large filters cost.
+  are updated too. The security model and the Milvus, Redis and LanceDB pages say that terms are
+  recomputed in the same write as the metadata, and what stale terms do; the extending guide says
+  that `check_backend` cannot see other writers, and that a backend should return at most `k` hits.
+  The Google Drive page shows how to enforce `access_expires_at` inside wardowl, with its cost,
+  says that no backend lists chunks by metadata, that `with_access` needs the authorizer's field
+  names, how tenants and case work, and that OpenFGA refuses the default `domain:` groups (use
+  `domain_prefix="domain/"`) and SpiceDB refuses email ids; the OpenFGA page and ADR 0006 say the
+  same. The OPA, Cerbos, Cedar and Casbin pages say how to keep tenants apart, Combining that a
+  tenant from `OIDCAuthenticator` is a string, the MCP page which group names permission services
+  refuse, and the pgvector and Cassandra pages what very large filters cost.
 - The HTTP service page and the `wardowl.server` docstring say what a failed search answers: 500
   with a fixed message, and the store's error on the `wardowl` logger (see Fixed). A vector of the
   wrong length for a database store answers that way.
@@ -1926,7 +1943,8 @@ needed, in which case it will be announced in a second release candidate. Instal
 - The project is now `wardowl`, a permission-aware retrieval library (ADR 0005). The earlier
   Rampart gateway lives on as an example deployment in `examples/gateway`.
 
-[Unreleased]: https://github.com/muzakkirhussain011/wardowl/compare/v3.0.0...HEAD
+[Unreleased]: https://github.com/muzakkirhussain011/wardowl/compare/v3.1.0...HEAD
+[3.1.0]: https://github.com/muzakkirhussain011/wardowl/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/muzakkirhussain011/wardowl/compare/v2.1.1...v3.0.0
 [2.1.1]: https://github.com/muzakkirhussain011/wardowl/compare/v2.1.0...v2.1.1
 [2.0.2]: https://github.com/muzakkirhussain011/wardowl/compare/v2.0.1...v2.0.2

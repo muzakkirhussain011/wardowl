@@ -1,12 +1,91 @@
 ---
-description: How to upgrade wardowl from 2.1 to 3.0, and from needtoknow 1.x to wardowl 2.0. Covers each change that can break existing code, and what to change.
+description: How to upgrade wardowl from 3.0 to 3.1, from 2.1 to 3.0, and from needtoknow 1.x to wardowl 2.0. Covers each change that can break existing code, and what to change.
 ---
 
 # Upgrading
 
-A major version can change behaviour that code written for the one before relies on. This page
-lists those changes, newest first, with what to change. The full list of changes is in the
-[changelog](changelog.md).
+A major version can change behaviour that code written for the one before relies on; a minor
+version adds features, and can refuse wrong input sooner. This page lists those changes, newest
+first, with what to change. The full list of changes is in the [changelog](changelog.md).
+
+## From 3.0 to 3.1
+
+wardowl 3.1.0 is a minor release. Code that follows the documented types needs no change, unless it
+relies on group names that are empty or only whitespace, or on filters nested more than 100 levels
+deep. The extras, the Python versions and the minimum versions of the store clients are the same as
+in 3.0, and nothing needs indexing again. 3.0.x keeps getting security fixes for six months after
+3.1.0; the
+[security policy](https://github.com/muzakkirhussain011/wardowl/blob/main/SECURITY.md#supported-versions)
+gives the date.
+
+```bash
+pip install --upgrade "wardowl==3.1.*"   # with the same extras, e.g. "wardowl[pgvector,redis]==3.1.*"
+```
+
+### What now fails closed
+
+| Input | In 3.1 | What to do |
+|---|---|---|
+| An authorizer's filter or scope nested more than 100 levels deep | `AuthorizationError` before anything is searched. 3.0 searched it up to Python's recursion limit, and beyond it raised `SearchError`, or a bare `RecursionError` with `recheck=False` and a backend that does not recurse into the filter | Have the authorizer return a shallower filter. The built-in authorizers build filters one or two levels deep and `AllOf` and `AnyOf` add one, so such a filter comes from a Cerbos plan nested that far, an authorizer of your own, or combinations around an answer already near the bound |
+| A filter or scope holding something other than `In`, `And` and `Or` | `AuthorizationError`, which `AllOf` and `AnyOf` also raise from their own `filter_for` and `scope_for`. 3.0 passed it to the backend, whose translation failed, and raised `SearchError`, which blames the store | Fix the authorizer; where you caught `SearchError` for this, catch `AuthorizationError` |
+| A search reply that is not hits: not iterable, a hit without `id`, `text`, `score` or `metadata`, an id that cannot be hashed, metadata that is not a mapping, or a score that is not a number (`True` and `False` included); with a reranker, an id that is not a string; with a redactor, a hit that is not a `Hit` | `SearchError("search failed")`, its `__cause__` a `TypeError` that names what was wrong. 3.0 failed later, outside the backend's errors, or returned the hit as it was: a score of None when pre-filtering, `True` and `False` sorted as 1 and 0 | Return `Hit` objects with string ids, metadata mappings and number scores, as the built-in backends do |
+| Group names that are empty or only whitespace, with `MetadataACLAuthorizer` or `SpanRedactor` | Ignored, on the subject, in a chunk's or a span's readers, and as `everyone`: they grant nothing. In 3.0 a subject with `""` among its groups read what listed `""`, and with `everyone=""` every subject did | Give such chunks and spans the names of real groups. `Subject` still accepts such names |
+| A store left in needtoknow 1.x's layout: a Qdrant collection, an Elasticsearch or OpenSearch index, Chroma records | `ValueError` naming the upgrade step: on Qdrant before anything is written, on Elasticsearch and OpenSearch from `create_index`, on Chroma from a search, which `retrieve` raises as `SearchError`. 3.0 misbehaved without an error ([what is checked, and when](#2-index-your-chunks-again)) | Index the chunks into a new collection or index, as step 2 of the upgrade from needtoknow 1.x says |
+| `OIDCAuthenticator(leeway=...)` that is NaN or infinite | `ValueError` when the authenticator is created. In 3.0, with NaN an expired token verified, and an infinite leeway turned the expiry check off | Pass a finite number of seconds, or a `datetime.timedelta` |
+
+### Deprecated: hits that are not `Hit` objects, and ids that are not strings
+
+A backend whose search returns objects that are not `Hit` (any object with `id`, `text`, `score`
+and `metadata`), or `Hit` objects whose `id` is not a string, still works: the retriever warns with
+`DeprecationWarning`, once per retriever for each of the two kinds, pointing at the code that called
+`retrieve` or awaited `aretrieve`. wardowl 4.0 will refuse them with `SearchError`. Return `Hit`
+objects with string ids, as the built-in backends do. To find such a backend in your tests, turn
+the warning into an error (`-W error::DeprecationWarning`): `retrieve` and `aretrieve` then raise
+it.
+
+### Other changes you may see
+
+- `VespaBackend` with `approximate=False` in vector mode, and `MongoDBBackend` created with
+  `exact=True` in vector mode, declare `exact_search`: a short pre-filtered result from them is
+  complete, with `shortfall="exhausted"`, where 3.0 reported `complete=False` and
+  `shortfall="unknown"`. The hits are the same.
+- A stored record whose metadata is not a JSON object, which another tool can write, no longer
+  fails the retrieval on Vespa, Pinecone, Cassandra, pgvector and Chroma: it is read with empty
+  metadata, which carries no permissions. On Vespa, Pinecone and Cassandra, a pre-filtered one
+  that the store returns is counted in `violations`.
+- The HTTP service's handler answers a failed search, or any other failure in the retrieval, with
+  500 and a fixed message, and logs the error on the `wardowl` logger. In 3.0 the exception left
+  the application, and uvicorn closed the connection, so the client's next request on it was reset
+  ([The API](integrations/http.md#the-api)).
+- `OIDCAuthenticator` logs each token it refuses at INFO on the `wardowl` logger, and by default
+  each token without the groups claim at DEBUG, with nothing from the token itself
+  ([Why a token was refused](integrations/http.md#why-a-token-was-refused)).
+
+### Additions worth knowing
+
+They change nothing until you use them, except the index that `RedisCache` now keeps.
+
+- `OIDCAuthenticator(require_groups=True)` refuses a token without the groups claim with 401, where
+  the default reads it as a subject in no groups. Check first what your provider sends for a user
+  in no groups ([Tokens without groups](integrations/http.md#tokens-without-groups)).
+- `SpiceDBAuthorizer(consistency=...)` takes a function of no arguments that returns the
+  requirement, so that every request can carry the ZedToken of your latest write. What it returns
+  is checked: anything but one of SpiceDB's four requirements, with a non-empty token where one is
+  needed, raises `AuthorizationError` and sends nothing. With a function, `max_staleness` is 11
+  seconds unless you pass it
+  ([The token of the latest write](integrations/spicedb.md#the-token-of-the-latest-write)).
+- `SpanRedactor(users_field=..., groups_field=..., everyone=...)`: give it the field names and the
+  marker your `MetadataACLAuthorizer` uses
+  ([Spans with their own readers](redaction.md#spans-with-their-own-readers)).
+- `CachingAuthorizer.ainvalidate(subject=None)` is `invalidate()` for async code: an `async def`
+  handler that reports a revocation no longer holds up the event loop while the shared cache is
+  cleared.
+- `RedisCache` keeps an index of each subject id's entries, so `invalidate(subject)` no longer scans
+  the database. During a rolling upgrade, entries that 3.0 replicas write are in no index: after an
+  invalidation they are refused, as before, but one made by a 3.1 replica leaves them in Redis
+  until they expire. Call `invalidate()` once every replica runs 3.1 to delete them at once. A
+  shared cache of your own can add `set_many_indexed` and `delete_indexed` to do the same
+  ([Sharing the cache across processes](operations.md#sharing-the-cache-across-processes)).
 
 ## From 2.1 to 3.0
 

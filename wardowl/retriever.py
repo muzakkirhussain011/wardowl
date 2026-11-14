@@ -180,8 +180,12 @@ class RetrievalResult:
     denied: int
     """Post-filtered candidates the subject may not read."""
     violations: int
-    """Pre-filtered hits that failed the re-check. Should always be 0; anything else means the
-    backend did not apply the filter and deserves an alert."""
+    """Pre-filtered hits that failed the re-check. Should be 0, and anything else deserves an
+    alert. A backend that did not apply the filter is one cause. The others known are permission
+    terms that another writer left stale and broader than the stored metadata, a search index that
+    has not caught up with the stored metadata (MongoDB), an authorizer whose filter selects more
+    than its `check` allows, and a permission that changed between the filter and the check. The
+    runbook tells them apart."""
     complete: bool
     """False when wardowl knows results may be missing. True only when:
 
