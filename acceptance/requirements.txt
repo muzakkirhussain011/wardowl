@@ -4242,9 +4242,9 @@ validators==0.36.0 \
     --hash=sha256:92ad9ed00bbed320b784cec0ea90b213cf08904cf605b3d0852cfa4108e32a2c \
     --hash=sha256:c52ad00435e385b95fa4d6dd3081cb20c0660e7fd07b214523c8584dd2edba34
     # via weaviate-client
-wardowl==3.0.0 \
-    --hash=sha256:3473be12996adc048ac170502cbe13f1a1609eee462940ab831c4317917d127e \
-    --hash=sha256:a36c23d08c327448e59921306b78f6fceed642fcd8f5d557cbf741de0c0afb82
+wardowl==3.1.0 \
+    --hash=sha256:8d4577ee44ba588bc6701664f0349a5bef2c5cee8bd4a18a538b42a85ef670d3 \
+    --hash=sha256:98aede6538385386da4bbcf05fc0bc84b069a475a711c4a3dd8c11c134c31214
     # via -r acceptance/requirements.in
 watchfiles==1.3.0 \
     --hash=sha256:000b9688fc8133037a8b075c8ebf98f32844ff8964dda61e85c1db547dafc441 \
