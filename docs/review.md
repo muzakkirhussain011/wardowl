@@ -172,6 +172,17 @@ published as advisory
 | November 2026 | Under `aretrieve`, an observer that blocked held up every request of the HTTP service and the MCP server | 3.0.0 |
 | November 2026 | The HTTP service and the MCP tool had no bound on a retrieval's time, and an HTTP authorizer's check none on its batches together | 3.0.0 |
 | November 2026 | pgvector and MongoDB had no way to refuse a write older than the one stored, so a late re-index could put back access a permission sync had revoked | 3.0.0 |
+| November 2026 | `MetadataACLAuthorizer` and `SpanRedactor` matched group names that are empty or only whitespace: a subject with `""` among its groups read what listed `""`, and with `everyone=""` every subject did | 3.1.0 |
+| November 2026 | `SpanRedactor` read the default field names and `"*"` whatever the authorizer used, so a span whose readers were written in the authorizer's form, with `"*"` naming a group, was shown to everyone | 3.1.0 |
+| November 2026 | `OIDCAuthenticator` accepted a NaN `leeway`, with which an expired token verified, and an infinite one, which turned the expiry check off | 3.1.0 |
+| November 2026 | A token without the groups claim stripped the user's group access with no error and no log line, and a refused token left no record of the check that failed | 3.1.0 |
+| November 2026 | A SpiceDB ZedToken fixed when the authorizer was created covered no later write, while the documentation said to declare `max_staleness=0` with it, so a cache could keep an answer from before a revocation for its whole `ttl` | 3.1.0 |
+| November 2026 | `invalidate(subject)` with `RedisCache` scanned the whole Redis database, so its cost grew with everything Redis held, and was paid in the calling thread | 3.1.0 |
+| November 2026 | A store left in needtoknow 1.x's layout misbehaved without an error: on Qdrant, a revocation by a chunk id that is not a UUID changed nothing, and Elasticsearch and OpenSearch found nothing under a pre-filter | 3.1.0 |
+| November 2026 | Qdrant and Weaviate could report one id for two points, so post-filtering could leave out the readable one | 3.1.0 |
+| November 2026 | One stored record whose metadata is not a JSON object, which another tool can write, failed every retrieval that reached it on Vespa, Pinecone, Cassandra and Chroma | 3.1.0 |
+| November 2026 | An authorizer's filter holding something other than `In`, `And` and `Or` failed as the store's fault, and, with `recheck=False` and a backend that does not recurse into it, one nested deep enough raised a bare `RecursionError` | 3.1.0 |
+| November 2026 | The HTTP service let a failed search leave the application, so the connection was closed and the client's next request on it was reset | 3.1.0 |
 
 ## Reporting
 
