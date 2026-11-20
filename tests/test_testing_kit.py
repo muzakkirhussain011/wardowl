@@ -282,10 +282,18 @@ def test_a_backend_that_cuts_or_drops_long_values_is_caught(backend, problem):
     assert "<x 999 times>1" in message and "x" * 100 not in message
 
 
+class _ApproximateDropping(_lenient(_dropped, filters=False)):
+    exact_search = False  # it stands in for an approximate index, and says so
+
+
+class _ApproximateCutting(_lenient(_cut)):
+    exact_search = False
+
+
 def test_an_approximate_backend_that_cuts_long_values_is_caught_when_it_matches_wrongly():
-    check_backend(_lenient(_dropped, filters=False), examples=2, exact=False)  # it may miss matches
+    check_backend(_ApproximateDropping, examples=2, exact=False)  # it may miss matches
     with pytest.raises(ConformanceError, match="should not match"):
-        check_backend(_lenient(_cut), examples=2, exact=False)
+        check_backend(_ApproximateCutting, examples=2, exact=False)
 
 
 class _DottedPathBackend(InMemoryBackend):
