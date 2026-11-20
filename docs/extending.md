@@ -150,6 +150,21 @@ may miss matches, pass `exact=False`: a result may then be short, but never wron
 short results as proof that nothing else matches, and so is every search asked for with
 `exact=True`. `count`, where it returns a number, must count what `matches` selects.
 
+Once in each run, `check_backend` also stores a corpus of its own whose permission values are
+`long_value_length` characters long (1,000 by default): two that differ only in their last
+character, one made of two-byte characters, and the characters the first two share, as a value of
+its own. Filters naming each of them must find exactly their documents, as must retrieval for a
+subject who holds them, and again after `set_metadata` replaces one with another long value. A
+store that cuts a long string short when it indexes it, or leaves it out of the index, fails here:
+a filter on the whole value then misses its document, or matches documents whose values only start
+the same way (on an approximate index checked with `exact=False`, only the second fails).
+wardowl's Redis, MongoDB, Elasticsearch, OpenSearch and Cassandra backends store a term longer than
+their store indexes whole as its SHA-256 digest, and search for it the same way, for this reason.
+Pass a length above your store's documented limit to check what the backend does beyond it, or 0 to
+leave the check out. A backend that refuses longer values with an error fails closed, not wrongly;
+for such a store, pass a length under its limit. A failure shows each long value as runs of its
+characters, such as `<x 999 times>1`.
+
 When `set_metadata` returns a set, `check_backend` checks that it holds exactly the ids it was given
 that are stored, and not an id that is not; it then deletes some documents and an id that is not
 stored, and checks the set `delete` returns the same way. A return value that is not a set, None

@@ -9,6 +9,8 @@ or integer in the metadata (`allowed_groups\\x1fs:hr`, `level\\x1fi:1`), for sca
 each element of a list field alike. A filter becomes a `terms` query on those tags, which compares
 type and value exactly. The original metadata is stored unindexed and returned as it was written,
 so the retriever's re-check sees the true permissions, and arbitrary metadata never adds mappings.
+Lucene refuses a term longer than 32,766 bytes, so a longer one is stored and searched as its
+SHA-256 digest (`engine_terms`), as the MongoDB and Redis backends do with theirs.
 """
 
 from __future__ import annotations
@@ -51,6 +53,23 @@ def terms(doc_id: str, metadata: Mapping[str, Any]) -> list[str]:
     return sorted(found)
 
 
+# Lucene's limit for one term, in bytes of UTF-8 (IndexWriter.MAX_TERM_LENGTH). A keyword field
+# without `ignore_above`, as `mappings` makes, refuses a document holding a longer value, so a term
+# this long or shorter is indexed as it is and a longer one never was: no stored term changes.
+_MAX_TERM_BYTES = 32_766
+
+
+def _indexed(term: str) -> str:
+    """`term`, or its digest when it is longer than Lucene indexes (`_MAX_TERM_BYTES`)."""
+    return term if len(term.encode("utf-8", "surrogatepass")) <= _MAX_TERM_BYTES else digest(term)
+
+
+def engine_terms(doc_id: str, metadata: Mapping[str, Any]) -> list[str]:
+    """The value of `wardowl_terms` on Elasticsearch and OpenSearch: `terms`, each one longer than
+    Lucene indexes replaced by its digest."""
+    return [_indexed(t) for t in terms(doc_id, metadata)]
+
+
 def filter_to_query(f: Filter) -> dict[str, Any]:
     """Translate a filter into a query on the tagged terms. Raises `NothingMatches` when nothing can match."""
     return required(_query(f))
@@ -62,7 +81,7 @@ def _query(f: Filter) -> dict[str, Any] | None:
         if _SEP in f.field:
             raise ValueError(f"field {f.field!r} may not contain \\x1f")
         values = _ordered(f.values)
-        return {"terms": {TERMS_FIELD: [tag(f.field, v) for v in values]}} if values else None
+        return {"terms": {TERMS_FIELD: [_indexed(tag(f.field, v)) for v in values]}} if values else None
     if isinstance(f, And):
         parts = [_query(c) for c in f.clauses]
         if any(p is None for p in parts):
@@ -140,7 +159,7 @@ class EngineBackend:
         source: dict[str, Any] = {
             self.content_field: doc.text,
             self.metadata_field: dict(doc.metadata),
-            TERMS_FIELD: terms(doc.id, doc.metadata),
+            TERMS_FIELD: engine_terms(doc.id, doc.metadata),
         }
         if vector is not None:  # a keyword-only backend without embed writes no vector
             source[self.vector_field] = [float(x) for x in vector]
@@ -178,7 +197,7 @@ class EngineBackend:
         for start in range(0, len(items), _BATCH):
             operations: list[dict[str, Any]] = []
             for doc_id, new in items[start : start + _BATCH]:
-                params = {"field": self.metadata_field, "metadata": dict(new), "terms": terms(doc_id, new)}
+                params = {"field": self.metadata_field, "metadata": dict(new), "terms": engine_terms(doc_id, new)}
                 operations += [
                     {"update": {"_index": self.index, "_id": doc_id}},
                     # A script, because a partial `doc` update would merge the old metadata's keys into the new.

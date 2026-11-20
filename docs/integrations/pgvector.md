@@ -99,7 +99,11 @@ metadata @> '{"allowed_groups": "hr"}'::jsonb OR metadata @> '{"allowed_groups":
 
 `And` and `Or` become `AND` and `OR`. Values are bound parameters, never interpolated. Containment
 keeps strings, numbers and booleans apart, which matches the reference semantics, and the GIN index
-serves it. jsonb compares numbers by value, though, so `{"level": 1.0}` contains `{"level": 1}`,
+serves it. Each item of that index is "a hash of the value and the key(s) leading to it"
+([jsonb indexing](https://www.postgresql.org/docs/current/datatype-json.html#JSON-INDEXING)), so the
+whole of a long value counts. CI stores values of 4,000 and 40,000 characters and finds each one's
+chunk with a filter, while a value that differs only in its last character matches only its own
+chunk, before and after `set_metadata` changes it. jsonb compares numbers by value, though, so `{"level": 1.0}` contains `{"level": 1}`,
 where the reference semantics match integers only. An integer value therefore also requires the
 stored number, or an element of the stored list, to read as that integer:
 

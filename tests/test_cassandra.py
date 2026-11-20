@@ -2,13 +2,15 @@
 
 from __future__ import annotations
 
+import json
 import os
 import uuid
 
 import pytest
+from helpers import long_value_outcomes
 
 from wardowl import And, Document, In, MetadataACLAuthorizer, Or, PermissionedRetriever, Query, Subject
-from wardowl.backends._engines import tag
+from wardowl.backends._engines import digest, tag
 from wardowl.backends.cassandra import (
     CassandraBackend,
     TooManyQueries,
@@ -48,6 +50,30 @@ def test_filters_become_an_or_of_ands():
     assert required_terms(In("a", ["x", "z"])) == frozenset()
     with pytest.raises(TypeError):
         required_terms("a")
+
+
+def test_a_term_longer_than_sai_indexes_is_written_as_its_digest_and_looked_for_in_both_forms(monkeypatch):
+    # SAI leaves a term longer than sai_string_term_size_fail_threshold (8 KiB by default) out of its
+    # index. A cluster with a higher threshold indexed such a term whole, so filters look for both.
+    extra = len(tag("allowed_groups", "").encode())
+    edge, longer = "g" * (8192 - extra), "g" * (8193 - extra)
+    kept, cut = tag("allowed_groups", edge), tag("allowed_groups", longer)
+    assert filter_to_conjunctions(In("allowed_groups", [edge])) == [frozenset({kept})]
+    both = sorted([frozenset({cut}), frozenset({digest(cut)})], key=sorted)
+    assert filter_to_conjunctions(In("allowed_groups", [longer])) == both
+    assert required_terms(In("allowed_groups", [edge])) == {kept}
+    assert required_terms(And(In("team", ["a"]), In("allowed_groups", [longer]))) == {tag("team", "a")}
+    calls = []
+
+    def run(self, cql, args, *, write=False):
+        calls.append(list(args))
+        return []
+
+    monkeypatch.setattr(CassandraBackend, "_run", run)
+    metadata = {"allowed_groups": [edge, longer]}
+    CassandraBackend(NoSession(), "ks", "chunks", EMBED).add([Document("d", "leave", metadata)])
+    ((row,),) = calls
+    assert row[3] == {kept, digest(cut)} and json.loads(row[2]) == metadata
 
 
 class NoSession:
@@ -213,3 +239,19 @@ def test_pre_filtering_and_changes_against_cassandra(session):
     assert backend.search("launch", 3, In("allowed_groups", ["eng"])) and len(backend.search("launch", 10)) == 3
     assert backend.delete(["all", "missing"]) == {"all"} and backend.delete(["all"]) == frozenset()
     assert {h.id for h in backend.search("launch", 10)} == {"eng", "hr"}
+
+
+@needs_cassandra
+def test_values_longer_than_sai_indexes_are_found(session):
+    # SAI leaves a term longer than sai_string_term_size_fail_threshold (8 KiB by default) out of its
+    # index; CI's Cassandra runs without authentication, so the write is not refused. Before, a
+    # filter on such a value found nothing (Cassandra 5.0.9: a term of 8,193 bytes, a value of 40,000).
+    extra = len(tag("allowed_groups", "").encode())
+    values = {
+        "term of 1,025 bytes": "g" * (1025 - extra),
+        "term of 8,192 bytes": "g" * (8192 - extra),
+        "term of 8,193 bytes": "g" * (8193 - extra),
+        "40,000 characters": "g" * 40_000,
+    }
+    outcomes = long_value_outcomes(_factory(session), values)
+    assert outcomes == dict.fromkeys(values, "found"), "\n".join(f"{k}: {v}" for k, v in outcomes.items())

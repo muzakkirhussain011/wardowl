@@ -25,6 +25,7 @@ from helpers import (
     expected_ids,
     filters,
     labelled_docs,
+    long_value_outcomes,
     may_read,
     queries,
     subjects,
@@ -144,6 +145,12 @@ def test_retriever_on_backend_never_leaks_and_says_when_it_is_complete(factory, 
 def test_backend_passes_the_public_conformance_kit(factory):
     # The checks third-party adapters run (wardowl.testing), on every built-in backend.
     check_backend(factory)
+
+
+def test_long_permission_values(factory):
+    values = {"4,000 characters": "g" * 4000, "40,000 characters": "g" * 40_000}
+    outcomes = long_value_outcomes(factory, values)
+    assert outcomes == dict.fromkeys(values, "found"), "\n".join(f"{k}: {v}" for k, v in outcomes.items())
 
 
 # ---- Chroma specifics ------------------------------------------------------------------------

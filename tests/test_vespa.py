@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 
 import pytest
+from helpers import long_value_outcomes
 
 from wardowl import And, Document, In, MetadataACLAuthorizer, Or, PermissionedRetriever, Query, RankFusion, Subject
 from wardowl.backends import NothingMatches
@@ -304,3 +305,13 @@ def test_pre_filtering_against_vespa():
     )
     retriever = PermissionedRetriever(backend, MetadataACLAuthorizer(), strategy="prefilter")
     assert {h.id for h in retriever.retrieve("launch", Subject("ann", ["eng"]), k=3).hits} == {"eng", "all"}
+
+
+@needs_vespa
+def test_long_permission_values_against_vespa():
+    values = {"4,000 characters": "g" * 4000, "40,000 characters": "g" * 40_000}
+    try:
+        outcomes = long_value_outcomes(_factory(), values)
+    finally:
+        VespaBackend(URL, None).delete(["long", "near"])  # whatever a failed write left behind
+    assert outcomes == dict.fromkeys(values, "found"), "\n".join(f"{k}: {v}" for k, v in outcomes.items())

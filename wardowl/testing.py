@@ -189,9 +189,11 @@ class _Example:
     seed: int
     number: int
     documents: Sequence[Document]
+    label: str | None = None  # what the example is, when the seed does not make it
 
     def failure(self, what: str, problems: Sequence[str], **details: Any) -> ConformanceError:
-        lines = [f"{what} (seed={self.seed}, example {self.number}; rerun with the same seed to reproduce)"]
+        where = self.label or f"seed={self.seed}, example {self.number}; rerun with the same seed to reproduce"
+        lines = [f"{what} ({where})"]
         lines += [f"  - {p}" for p in problems]
         lines += [f"  {key}: {value}" for key, value in details.items()]
         lines.append(f"  documents ({len(self.documents)}):")
@@ -379,6 +381,7 @@ def check_backend(
     filters_per_example: int = 4,
     exact: bool = True,
     query: str | Query = QUERY,
+    long_value_length: int = 1000,
 ) -> None:
     """Check a backend against the reference semantics. Raises `ConformanceError` on the first failure.
 
@@ -415,6 +418,17 @@ def check_backend(
     such a field name by raising `ValueError`, which returns nothing, from `search` and `asearch`
     alike; it may not return wrong hits.
 
+    Then, once, it stores a corpus of its own whose permission values are `long_value_length`
+    characters long (1,000 by default; 0 leaves this out): two that differ only in their last
+    character, one made of two-byte characters, and the `long_value_length - 1` characters the
+    first two share, as a value of its own. It runs the checks above on that corpus, with filters
+    naming each of these values, for subjects who hold them, and, if the backend has
+    `set_metadata`, after a change to another long value. A store that cuts long values short when
+    it indexes them, or leaves them out of its index, fails these checks: a filter on a whole value
+    then misses its document, or matches documents whose values only start the same way (with
+    `exact=False`, only the second fails). For a store that refuses longer values with an error,
+    pass a length under its documented limit.
+
     `exact=False` suits approximate indexes, which may miss matching documents: results must
     still never include a document that does not match, but may contain fewer than expected. A
     backend whose `exact_search` is True is checked as exact whatever `exact` says, since the
@@ -425,8 +439,10 @@ def check_backend(
     you compute, for example `Query(QUERY, HashingEmbedder()(QUERY))` against a backend built
     without `embed` and filled with `add(documents, embeddings=...)`.
     """
-    if examples < 1 or max_documents < 0 or filters_per_example < 0:
-        raise ValueError("examples must be positive, max_documents and filters_per_example not negative")
+    if examples < 1 or max_documents < 0 or filters_per_example < 0 or long_value_length < 0:
+        raise ValueError(
+            "examples must be positive, max_documents, filters_per_example and long_value_length not negative"
+        )
     rng = random.Random(seed)
     for number in range(examples):
         docs = random_documents(rng, rng.randint(0, max_documents))
@@ -474,6 +490,9 @@ def check_backend(
                 _check_delete(delete, example, docs)
 
         _check_retrieval(factory, rng, seed, number, max_documents, exact, query)
+
+    if long_value_length:
+        _check_long_values(factory, long_value_length, exact, query)
 
 
 def _strict(backend: SearchBackend, exact: bool) -> bool:
@@ -570,38 +589,127 @@ def _check_retrieval(
     example = _Example(seed, number, docs)
     backend = factory(docs)
     exact = _strict(backend, exact)
-    strategies: tuple[Strategy, ...] = ("prefilter", "postfilter") if backend.supports_filters else ("postfilter",)
     for _ in range(3):
         subject = _subject(rng)
         k = rng.randint(1, 5)
-        readable = {d.id for d in docs if _may_read(subject, d.metadata)}
-        for strategy in strategies:
-            retriever = PermissionedRetriever(backend, MetadataACLAuthorizer(), strategy=strategy)
-            # Both drivers: the async one runs asearch, which may translate filters on its own.
-            results = {"retrieve": retriever.retrieve(query, subject, k)}
-            results["aretrieve"] = asyncio.run(retriever.aretrieve(query, subject, k))
-            expected_ids = [h.id for h in results["retrieve"].hits]
-            for call, result in results.items():
-                ids = [h.id for h in result.hits]
-                problems: list[str] = []
-                leaked = [i for i in ids if i not in readable]
-                if leaked:
-                    problems.append(f"returned documents the subject may not read: {leaked}")
-                if result.violations:
-                    problems.append(f"{result.violations} pre-filtered hits failed the re-check")
-                if exact and len(ids) < min(k, len(readable)):
-                    problems.append(f"returned {len(ids)} of the {min(k, len(readable))} readable documents asked for")
-                if ids != expected_ids:
-                    problems.append(f"returned {ids}, where retrieve returned {expected_ids}")
-                if problems:
-                    raise example.failure(
-                        f"{call} with strategy={strategy!r}",
-                        problems,
-                        subject=f"{subject.id}, groups {sorted(subject.groups)}",
-                        k=k,
-                        readable=sorted(readable),
-                        returned=ids,
-                    )
+        _check_subject(backend, example, subject, k, exact, query)
+
+
+def _check_subject(
+    backend: SearchBackend, example: _Example, subject: Subject, k: int, exact: bool, query: str | Query
+) -> None:
+    """Retrieve for `subject` with every strategy the backend allows, through `retrieve` and
+    `aretrieve`, and check the results against the documents `subject` may read."""
+    readable = {d.id for d in example.documents if _may_read(subject, d.metadata)}
+    strategies: tuple[Strategy, ...] = ("prefilter", "postfilter") if backend.supports_filters else ("postfilter",)
+    for strategy in strategies:
+        retriever = PermissionedRetriever(backend, MetadataACLAuthorizer(), strategy=strategy)
+        # Both drivers: the async one runs asearch, which may translate filters on its own.
+        results = {"retrieve": retriever.retrieve(query, subject, k)}
+        results["aretrieve"] = asyncio.run(retriever.aretrieve(query, subject, k))
+        expected_ids = [h.id for h in results["retrieve"].hits]
+        for call, result in results.items():
+            ids = [h.id for h in result.hits]
+            problems: list[str] = []
+            leaked = [i for i in ids if i not in readable]
+            if leaked:
+                problems.append(f"returned documents the subject may not read: {leaked}")
+            if result.violations:
+                problems.append(f"{result.violations} pre-filtered hits failed the re-check")
+            if exact and len(ids) < min(k, len(readable)):
+                problems.append(f"returned {len(ids)} of the {min(k, len(readable))} readable documents asked for")
+            if ids != expected_ids:
+                problems.append(f"returned {ids}, where retrieve returned {expected_ids}")
+            if problems:
+                raise example.failure(
+                    f"{call} with strategy={strategy!r}",
+                    problems,
+                    subject=f"{subject.id}, groups {sorted(subject.groups)}",
+                    k=k,
+                    readable=sorted(readable),
+                    returned=ids,
+                )
+
+
+# A character, or an escape such as \u00e9, repeated 16 times or more: a long value in a failure.
+_RUN = re.compile(r"(.{1,6}?)\1{15,}")
+
+
+def _shortened(text: str) -> str:
+    return _RUN.sub(lambda m: f"<{m.group(1)} {len(m.group(0)) // len(m.group(1)):,} times>", text)
+
+
+def _check_long_values(factory: BackendFactory, length: int, exact: bool, query: str | Query) -> None:
+    """Check searches, retrieval and `set_metadata` on permission values `length` characters long.
+
+    The documents and filters do not depend on the seed. A failure shows each long value as runs of
+    its characters, such as `<x 999 times>1`, rather than in full.
+    """
+    stem = "x" * (length - 1)
+    first, second, third = stem + "1", stem + "2", stem + "3"  # alike but for the last character
+    wide = "\u00e9" * (length - 1) + "1"  # e with an acute accent: two bytes in UTF-8
+    docs = [
+        Document("long-1", f"{QUERY} {_WORDS[0]}", {"allowed_groups": [first], "team": wide}),
+        Document("long-2", f"{QUERY} {_WORDS[1]}", {"allowed_groups": [second]}),
+        Document("long-3", f"{QUERY} {_WORDS[2]}", {"allowed_groups": [stem], "allowed_users": [wide]}),
+        Document("short", f"{QUERY} {_WORDS[3]}", {"allowed_groups": ["x"], "team": "x"}),
+    ]
+    label = f"values of {length:,} characters, long_value_length={length}"
+    try:
+        backend = factory(docs)
+        strict = _strict(backend, exact)
+        filters: list[Filter] = [
+            In("allowed_groups", [first]),
+            In("allowed_groups", [second]),
+            In("allowed_groups", [stem]),
+            In("allowed_groups", [first + "1"]),  # longer than every stored value: matches nothing
+            In("team", [wide]),
+            In("allowed_users", [wide]),
+            Or(In("allowed_groups", [second]), In("team", [wide])),
+        ]
+        _check_corpus(backend, _Example(0, 0, docs, label), filters, strict, query)
+        for subject in (Subject(_USERS[0], [first]), Subject(wide, [stem])):
+            _check_subject(backend, _Example(0, 0, docs, label), subject, len(docs), strict, query)
+        set_metadata = getattr(backend, "set_metadata", None)
+        if set_metadata is not None:
+            set_metadata({"long-2": {"allowed_groups": [third]}})
+            updated = [Document(d.id, d.text, {"allowed_groups": [third]}) if d.id == "long-2" else d for d in docs]
+            changed = [In("allowed_groups", [third]), In("allowed_groups", [second])]
+            _check_corpus(backend, _Example(0, 0, updated, f"{label}, after set_metadata"), changed, strict, query)
+    except ConformanceError as e:
+        raise ConformanceError(_shortened(str(e))) from None
+
+
+def _check_corpus(
+    backend: SearchBackend, example: _Example, filters: Sequence[Filter], exact: bool, query: str | Query
+) -> None:
+    """Search the backend, which holds `example.documents`, for all of them, without a filter and
+    with each of `filters`, and check what comes back."""
+    docs = example.documents
+    by_id = {d.id: d for d in docs}
+    k = len(docs)
+    hits = backend.search(query, k)
+    problems = _problems(hits, k, set(by_id), by_id, exact)
+    if problems:
+        raise example.failure("search without a filter", problems, k=k, returned=[h.id for h in hits])
+    _compare_asearch(backend, example, query, k, None, hits)
+    if not backend.supports_filters:
+        return
+    for f in filters:
+        expected = {d.id for d in docs if matches(f, d.metadata)}
+        found = list(backend.search(query, k, f))
+        problems = _problems(found, k, expected, by_id, exact)
+        if problems:
+            raise example.failure(
+                "search with a filter",
+                problems,
+                filter=_json(filter_to_dict(f)),
+                k=k,
+                expected=sorted(expected),
+                returned=[h.id for h in found],
+            )
+        _compare_asearch(backend, example, query, k, f, found)
+        _check_short_results(backend, example, query, k, f, expected, by_id)
 
 
 def _clear_caches(authorizer: Any) -> None:

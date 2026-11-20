@@ -101,6 +101,36 @@ itself is stored with `enabled: false`: kept in `_source` and returned exactly a
 retriever's re-check sees the true permissions, but never indexed, so arbitrary metadata cannot add
 mappings to the index. The index uses `dynamic: false` for the same reason.
 
+### Long values
+
+Lucene indexes a term of at most 32,766 bytes of UTF-8 and refuses a longer one
+([`IndexWriter.MAX_TERM_LENGTH`](https://lucene.apache.org/core/10_3_0/core/org/apache/lucene/index/IndexWriter.html#MAX_TERM_LENGTH)).
+`create_index` maps `wardowl_terms` as `keyword` without `ignore_above`, which in a standard index
+takes strings of any length, and Elasticsearch documents the result: "Documents will be rejected if
+this keyword exceeds `32766` UTF-8 encoded bytes"
+([keyword field type](https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/keyword)).
+Up to 3.1.0, a chunk whose metadata held a longer term, field name and value together, could not
+be written. CI measured it on both engines: a term of 32,766 bytes was indexed and found, and one of
+32,767 bytes, or of 32,768 bytes in three-byte characters, made `add` raise `RuntimeError`
+(Elasticsearch 9.5.5 answered `document_parsing_exception`, OpenSearch 3.9.0 "Document contains at
+least one immense term").
+
+A term longer than 32,766 bytes is now stored and searched as its SHA-256 digest, 72 characters,
+as the [MongoDB](mongodb.md#how-permissions-are-indexed) and
+[Redis](redis.md#how-permissions-are-indexed) backends do with theirs. Its chunk is found like any
+other, and a value that is only the first part of a longer one does not match it. Terms of 32,766
+bytes or fewer are stored as before, and a keyword field cannot index a longer one, so an index
+written by an earlier 3.x release needs nothing done. `permission_terms` writes the same form.
+
+Do not give `wardowl_terms` an `ignore_above`, and do not create the index with the
+`index.mapping.ignore_above` setting or in an index mode that sets one (`logsdb` sets 8,191). A
+value longer than that, counted in characters, is left out of the index: Elasticsearch says such
+strings "will not be indexed or stored"
+([`ignore_above`](https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/ignore-above)),
+and OpenSearch that they "do not match any query"
+([keyword field type](https://docs.opensearch.org/latest/mappings/supported-field-types/keyword/)).
+A filter then never finds the chunk, and nothing reports it.
+
 ## What writes return
 
 `set_metadata` and `delete` send bulk requests, whose response reports each operation's status
@@ -124,8 +154,8 @@ from wardowl.backends.elasticsearch import TERMS_FIELD, permission_terms
 document[TERMS_FIELD] = permission_terms(document["metadata"])
 ```
 
-and map `wardowl_terms` as `keyword`. A document without a `metadata` object carries no
-permissions, so the re-check denies it.
+and map `wardowl_terms` as `keyword`, without `ignore_above` ([Long values](#long-values)). A
+document without a `metadata` object carries no permissions, so the re-check denies it.
 
 The terms are derived from the metadata: recompute them with `permission_terms` in the same write
 as every change to a document's metadata, as `set_metadata` does. A tool that changes the metadata

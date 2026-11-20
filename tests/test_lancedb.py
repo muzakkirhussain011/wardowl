@@ -7,6 +7,7 @@ import json
 import uuid
 
 import pytest
+from helpers import long_value_outcomes
 
 pytest.importorskip("lancedb")
 
@@ -95,6 +96,21 @@ def test_the_label_list_index_gives_the_same_answers(db):
     before = [h.id for h in backend.search("leave", 60, f)]
     create_indexes(table)
     assert [h.id for h in backend.search("leave", 60, f)] == before and before
+
+
+@pytest.mark.parametrize("indexed", [False, True])
+def test_long_permission_values(db, indexed):
+    def make(docs):
+        table = _new_table(db)
+        backend = LanceDBBackend(table, EMBED)
+        backend.add(docs)
+        if indexed:
+            create_indexes(table)
+        return backend
+
+    values = {"4,000 characters": "g" * 4000, "40,000 characters": "g" * 40_000}
+    outcomes = long_value_outcomes(make, values)
+    assert outcomes == dict.fromkeys(values, "found"), "\n".join(f"{k}: {v}" for k, v in outcomes.items())
 
 
 def test_hostile_and_quoted_values_are_only_values(db):

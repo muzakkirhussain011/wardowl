@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Callable, Mapping, Sequence
 from typing import Any
 
 from hypothesis import strategies as st
@@ -99,6 +99,44 @@ filters = st.recursive(
 
 def expected_ids(docs: Sequence[Document], f: Filter) -> set[str]:
     return {d.id for d in docs if matches(f, d.metadata)}
+
+
+def long_value_outcomes(make: Callable[[Sequence[Document]], Any], values: Mapping[str, str]) -> dict[str, str]:
+    """What a store does with long permission values, by label.
+
+    For each value, `make` stores two chunks: one whose `allowed_groups` holds the value, and one
+    whose value differs from it only in its last character, so a store that cuts terms short
+    gives both the same term. Then `set_metadata` gives the first chunk a third such value. The
+    outcome is "found" when a filtered search for each value returns its own chunk alone, before
+    and after the change; otherwise it says what came back, or what the write or the search raised.
+    """
+    outcomes: dict[str, str] = {}
+    for label, value in values.items():
+        near, changed = (value[:-1] + c for c in ("hi" if value[-1] not in "hi" else "jk"))
+        docs = [
+            Document("long", f"{QUERY} leave", {"allowed_groups": [value]}),
+            Document("near", f"{QUERY} leave", {"allowed_groups": [near]}),
+        ]
+        expected = {value: ["long"], near: ["near"]}
+        try:
+            backend = make(docs)
+        except Exception as e:  # what the store does is what is measured
+            outcomes[label] = f"the write raised {type(e).__name__}: {str(e)[:400]}"
+            continue
+        try:
+            found = {v: [h.id for h in backend.search(QUERY, 5, In("allowed_groups", [v]))] for v in expected}
+            if found == expected:
+                backend.set_metadata({"long": {"allowed_groups": [changed]}})
+                expected = {value: [], changed: ["long"]}
+                found = {v: [h.id for h in backend.search(QUERY, 5, In("allowed_groups", [v]))] for v in expected}
+        except Exception as e:
+            outcomes[label] = f"the search or set_metadata raised {type(e).__name__}: {str(e)[:400]}"
+            continue
+        if found == expected:
+            outcomes[label] = "found"
+        else:
+            outcomes[label] = f"filters on the values returned {list(found.values())}, not {list(expected.values())}"
+    return outcomes
 
 
 def chroma_where_matches(where: dict[str, Any], stored: dict[str, Any], fanout: int = 16) -> bool:

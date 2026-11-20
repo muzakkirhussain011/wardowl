@@ -18,14 +18,21 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
 
-from wardowl.backends._engines import TERMS_FIELD, EngineBackend, check_layout, filter_to_query, mappings, terms
+from wardowl.backends._engines import (
+    TERMS_FIELD,
+    EngineBackend,
+    check_layout,
+    engine_terms,
+    filter_to_query,
+    mappings,
+)
 
 __all__ = ["TERMS_FIELD", "OpenSearchBackend", "create_index", "filter_to_query", "permission_terms"]
 
 
 def permission_terms(metadata: Mapping[str, Any]) -> list[str]:
     """The value of `wardowl_terms` for a chunk with this metadata."""
-    return terms("metadata", metadata)
+    return engine_terms("metadata", metadata)
 
 
 def create_index(

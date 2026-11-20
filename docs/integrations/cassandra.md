@@ -97,6 +97,22 @@ To avoid it:
   ([Checking that a change reached the chunks](../operations.md#checking-that-a-change-reached-the-chunks)).
 - **Limits:** Cassandra allows 1,000 rows per ANN query, so a search with `k` above 1,000 raises
   `ValueError` rather than return 1,000 hits as if no more matched.
+- **Long values:** SAI does not index a string term longer than
+  `sai_string_term_size_fail_threshold`, 8 KiB by default
+  ([cassandra.yaml](https://github.com/apache/cassandra/blob/cassandra-5.0/conf/cassandra.yaml)).
+  In Cassandra's source the guardrail fails an ordinary user's write, and is skipped for a superuser
+  or with authentication off
+  ([`Guardrail.enabled`](https://github.com/apache/cassandra/blob/cassandra-5.0/src/java/org/apache/cassandra/db/guardrails/Guardrail.java)),
+  when the row is stored and the index leaves the term out
+  ([`TrieMemoryIndex.addTerm`](https://github.com/apache/cassandra/blob/cassandra-5.0/src/java/org/apache/cassandra/index/sai/memory/TrieMemoryIndex.java)).
+  CI's Cassandra 5.0.9 runs without authentication. There, up to 3.1.0, a filter on a value whose
+  term (field name and value together) was 8,193 bytes long, or a value of 40,000 characters, found
+  nothing and raised nothing, while a term of 8,192 bytes was found. A term longer than 8,192 bytes
+  is now written as its SHA-256 digest, and a filter looks for both the term and its digest: a
+  cluster whose threshold is higher indexed such a term whole, and its rows are still found. A row
+  written with one before on a cluster at the default was never indexed under it; write it again
+  with `add` or `set_metadata`. A cluster whose threshold is lower than 8 KiB still leaves out the
+  terms between its threshold and 8,192 bytes.
 - **Concurrent writes:** Cassandra 5.0's vector index accepts only a few writes at once per table (about
   one per core). The backend writes `write_concurrency` (4) rows at a time and sends a refused write
   once more, alone; searches run `concurrency` (32) queries at a time.

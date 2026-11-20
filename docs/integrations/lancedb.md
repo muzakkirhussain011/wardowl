@@ -55,7 +55,10 @@ nothing without a query; `filter_to_sql` raises `NothingMatches` for a filter th
 nothing, since LanceDB reads a missing predicate as "match everything". `create_indexes` adds a
 `LABEL_LIST` index on the terms, the index type LanceDB uses for `array_has_any`; rows added later
 are found before they are indexed. The metadata is stored as JSON and returned exactly as written,
-so the retriever's re-check sees the true permissions.
+so the retriever's re-check sees the true permissions. CI stores permission values of 4,000 and
+40,000 characters, with and without the `LABEL_LIST` index, and finds each one's chunk with a
+filter, while a value that differs only in its last character matches only its own chunk, before
+and after `set_metadata` changes it.
 
 `set_metadata` is an update-only merge of the metadata and terms columns on `id`: an id that is not
 stored, or a chunk deleted meanwhile, gets no row, and the text and vector are never read and

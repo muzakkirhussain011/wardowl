@@ -7,6 +7,7 @@ import os
 import uuid
 
 import pytest
+from helpers import long_value_outcomes
 
 from wardowl import And, Document, In, MetadataACLAuthorizer, Or, PermissionedRetriever, Query, Subject
 from wardowl.backends import NothingMatches
@@ -23,6 +24,9 @@ from wardowl.testing import QUERY, HashingEmbedder, check_backend
 EMBED = HashingEmbedder()
 MILVUS_URL = os.environ.get("WARDOWL_TEST_MILVUS_URL")
 CONTAINS = f"ARRAY_CONTAINS_ANY({TERMS_FIELD}, {{%s}})"
+# The length of the kit's long values. create_collection's max_term_length is 1,024 bytes, and at 500
+# the kit's longest term, allowed_users with 499 two-byte characters and a digit, is 1,015 bytes.
+LONG = 500
 
 
 # ---- translation and requests (no server) ------------------------------------------------------
@@ -234,7 +238,7 @@ def test_server_passes_the_conformance_kit():
         return backend
 
     try:
-        check_backend(make)
+        check_backend(make, long_value_length=LONG)
     finally:
         for name in previous:
             client.drop_collection(name)
@@ -252,7 +256,7 @@ def test_server_searches_with_query_vectors():
         return backend
 
     try:
-        check_backend(make, examples=8, query=Query(vector=EMBED(QUERY)))
+        check_backend(make, examples=8, query=Query(vector=EMBED(QUERY)), long_value_length=LONG)
     finally:
         for name in previous:
             client.drop_collection(name)
@@ -299,6 +303,37 @@ def test_a_chunk_with_more_terms_than_the_collection_allows_is_refused():
     stored = backend.search("leave", 5)
     client.drop_collection(name)
     assert stored == []  # not stored with some of its permissions dropped
+
+
+def test_a_term_longer_than_max_term_length_bytes_is_refused():
+    # max_term_length (1,024 by default) counts UTF-8 bytes, as Milvus's VARCHAR max_length does: a
+    # longer term fails the write, so no chunk is stored with a permission term cut short or dropped.
+    client, previous = _client(), []
+
+    def make(docs):
+        for name in previous:
+            client.drop_collection(name)
+        previous[:] = [_new_collection(client)]
+        backend = MilvusBackend(client, previous[0], EMBED)
+        backend.add(docs)
+        return backend
+
+    extra = len(tag("allowed_groups", ""))
+    values = {
+        "term of 1,024 bytes": "g" * (1024 - extra),
+        "term of 1,025 bytes": "g" * (1025 - extra),
+        "term of 617 characters, 1,217 bytes": "\u00e9" * 600,
+    }
+    try:
+        outcomes = long_value_outcomes(make, values)
+        stored = [h.id for h in MilvusBackend(client, previous[0], EMBED).search(QUERY, 5)]
+    finally:
+        for name in previous:
+            client.drop_collection(name)
+    assert outcomes["term of 1,024 bytes"] == "found"
+    for label in ("term of 1,025 bytes", "term of 617 characters, 1,217 bytes"):
+        assert "MilvusException" in outcomes[label] and "exceeds max length" in outcomes[label], outcomes[label]
+    assert stored == []  # the last write, refused, stored neither chunk
 
 
 def test_delete_removes_chunks():
@@ -390,7 +425,7 @@ def test_server_keyword_mode_passes_the_conformance_kit():
         return backend
 
     try:
-        check_backend(make)
+        check_backend(make, long_value_length=LONG)
     finally:
         for name in previous:
             client.drop_collection(name)
@@ -410,8 +445,8 @@ def test_server_hybrid_search_over_one_collection_passes_the_conformance_kit():
         return RankFusion(vector, MilvusBackend(client, previous[0], mode="keyword"))
 
     try:
-        check_backend(make, examples=10)
-        check_backend(make, examples=5, query=Query(QUERY, EMBED(QUERY)))
+        check_backend(make, examples=10, long_value_length=LONG)
+        check_backend(make, examples=5, query=Query(QUERY, EMBED(QUERY)), long_value_length=LONG)
     finally:
         for name in previous:
             client.drop_collection(name)

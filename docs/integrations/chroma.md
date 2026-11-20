@@ -65,7 +65,10 @@ search returns is not found.
 Field names, in metadata and in filters, may not contain `::`, and `wardowl_metadata` is
 reserved: a filter on such a name would test a list field or the JSON copy, and `filter_to_where`
 refuses it with `ValueError`. Values that are not strings or integers are kept in the JSON copy
-only, which matches the reference semantics: no filter matches them.
+only, which matches the reference semantics: no filter matches them. A long value in a list makes a
+long field name: CI stores values of 4,000 and 40,000 characters in an `allowed_groups` list and
+finds each one's chunk with a filter, while a value that differs only in its last character matches
+only its own chunk, before and after `set_metadata` changes it.
 
 `set_metadata` is an update, which Chroma applies to stored records only, so a chunk deleted
 meanwhile is not recreated, and its text and vector are never read and written back. Fields of the

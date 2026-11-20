@@ -35,7 +35,9 @@ A filter becomes `wardowl_terms in ("...")` conditions joined with `and` and `or
 text is hex digits, so no metadata value can change the query. The metadata itself is stored as
 JSON and returned exactly as written. A filter that can match nothing returns no hits without a
 query, and `filter_to_yql` raises `NothingMatches` for it, since a query without the condition
-matches every chunk.
+matches every chunk. CI stores permission values of 4,000 and 40,000 characters on Vespa 8.763.13
+and finds each one's chunk with a filter, while a value that differs only in its last character
+matches only its own chunk, before and after `set_metadata` changes it.
 
 ## Search modes
 

@@ -8,15 +8,27 @@ import uuid
 from types import SimpleNamespace
 
 import pytest
+from helpers import long_value_outcomes
 
 from wardowl import And, Document, In, MetadataACLAuthorizer, Or, PermissionedRetriever, Query, RankFusion, Subject
 from wardowl.backends import NothingMatches
-from wardowl.backends._engines import TERMS_FIELD, EngineBackend, _done, _raise_for_items, filter_to_query, tag, terms
+from wardowl.backends._engines import (
+    TERMS_FIELD,
+    EngineBackend,
+    _done,
+    _raise_for_items,
+    digest,
+    engine_terms,
+    filter_to_query,
+    tag,
+    terms,
+)
 from wardowl.testing import QUERY, HashingEmbedder, check_backend
 
 EMBED = HashingEmbedder()
 ES_URL = os.environ.get("WARDOWL_TEST_ELASTICSEARCH_URL")
 OS_URL = os.environ.get("WARDOWL_TEST_OPENSEARCH_URL")
+_TAG = len(tag("allowed_groups", "").encode())  # the bytes a tagged term adds to its value
 
 
 # ---- terms and translation (no server) ---------------------------------------------------------
@@ -69,6 +81,55 @@ def test_names_containing_the_separator_are_refused():
         terms("d", {"a\x1fb": "x"})
     with pytest.raises(ValueError):
         filter_to_query(In("a\x1fb", ["x"]))
+
+
+def test_a_term_longer_than_lucene_indexes_becomes_its_digest():
+    # Lucene refuses a term longer than 32,766 bytes of UTF-8, and the engines then refuse the whole
+    # document, so such a value could not be written before: no term an index holds changes.
+    from wardowl.backends.elasticsearch import permission_terms as elasticsearch_terms
+    from wardowl.backends.opensearch import permission_terms as opensearch_terms
+
+    edge = "g" * (32_766 - _TAG)  # the longest value kept as it is
+    longer = edge + "g"
+    wide = "\u20ac" * ((32_766 - _TAG) // 3 + 1)  # 10,917 characters: 32,768 bytes with the tag
+    (stored,) = engine_terms("d", {"allowed_groups": [longer]})
+    assert stored == digest(tag("allowed_groups", longer)) and len(stored) < 80
+    assert engine_terms("d", {"allowed_groups": [edge]}) == [tag("allowed_groups", edge)]
+    assert engine_terms("d", {"allowed_groups": [wide]}) == [digest(tag("allowed_groups", wide))]
+    both = {"allowed_groups": [edge, longer]}
+    assert elasticsearch_terms(both) == opensearch_terms(both) == [tag("allowed_groups", edge), stored]
+    query = {"terms": {TERMS_FIELD: [stored, tag("allowed_groups", "hr")]}}
+    assert filter_to_query(In("allowed_groups", [longer, "hr"])) == query
+    assert engine_terms("d", {"team": longer + "a"}) != engine_terms("d", {"team": longer + "b"})
+
+
+class Recording:
+    """A client that keeps what its bulk writes send and answers that every one succeeded."""
+
+    def __init__(self):
+        self.sent = []
+
+    def bulk(self, operations=None, body=None, refresh=None):
+        actions = operations if operations is not None else body
+        self.sent += actions
+        return {"errors": False, "items": []}
+
+
+@pytest.mark.parametrize("engine", ["elasticsearch", "opensearch"])
+def test_writes_store_the_digest_of_a_long_term_and_the_metadata_as_written(engine):
+    from wardowl.backends.elasticsearch import ElasticsearchBackend
+    from wardowl.backends.opensearch import OpenSearchBackend
+
+    client, longer = Recording(), "g" * 40_000
+    backend = (ElasticsearchBackend if engine == "elasticsearch" else OpenSearchBackend)(client, "chunks", EMBED)
+    backend.add([Document("a", "leave", {"allowed_groups": [longer, "hr"]})])
+    source = client.sent[1]
+    assert source[TERMS_FIELD] == [digest(tag("allowed_groups", longer)), tag("allowed_groups", "hr")]
+    assert source["metadata"] == {"allowed_groups": [longer, "hr"]}
+    backend.set_metadata({"a": {"allowed_groups": [longer]}})
+    params = client.sent[-1]["script"]["params"]
+    assert params["terms"] == [digest(tag("allowed_groups", longer))]
+    assert params["metadata"] == {"allowed_groups": [longer]}
 
 
 def test_bulk_errors_raise_except_deleting_what_is_not_there():
@@ -334,7 +395,7 @@ def test_server_passes_the_conformance_kit(engine):
         backend.add(docs)
         return backend
 
-    check_backend(make)
+    check_backend(make, long_value_length=40_000)  # over Lucene's limit: the digests, through the kit
 
 
 def test_server_create_index_refuses_an_index_that_needtoknow_1x_created(engine):
@@ -464,3 +525,32 @@ def test_hybrid_search_with_one_query_vector_and_no_embed_function(engine):
     check_backend(make, examples=8, query=Query(QUERY, EMBED(QUERY)))
     for name in previous:
         engine["client"].indices.delete(index=name)
+
+
+def test_the_server_finds_values_longer_than_lucene_indexes(engine):
+    # Lucene refuses a term longer than 32,766 bytes of UTF-8. Before, the engines refused every
+    # document holding one (Elasticsearch 9.5.5: document_parsing_exception, OpenSearch 3.9.0:
+    # "Document contains at least one immense term"), and add raised RuntimeError.
+    previous: list[str] = []
+
+    def make(docs):
+        for name in previous:
+            engine["client"].indices.delete(index=name)
+        previous[:] = [_new_index(engine)]
+        backend = engine["backend"](engine["client"], previous[0], EMBED)
+        backend.add(docs)
+        return backend
+
+    values = {
+        "term of 32,766 bytes": "g" * (32_766 - _TAG),
+        "term of 32,767 bytes": "g" * (32_767 - _TAG),
+        "term of 32,765 bytes in three-byte characters": "\u20ac" * ((32_765 - _TAG) // 3),
+        "term of 32,768 bytes in three-byte characters": "\u20ac" * ((32_768 - _TAG) // 3),
+        "40,000 characters": "g" * 40_000,
+    }
+    try:
+        outcomes = long_value_outcomes(make, values)
+    finally:
+        for name in previous:
+            engine["client"].indices.delete(index=name)
+    assert outcomes == dict.fromkeys(values, "found"), "\n".join(f"{k}: {v}" for k, v in outcomes.items())
