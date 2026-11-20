@@ -386,8 +386,13 @@ class MongoDBBackend:
 
     def set_metadata(
         self, metadata: Mapping[str, Mapping[str, Any]], *, wait: bool = True, revision: int | None = None
-    ) -> None:
+    ) -> frozenset[str]:
         """Replace the metadata of stored chunks, keeping their text and vectors. Ids not stored are ignored.
+
+        Returns the ids whose documents it updated. Each batch's updates write a marker of their
+        own (`wardowl_write`); the bulk write reports how many documents they matched, and when
+        that is fewer than the ids sent, one read on the primary names the documents that hold the
+        batch's marker. An id not stored, or deleted before its update, is not among them.
 
         With `wait` (the default), returns once the search index shows the new metadata, or raises
         `TimeoutError` after `wait_timeout` seconds.
@@ -405,6 +410,7 @@ class MongoDBBackend:
             self._refuse_newer([doc_id for doc_id, _ in items], number)
         batches: list[tuple[str, int]] = []
         refused: list[str] = []
+        changed: list[str] = []
         for start in range(0, len(items), _BATCH):
             marker = uuid.uuid4().hex
             part = items[start : start + _BATCH]
@@ -422,12 +428,37 @@ class MongoDBBackend:
                 refused += self._newer([doc_id for doc_id, _ in part], number)
             if result.matched_count:
                 batches.append((marker, result.matched_count))
+            # Each update names one _id, so it matches one document or none.
+            if result.matched_count == len(part):
+                changed += [doc_id for doc_id, _ in part]
+            elif result.matched_count:
+                changed += self._marked([doc_id for doc_id, _ in part], marker)
         if wait and batches:
             probe = self._probe()
             for marker, expected in batches:
                 self._settle({WRITE_FIELD: marker}, {"in": {"path": WRITE_FIELD, "value": [marker]}}, expected, probe)
         if number is not None and refused:
             raise StaleRevision(refused, number)
+        return frozenset(changed)
+
+    def _primary(self) -> Any:
+        """The collection, read on the primary: a secondary can lag behind the writes just made."""
+        from pymongo import ReadPreference
+
+        return self.collection.with_options(read_preference=ReadPreference.PRIMARY)
+
+    def _marked(self, ids: Sequence[str], marker: str) -> list[str]:
+        """The chunks among `ids` that hold `marker`, which only the batch that wrote it can have set."""
+        query = {"_id": {"$in": list(ids)}, WRITE_FIELD: marker}
+        return [d["_id"] for d in self._primary().find(query, {"_id": 1})]
+
+    def _stored(self, ids: Sequence[str]) -> list[str]:
+        """The chunks among `ids` that are stored, read on the primary."""
+        found: list[str] = []
+        for start in range(0, len(ids), _BATCH):
+            part = list(ids[start : start + _BATCH])
+            found += [d["_id"] for d in self._primary().find({"_id": {"$in": part}}, {"_id": 1})]
+        return found
 
     def _newer(self, ids: Sequence[str], revision: int) -> list[str]:
         """The chunks among `ids` stored with a revision newer than `revision`, in the order given."""
@@ -445,17 +476,25 @@ class MongoDBBackend:
         if newer:
             raise StaleRevision(newer, revision)
 
-    def delete(self, ids: Iterable[str], *, wait: bool = True) -> None:
-        """Delete chunks by id; with `wait`, returns once the search index no longer returns them."""
+    def delete(self, ids: Iterable[str], *, wait: bool = True) -> frozenset[str]:
+        """Delete chunks by id; with `wait`, returns once the search index no longer returns them.
+
+        Returns the ids that were stored, as a read on the primary just before the delete finds
+        them; none of them is stored once the delete has run. MongoDB reports only how many
+        documents a delete removed, not which, so a chunk that another writer deletes between
+        that read and the delete is among them too.
+        """
         selected = list(dict.fromkeys(ids))
         if not selected:
-            return
+            return frozenset()
         probe = self._probe() if wait else None
+        stored = self._stored(selected)
         self.collection.delete_many({"_id": {"$in": selected}})
         if wait:
             for start in range(0, len(selected), _MAX_CANDIDATES):
                 part = selected[start : start + _MAX_CANDIDATES]
                 self._settle({"_id": {"$in": part}}, {"in": {"path": "_id", "value": part}}, 0, probe)
+        return frozenset(stored)
 
     def _probe(self) -> list[float] | None:
         """A query vector for the exact searches that wait for the vector index, which only count

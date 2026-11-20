@@ -93,20 +93,40 @@ def test_set_metadata_updates_the_rows_found_with_plain_writes(monkeypatch):
         def one(self):
             return self.row
 
-    def run(self, cql, rows, *, write=False):
-        calls.append((cql, list(rows), write))
-        return [Found({"id": r[0]} if r[0] == "a" else None) for r in rows] if cql.startswith("SELECT") else []
+    # The rows as Cassandra holds them after the update: "a" kept its text, and "b", deleted between
+    # the lookup and the update, is a row the update made, with metadata and terms but no text.
+    rows = {
+        "a": {"id": "a", "text": "leave", "metadata": '{"allowed_groups": ["hr"]}'},
+        "b": {"id": "b", "text": None, "metadata": '{"allowed_groups": ["hr"]}'},
+    }
+
+    def run(self, cql, args, *, write=False):
+        calls.append((cql, list(args), write))
+        return [Found(rows.get(a[0])) for a in args] if cql.startswith("SELECT") else []
 
     monkeypatch.setattr(CassandraBackend, "_run", run)
-    CassandraBackend(NoSession(), "ks", "chunks", EMBED).set_metadata({"a": {"allowed_groups": ["hr"]}, "gone": {}})
-    lookup, update = calls
-    assert lookup == ("SELECT id FROM ks.chunks WHERE id = ?", [("a",), ("gone",)], False)
+    backend = CassandraBackend(NoSession(), "ks", "chunks", EMBED)
+    hr = {"allowed_groups": ["hr"]}
+    assert backend.set_metadata({"a": hr, "b": hr, "gone": {}}) == {"a"}
+    lookup, update, read_back = calls
+    assert lookup == ("SELECT id FROM ks.chunks WHERE id = ?", [("a",), ("b",), ("gone",)], False)
     # No lightweight transaction: its Paxos timestamp would not order with the plain writes of add and delete.
+    hr_row = ('{"allowed_groups": ["hr"]}', {tag("allowed_groups", "hr")})
     assert update == (
         "UPDATE ks.chunks SET metadata = ?, wardowl_terms = ? WHERE id = ?",
-        [('{"allowed_groups": ["hr"]}', {tag("allowed_groups", "hr")}, "a")],
+        [(*hr_row, "a"), (*hr_row, "b")],
         True,
     )
+    assert read_back == ("SELECT metadata, text FROM ks.chunks WHERE id = ?", [("a",), ("b",)], False)
+    # A row whose metadata is not what was written is not counted either.
+    rows["a"] = {"id": "a", "text": "leave", "metadata": '{"allowed_groups": ["eng"]}'}
+    assert backend.set_metadata({"a": hr}) == frozenset()
+    calls.clear()
+    assert backend.delete(["gone", "a", "a"]) == {"a"}  # what the lookup just before found stored
+    assert calls == [
+        ("SELECT id FROM ks.chunks WHERE id = ?", [("a",), ("gone",)], False),
+        ("DELETE FROM ks.chunks WHERE id = ?", [("a",), ("gone",)], True),
+    ]
 
 
 def test_a_row_whose_metadata_is_not_a_json_object_carries_no_permissions(monkeypatch):
@@ -188,6 +208,8 @@ def test_pre_filtering_and_changes_against_cassandra(session):
     )
     retriever = PermissionedRetriever(backend, MetadataACLAuthorizer(), strategy="prefilter")
     assert {h.id for h in retriever.retrieve("launch", Subject("ann", ["eng"]), k=3).hits} == {"eng", "all"}
-    backend.set_metadata({"hr": {"allowed_groups": ["eng"]}, "missing": {"allowed_groups": ["eng"]}})
+    assert backend.set_metadata({"hr": {"allowed_groups": ["eng"]}, "missing": {"allowed_groups": ["eng"]}}) == {"hr"}
     assert {h.id for h in retriever.retrieve("launch", Subject("ann", ["eng"]), k=3).hits} == {"eng", "hr", "all"}
     assert backend.search("launch", 3, In("allowed_groups", ["eng"])) and len(backend.search("launch", 10)) == 3
+    assert backend.delete(["all", "missing"]) == {"all"} and backend.delete(["all"]) == frozenset()
+    assert {h.id for h in backend.search("launch", 10)} == {"eng", "hr"}

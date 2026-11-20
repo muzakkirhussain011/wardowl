@@ -117,22 +117,30 @@ class FaissBackend:
                 self._next += 1
             self.index.add_with_ids(x, self._np.asarray(ids, dtype="int64"))
 
-    def delete(self, ids: Iterable[str]) -> None:
-        """Remove chunks by id. Ids not stored are ignored."""
+    def delete(self, ids: Iterable[str]) -> frozenset[str]:
+        """Remove chunks by id. Ids not stored are ignored. Returns the ids it removed."""
         with self._lock:
-            internal = [self._ids.pop(i) for i in set(ids) if i in self._ids]
+            removed = frozenset(i for i in set(ids) if i in self._ids)
+            internal = [self._ids.pop(i) for i in removed]
             if internal:
                 self.index.remove_ids(self._np.asarray(internal, dtype="int64"))
                 for n in internal:
                     del self._docs[n]
+            return removed
 
-    def set_metadata(self, metadata: Mapping[str, Mapping[str, Any]]) -> None:
-        """Replace the metadata of stored chunks, keeping their text and vectors. Ids not stored are ignored."""
+    def set_metadata(self, metadata: Mapping[str, Mapping[str, Any]]) -> frozenset[str]:
+        """Replace the metadata of stored chunks, keeping their text and vectors. Ids not stored are ignored.
+
+        Returns the ids whose metadata it replaced: those stored, never one that is not.
+        """
+        changed: set[str] = set()
         with self._lock:
             for doc_id, new in metadata.items():
                 n = self._ids.get(doc_id)
                 if n is not None:
                     self._docs[n] = Document(doc_id, self._docs[n].text, _copy(new))
+                    changed.add(doc_id)
+        return frozenset(changed)
 
     def __len__(self) -> int:
         return len(self._docs)

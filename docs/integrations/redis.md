@@ -39,6 +39,14 @@ acme = RedisBackend(client, "acme_chunks", embed=embed, prefix="acme:")
 Prefixes are compared as plain strings, so end each with a separator: `t1:` and `t10:` are apart,
 but every key under `t10` also starts with `t1`.
 
+`set_metadata` writes each chunk with a script that checks that its hash is stored and writes it
+in one [atomic](https://redis.io/docs/latest/develop/programmability/eval-intro/) step, and answers
+whether it did; it returns the ids it wrote. `delete` sends one `DEL` per key, each of which
+[answers](https://redis.io/docs/latest/commands/del/) the number of keys it removed, and returns
+the ids whose hash was there. Each batch's `DEL`s run in one `MULTI` transaction, so the batch is
+deleted at once, as it was by one `DEL` of all its keys
+([Checking that a change reached the chunks](../operations.md#checking-that-a-change-reached-the-chunks)).
+
 HNSW is approximate. Redis indexes a hash again whenever any of its fields changes, so `set_metadata`
 removes and re-adds the chunk's vector in the graph, and a small graph that changes often can miss
 a chunk; it never returns one the filter excludes. `create_index(..., algorithm="FLAT")` compares

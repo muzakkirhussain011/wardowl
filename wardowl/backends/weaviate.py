@@ -104,6 +104,11 @@ def _held(stored: Iterable[Any]) -> set[str]:
     return held
 
 
+def _deleted(result: Any) -> list[str]:
+    """The UUIDs, written as results report them, of the objects a verbose `delete_many` deleted."""
+    return [str(o.uuid) for o in result.objects or [] if o.successful]
+
+
 def _by_id(uuids: Sequence[str]) -> dict[str, Any]:
     """`fetch_objects` arguments for these objects, with their `wardowl_id`."""
     from weaviate.classes.query import Filter as Where
@@ -261,13 +266,18 @@ class WeaviateBackend:
                 first = next(iter(result.errors.values()))
                 raise RuntimeError(f"Weaviate rejected {len(result.errors)} objects, for example: {first}")
 
-    def set_metadata(self, metadata: Mapping[str, Mapping[str, Any]]) -> None:
+    def set_metadata(self, metadata: Mapping[str, Mapping[str, Any]]) -> frozenset[str]:
         """Replace the metadata of stored chunks, keeping their text and vectors. Ids not stored are ignored.
 
         An object is changed only when its `wardowl_id` is the id given, or, for an object written
         by another tool, when it has no `wardowl_id` and the id is its UUID.
+
+        Returns the ids whose objects it updated. Each object is looked up, then updated by its
+        UUID, and Weaviate refuses to update an object that is not stored, so an object deleted
+        between the two makes the call raise rather than be counted.
         """
         handle = self.client.collections.get(self.collection)
+        changed: set[str] = set()
         for doc_id, new in metadata.items():
             # An update replaces the value of each property it names, and leaves the rest. It fails
             # for a missing object rather than create one.
@@ -277,6 +287,8 @@ class WeaviateBackend:
             }
             for uid in self._holding(handle, doc_id):
                 handle.data.update(uuid=uid, properties=properties)
+                changed.add(doc_id)
+        return frozenset(changed)
 
     def _holding(self, handle: Any, doc_id: str) -> list[str]:
         """The objects that hold `doc_id`: those `_written_by_others` finds, and the one `add`
@@ -302,14 +314,19 @@ class WeaviateBackend:
         # string is an id `add` wrote, and the object holds that id, not its UUID.
         return [str(o.uuid) for o in stored.objects if not isinstance((o.properties or {}).get(ID_PROPERTY), str)]
 
-    def delete(self, ids: Iterable[str]) -> None:
-        """Remove chunks by id: the objects holding each id, and no other. Ids not stored are ignored."""
+    def delete(self, ids: Iterable[str]) -> frozenset[str]:
+        """Remove chunks by id: the objects holding each id, and no other. Ids not stored are ignored.
+
+        Returns the ids whose objects it deleted, as Weaviate reports each object of a
+        `delete_many(..., verbose=True)` and whether its deletion succeeded.
+        """
         from weaviate.classes.query import Filter as Where
 
         selected = list(dict.fromkeys(ids))
         if not selected:
-            return
+            return frozenset()
         handle = self.client.collections.get(self.collection)
+        removed: set[str] = set()
         for start in range(0, len(selected), _BATCH):
             batch = selected[start : start + _BATCH]
             owned = Where.all_of(
@@ -318,10 +335,16 @@ class WeaviateBackend:
                     Where.by_property(ID_PROPERTY).contains_any(batch),
                 ]
             )
-            handle.data.delete_many(where=owned)
+            # Each object `add` wrote sits at the UUID derived from its id, which leads back to the id.
+            by_uuid = {point_id(i): i for i in batch}
+            deleted = _deleted(handle.data.delete_many(where=owned, verbose=True))
+            removed.update(by_uuid[u] for u in deleted if u in by_uuid)
             others = self._written_by_others(handle, batch)
             if others:
-                handle.data.delete_many(where=Where.by_id().contains_any(others))
+                # Another tool's object is reached by its UUID, which is the id.
+                gone = handle.data.delete_many(where=Where.by_id().contains_any(others), verbose=True)
+                removed.update(_deleted(gone))
+        return frozenset(removed)
 
     # ---- searching ---------------------------------------------------------------------------
 

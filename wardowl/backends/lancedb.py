@@ -195,14 +195,17 @@ class LanceDBBackend:
             rows = [self._row(d, v) for d, v in latest[start : start + _BATCH]]
             self.table.merge_insert("id").when_matched_update_all().when_not_matched_insert_all().execute(rows)
 
-    def set_metadata(self, metadata: Mapping[str, Mapping[str, Any]]) -> None:
+    def set_metadata(self, metadata: Mapping[str, Mapping[str, Any]]) -> frozenset[str]:
         """Replace the metadata of stored chunks, keeping their text and vectors. Ids not stored are ignored.
 
         An update-only merge of the metadata and terms columns: rows whose id is not stored are not
         inserted, so a chunk deleted meanwhile is not recreated, and the text and vector are never
         read and written back. No metadata value is ever part of the SQL.
+
+        Returns the ids whose rows hold the new metadata when the call reads them back after each
+        merge: the merge reports how many rows it updated, not which.
         """
-        rows = [
+        rows: list[dict[str, Any]] = [
             {
                 "id": doc_id,
                 self.metadata_field: json.dumps(dict(new)),
@@ -211,20 +214,43 @@ class LanceDBBackend:
             for doc_id, new in metadata.items()
         ]
         if not rows:
-            return
+            return frozenset()
         import pyarrow as pa
 
         # Only these columns, typed as the table types them: a merge updates the columns it is given.
         schema = pa.schema([self.table.schema.field(name) for name in ("id", self.metadata_field, TERMS_FIELD)])
+        changed: set[str] = set()
         for start in range(0, len(rows), _BATCH):
-            data = pa.Table.from_pylist(rows[start : start + _BATCH], schema=schema)
-            self.table.merge_insert("id").when_matched_update_all().execute(data)
+            batch = rows[start : start + _BATCH]
+            self.table.merge_insert("id").when_matched_update_all().execute(pa.Table.from_pylist(batch, schema=schema))
+            written = {row["id"]: row[self.metadata_field] for row in batch}
+            for row in self._rows(list(written), [self.metadata_field]):
+                if row.get(self.metadata_field) == written.get(row["id"]):
+                    changed.add(row["id"])
+        return frozenset(changed)
 
-    def delete(self, ids: Iterable[str]) -> None:
-        keys = [_hex(i) for i in dict.fromkeys(ids)]
-        for start in range(0, len(keys), _BATCH):
-            listed = ", ".join(f"'{k}'" for k in keys[start : start + _BATCH])
+    def _rows(self, ids: list[str], columns: list[str]) -> list[dict[str, Any]]:
+        """The stored rows of these ids, with `id` and `columns`: a scan matched on the hex-encoded
+        id column, without a limit."""
+        listed = ", ".join(f"'{_hex(i)}'" for i in ids)
+        query = self.table.search().where(f"{KEY_FIELD} IN ({listed})").select(["id", *columns]).limit(None)
+        return list(query.to_list())
+
+    def delete(self, ids: Iterable[str]) -> frozenset[str]:
+        """Remove chunks by id. Ids not stored are ignored.
+
+        Returns the ids that were stored, as a read just before each batch's delete finds them;
+        none of them is stored once the delete has run. LanceDB's delete reports no ids, so a chunk
+        that another writer deletes between that read and the delete is among them too.
+        """
+        selected = list(dict.fromkeys(ids))
+        removed: set[str] = set()
+        for start in range(0, len(selected), _BATCH):
+            batch = selected[start : start + _BATCH]
+            removed.update(row["id"] for row in self._rows(batch, []))
+            listed = ", ".join(f"'{_hex(i)}'" for i in batch)
             self.table.delete(f"{KEY_FIELD} IN ({listed})")
+        return frozenset(removed)
 
     # ---- searching ---------------------------------------------------------------------------
 

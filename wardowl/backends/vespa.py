@@ -191,24 +191,40 @@ class VespaBackend:
             raise ValueError(f"Vespa cannot address a document whose id is {doc_id!r}")
         return f"{self.url}/document/v1/{self.namespace}/{self.schema}/docid/{quote(doc_id, safe='')}"
 
-    def _each(self, method: str, items: Sequence[tuple[str, Any]], what: str) -> None:
-        """Send one document request per (id, body), `concurrency` at a time; any failure raises."""
-        ok = frozenset({200}) if method == "POST" else frozenset({200, 404})  # 404: not stored, ignored
-        # Every address first, so an id `_document` refuses stops the call before anything is sent.
-        requests = [(self._document(doc_id), body) for doc_id, body in items]
+    def _each(self, method: str, items: Sequence[tuple[str, Any]], what: str) -> frozenset[str]:
+        """Send one document request per (id, body), `concurrency` at a time; any failure raises.
 
-        def run(request: tuple[str, Any]) -> None:
-            response = self._client.request(method, request[0], json=request[1])
+        Returns the ids Vespa answered with 200. A write (POST) must succeed. An update (PUT)
+        carries a test-and-set condition that every document of the schema meets (the schema's
+        name, as a document selection): Vespa answers 412 for a document that is not stored, where
+        it would answer 200 without a condition, so 200 means it applied the update. A get (GET)
+        reads only the document's `wardowl_id`, and Vespa answers 404 for a document that is not
+        stored. A remove (DELETE) is answered 200 either way (see `delete`).
+        """
+        # 404 answers a get of a missing document; for a write it is read as "not stored", as before.
+        ok = frozenset({200}) if method == "POST" else frozenset({200, 404, 412})
+        params: dict[str, str] | None = None
+        if method == "PUT":
+            params = {"condition": self.schema}
+        elif method == "GET":
+            params = {"fieldSet": f"{self.schema}:{ID_FIELD}"}
+        # Every address first, so an id `_document` refuses stops the call before anything is sent.
+        requests = [(doc_id, self._document(doc_id), body) for doc_id, body in items]
+
+        def run(request: tuple[str, str, Any]) -> bool:
+            response = self._client.request(method, request[1], json=request[2], params=params)
             if response.status_code not in ok:
                 raise RuntimeError(f"Vespa {what} failed: HTTP {response.status_code}: {response.text[:300]}")
+            return bool(response.status_code == 200)
 
         if not requests:
-            return
+            return frozenset()
         if len(requests) == 1:
-            run(requests[0])
-            return
-        with ThreadPoolExecutor(min(self.concurrency, len(requests))) as pool:
-            list(pool.map(run, requests))
+            applied = [run(requests[0])]
+        else:
+            with ThreadPoolExecutor(min(self.concurrency, len(requests))) as pool:
+                applied = list(pool.map(run, requests))
+        return frozenset(doc_id for (doc_id, _, _), done in zip(requests, applied, strict=True) if done)
 
     def add(self, documents: Iterable[Document], embeddings: Iterable[Sequence[float]] | None = None) -> None:
         """Store chunks, replacing any with the same id. `embeddings` gives their vectors, in order."""
@@ -234,12 +250,27 @@ class VespaBackend:
             puts.append((doc.id, {"fields": fields}))
         self._each("POST", puts, "write")
 
-    def delete(self, ids: Iterable[str]) -> None:
-        """Remove chunks by id. Ids not stored are ignored."""
-        self._each("DELETE", [(i, None) for i in sorted(set(ids))], "delete")
+    def delete(self, ids: Iterable[str]) -> frozenset[str]:
+        """Remove chunks by id. Ids not stored are ignored.
 
-    def set_metadata(self, metadata: Mapping[str, Mapping[str, Any]]) -> None:
-        """Replace the metadata of stored chunks, keeping their text and vectors. Ids not stored are ignored."""
+        Returns the ids that were stored, as a get of each document just before the removes finds
+        them; none of them is stored once the removes have run. Vespa answers 200 to a remove of a
+        document that is not stored. Its reference says a remove with a test-and-set condition is
+        answered 412 then, but Vespa 8.763.13 answered 200 in wardowl's CI, so a remove's status is
+        not relied on, and a document that another writer removes between the get and the remove is
+        among them too.
+        """
+        selected = [(i, None) for i in sorted(set(ids))]
+        stored = self._each("GET", selected, "lookup")
+        self._each("DELETE", selected, "delete")
+        return stored
+
+    def set_metadata(self, metadata: Mapping[str, Mapping[str, Any]]) -> frozenset[str]:
+        """Replace the metadata of stored chunks, keeping their text and vectors. Ids not stored are ignored.
+
+        Returns the ids whose documents it updated: each update carries a condition that fails,
+        with 412, for a document not stored.
+        """
         updates = []
         for doc_id, new in metadata.items():
             fields = {
@@ -247,7 +278,7 @@ class VespaBackend:
                 TERMS_FIELD: {"assign": [_hex(t) for t in terms(doc_id, new)]},
             }
             updates.append((doc_id, {"fields": fields}))
-        self._each("PUT", updates, "update")
+        return self._each("PUT", updates, "update")
 
     def _body(self, query: Query, k: int, where: str | None) -> dict[str, Any]:
         if self.mode == "vector":

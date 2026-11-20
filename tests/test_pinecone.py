@@ -144,9 +144,12 @@ def test_changes_leave_alone_a_record_that_holds_another_id():
     # A record at victim's record id holding another chunk id: written there by something else.
     fake = Fake(records={record_id("victim"): {"wardowl_id": "intruder"}, record_id("mine"): {"wardowl_id": "mine"}})
     backend = fake.backend()
-    backend.set_metadata({"victim": {"allowed_groups": ["*"]}, "mine": {"allowed_groups": ["*"]}, "unseen": {}})
+    everyone = {"allowed_groups": ["*"]}
+    # Without `wait`, nothing is read back after the update, so it cannot say which ids it changed.
+    assert backend.set_metadata({"victim": everyone, "mine": everyone, "unseen": {}}) is None
     assert sorted(u["id"] for u in fake.bodies("/vectors/update")) == ["mine", "unseen"]
-    backend.delete(["victim", "mine", "unseen"])
+    # The fetch before the delete showed "mine" holding its id; "unseen" was not shown, "victim" held another.
+    assert backend.delete(["victim", "mine", "unseen"]) == {"mine"}
     assert [d["ids"] for d in fake.bodies("/vectors/delete")] == [["mine", "unseen"]]
 
 
@@ -207,7 +210,8 @@ def test_wait_polls_until_a_search_shows_the_writes():
     old, new = _match("a", {"team": "x"}), _match("a", {"team": "y"})
     fake = Fake([{"matches": [old]}, {"matches": [new]}, {"matches": [new]}, {"matches": []}])
     backend = fake.backend(wait=10.0)
-    backend.set_metadata({"a": {"team": "y"}, "missing": {}})  # describe_index_stats, then two polls
+    # describe_index_stats, then two polls: the second shows "a" with the new metadata, and no "missing".
+    assert backend.set_metadata({"a": {"team": "y"}, "missing": {}}) == {"a"}
     writes = ["/vectors/fetch", "/vectors/update", "/vectors/update"]
     assert fake.paths() == [*writes, "/describe_index_stats", "/query", "/query"]
     backend.delete(["a"])  # one poll that still shows it, one that does not
@@ -277,8 +281,9 @@ def test_pre_filtering_and_changes_on_pinecone(host):
     retriever = PermissionedRetriever(backend, MetadataACLAuthorizer(), strategy="prefilter")
     found = {h.id for h in retriever.retrieve("launch", Subject("ann", ["eng"]), k=4).hits}
     assert found == {"eng", "all", "ünïcode/π"}
-    backend.set_metadata({"hr": {"allowed_groups": ["eng"]}, "missing": {"allowed_groups": ["eng"]}})
+    written = backend.set_metadata({"hr": {"allowed_groups": ["eng"]}, "missing": {"allowed_groups": ["eng"]}})
+    assert written == {"hr"}
     found = {h.id for h in retriever.retrieve("launch", Subject("ann", ["eng"]), k=5).hits}
     assert found == {"eng", "hr", "all", "ünïcode/π"}
-    backend.delete(["ünïcode/π"])
+    assert backend.delete(["ünïcode/π", "missing"]) == {"ünïcode/π"}
     assert len(backend.search("launch", 10)) == 3

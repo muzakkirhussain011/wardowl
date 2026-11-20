@@ -234,6 +234,40 @@ Until a change is synced, the chunks keep their old permissions; sync often enou
 window is acceptable, and see [Operations](../operations.md#changing-a-documents-permissions)
 for what changes take effect at once.
 
+### Checking that a sync reached the chunks
+
+`chunks(file_id)` and `chunk_ids(file_id)` above are your record of each file's chunks, and that
+record can fall behind the store: the indexer chunks an edited file again under new ids, and the
+sync reads the old ones. `set_metadata` then changes no chunk, and the file's stored chunks keep
+the sharing from before the change. `set_metadata` returns the ids whose chunks it changed, and
+`delete` the ids it found stored, so compare each with the ids you sent:
+
+```python
+for change in page.get("changes", []):
+    file_id = change["fileId"]
+    if change.get("removed"):
+        sent = chunk_ids(file_id)
+        if set(sent) - backend.delete(sent):
+            reindex_later(file_id)  # your queue: chunks under ids you do not know may still be stored
+    elif is_indexed(file_id):
+        access = drive.access(file_id)
+        sent = chunks(file_id)
+        written = backend.set_metadata({cid: with_access(md, access) for cid, md in sent.items()})
+        if written is not None and set(sent) - written:
+            reindex_later(file_id)  # the record is out of date: index the file again from Drive
+```
+
+An id missing from what `set_metadata` returns was not stored, so the change reached none of the
+chunks stored under the file's current ids. Indexing the file again reads its content and sharing
+now and writes every chunk with that sharing; correct your record of its chunk ids in the same
+step. For a removed file, chunks under ids your record lacks stay readable until you find them:
+no wardowl backend lists chunks by their metadata, so ask the store with its own client for the
+chunks whose metadata holds the file's id, if your ingestion writes it, and delete them. Leave
+the page token unsaved until those files are handled, as for any sync. `PineconeBackend` with
+`wait=None` returns None from `set_metadata`, since it reads nothing back, and the check above then
+catches nothing: keep the default `wait` with Pinecone to rely on it. What each store reports, and
+how, is in [Operations](../operations.md#checking-that-a-change-reached-the-chunks).
+
 ## One writer at a time for each file
 
 Two writers usually write a file's chunks: your indexer, with `add`, and the permission sync above,
@@ -284,7 +318,9 @@ except StaleRevision:
 - The comparison is per chunk. A chunk that is not stored has no revision, so it is written: while
   a file's chunks are deleted and added again, or when its chunk ids change from one version to the
   next, a late write is not caught. Keep ids such as `"<file id>#<n>"`, and keep the writes for
-  each file in order; revisions catch what slips past that.
+  each file in order; revisions catch what slips past that. A sync aimed at chunk ids that are no
+  longer stored is caught by what `set_metadata` returns instead: those ids are missing from it
+  ([Checking that a sync reached the chunks](#checking-that-a-sync-reached-the-chunks)).
 - Chroma and the other backends have no revision check. With them, running the writes for each
   file one after another is the only protection.
 

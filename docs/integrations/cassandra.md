@@ -87,6 +87,14 @@ To avoid it:
   client, so mixing the two could apply an older permission over a newer one. A chunk deleted
   between the lookup and the update is left as a row with metadata and terms but no text and no
   vector, which an ANN search never returns; a later `add` of that id replaces it.
+- **What writes return:** a plain write reports nothing; Cassandra's documentation says of an
+  `UPDATE` that "there is no means of knowing" whether it created the row
+  ([CQL DML](https://cassandra.apache.org/doc/latest/cassandra/developing/cql/dml.html)). So
+  `set_metadata` reads each row back after its update and returns the ids whose rows hold the new
+  metadata and still have their text: a row the update made for a chunk deleted after the lookup
+  has none. `delete` returns the ids its lookup just before the delete finds; a chunk that another
+  writer deletes in between is among them too. Each read is one more query per id
+  ([Checking that a change reached the chunks](../operations.md#checking-that-a-change-reached-the-chunks)).
 - **Limits:** Cassandra allows 1,000 rows per ANN query, so a search with `k` above 1,000 raises
   `ValueError` rather than return 1,000 hits as if no more matched.
 - **Concurrent writes:** Cassandra 5.0's vector index accepts only a few writes at once per table (about

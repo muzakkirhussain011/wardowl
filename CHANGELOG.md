@@ -6,22 +6,35 @@ All notable changes are recorded here. The format follows
 
 ## [Unreleased]
 
-### Documentation
-
-- The acceptance suite's company now has a document shared with everyone in its tenant and, in
-  both tenants, documents at the same paths, and the permission-systems scenario runs the default
-  `strategy="auto"` with every system that gives a filter (U31 in the readiness review). A fuzz
-  target and tests hand the retriever filters an authorizer built 101 levels deep and past
-  Python's recursion limit, on every path that takes them, and `In` clauses of up to 100,000
-  values (U34). Tests only; no library behaviour changes.
-- The supported configurations page said that the library tests on Python 3.11, 3.13 and 3.14
-  cover the frameworks; those tests need the framework extras, which only the Python 3.12 run
-  installs. The page now says so. The HTTP service page says that the `Authorization` header is not
-  counted in `max_body_bytes`, so how long a token may be is left to the ASGI server's limits on
-  request headers.
-
 ### Added
 
+- `set_metadata` and `delete` on every built-in backend return the ids they found: `set_metadata` a
+  `frozenset` of the ids whose chunks it wrote, `delete` a `frozenset` of the ids it found stored.
+  An id that is not stored is never among them. Both returned None, so a permission sync aimed at
+  chunk ids that are no longer stored, as when the record of a document's chunks lags a re-chunk,
+  changed nothing and nothing said so (U7 in the readiness review); the 3.0 `revision=` check does
+  not catch it, since a chunk that is not stored has no revision. Compare the result with the ids
+  you sent. Each backend takes the ids from what its store reports for each write: `RETURNING id`
+  (pgvector), the bulk response's items (Elasticsearch, OpenSearch), the bulk write's matched count
+  (MongoDB), a script's answer and each `DEL`'s (Redis), the status of a conditional update
+  (Vespa), a verbose `delete_many` (Weaviate), and an update that raises for a row deleted after its
+  lookup (Weaviate, Milvus). Where the store reports nothing, the call reads: `set_metadata` after
+  the write (Chroma, LanceDB, Qdrant, Cassandra, MongoDB when fewer documents matched than were
+  sent, Pinecone through the search its `wait` already makes), and `delete` before it (MongoDB,
+  Milvus, Chroma, LanceDB, Qdrant, Cassandra, Vespa, Pinecone through the fetch it already made). A
+  read is one request for each batch of ids, or one for each id on Cassandra and for a Vespa
+  `delete`. Such a `delete` also names a
+  chunk that another writer deletes between its read and its delete; a `set_metadata` result never
+  names a chunk deleted before the write reached it. `PineconeBackend.set_metadata` with
+  `wait=None` reads nothing back and returns None. Code that ignores the result is unaffected; a
+  subclass that overrides either method with a `-> None` annotation now fails mypy's override
+  check. [Operations](https://muzakkirhussain011.github.io/wardowl/operations.html#checking-that-a-change-reached-the-chunks)
+  has the store-by-store table and an example, and the Google Drive page a sync that checks it.
+- The conformance kit checks what `set_metadata` returns when it is a set: exactly the ids it was
+  given that are stored, never the one that is not. When it is, the kit also deletes some documents
+  and an id that is not stored and checks the set `delete` returns the same way. A result that is
+  not a set, None included, is not checked, and `delete` is then not called, so a backend that
+  returns nothing passes as before.
 - `create_app(max_groups=...)` bounds the groups on the subject that the authenticator returns,
   whichever authenticator it is (U40 in the readiness review). A subject in more groups answers
   401, the same answer as a refused token, before anything is searched, and the `wardowl` logger
@@ -37,6 +50,40 @@ All notable changes are recorded here. The format follows
   without extras there; every extra is tested on 3.12. The `chroma` extra cannot be installed on
   3.15 yet: chromadb requires onnxruntime, which publishes no wheels for 3.15 and no source
   distribution.
+
+### Changed
+
+- `VespaBackend.set_metadata` sends each update with the test-and-set condition
+  `condition=<schema>`, which every document of the schema meets. Vespa answers 200 to an update of
+  a document that is not stored, as to one that is, and 412 when a condition is given
+  ([document/v1 status codes](https://docs.vespa.ai/en/reference/document-v1-api-reference.html)),
+  so that is how the backend learns which documents an update reached. 412 is read as "not
+  stored", as 404 still is; the documents written are the same. `VespaBackend.delete` gets each
+  document's `wardowl_id` before it removes it, one more request per id: Vespa 8.763.13 answered 200
+  to a remove of a document that is not stored, with such a condition too, in wardowl's CI.
+- `RedisBackend.delete` sends one `DEL` per key, in one `MULTI` transaction for each batch of 500,
+  where it sent one `DEL` with every key of the batch: each answers whether its key was there, and
+  the batch is still deleted at once.
+- `ChromaBackend.delete` deletes a repeated id once, and `MilvusBackend.set_metadata` writes a row
+  found twice by its lookup once.
+
+### Documentation
+
+- The Chroma module and page said that a record whose JSON copy cannot be read is denied by the
+  re-check. Since 2.0.0, `ChromaBackend.search` applies a filter to each hit's copy first, so under
+  a filter such a record is dropped there and never counted; only a search without a filter
+  returns it, with empty metadata, for the re-check to deny.
+- The acceptance suite's company now has a document shared with everyone in its tenant and, in
+  both tenants, documents at the same paths, and the permission-systems scenario runs the default
+  `strategy="auto"` with every system that gives a filter (U31 in the readiness review). A fuzz
+  target and tests hand the retriever filters an authorizer built 101 levels deep and past
+  Python's recursion limit, on every path that takes them, and `In` clauses of up to 100,000
+  values (U34). Tests only; no library behaviour changes.
+- The supported configurations page said that the library tests on Python 3.11, 3.13 and 3.14
+  cover the frameworks; those tests need the framework extras, which only the Python 3.12 run
+  installs. The page now says so. The HTTP service page says that the `Authorization` header is not
+  counted in `max_body_bytes`, so how long a token may be is left to the ASGI server's limits on
+  request headers.
 
 ## [3.1.0] - 2026-11-14
 

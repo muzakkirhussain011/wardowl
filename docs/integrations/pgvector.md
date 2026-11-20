@@ -48,6 +48,12 @@ backend.delete(["salaries-1"])
 `add` inserts or replaces by id, so re-indexing a document after its permissions change is the
 same call.
 
+`set_metadata` returns the ids of the rows it updated and `delete` those of the rows it deleted, as
+PostgreSQL names them with `RETURNING id`, which returns a value for
+[each row actually updated](https://www.postgresql.org/docs/current/sql-update.html) or
+[deleted](https://www.postgresql.org/docs/current/sql-delete.html): an id not stored is not among
+them ([Checking that a change reached the chunks](../operations.md#checking-that-a-change-reached-the-chunks)).
+
 ## Revisions
 
 `add` and `set_metadata` replace what is stored, whenever their data was read, so when an indexer

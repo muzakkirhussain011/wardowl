@@ -61,6 +61,12 @@ so the retriever's re-check sees the true permissions.
 stored, or a chunk deleted meanwhile, gets no row, and the text and vector are never read and
 written back, so a concurrent `add` keeps its text.
 
+A merge reports how many rows it updated, not which, and a delete reports no rows. So `set_metadata` reads the rows back after each merge and returns the ids whose rows hold the
+metadata it wrote, and `delete` returns the ids a read just before each batch's delete finds; a
+chunk that another writer deletes between that read and the delete is among them too. Both reads
+match the hex-encoded `wardowl_key` column, as deletes do, so a row written by another tool without
+it is not counted ([Checking that a change reached the chunks](../operations.md#checking-that-a-change-reached-the-chunks)).
+
 ## Rows written by other tools
 
 A row with no `wardowl_terms` is invisible to a pre-filtered search, though post-filtering still

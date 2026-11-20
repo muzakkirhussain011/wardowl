@@ -167,18 +167,24 @@ def test_chroma_set_metadata_never_recreates_a_deleted_chunk_nor_restores_old_te
     collection = backend.collection
 
     class Interleaved:
-        """The collection, with another writer's changes landing just after set_metadata reads."""
+        """The collection, with another writer's changes landing just after set_metadata's first read."""
+
+        reads = 0
 
         def __getattr__(self, name):
             return getattr(collection, name)
 
         def get(self, **kwargs):
             stored = collection.get(**kwargs)
-            backend.delete(["a"])
-            backend.add([Document("b", "new text", eng)])
+            self.reads += 1
+            if self.reads == 1:
+                backend.delete(["a"])
+                backend.add([Document("b", "new text", eng)])
             return stored
 
-    ChromaBackend(Interleaved(), EMBED).set_metadata({"a": {"allowed_groups": ["*"]}, "b": {"allowed_groups": ["*"]}})
+    everyone = {"allowed_groups": ["*"]}
+    written = ChromaBackend(Interleaved(), EMBED).set_metadata({"a": everyone, "b": everyone})
+    assert written == {"b"}  # the first read found "a", but the update had nothing left to change
     hits = {h.id: (h.text, h.metadata) for h in backend.search("leave plan text", 5)}
     assert hits == {"b": ("new text", {"allowed_groups": ["*"]})}
     assert backend.search("text", 5, In("allowed_groups", ["eng"])) == []  # the old list field is gone
@@ -193,15 +199,19 @@ def test_chroma_search_drops_a_hit_only_a_stale_list_field_matches(chroma_factor
     class Interleaved:
         """The collection, with another writer's add landing between set_metadata's read and update."""
 
+        reads = 0
+
         def __getattr__(self, name):
             return getattr(collection, name)
 
         def get(self, **kwargs):
             stored = collection.get(**kwargs)
-            backend.add([Document("a", "leave plan", {"allowed_groups": ["eng"]})])
+            self.reads += 1
+            if self.reads == 1:
+                backend.add([Document("a", "leave plan", {"allowed_groups": ["eng"]})])
             return stored
 
-    ChromaBackend(Interleaved(), EMBED).set_metadata({"a": {"allowed_groups": ["sales"]}})
+    assert ChromaBackend(Interleaved(), EMBED).set_metadata({"a": {"allowed_groups": ["sales"]}}) == {"a"}
     # The update knew only the list field it read, so the one the add wrote is left, and Chroma matches it.
     (fields,) = collection.get(ids=["a"], include=["metadatas"])["metadatas"]
     assert fields.get("allowed_groups::s:eng") is True
@@ -255,12 +265,13 @@ def test_chroma_writes_in_batches_no_larger_than_the_clients_maximum():
     docs = [Document(f"d{i}", f"text {i}", {"allowed_groups": ["eng"]}) for i in range(10)]
     backend.add(docs)
     assert set(collection.records) == {d.id for d in docs}
-    backend.set_metadata({**{d.id: {"allowed_groups": ["hr"]} for d in docs}, "not-stored": {}})
+    written = backend.set_metadata({**{d.id: {"allowed_groups": ["hr"]} for d in docs}, "not-stored": {}})
+    assert written == {d.id for d in docs}
     stored = [metadata for _, metadata in collection.records.values()]
     assert all(
         json.loads(m[JSON_KEY]) == {"allowed_groups": ["hr"]} and "allowed_groups::s:eng" not in m for m in stored
     )
-    backend.delete([*(d.id for d in docs), "not-stored"])
+    assert backend.delete([*(d.id for d in docs), "not-stored"]) == {d.id for d in docs}
     assert collection.records == {}
     assert {name for name, _ in collection.calls} == {"add", "delete", "get", "update"}
     assert max(size for _, size in collection.calls) == 3
@@ -281,10 +292,10 @@ def test_chroma_takes_more_records_than_its_maximum_batch_with_the_defaults(chro
     docs = [Document(f"d{i:05d}", "leave", {"allowed_groups": ["eng"]}) for i in range(maximum + 1)]
     backend.add(docs)  # in one call, Chroma would refuse it
     assert backend.collection.count() == maximum + 1
-    backend.set_metadata({d.id: {"allowed_groups": ["hr"]} for d in docs})
+    assert backend.set_metadata({d.id: {"allowed_groups": ["hr"]} for d in docs}) == {d.id for d in docs}
     assert backend.search("leave", 5, In("allowed_groups", ["eng"])) == []
     assert len(backend.search("leave", 5, In("allowed_groups", ["hr"]))) == 5
-    backend.delete([d.id for d in docs])
+    assert backend.delete([d.id for d in docs]) == {d.id for d in docs}
     assert backend.collection.count() == 0
 
 
@@ -306,6 +317,10 @@ class SearchableChroma:
     def delete(self, ids):
         for doc_id in ids:
             self.records.pop(doc_id, None)
+
+    def get(self, ids, include):
+        found = [doc_id for doc_id in ids if doc_id in self.records]
+        return {"ids": found, "metadatas": [self.records[doc_id][1] for doc_id in found]}
 
     def query(self, n_results, include, where=None, **embedded):
         self.queries.append({"where": where, "n_results": n_results})
@@ -480,10 +495,27 @@ def test_chroma_reads_nested_where_trees_as_the_reference(chroma_factory, docs, 
 
 def test_the_in_memory_backend_deletes_chunks_and_ignores_ids_it_does_not_hold():
     backend = InMemoryBackend([Document("a", "leave plan", {}), Document("b", "leave rota", {})])
-    backend.delete(["a", "not-stored"])
+    assert backend.delete(["a", "not-stored", "a"]) == {"a"}
     assert [h.id for h in backend.search("leave", 5)] == ["b"] and len(backend) == 1
-    backend.delete([])
+    assert backend.delete([]) == frozenset()
     assert len(backend) == 1
+
+
+def test_writes_return_the_ids_they_found_and_never_one_that_is_not_stored(factory):
+    # What a permission sync checks: a set_metadata or delete aimed at stale chunk ids reaches no
+    # chunk, and its result says so, where it used to return None either way.
+    backend = factory([Document(i, f"doc leave {i}", {"allowed_groups": ["eng"]}) for i in ("a", "b", "c")])
+    hr = {"allowed_groups": ["hr"]}
+    written = backend.set_metadata({"a": hr, "b": hr, "gone": hr})
+    assert written == {"a", "b"} and isinstance(written, frozenset)
+    assert backend.set_metadata({"gone": hr, "also-gone": hr}) == frozenset()
+    assert backend.set_metadata({}) == frozenset()
+    assert {h.id for h in backend.search("doc leave", 5, In("allowed_groups", ["hr"]))} == {"a", "b"}
+    removed = backend.delete(["b", "gone", "b"])
+    assert removed == {"b"} and isinstance(removed, frozenset)
+    assert backend.delete(["b", "gone"]) == frozenset()
+    assert backend.delete([]) == frozenset()
+    assert sorted(h.id for h in backend.search("doc leave", 5)) == ["a", "c"]
 
 
 # ---- pgvector specifics ----------------------------------------------------------------------
@@ -1141,7 +1173,7 @@ def test_pgvector_without_a_revision_a_late_reindex_undoes_a_revocation(revised)
 
 def test_pgvector_refuses_a_write_older_than_the_stored_revision(revised, pgvector_pool):
     revised.add(_part(["alice"]), revision=5)  # the indexer, at revision 5
-    revised.set_metadata(_revoke(), revision=6)  # the permission sync, at revision 6
+    assert revised.set_metadata(_revoke(), revision=6) == {"a#0", "a#1"}  # the permission sync, at revision 6
     # The indexer's late write, read at revision 5, with a chunk the document did not have before.
     with pytest.raises(StaleRevision) as refused:
         revised.add(_part(["alice"], ("a#0", "a#1", "a#2")), revision=5)
@@ -1153,8 +1185,8 @@ def test_pgvector_refuses_a_write_older_than_the_stored_revision(revised, pgvect
     assert _pg_stored(pgvector_pool) == {"a#0": ([], 6), "a#1": ([], 6)}
     assert PermissionedRetriever(revised, MetadataACLAuthorizer()).retrieve("salary", Subject("alice"), 5).hits == []
     # The same revision again (a retry) is written, and so is a newer one; ids not stored stay ignored.
-    revised.set_metadata({"a#0": {"allowed_users": ["bob"]}, "gone": {"allowed_users": ["bob"]}}, revision=6)
-    assert _pg_stored(pgvector_pool) == {"a#0": (["bob"], 6), "a#1": ([], 6)}
+    written = revised.set_metadata({"a#0": {"allowed_users": ["bob"]}, "gone": {"allowed_users": ["bob"]}}, revision=6)
+    assert written == {"a#0"} and _pg_stored(pgvector_pool) == {"a#0": (["bob"], 6), "a#1": ([], 6)}
     revised.add(_part(["carol"], ("a#0", "a#1", "a#2")), revision=7)
     assert _pg_stored(pgvector_pool) == {"a#0": (["carol"], 7), "a#1": (["carol"], 7), "a#2": (["carol"], 7)}
 

@@ -48,6 +48,13 @@ reference semantics do, and no metadata value can change the filter's structure.
   ids that start with `sha256-`, are stored under `sha256-` and their SHA-256, and returned as
   written. No two chunk ids share a record. `set_metadata` and `delete` first fetch the records
   (`GET /vectors/fetch`) and leave alone any record that holds another chunk id.
+- **What writes return:** Pinecone's [update](https://docs.pinecone.io/reference/api/2025-10/data-plane/update)
+  and [delete](https://docs.pinecone.io/reference/api/2025-10/data-plane/delete) by id answer with
+  no ids. With `wait`, `set_metadata` returns the ids that the last search of its wait shows holding
+  the new metadata; with `wait=None` it reads nothing back and returns None. `delete` returns the
+  ids whose records the fetch before it showed holding them: a record that another writer deletes
+  between the fetch and the delete is among them too, and one written moments before may not show
+  in the fetch yet ([Checking that a change reached the chunks](../operations.md#checking-that-a-change-reached-the-chunks)).
 - **Limits:** Pinecone allows 40 KB of metadata per record, which includes the chunk's text, and
   10,000 results per query: a search with `k` above 10,000 raises `ValueError` rather than return
   10,000 hits as if no more matched. Writes go in batches of 100, 8 requests at a time.

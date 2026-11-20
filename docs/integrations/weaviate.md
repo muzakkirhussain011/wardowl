@@ -54,6 +54,12 @@ id. An object written by another tool, without `wardowl_id`, is reached by its U
 exactly as results report it (lower case, with hyphens). An object whose `wardowl_id` is a string,
 the empty string included, holds that id and is never reached by its UUID.
 
+`set_metadata` returns the ids whose objects it updated: each object its lookup finds is updated by
+UUID, and an update of an object deleted after that lookup raises rather than create it. `delete`
+returns the ids whose objects Weaviate reports deleted: it deletes with `verbose=True`, which
+[reports](https://docs.weaviate.io/weaviate/manage-objects/delete) each object's id and whether its
+deletion succeeded ([Checking that a change reached the chunks](../operations.md#checking-that-a-change-reached-the-chunks)).
+
 One id never stands for two objects in results. An object written by another tool at the UUID `u`,
 reported as `u`, and a chunk added with the id `u`, stored at `point_id(u)`, would both be reported
 as `u`; so would an object holding `wardowl_id` `x` at a UUID other than `point_id("x")`, next to

@@ -75,9 +75,10 @@ def test_changes_replace_delete_and_set_metadata():
     b.add([Document("hr", "pay bands, revised", {"allowed_groups": ["hr"]})])
     assert len(b) == 3 and b.index.ntotal == 3
     assert next(h for h in b.search("pay bands", 3) if h.id == "hr").text == "pay bands, revised"
-    b.set_metadata({"hr": {"allowed_groups": ["eng"]}, "missing": {}})
+    assert b.set_metadata({"hr": {"allowed_groups": ["eng"]}, "missing": {}}) == {"hr"}
     assert {h.id for h in b.search("launch", 3, In("allowed_groups", ["eng"]))} == {"eng", "hr"}
-    b.delete(["eng", "missing"])
+    assert b.delete(["eng", "missing", "eng"]) == {"eng"}
+    assert b.delete(["eng"]) == frozenset() and b.set_metadata({"eng": {}}) == frozenset()
     assert len(b) == 2 and b.index.ntotal == 2 and "eng" not in {h.id for h in b.search("launch", 3)}
     b.add([])
     assert b.search("launch", 0) == [] and FaissBackend(EMBED, EMBED.dim).search("launch", 3) == []

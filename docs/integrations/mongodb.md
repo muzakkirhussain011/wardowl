@@ -47,6 +47,16 @@ default:
 All three raise `TimeoutError` after `wait_timeout` seconds (60 by default). Bulk ingestion that
 does not need to read its own writes can pass `wait=False`.
 
+`set_metadata` returns the ids of the documents it updated. A bulk write reports how many documents
+its updates [matched](https://pymongo.readthedocs.io/en/stable/api/pymongo/results.html), not which;
+each update names one `_id`, so when every update matched, every id was written, and otherwise
+one read names the documents holding the batch's own `wardowl_write` value. `delete` returns the
+ids that a read just before the delete finds stored, since a delete reports only how many documents
+it removed; a chunk that another writer deletes between that read and the delete is among them too.
+Both reads go to the primary: a secondary
+[may return stale data](https://www.mongodb.com/docs/manual/core/read-preference/), which could
+name a document that is gone ([Checking that a change reached the chunks](../operations.md#checking-that-a-change-reached-the-chunks)).
+
 A replaced chunk dropped this way is counted in the result's `violations`, so a revocation written
 with `set_metadata` can raise the count for retrievals made while it waits; the wait blocks only
 the writer ([runbook](../runbook.md#the-violations-count-rose)).

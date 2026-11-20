@@ -109,7 +109,7 @@ def test_hostile_and_quoted_values_are_only_values(db):
     attacker = Subject("mallory", ["x') OR TRUE --", "' OR 1=1 --"])
     assert retriever.retrieve("leave", attacker, 5).hits == []
     assert [h.id for h in retriever.retrieve("leave", Subject("O'Brien"), 5).hits] == ["o'brien's notes"]
-    backend.delete(["o'brien's notes"])
+    assert backend.delete(["o'brien's notes", "x' OR TRUE --"]) == {"o'brien's notes"}
     assert [h.id for h in backend.search("leave", 5)] == ["secret"]
 
 
@@ -183,7 +183,8 @@ def test_arguments_are_checked(db):
 def test_set_metadata_replaces_permissions_and_ignores_unknown_ids(db):
     backend = LanceDBBackend(_new_table(db), EMBED)
     backend.add([Document("plan", "leave plan", {"allowed_groups": ["eng"], "level": 1})])
-    backend.set_metadata({"plan": {"allowed_groups": ["O'Brien's team"]}, "not-stored": {"allowed_groups": ["*"]}})
+    changes = {"plan": {"allowed_groups": ["O'Brien's team"]}, "not-stored": {"allowed_groups": ["*"]}}
+    assert backend.set_metadata(changes) == {"plan"} and backend.set_metadata({"not-stored": {}}) == frozenset()
     assert backend.search("leave", 5, In("allowed_groups", ["eng"])) == []
     assert backend.search("leave", 5, In("level", [1])) == []
     (hit,) = backend.search("leave", 5)
@@ -206,7 +207,8 @@ def test_set_metadata_never_recreates_a_deleted_chunk_nor_restores_old_text(db):
             backend.add([Document("b", "new text", {"allowed_groups": ["eng"]})])
             return table.merge_insert(on)
 
-    LanceDBBackend(Interleaved(), EMBED).set_metadata({"a": {"allowed_groups": ["*"]}, "b": {"allowed_groups": ["*"]}})
+    everyone = {"allowed_groups": ["*"]}
+    assert LanceDBBackend(Interleaved(), EMBED).set_metadata({"a": everyone, "b": everyone}) == {"b"}
     hits = {h.id: (h.text, h.metadata) for h in backend.search("leave plan text", 5)}
     assert hits == {"b": ("new text", {"allowed_groups": ["*"]})}
     assert [h.id for h in backend.search("text", 5, In("allowed_groups", ["*"]))] == ["b"]

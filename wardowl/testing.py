@@ -32,7 +32,7 @@ import json
 import math
 import random
 import re
-from collections.abc import Callable, Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence, Set
 from dataclasses import dataclass
 from typing import Any
 
@@ -399,6 +399,11 @@ def check_backend(
     * if the backend has `set_metadata`, replacing the metadata of some documents (and of an id
       that is not stored) leaves their text as it was, changes what filters select as `matches`
       says it should, keeps no key of the old metadata, and stores nothing new;
+    * if `set_metadata` returns a set, it holds exactly the ids of the documents it was given that
+      are stored, and not the id that is not. A backend that reports its writes this way has its
+      `delete`, if it has one, checked the same way: deleting some documents and an id that is not
+      stored returns a set of exactly those documents' ids. A return value that is not a set, None
+      included, is not checked;
     * if the backend offers what `PermissionedRetriever(short_results=...)` uses, for each of those
       filters: with `supports_exact`, `search(..., exact=True)` (and `asearch`) returns min(k,
       matching) of the documents `matches` selects, as an exact search must, whatever `exact`
@@ -463,7 +468,10 @@ def check_backend(
 
         set_metadata = getattr(backend, "set_metadata", None)
         if set_metadata is not None and docs:
-            _check_set_metadata(backend, set_metadata, rng, example, docs, filters_per_example, strict, query)
+            reports = _check_set_metadata(backend, set_metadata, rng, example, docs, filters_per_example, strict, query)
+            delete = getattr(backend, "delete", None)
+            if reports and delete is not None:
+                _check_delete(delete, example, docs)
 
         _check_retrieval(factory, rng, seed, number, max_documents, exact, query)
 
@@ -473,22 +481,47 @@ def _strict(backend: SearchBackend, exact: bool) -> bool:
     return exact or getattr(backend, "exact_search", False) is True
 
 
+_UNKNOWN = "not-stored"  # the id no generated document has, which writes must not report
+
+
+def _check_reported(
+    example: _Example, call: str, returned: object, expected: set[str], details: Mapping[str, Any]
+) -> None:
+    """Check a write's return value, when it is a set: exactly the ids in `expected`, all strings."""
+    if not isinstance(returned, Set):
+        return
+    problems = []
+    if not all(isinstance(i, str) for i in returned):
+        problems.append(f"returned ids that are not strings: {sorted(map(repr, returned))}")
+    extra = sorted(str(i) for i in returned if i not in expected)
+    if extra:
+        problems.append(f"returned ids it did not change: {extra}")
+    missing = sorted(expected - set(returned))
+    if missing:
+        problems.append(f"left out ids it changed: {missing}")
+    if problems:
+        raise example.failure(f"what {call} returned", problems, **details, expected=sorted(expected))
+
+
 def _check_set_metadata(
     backend: SearchBackend,
-    set_metadata: Callable[[Mapping[str, Mapping[str, Any]]], None],
+    set_metadata: Callable[[Mapping[str, Mapping[str, Any]]], object],
     rng: random.Random,
     example: _Example,
     docs: Sequence[Document],
     filters: int,
     exact: bool,
     query: str | Query,
-) -> None:
+) -> bool:
+    """Check `set_metadata`, and return whether it reports its writes (returned a set)."""
     changed = rng.sample(list(docs), rng.randint(1, len(docs)))
     replacements = {d.id: _metadata(rng) for d in changed}
-    set_metadata({**replacements, "not-stored": {"team": "a", "allowed_groups": ["*"]}})
+    returned = set_metadata({**replacements, _UNKNOWN: {"team": "a", "allowed_groups": ["*"]}})
     updated = [Document(d.id, d.text, replacements.get(d.id, d.metadata)) for d in docs]
     by_id = {d.id: d for d in updated}
     details: dict[str, Any] = {"replaced": _json(replacements)}
+    _check_reported(example, "set_metadata", returned, set(replacements), details)
+    reports = isinstance(returned, Set)
 
     hits = backend.search(query, len(updated))
     problems = _problems(hits, len(updated), set(by_id), by_id, exact)
@@ -496,7 +529,7 @@ def _check_set_metadata(
         raise example.failure("search after set_metadata", problems, **details, returned=[h.id for h in hits])
     _compare_asearch(backend, example, query, len(updated), None, hits, **details)
     if not backend.supports_filters:
-        return
+        return reports
     for _ in range(max(1, filters)):
         f = random_filter(rng)
         expected = {d.id for d in updated if matches(f, d.metadata)}
@@ -515,6 +548,19 @@ def _check_set_metadata(
                 returned=[h.id for h in found],
             )
         _compare_asearch(backend, example, query, len(updated), f, found, **details)
+    return reports
+
+
+def _check_delete(delete: Callable[[list[str]], object], example: _Example, docs: Sequence[Document]) -> None:
+    """Delete some of the documents and an id that is not stored, and check what `delete` returns.
+
+    The documents come from a generator of their own, seeded by the example, so that the corpora
+    the kit generates afterwards are the same with this check as without it.
+    """
+    rng = random.Random(f"delete {example.seed} {example.number}")
+    removed = sorted(d.id for d in rng.sample(list(docs), rng.randint(1, len(docs))))
+    answer = delete([*removed, _UNKNOWN])
+    _check_reported(example, "delete", answer, set(removed), {"deleted": removed})
 
 
 def _check_retrieval(

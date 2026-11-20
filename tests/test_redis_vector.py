@@ -72,17 +72,30 @@ def test_an_empty_in_matches_nothing_without_asking_redis():
 
 
 class FakePipeline:
+    """Queues commands and answers each as Redis would, from the keys the client holds."""
+
     def __init__(self, client):
         self.client = client
+        self.answers = []
 
     def delete(self, key):
         self.client.calls.append(("delete", key))
+        self.answers.append(int(key in self.client.stored))
+        self.client.stored.discard(key)
 
     def hset(self, key, mapping):
         self.client.calls.append(("hset", key, mapping))
+        self.client.stored.add(key)
+        self.answers.append(len(mapping))
+
+    def eval(self, script, numkeys, key, *args):
+        self.client.calls.append(("eval", key, *args))
+        self.answers.append(int(key in self.client.stored))  # the script's answer: 1 when it wrote
 
     def execute(self):
         self.client.calls.append(("execute",))
+        answers, self.answers = self.answers, []
+        return answers
 
 
 class FakeClient:
@@ -92,6 +105,7 @@ class FakeClient:
         self.reply = reply if reply is not None else [0]
         self.policy = policy
         self.commands, self.calls, self.asked = [], [], []
+        self.stored = set()  # the keys the pipeline's commands find
 
     def execute_command(self, *args):
         if args[0] in ("CONFIG", "FT.CONFIG"):
@@ -104,9 +118,6 @@ class FakeClient:
 
     def pipeline(self, transaction=True):
         return FakePipeline(self)
-
-    def delete(self, *keys):
-        self.calls.append(("delete-many", keys))
 
 
 def test_the_search_command_puts_the_filter_before_the_knn():
@@ -286,12 +297,24 @@ def test_add_replaces_whole_hashes_with_hex_terms_and_exact_json():
         RedisBackend(client, "idx", EMBED).add(docs[:2], embeddings=[EMBED("x")])
 
 
+def test_set_metadata_returns_the_ids_whose_script_found_the_hash():
+    client = FakeClient()
+    backend = RedisBackend(client, "idx", EMBED)
+    backend.add([Document("a", "leave", {})])
+    client.calls.clear()
+    assert backend.set_metadata({"a": {"allowed_groups": ["hr"]}, "gone": {}}) == {"a"}
+    assert [call[1] for call in client.calls if call[0] == "eval"] == ["wardowl:a", "wardowl:gone"]
+    assert backend.set_metadata({}) == frozenset()
+
+
 def test_delete_and_configuration():
     client = FakeClient()
     backend = RedisBackend(client, "idx", EMBED)
-    backend.delete([])
-    backend.delete(["a", "a", "b"])
-    assert client.calls == [("delete-many", ("wardowl:a", "wardowl:b"))]
+    assert backend.delete([]) == frozenset() and client.calls == []
+    client.stored.add("wardowl:b")
+    # One DEL per key, so each answer says whether that key was there.
+    assert backend.delete(["a", "a", "b"]) == {"b"}
+    assert client.calls == [("delete", "wardowl:a"), ("delete", "wardowl:b"), ("execute",)]
     for options in ({"ef_runtime": 0}, {"prefix": ""}):
         with pytest.raises(ValueError):
             RedisBackend(client, "idx", EMBED, **options)
@@ -545,7 +568,9 @@ def test_replaced_and_deleted_chunks(redis_client):
     backend.add([Document("doc", "leave policy", {"allowed_groups": ["eng"]})])
     assert retriever.retrieve("leave", Subject("ann", ["hr"]), 5).hits == []
     assert [h.id for h in retriever.retrieve("leave", Subject("bob", ["eng"]), 5).hits] == ["doc"]
-    backend.delete(["doc", "never-written"])
+    assert backend.set_metadata({"doc": {"allowed_groups": ["eng"]}, "never-written": {}}) == {"doc"}
+    assert backend.delete(["doc", "never-written"]) == {"doc"}
+    assert backend.delete(["doc"]) == frozenset()
     assert backend.search("leave policy", 5) == []
     _drop(redis_client, name)
 

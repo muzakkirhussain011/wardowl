@@ -192,6 +192,9 @@ backend.set_metadata({chunk_id: {**stored[chunk_id], "allowed_groups": ["hr"]} f
   chunk keeps, not only the one that changed: a chunk written back without its `tenant` matches no
   `TenantAuthorizer` filter, and one without its `redactions` is hidden whole by `SpanRedactor`. Ids
   that are not stored are ignored, so nothing is created from metadata alone.
+- It returns the ids whose chunks it changed, as a `frozenset`, and never an id that is not stored,
+  so you can tell a change that reached its chunks from one aimed at ids that are gone
+  ([below](#checking-that-a-change-reached-the-chunks)). `delete` returns the ids it found stored.
 - It returns once searches see the change, as `add` does for that store
   ([Choosing a store](integrations/index.md#choosing-a-store)); MongoDB waits for its search index.
 - Every built-in backend has it, and the [conformance kit](extending.md#test-it-with-the-conformance-kit)
@@ -206,6 +209,56 @@ A change on the other side, such as a user leaving a group, needs no update to t
 subject's groups are read at query time. `CachingAuthorizer` keys each decision by the chunk's
 metadata, so a chunk whose metadata changed is decided again at once, and cached filters expire
 after `ttl`.
+
+### Checking that a change reached the chunks
+
+Your record of a document's chunk ids can fall behind the store: the document is chunked again
+under new ids, and the permission sync still holds the old ones. A `set_metadata` sent with those
+ids changes no chunk, and the chunks that are stored keep the old permissions. Compare what it
+returns with the ids you sent:
+
+```python
+written = backend.set_metadata({chunk_id: {**stored[chunk_id], "allowed_groups": ["hr"]} for chunk_id in chunk_ids})
+missing = set(chunk_ids) - written
+if missing:
+    # No chunk with these ids is stored: the record is out of date, and the change did not reach
+    # the chunks that are. Index the document again, and correct the record.
+    logger.error("permission change for %s found %d of %d chunks", doc_id, len(written), len(chunk_ids))
+```
+
+`delete` returns the ids it found the same way. A document deleted at its source whose `delete`
+finds fewer chunks than you sent can still have chunks stored under ids you do not know: no
+wardowl backend lists chunks by their metadata, so find them with the store's own client, by a
+field your ingestion writes on every chunk, such as the document's id, and delete them.
+
+The `revision=` check of pgvector and MongoDB does not catch this: a chunk that is not stored has no
+revision to compare ([below](#one-writer-at-a-time-for-each-document)). Each backend learns what a
+write changed from what its store reports, and where the store reports nothing it reads back:
+
+| Store | `set_metadata` returns | `delete` returns |
+|---|---|---|
+| In memory, FAISS | The ids it held, changed in the same call | The ids it held and removed |
+| pgvector | The rows `UPDATE ... RETURNING id` names | The rows `DELETE ... RETURNING id` names |
+| Elasticsearch, OpenSearch | The updates the bulk response reports done; a missing document's fails with 404 | The deletes whose result is `deleted`; a missing document's is `not_found` |
+| MongoDB | All the ids, when the bulk write matched as many documents as it was sent; otherwise one read on the primary names the documents that hold the batch's write marker | The ids a read on the primary finds just before the delete |
+| Redis | Each chunk's script answers whether its hash was stored, in the step that writes it | Each key's `DEL` answers whether it removed the key |
+| Vespa | Each update carries a condition every document of the schema meets; one that is not stored fails it with 412 | The ids a get of each document finds just before the removes |
+| Weaviate | The objects its lookup found, each then updated by UUID; Weaviate refuses to update an object that is not stored, so one deleted in between makes the call raise | The objects `delete_many(..., verbose=True)` reports deleted |
+| Milvus | The rows a strongly consistent query found, all of which the partial update then wrote, since it raises otherwise | The ids a strongly consistent query finds just before the delete |
+| Chroma | The records that hold the new metadata when read back after the update | The ids a read finds just before the delete |
+| LanceDB | The rows that hold the new metadata when read back after the merge | The ids a read finds just before the delete |
+| Qdrant | The ids whose points hold the new metadata when read back after the update | The ids a `retrieve` finds just before the delete |
+| Cassandra | The rows that, read back after the update, hold the new metadata and still have their text | The ids a lookup finds just before the delete |
+| Pinecone | With `wait` (the default), the ids a search shows holding the new metadata when the wait ends; with `wait=None`, None | The ids the fetch before the delete shows holding them |
+
+The reads are of the call's own ids, one request for each batch of them, or one for each id on
+Cassandra and for a Vespa `delete`. A `set_metadata` result never names a chunk that was deleted before the write reached
+it: a store that cannot say so is read back after the write. A `delete` that reads first names the
+ids that read found, every one of which is deleted once the call's delete has run; the store's
+delete does not say which chunks it removed, so a chunk that another writer deletes between the
+read and the delete is named too. Pinecone's `set_metadata` returns None with `wait=None`, and a
+backend of your own may return None when its store cannot tell
+([Extending wardowl](extending.md#a-backend)), so check for None before comparing.
 
 ### One writer at a time for each document
 
