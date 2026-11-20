@@ -183,6 +183,11 @@ published as advisory
 | November 2026 | One stored record whose metadata is not a JSON object, which another tool can write, failed every retrieval that reached it on Vespa, Pinecone, Cassandra and Chroma | 3.1.0 |
 | November 2026 | An authorizer's filter holding something other than `In`, `And` and `Or` failed as the store's fault, and, with `recheck=False` and a backend that does not recurse into it, one nested deep enough raised a bare `RecursionError` | 3.1.0 |
 | November 2026 | The HTTP service let a failed search leave the application, so the connection was closed and the client's next request on it was reset | 3.1.0 |
+| November 2026 | `set_metadata` and `delete` reported nothing, so a permission sync aimed at chunk ids that are no longer stored changed nothing and nothing said so | 3.2.0 |
+| November 2026 | The HTTP service bounded the body, `k`, the query and the vector, but not the groups on a verified token's subject, which every request puts in its filter and its cache keys | 3.2.0 |
+| November 2026 | Elasticsearch and OpenSearch refused to write a chunk whose permission term, field name and value together, was longer than 32,766 bytes | 3.2.0 |
+| November 2026 | Cassandra, with authentication off or for a superuser, stored a chunk whose permission term was longer than 8 KiB without indexing it, so a filter never found the chunk | 3.2.0 |
+| November 2026 | The conformance kit stored permission values of at most nine characters, so a store that cuts long values short or leaves them out of its index passed | 3.2.0 |
 
 ## Reporting
 
