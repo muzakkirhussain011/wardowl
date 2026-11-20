@@ -14,6 +14,31 @@ All notable changes are recorded here. The format follows
   target and tests hand the retriever filters an authorizer built 101 levels deep and past
   Python's recursion limit, on every path that takes them, and `In` clauses of up to 100,000
   values (U34). Tests only; no library behaviour changes.
+### Added
+
+- `create_app(max_groups=...)` bounds the groups on the subject that the authenticator returns,
+  whichever authenticator it is (U40 in the readiness review). A subject in more groups answers
+  401, the same answer as a refused token, before anything is searched, and the `wardowl` logger
+  records `wardowl refused a token: its subject is in more than N groups (max_groups)` at INFO, with
+  the bound and nothing from the token. The service bounded the body, `k`, the query and the
+  vector, but not the groups a verified token carries, and on every request `MetadataACLAuthorizer`
+  puts every group in the subject's filter and `CachingAuthorizer` hashes every group into its
+  cache keys. The default, None, sets no bound, as before: a default bound could refuse users in
+  many groups. A value that is neither None nor a positive integer raises `ValueError`. The subject
+  holds each group once, so a group listed twice in a token counts once.
+- Python 3.15. CI runs the library tests on it, the release verification installs each release on
+  it, and the package's classifiers list it. As on 3.11, 3.13 and 3.14, CI tests the library
+  without extras there; every extra is tested on 3.12. The `chroma` extra cannot be installed on
+  3.15 yet: chromadb requires onnxruntime, which publishes no wheels for 3.15 and no source
+  distribution.
+
+### Documentation
+
+- The supported configurations page said that the library tests on Python 3.11, 3.13 and 3.14
+  cover the frameworks; those tests need the framework extras, which only the Python 3.12 run
+  installs. The page now says so. The HTTP service page says that the `Authorization` header is not
+  counted in `max_body_bytes`, so how long a token may be is left to the ASGI server's limits on
+  request headers.
 
 ## [3.1.0] - 2026-11-14
 

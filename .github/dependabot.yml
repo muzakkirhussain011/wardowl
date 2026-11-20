@@ -11,6 +11,12 @@ updates:
     cooldown: { default-days: 7 }
     groups:
       library: { patterns: ["*"], update-types: [minor, patch] }
+    # hatchling appears only in [build-system] requires, as a lower bound that uv.lock does not
+    # record, so an update leaves the lock unchanged and the job fails ("Expected lockfile to
+    # change", Nov 19). The release builds with the hatchling pinned by hash in
+    # .github/requirements/build.txt, which the pip entry below keeps current.
+    ignore:
+      - dependency-name: hatchling
   - package-ecosystem: uv
     directory: /examples/gateway
     schedule: { interval: weekly }
