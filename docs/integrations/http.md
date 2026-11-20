@@ -53,14 +53,26 @@ Content-Type: application/json
   `max_vector_length` numbers (4,096 by default), all finite: `NaN` and infinities are refused.
 - A body over `max_body_bytes` (256 KiB by default) is refused with 413 before it is parsed, by its
   `Content-Length` and by the bytes actually received. If you raise `max_vector_length` well past
-  4,096, raise `max_body_bytes` with it.
+  4,096, raise `max_body_bytes` with it. The `Authorization` header is not part of the body: how
+  long a token may be is left to your ASGI server's limits on request headers.
+- `max_groups` (no bound by default) caps the groups on the caller's subject, as the authenticator
+  returns it, whichever authenticator that is; the subject holds each group once, so a group listed
+  twice in the token counts once. A subject in more groups answers 401 before anything is searched,
+  the same answer as a refused token. On every request, `MetadataACLAuthorizer` puts every group in
+  the subject's filter and `CachingAuthorizer` hashes every group into its cache keys
+  ([Subjects in very many groups](../operations.md#subjects-in-very-many-groups)), so the bound
+  keeps a token with a very long group list from making each of its requests that costly. Set it
+  above the most groups any of your users has: a user over it cannot use the service. Microsoft
+  Entra ID leaves the `groups` claim out of a JWT for a user in more than 200 groups
+  ([Tokens without groups](#tokens-without-groups)), so a `groups` claim from Entra ID never holds
+  more than 200.
 - `GET /healthz` answers liveness probes. `GET /openapi.json` describes the API, for generating a
   client in your language; `create_app(..., docs=True)` also serves the interactive pages at `/docs`.
 
 | Status | When |
 |---|---|
 | 200 | The hits the caller may read, best first, and whether the result is `complete` |
-| 401 | No bearer token, or one that fails verification. The answer is the same whatever the reason; `OIDCAuthenticator` logs the check that failed ([Why a token was refused](#why-a-token-was-refused)) |
+| 401 | No bearer token, one that fails verification, or, with `max_groups`, one whose subject is in more groups than that. The answer is the same whatever the reason; `OIDCAuthenticator` logs the check that failed, and the service logs a subject over `max_groups` ([Why a token was refused](#why-a-token-was-refused)) |
 | 413 | A body over `max_body_bytes` |
 | 422 | A malformed body, including one with a field the API does not define, or a value over its limit. Also a well-formed query the service cannot search as sent (`InvalidQuery`): `k` over the retriever's `max_candidates`, only a vector for a keyword backend, only text for a backend without an embed function, or a vector of the wrong length where the backend checks it (`FaissBackend`). The answer echoes nothing from the request or the backend |
 | 500 | A fault on the server's side, and nothing is returned. A search or count the store could not complete (`SearchError`: the store unreachable or misconfigured, or refusing the query) answers "the search could not be completed, so nothing was returned", echoing nothing, and the store's error goes to the `wardowl` logger with the traceback. Any other fault, such as a misconfigured reranker, goes to the server's log |
@@ -209,9 +221,16 @@ logging.basicConfig()  # a handler on the root logger, if your application sets 
 logging.getLogger("wardowl").setLevel(logging.INFO)  # DEBUG adds the tokens without groups
 ```
 
-A line is written for every refused request, made-up tokens included. `create_app` itself logs
-nothing for a 401, so an authenticator of your own that raises `InvalidToken` logs its reasons only
-if it does so itself.
+A line is written for every refused request, made-up tokens included. `create_app` itself logs a
+401 only for a subject over `max_groups`, with the bound and nothing from the token, not even how
+many groups it had:
+
+```text
+wardowl refused a token: its subject is in more than 200 groups (max_groups)
+```
+
+Otherwise an authenticator of your own that raises `InvalidToken` logs its reasons only if it does
+so itself.
 
 ### Mapping a real provider's tokens
 

@@ -10,10 +10,14 @@ record.
 
 | Python | Tested |
 |---|---|
-| 3.11, 3.13, 3.14 | The whole library without external services: property tests, the reference backend, composition, caching, the frameworks |
-| 3.12 | All of that, plus every store and permission service below, the examples, the benchmark harnesses and the docs build |
+| 3.11, 3.13, 3.14, 3.15 | The library without extras or external services: property tests, the reference backend, composition, caching |
+| 3.12 | All of that, plus every extra (every store and permission service below, the frameworks, the HTTP service), the examples, the benchmark harnesses and the docs build |
 
 Python 3.10 reaches its end of life on 2026-10-31; 1.4.0 requires 3.11.
+
+Python 3.15 is supported from 3.2.0. As of November 2026 the `chroma` extra cannot be installed on
+it: chromadb requires onnxruntime, whose latest release (1.32.0) publishes wheels up to Python 3.14
+and no source distribution.
 
 ## Operating systems
 

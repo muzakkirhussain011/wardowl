@@ -31,7 +31,7 @@ How it holds:
 3. Hits carry no metadata unless a field is listed in `metadata_fields`.
 4. `k`, the query's length and the vector's length are bounded, the vector holds finite numbers
    only, a body over `max_body_bytes` is refused with 413 before it is parsed, and the query text
-   is never logged.
+   is never logged. With `max_groups`, a subject in more groups than that answers 401.
 5. A synchronous authenticator, such as `OIDCAuthenticator`, runs in a worker thread, so a slow
    identity provider never stalls the event loop.
 6. With `retrieval_timeout`, a retrieval that runs longer is cancelled and answers 503, and nothing
@@ -314,6 +314,12 @@ class _BodyLimit:
         await self.app(scope, replay, send)
 
 
+def _positive_or_none(value: object, name: str) -> None:
+    """Refuses a setting that is neither None nor a positive integer; True is not a count."""
+    if value is not None and (isinstance(value, bool) or not isinstance(value, int) or value < 1):
+        raise ValueError(f"{name} must be None or a positive integer")
+
+
 def create_app(
     retriever: PermissionedRetriever,
     authenticate: Authenticator,
@@ -322,6 +328,7 @@ def create_app(
     max_query_length: int = 4000,
     max_vector_length: int = 4096,
     max_body_bytes: int = 256 * 1024,
+    max_groups: int | None = None,
     metadata_fields: Collection[str] = (),
     title: str = "wardowl",
     docs: bool = False,
@@ -335,6 +342,11 @@ def create_app(
     worker thread. `metadata_fields` lists the metadata returned with each hit (none by default).
     A request body over `max_body_bytes` is refused with 413. `docs` serves the interactive API
     pages at `/docs`.
+
+    `max_groups` (None, the default, sets no bound) bounds the groups on the subject that
+    `authenticate` returns, whichever authenticator it is. A subject in more groups answers 401,
+    as a refused token does, and is logged at INFO on the `wardowl` logger with the bound, never
+    the groups.
 
     `retrieval_timeout` (seconds; None, the default, sets no bound) bounds each retrieval: one that
     takes longer is cancelled, answers 503 and returns nothing. A synchronous call it was making in
@@ -350,9 +362,8 @@ def create_app(
     if min(max_k, max_query_length, max_vector_length, max_body_bytes) < 1:
         raise ValueError("max_k, max_query_length, max_vector_length and max_body_bytes must be positive")
     retrieval_timeout = checked(retrieval_timeout)
-    workers: Any = max_workers
-    if workers is not None and (isinstance(workers, bool) or not isinstance(workers, int) or workers < 1):
-        raise ValueError("max_workers must be None or a positive integer")
+    _positive_or_none(max_workers, "max_workers")
+    _positive_or_none(max_groups, "max_groups")
     fields = frozenset(metadata_fields)
     bearer = HTTPBearer(auto_error=False)
 
@@ -420,6 +431,11 @@ def create_app(
         if not isinstance(answer, Subject):
             _log.error("wardowl's authenticator returned %s, not a Subject", type(answer).__name__)
             raise HTTPException(503, "the caller could not be verified, so nothing was returned")
+        if max_groups is not None and len(answer.groups) > max_groups:
+            # A filter can name every group, and a cache key hashes them all, on every request the
+            # subject makes. The count is not logged: it comes from the token.
+            _log.info("wardowl refused a token: its subject is in more than %d groups (max_groups)", max_groups)
+            raise refused
         return answer
 
     @app.post("/v1/retrieve")

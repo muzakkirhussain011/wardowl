@@ -411,6 +411,46 @@ def test_time_and_thread_bounds_must_be_valid(setting):
         create_app(retriever, tokens, **setting)
 
 
+# --- the bound on a subject's groups -----------------------------------------------------------
+
+
+@pytest.mark.parametrize("max_groups", [0, -1, True, 2.5, "200"])
+def test_max_groups_must_be_none_or_a_positive_integer(max_groups):
+    retriever = PermissionedRetriever(InMemoryBackend(DOCS), MetadataACLAuthorizer())
+    with pytest.raises(ValueError, match="max_groups must be None or a positive integer"):
+        create_app(retriever, tokens, max_groups=max_groups)
+
+
+def test_without_max_groups_a_subject_in_any_number_of_groups_is_served():
+    crowd = Subject("carol", ["eng", *(f"team-{i}" for i in range(5000))])
+    hits = ask(client(authenticate=lambda token: crowd), {"query": "launch"}).json()["hits"]
+    assert {h["id"] for h in hits} == {"eng-plan", "all-hands"}
+
+
+def test_max_groups_refuses_a_subject_in_more_groups_as_any_refused_token_is_refused(caplog):
+    users = {**USERS, "carol-token": Subject("carol", ["eng", "team-1", "team-2"])}
+
+    async def authenticate(token):  # an authenticator of your own, async at that
+        if token not in users:
+            raise InvalidToken("unknown token")
+        return users[token]
+
+    at_the_bound = client(authenticate=authenticate, max_groups=3)
+    assert ask(at_the_bound, {"query": "launch"}, who="carol-token").status_code == 200
+    c = client(authenticate=authenticate, max_groups=2)
+    with caplog.at_level(logging.INFO, logger="wardowl"):
+        over = ask(c, {"query": "launch"}, who="carol-token")
+    forged = ask(c, {"query": "launch"}, who="forged")
+    # The caller cannot tell a subject over the bound from a forged token.
+    assert over.status_code == forged.status_code == 401 and over.json() == forged.json()
+    assert over.headers["www-authenticate"] == "Bearer"
+    assert wardowl_records(caplog) == [
+        (logging.INFO, "wardowl refused a token: its subject is in more than 2 groups (max_groups)")
+    ]
+    assert "team-" not in caplog.text and "carol" not in caplog.text
+    assert ask(c, {"query": "launch"}).status_code == 200  # ann, in one group
+
+
 # --- time bounds, the executor and observers ---------------------------------------------------
 
 
@@ -883,3 +923,17 @@ def test_the_service_with_oidc_tokens():
     assert {h["id"] for h in ask(c, {"query": "launch"}, who=token()).json()["hits"]} == {"eng-plan", "all-hands"}
     assert ask(c, {"query": "launch"}, who=token(aud="another-api")).status_code == 401
     assert ask(c, {"query": "launch"}, who=token(key=EC_KEY, algorithm="ES256")).status_code == 401
+
+
+def test_max_groups_bounds_the_groups_of_a_verified_oidc_token(caplog):
+    c = client(authenticate=oidc(), max_groups=2)
+    assert ask(c, {"query": "launch"}, who=token(groups=["eng", "ops"])).status_code == 200
+    # The subject holds each group once, so a group listed twice in the token counts once.
+    assert ask(c, {"query": "launch"}, who=token(groups=["eng"] * 5)).status_code == 200
+    with caplog.at_level(logging.INFO, logger="wardowl"):
+        over = ask(c, {"query": "launch"}, who=token(groups=["eng", "ops", "sales"]))
+    assert over.status_code == 401 and over.json() == {"detail": "a valid bearer token is required"}
+    assert wardowl_records(caplog) == [
+        (logging.INFO, "wardowl refused a token: its subject is in more than 2 groups (max_groups)")
+    ]
+    assert "sales" not in caplog.text

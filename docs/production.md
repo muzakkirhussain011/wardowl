@@ -17,6 +17,8 @@ fails. Each item links to the page with the details.
   differs in case does not match. ([Google Drive](integrations/google-drive.md#how-drive-sharing-maps-onto-subjects))
 - [ ] Only groups that grant access to documents are on the subject. A subject in tens of thousands
   of groups works, but costs on every query. ([Operations](operations.md#subjects-in-very-many-groups))
+  The HTTP service's `max_groups`, set above the most groups any of your users has, refuses a token
+  whose subject is in more. ([HTTP service](integrations/http.md#the-api))
 - [ ] In a multi-tenant deployment, every subject carries its tenant, and the authorizer is wrapped
   in `AllOf(TenantAuthorizer(), ...)`. A subject without a tenant then gets nothing.
   ([Combining authorizers](combining.md))
@@ -105,6 +107,7 @@ says why. The table shows what each failure looks like.
 | A subject has no tenant under `TenantAuthorizer` | Raises `AuthorizationError` | As for a failing authorizer |
 | `OIDCAuthenticator` refuses a token: expired, not yet valid by the service's clock (a provider's clock ahead), or failing another check | Answers 401, the same whatever the reason | An INFO line on the `wardowl` logger naming the check, such as `ImmatureSignatureError` ([HTTP service](integrations/http.md#why-a-token-was-refused)) |
 | A token carries no groups claim | Without `require_groups`, a subject with no groups: 200 with fewer hits; with it, 401 | A DEBUG line on the `wardowl` logger, or the 401's INFO line |
+| A token's subject is in more groups than the HTTP service's `max_groups` | Answers 401, the same as for a refused token, and searches nothing | An INFO line on the `wardowl` logger with the bound, never the groups |
 | The shared cache (Redis) is down or slow | Treats it as a miss and asks the permission service | A warning on the `wardowl` logger; higher `wardowl.authorize.duration` |
 | A shared-cache entry is unsigned, tampered with or copied under another key | Ignores it (with `signing_key`) | Nothing: it is a miss |
 | `invalidate()` cannot reach Redis | Raises, because the caller asked for a revocation now | The exception at the caller |
