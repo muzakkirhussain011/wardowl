@@ -207,11 +207,20 @@ class CassandraBackend:
             write=True,
         )
 
-    def delete(self, ids: Iterable[str]) -> None:
-        """Remove chunks by id. Ids not stored are ignored."""
-        self._run(f"DELETE FROM {self.name} WHERE id = ?", [(i,) for i in sorted(set(ids))], write=True)
+    def delete(self, ids: Iterable[str]) -> frozenset[str]:
+        """Remove chunks by id. Ids not stored are ignored.
 
-    def set_metadata(self, metadata: Mapping[str, Mapping[str, Any]]) -> None:
+        Returns the ids that were stored, as a lookup just before the delete finds them; none of
+        them is stored once the delete has run. A plain delete reports nothing, so a chunk that
+        another writer deletes between the lookup and the delete is among them too.
+        """
+        selected = sorted(set(ids))
+        found = self._run(f"SELECT id FROM {self.name} WHERE id = ?", [(i,) for i in selected])
+        stored = [i for i, result in zip(selected, found, strict=True) if result.one() is not None]
+        self._run(f"DELETE FROM {self.name} WHERE id = ?", [(i,) for i in selected], write=True)
+        return frozenset(stored)
+
+    def set_metadata(self, metadata: Mapping[str, Mapping[str, Any]]) -> frozenset[str]:
         """Replace the metadata of stored chunks, keeping their text and vectors. Ids not stored are ignored.
 
         The ids are looked up first, and only the rows found are updated, with plain writes like those
@@ -221,11 +230,22 @@ class CassandraBackend:
         permission back. A chunk deleted between the lookup and the update is left as a row holding
         only its metadata and terms, with no text and no vector, which an ANN search never returns;
         a later `add` of that id replaces it.
+
+        Returns the ids whose rows, read back after the update, hold the new metadata and still
+        have their text. A plain write reports nothing, and a row left without text by a delete
+        between the lookup and the update is not counted.
         """
         rows = [(json.dumps(dict(new)), set(terms(i, new)), i) for i, new in metadata.items()]
         found = self._run(f"SELECT id FROM {self.name} WHERE id = ?", [(i,) for _, _, i in rows])
         stored = [row for row, result in zip(rows, found, strict=True) if result.one() is not None]
         self._run(f"UPDATE {self.name} SET metadata = ?, wardowl_terms = ? WHERE id = ?", stored, write=True)
+        after = self._run(f"SELECT metadata, text FROM {self.name} WHERE id = ?", [(i,) for _, _, i in stored])
+        changed: list[str] = []
+        for (encoded, _, doc_id), result in zip(stored, after, strict=True):
+            row = result.one()
+            if row is not None and _field(row, "text") is not None and _field(row, "metadata") == encoded:
+                changed.append(doc_id)
+        return frozenset(changed)
 
     def search(self, query: str | Query, k: int, filter: Filter | None = None) -> list[Hit]:
         if k < 1:

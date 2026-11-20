@@ -55,17 +55,26 @@ class InMemoryBackend:
         for doc in documents:
             self._docs[doc.id] = Document(doc.id, doc.text, _copy(doc.metadata))
 
-    def set_metadata(self, metadata: Mapping[str, Mapping[str, Any]]) -> None:
-        """Replace the metadata of stored chunks, keeping their text. Ids not stored are ignored."""
+    def set_metadata(self, metadata: Mapping[str, Mapping[str, Any]]) -> frozenset[str]:
+        """Replace the metadata of stored chunks, keeping their text. Ids not stored are ignored.
+
+        Returns the ids whose metadata it replaced: those stored, never one that is not.
+        """
+        changed: set[str] = set()
         for doc_id, new in metadata.items():
             old = self._docs.get(doc_id)
             if old is not None:
                 self._docs[doc_id] = Document(doc_id, old.text, _copy(new))
+                changed.add(doc_id)
+        return frozenset(changed)
 
-    def delete(self, ids: Iterable[str]) -> None:
-        """Remove chunks by id. Ids not stored are ignored."""
+    def delete(self, ids: Iterable[str]) -> frozenset[str]:
+        """Remove chunks by id. Ids not stored are ignored. Returns the ids it removed."""
+        removed: set[str] = set()
         for doc_id in ids:
-            self._docs.pop(doc_id, None)
+            if self._docs.pop(doc_id, None) is not None:
+                removed.add(doc_id)
+        return frozenset(removed)
 
     def __len__(self) -> int:
         return len(self._docs)

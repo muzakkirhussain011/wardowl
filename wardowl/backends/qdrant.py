@@ -35,6 +35,7 @@ there (`bm25_terms`), and Qdrant applies the inverse document frequency at searc
 from __future__ import annotations
 
 import asyncio
+import json
 import re
 import uuid
 import zlib
@@ -166,6 +167,38 @@ def _held(stored: Iterable[Any]) -> set[str]:
         if own:
             held.add(doc_id)
     return held
+
+
+def _candidates(ids: Sequence[str]) -> list[str]:
+    """The point ids `_addressed` can select for these document ids: the point `add` writes each
+    to, and the id itself when it is a UUID in canonical form."""
+    points = [point_id(i) for i in ids]
+    points += [i for i in ids if canonical_uuid(i)]
+    return list(dict.fromkeys(points))
+
+
+def _holders(points: Iterable[Any], ids: Iterable[str]) -> dict[str, list[Any]]:
+    """For each of `ids`, the points among `points` that `_addressed` selects for it: the point
+    `add` writes it to, when its `wardowl_id` is that id, and the point whose UUID it is, when that
+    point's `wardowl_id` is missing, null or `[]` (Qdrant's `IsEmpty`)."""
+    wanted = set(ids)
+    holders: dict[str, list[Any]] = {}
+    for p in points:
+        held = (p.payload or {}).get(ID_KEY)
+        if isinstance(held, str):
+            if held in wanted and _at(p, held):
+                holders.setdefault(held, []).append(p)
+        elif held is None or held == []:
+            uid = str(p.id)
+            if uid in wanted and canonical_uuid(uid):
+                holders.setdefault(uid, []).append(p)
+    return holders
+
+
+def _same(stored: Any, written: Mapping[str, Any]) -> bool:
+    """Whether a point's stored metadata is the metadata written, compared as JSON: a tuple is
+    stored as a list, and keys come back in any order."""
+    return json.dumps(stored, sort_keys=True, default=str) == json.dumps(dict(written), sort_keys=True, default=str)
 
 
 def _check_collection(client: Any, name: str) -> None:
@@ -413,38 +446,64 @@ class QdrantBackend:
         for start in range(0, len(points), _BATCH):
             self.client.upsert(self.collection, points=points[start : start + _BATCH], wait=True)
 
-    def set_metadata(self, metadata: Mapping[str, Mapping[str, Any]]) -> None:
+    def set_metadata(self, metadata: Mapping[str, Mapping[str, Any]]) -> frozenset[str]:
         """Replace the metadata of stored chunks, keeping their text and vectors. Ids not stored are ignored.
 
         Each change sets only the metadata key of the payload (Qdrant replaces a top-level key's
         whole value, so no key of the old metadata survives), on the points that hold that id. It
         never writes the text back, and a point deleted meanwhile is not recreated.
+
+        Returns the ids whose points hold the new metadata when the call reads them back after
+        each batch of changes, every point that holds the id included: Qdrant reports that an
+        update was applied, not which points it changed.
         """
         from qdrant_client import models
 
-        operations: list[Any] = [
-            models.SetPayloadOperation(
-                set_payload=models.SetPayload(payload={self.metadata_key: dict(new)}, filter=_addressed([doc_id]))
-            )
-            for doc_id, new in metadata.items()
-        ]
-        if operations:
+        items = list(metadata.items())
+        if items:
             self._check_layout()
-        for start in range(0, len(operations), _BATCH):
-            self.client.batch_update_points(
-                self.collection, update_operations=operations[start : start + _BATCH], wait=True
-            )
+        changed: set[str] = set()
+        for start in range(0, len(items), _BATCH):
+            batch = items[start : start + _BATCH]
+            operations: list[Any] = [
+                models.SetPayloadOperation(
+                    set_payload=models.SetPayload(payload={self.metadata_key: dict(new)}, filter=_addressed([doc_id]))
+                )
+                for doc_id, new in batch
+            ]
+            self.client.batch_update_points(self.collection, update_operations=operations, wait=True)
+            holders = self._read_holders([doc_id for doc_id, _ in batch], [ID_KEY, self.metadata_key])
+            for doc_id, new in batch:
+                points = holders.get(doc_id, [])
+                if points and all(_same((p.payload or {}).get(self.metadata_key), new) for p in points):
+                    changed.add(doc_id)
+        return frozenset(changed)
 
-    def delete(self, ids: Iterable[str]) -> None:
-        """Remove chunks by id: the points holding each id, and no other. Ids not stored are ignored."""
+    def _read_holders(self, ids: Sequence[str], payload: list[str]) -> dict[str, list[Any]]:
+        """The points that hold each of `ids`, read with these payload keys in one `retrieve`."""
+        stored = self.client.retrieve(self.collection, ids=_candidates(ids), with_payload=payload, with_vectors=False)
+        return _holders(stored, ids)
+
+    def delete(self, ids: Iterable[str]) -> frozenset[str]:
+        """Remove chunks by id: the points holding each id, and no other. Ids not stored are ignored.
+
+        Returns the ids that a point held when the call read them just before each batch's
+        delete; none of those points is stored once the delete has run. Qdrant's delete reports
+        no points, so a point that another writer deletes between that read and the delete is
+        counted too.
+        """
         from qdrant_client import models
 
         selected = list(dict.fromkeys(ids))
         if selected:
             self._check_layout()
+        removed: set[str] = set()
         for start in range(0, len(selected), _BATCH):
-            chosen = models.FilterSelector(filter=_addressed(selected[start : start + _BATCH]))
+            batch = selected[start : start + _BATCH]
+            removed.update(self._read_holders(batch, [ID_KEY]))
+            chosen = models.FilterSelector(filter=_addressed(batch))
             self.client.delete(self.collection, points_selector=chosen, wait=True)
+        return frozenset(removed)
 
     # ---- searching ---------------------------------------------------------------------------
 

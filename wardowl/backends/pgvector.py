@@ -146,6 +146,16 @@ def _vector(values: Sequence[float]) -> str:
     return "[" + ",".join(f"{v:.8g}" for v in floats) + "]"
 
 
+def _returned(cur: Any) -> list[tuple[Any, ...]]:
+    """Every row returned by the statements of `executemany(..., returning=True)`: psycopg keeps
+    each statement's rows as a result set of its own, reached with `nextset()`."""
+    returned: list[tuple[Any, ...]] = []
+    while True:
+        returned += cur.fetchall()
+        if not cur.nextset():
+            return returned
+
+
 _CONFIG = re.compile(r"[a-z_][a-z0-9_]*")
 # A PostgreSQL memory setting with its unit, as `work_mem` takes it: "64MB", "1.5GB", "65536kB".
 _MEMORY = re.compile(r"\d+(\.\d+)?\s*(B|kB|MB|GB|TB)")
@@ -384,8 +394,11 @@ class PgVectorBackend:
         with self.pool.connection() as conn, conn.cursor() as cur:
             cur.executemany(statement, rows)
 
-    def set_metadata(self, metadata: Mapping[str, Mapping[str, Any]], *, revision: int | None = None) -> None:
+    def set_metadata(self, metadata: Mapping[str, Mapping[str, Any]], *, revision: int | None = None) -> frozenset[str]:
         """Replace the metadata of stored chunks, keeping their text and vectors. Ids not stored are ignored.
+
+        Returns the ids whose rows it updated, as `UPDATE ... RETURNING id` names them: an id
+        not stored, or deleted before the update reached its row, is not among them.
 
         With `revision`, a chunk stored with a newer revision keeps its metadata: the call then
         raises `StaleRevision` and writes nothing, as `add` does. The chunks it writes store
@@ -393,7 +406,7 @@ class PgVectorBackend:
         """
         rows = [(_metadata_json(doc_id, m), doc_id) for doc_id, m in metadata.items()]
         if not rows:
-            return
+            return frozenset()
 
         from psycopg import sql
 
@@ -412,12 +425,15 @@ class PgVectorBackend:
             def newer(returned: list[tuple[Any, ...]]) -> list[str]:
                 return [row[0] for row in returned if row[1]]
 
-            self._write_revised(revised, params, newer, number)
-            return
+            # Committed only when no row was newer, so every row returned was written.
+            return frozenset(row[0] for row in self._write_revised(revised, params, newer, number))
 
-        statement = sql.SQL("UPDATE {t} SET metadata = %s::jsonb WHERE id = %s").format(t=sql.Identifier(self.table))
+        statement = sql.SQL("UPDATE {t} SET metadata = %s::jsonb WHERE id = %s RETURNING id").format(
+            t=sql.Identifier(self.table)
+        )
         with self.pool.connection() as conn, conn.cursor() as cur:
-            cur.executemany(statement, rows)
+            cur.executemany(statement, rows, returning=True)
+            return frozenset(row[0] for row in _returned(cur))
 
     def _write_revised(
         self,
@@ -425,34 +441,34 @@ class PgVectorBackend:
         params: list[dict[str, Any]],
         newer: Callable[[list[tuple[Any, ...]]], list[str]],
         revision: int,
-    ) -> None:
+    ) -> list[tuple[Any, ...]]:
         """Run `statement` once per chunk in one transaction, and commit only if `newer`, given
-        every row the statements returned, names no chunk stored with a newer revision.
+        every row the statements returned, names no chunk stored with a newer revision. Returns
+        those rows.
 
         Chunks are written in the order of their ids, so two calls that write the same chunks lock
         them in the same order rather than deadlock. The sort is stable: a repeated id is written
         in the order given, and the last one wins, as without a revision.
         """
         if not params:
-            return
+            return []
         ordered = sorted(params, key=lambda p: str(p["id"]))
-        returned: list[tuple[Any, ...]] = []
         with self.pool.connection() as conn, conn.transaction(), conn.cursor() as cur:
             cur.executemany(statement, ordered, returning=True)
-            while True:
-                returned += cur.fetchall()
-                if not cur.nextset():
-                    break
+            returned = _returned(cur)
             refused = newer(returned)
             if refused:
                 raise StaleRevision(refused, revision)  # inside the transaction, which rolls back
+        return returned
 
-    def delete(self, ids: Iterable[str]) -> None:
+    def delete(self, ids: Iterable[str]) -> frozenset[str]:
+        """Remove chunks by id. Ids not stored are ignored. Returns the ids of the rows it deleted,
+        as `DELETE ... RETURNING id` names them."""
         from psycopg import sql
 
-        statement = sql.SQL("DELETE FROM {t} WHERE id = ANY(%s)").format(t=sql.Identifier(self.table))
+        statement = sql.SQL("DELETE FROM {t} WHERE id = ANY(%s) RETURNING id").format(t=sql.Identifier(self.table))
         with self.pool.connection() as conn:
-            conn.execute(statement, [list(ids)])
+            return frozenset(row[0] for row in conn.execute(statement, [list(ids)]).fetchall())
 
     # ---- searching ---------------------------------------------------------------------------
 

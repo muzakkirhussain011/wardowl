@@ -22,10 +22,13 @@ either would address a list key or the JSON copy rather than a field. Values oth
 and integers (booleans, floats, nested objects) are kept in the JSON copy only, which matches the
 reference semantics: no filter ever matches them.
 
-A record without that copy, or whose copy is not JSON text for an object, carries no permissions,
-so the re-check denies it. needtoknow 1.x kept the copy under `needtoknow_metadata`: a search that
-returns a record holding that key and no `wardowl_metadata` raises `ValueError`, naming the upgrade
-step, instead of denying every such record.
+A record without that copy, or whose copy is not JSON text for an object, carries no permissions.
+A search with a filter applies the filter to each hit's copy (see `ChromaBackend.search`), so such
+a record is dropped there and never reaches the retriever, which does not count it; a search
+without one returns it with empty metadata, and the retriever's re-check denies it. needtoknow 1.x
+kept the copy under `needtoknow_metadata`: a search that returns a record holding that key and no
+`wardowl_metadata` raises `ValueError`, naming the upgrade step, instead of reading every such
+record as carrying no permissions.
 
 How large a filter Chroma is sent, and why
 ------------------------------------------
@@ -269,8 +272,9 @@ def _encode_metadata(doc_id: str, metadata: Mapping[str, Any]) -> dict[str, Any]
 
 
 def _decode_metadata(stored: Mapping[str, Any] | None) -> dict[str, Any]:
-    # Records written by something other than wardowl have no trusted copy: treat them as
-    # carrying no permissions, so the re-check denies them. So does a copy that is not a JSON object.
+    # Records written by something other than wardowl have no trusted copy: treat them as carrying
+    # no permissions, as a copy that is not a JSON object does. Under a filter, `search` then drops
+    # them; without one, the retriever's re-check denies them.
     if stored and JSON_KEY not in stored and isinstance(stored.get(_LEGACY_JSON_KEY), str):
         raise ValueError(
             f"Chroma record written by needtoknow 1.x (it holds {_LEGACY_JSON_KEY!r} and no {JSON_KEY!r}), "
@@ -378,7 +382,7 @@ class ChromaBackend:
         self.collection.delete(ids=records["ids"])
         self.collection.add(**records)
 
-    def set_metadata(self, metadata: Mapping[str, Mapping[str, Any]]) -> None:
+    def set_metadata(self, metadata: Mapping[str, Mapping[str, Any]]) -> frozenset[str]:
         """Replace the metadata of stored chunks, keeping their text and vectors. Ids not stored are ignored.
 
         An update, which Chroma applies to stored records only: a chunk deleted meanwhile is not
@@ -387,9 +391,14 @@ class ChromaBackend:
         The read and the update are two calls, so an `add` between them can leave list keys the
         update does not know of; `search` checks each hit's JSON copy against the filter, so such a
         key never makes a chunk match.
+
+        Returns the ids whose records hold the new metadata when the call reads them back after
+        the update. Chroma's update logs an id it does not find and returns nothing, so a chunk
+        deleted between the first read and the update is told apart only by that second read.
         """
         encoded = {doc_id: _encode_metadata(doc_id, new) for doc_id, new in metadata.items()}
         names = list(encoded)
+        changed: set[str] = set()
         for start in self._batches(len(names)):
             stored = self.collection.get(ids=names[start : start + self.batch_size], include=["metadatas"])
             found = list(stored["ids"])
@@ -400,11 +409,26 @@ class ChromaBackend:
                 new = encoded[doc_id]
                 updates.append({**{key: None for key in old or {} if key not in new}, **new})
             self.collection.update(ids=found, metadatas=updates)
+            after = self.collection.get(ids=found, include=["metadatas"])
+            for doc_id, now in zip(after["ids"], after["metadatas"], strict=True):
+                if (now or {}).get(JSON_KEY) == encoded[doc_id][JSON_KEY]:
+                    changed.add(doc_id)
+        return frozenset(changed)
 
-    def delete(self, ids: Iterable[str]) -> None:
-        chosen = list(ids)
+    def delete(self, ids: Iterable[str]) -> frozenset[str]:
+        """Remove chunks by id. Ids not stored are ignored.
+
+        Returns the ids that were stored, as a read just before each batch's delete finds them;
+        none of them is stored once the delete has run. Chroma's delete reports no ids, so a chunk
+        that another writer deletes between that read and the delete is among them too.
+        """
+        chosen = list(dict.fromkeys(ids))
+        removed: set[str] = set()
         for start in self._batches(len(chosen)):
-            self.collection.delete(ids=chosen[start : start + self.batch_size])
+            batch = chosen[start : start + self.batch_size]
+            removed.update(self.collection.get(ids=batch, include=[])["ids"])
+            self.collection.delete(ids=batch)
+        return frozenset(removed)
 
     def search(self, query: str | Query, k: int, filter: Filter | None = None) -> list[Hit]:
         q = Query.of(query)

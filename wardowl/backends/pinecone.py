@@ -212,20 +212,29 @@ class PineconeBackend:
         self._each(batches, lambda batch: self._post("/vectors/upsert", {"vectors": batch}, "upsert"))
         self._settle(expected)
 
-    def delete(self, ids: Iterable[str]) -> None:
-        """Remove chunks by id. Ids not stored are ignored, and so is a record that holds another id."""
-        unique = self._unclaimed(sorted(set(ids)))
+    def delete(self, ids: Iterable[str]) -> frozenset[str]:
+        """Remove chunks by id. Ids not stored are ignored, and so is a record that holds another id.
+
+        Returns the ids whose records the fetch before the delete showed holding them; none of
+        them is stored once the delete has run. Pinecone's delete reports no ids, so a record that
+        another writer deletes between the fetch and the delete is among them too, and a record
+        written moments before may not show in the fetch yet, and then is not.
+        """
+        unique, held = self._unclaimed(sorted(set(ids)))
         for i in range(0, len(unique), 1000):
             self._post("/vectors/delete", {"ids": [record_id(d) for d in unique[i : i + 1000]]}, "delete")
         self._settle(dict.fromkeys(unique))
+        return frozenset(held)
 
-    def _unclaimed(self, ids: Sequence[str]) -> list[str]:
-        """The ids whose record holds no other chunk id, as a fetch of the records shows them.
+    def _unclaimed(self, ids: Sequence[str]) -> tuple[list[str], set[str]]:
+        """The ids whose record holds no other chunk id, as a fetch of the records shows them, and
+        the ids whose record it shows holding that id.
 
         Record ids are never shared by two chunk ids, so a record holding another id would have been
         written by something else; a record not yet visible to the fetch is no evidence either way.
         """
         claimed: set[str] = set()
+        held: set[str] = set()
         for batch in _fetch_batches(ids):
             params = [("ids", record_id(i)) for i in batch]
             if self.namespace:
@@ -236,28 +245,40 @@ class PineconeBackend:
             records = response.json().get("vectors") or {}
             for doc_id in batch:
                 record = records.get(record_id(doc_id))
-                if isinstance(record, Mapping) and (record.get("metadata") or {}).get(ID_FIELD) != doc_id:
+                if not isinstance(record, Mapping):
+                    continue
+                if (record.get("metadata") or {}).get(ID_FIELD) == doc_id:
+                    held.add(doc_id)
+                else:
                     claimed.add(doc_id)
-        return [i for i in ids if i not in claimed]
+        return [i for i in ids if i not in claimed], held
 
     def clear(self) -> None:
         """Remove every chunk in the backend's namespace."""
         self._post("/vectors/delete", {"deleteAll": True}, "delete", frozenset({200, 404}))  # 404: already empty
 
-    def set_metadata(self, metadata: Mapping[str, Mapping[str, Any]]) -> None:
+    def set_metadata(self, metadata: Mapping[str, Mapping[str, Any]]) -> frozenset[str] | None:
         """Replace the metadata of stored chunks, keeping their text and vectors. Ids not stored are
-        ignored, and so is a record that holds another id."""
+        ignored, and so is a record that holds another id.
+
+        With `wait`, returns the ids whose records a search shows holding the new metadata when the
+        wait ends; an id not stored is never shown, so it is not among them. With `wait=None`,
+        nothing is read back, and it returns None: Pinecone's update reports no ids.
+        """
         changes: dict[str, dict[str, Any]] = {
             doc_id: {METADATA_FIELD: json.dumps(dict(new)), TERMS_FIELD: [_hex(t) for t in terms(doc_id, new)]}
             for doc_id, new in metadata.items()
         }
         updates: list[dict[str, Any]] = []
         expected: dict[str, str | None] = {}
-        for doc_id in self._unclaimed(list(changes)):
+        for doc_id in self._unclaimed(list(changes))[0]:
             updates.append({"id": record_id(doc_id), "setMetadata": changes[doc_id]})
             expected[doc_id] = changes[doc_id][METADATA_FIELD]
         self._each(updates, lambda u: self._post("/vectors/update", u, "update"))
-        self._settle(expected, only_stored=True)
+        seen = self._settle(expected, only_stored=True)
+        if seen is None:
+            return None
+        return frozenset(doc_id for doc_id, want in expected.items() if seen.get(doc_id) == want)
 
     def _query(self, vector: Sequence[float], k: int, where: dict[str, Any] | None) -> list[dict[str, Any]]:
         body: dict[str, Any] = {"vector": [float(x) for x in vector], "topK": k, "includeMetadata": True}
@@ -268,10 +289,13 @@ class PineconeBackend:
             raise RuntimeError("Pinecone query failed: the answer has no matches")
         return matches
 
-    def _settle(self, expected: Mapping[str, str | None], *, only_stored: bool = False) -> None:
-        """With `wait`, poll until a search shows each chunk with its metadata (None: deleted)."""
-        if self.wait is None or not expected:
-            return
+    def _settle(self, expected: Mapping[str, str | None], *, only_stored: bool = False) -> dict[Any, Any] | None:
+        """With `wait`, poll until a search shows each chunk with its metadata (None: deleted), and
+        return the metadata the last search showed for each id it found. None without `wait`."""
+        if self.wait is None:
+            return None
+        if not expected:
+            return {}
         ids = list(expected)
         deadline = time.monotonic() + self.wait
         pause = 0.25
@@ -284,7 +308,7 @@ class PineconeBackend:
                     meta = match.get("metadata") or {}
                     seen[meta.get(ID_FIELD)] = meta.get(METADATA_FIELD)
             if all(_settled(seen, doc_id, want, only_stored) for doc_id, want in expected.items()):
-                return
+                return seen
             if time.monotonic() >= deadline:
                 raise TimeoutError(f"Pinecone did not show the writes to a search within {self.wait} seconds")
             time.sleep(pause)

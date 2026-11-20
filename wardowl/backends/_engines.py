@@ -167,9 +167,14 @@ class EngineBackend:
                 operations += [{"index": {"_index": self.index, "_id": doc.id}}, source]
             _raise_for_items(self._bulk(self.client, operations), allow_not_found=False)
 
-    def set_metadata(self, metadata: Mapping[str, Mapping[str, Any]]) -> None:
-        """Replace the metadata of stored chunks, keeping their text and vectors. Ids not stored are ignored."""
+    def set_metadata(self, metadata: Mapping[str, Mapping[str, Any]]) -> frozenset[str]:
+        """Replace the metadata of stored chunks, keeping their text and vectors. Ids not stored are ignored.
+
+        Returns the ids whose documents it updated: the bulk response reports each update, with
+        status 404 (`document_missing_exception`) for a document that is not stored.
+        """
         items = list(metadata.items())
+        changed: set[str] = set()
         for start in range(0, len(items), _BATCH):
             operations: list[dict[str, Any]] = []
             for doc_id, new in items[start : start + _BATCH]:
@@ -179,12 +184,21 @@ class EngineBackend:
                     # A script, because a partial `doc` update would merge the old metadata's keys into the new.
                     {"script": {"source": _REPLACE_METADATA, "params": params}},
                 ]
-            _raise_for_items(self._bulk(self.client, operations), allow_not_found=True)
+            response = self._bulk(self.client, operations)
+            _raise_for_items(response, allow_not_found=True)
+            changed.update(_done(response, "update", ("updated", "noop")))
+        return frozenset(changed)
 
-    def delete(self, ids: Iterable[str]) -> None:
+    def delete(self, ids: Iterable[str]) -> frozenset[str]:
+        """Remove chunks by id. Ids not stored are ignored. Returns the ids whose documents it
+        deleted: the bulk response reports each delete, with the result `not_found` for a document
+        that is not stored."""
         operations = [{"delete": {"_index": self.index, "_id": i}} for i in ids]
-        if operations:
-            _raise_for_items(self._bulk(self.client, operations), allow_not_found=True)
+        if not operations:
+            return frozenset()
+        response = self._bulk(self.client, operations)
+        _raise_for_items(response, allow_not_found=True)
+        return frozenset(_done(response, "delete", ("deleted",)))
 
     # Searching --------------------------------------------------------------------------------
 
@@ -254,6 +268,21 @@ def _checked_k(k: int) -> int:
     if k > _MAX_K:
         raise ValueError(f"k={k} is more than one search returns ({_MAX_K:,}); ask for at most {_MAX_K:,}")
     return k
+
+
+def _done(response: Any, action: str, results: tuple[str, ...]) -> list[str]:
+    """The ids of the bulk response's `action` items that succeeded with one of `results`.
+
+    Each item reports its own `status` and `result`: an update of a missing document fails with
+    status 404, and a delete of one succeeds with status 404 and the result `not_found`, which
+    leaves `errors` false.
+    """
+    done = []
+    for item in response.get("items", []):
+        outcome = item.get(action)
+        if isinstance(outcome, Mapping) and 200 <= outcome.get("status", 0) < 300 and outcome.get("result") in results:
+            done.append(str(outcome["_id"]))
+    return done
 
 
 def _raise_for_items(response: Any, *, allow_not_found: bool) -> None:

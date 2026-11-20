@@ -238,38 +238,58 @@ class MilvusBackend:
         for start in range(0, len(rows), _BATCH):
             self.client.upsert(collection_name=self.collection, data=rows[start : start + _BATCH])
 
-    def set_metadata(self, metadata: Mapping[str, Mapping[str, Any]]) -> None:
+    def set_metadata(self, metadata: Mapping[str, Mapping[str, Any]]) -> frozenset[str]:
         """Replace the metadata of stored chunks, keeping their text and vectors. Ids not stored are ignored.
 
         The rows found are changed with a partial update (Milvus 2.6.2 or newer) of the metadata and
         terms alone, which replaces the value of each field it names: the text and vector are never
         written back. A row deleted between the lookup and the update is not recreated, since Milvus
         refuses to insert a row without its vector; the call then raises, and can be repeated.
+
+        Returns the ids whose rows it updated: those the lookup found, all of which the partial
+        update then wrote, since it raises otherwise.
         """
         changes: dict[str, dict[str, Any]] = {
             i: {ID_FIELD: i, self.metadata_field: dict(m), TERMS_FIELD: terms(i, m)} for i, m in metadata.items()
         }
         ids = list(changes)
+        changed: set[str] = set()
         for start in range(0, len(ids), _BATCH):
-            stored = self.client.query(
-                collection_name=self.collection,
-                filter=_BY_ID,
-                filter_params={"ids": ids[start : start + _BATCH]},
-                output_fields=[ID_FIELD],
-                consistency_level="Strong",  # rows written just before must be found
-            )
-            rows = [changes[r[ID_FIELD]] for r in stored]
-            if rows:
+            found = self._stored(ids[start : start + _BATCH])
+            if found:
+                rows = [changes[i] for i in found]
                 self.client.upsert(collection_name=self.collection, data=rows, partial_update=True)
+                changed.update(found)
+        return frozenset(changed)
 
-    def delete(self, ids: Iterable[str]) -> None:
+    def _stored(self, ids: list[str]) -> list[str]:
+        """The ids among `ids` that a strongly consistent query finds, each once."""
+        stored = self.client.query(
+            collection_name=self.collection,
+            filter=_BY_ID,
+            filter_params={"ids": ids},
+            output_fields=[ID_FIELD],
+            consistency_level="Strong",  # rows written just before must be found
+        )
+        return list(dict.fromkeys(r[ID_FIELD] for r in stored))
+
+    def delete(self, ids: Iterable[str]) -> frozenset[str]:
+        """Remove chunks by id. Ids not stored are ignored.
+
+        Returns the ids that were stored, as a strongly consistent query just before the delete
+        finds them; none of them is stored once the delete has run. Milvus's delete reports no
+        ids, so a chunk that another writer deletes between that query and the delete is among
+        them too.
+        """
         # A filter with the ids as a parameter: pymilvus's delete(ids=...) writes string ids into the
         # expression between quotes, so an id containing a quote would change which rows it deletes.
         selected = list(dict.fromkeys(ids))
+        removed: set[str] = set()
         for start in range(0, len(selected), _BATCH):
-            self.client.delete(
-                collection_name=self.collection, filter=_BY_ID, filter_params={"ids": selected[start : start + _BATCH]}
-            )
+            batch = selected[start : start + _BATCH]
+            removed.update(self._stored(batch))
+            self.client.delete(collection_name=self.collection, filter=_BY_ID, filter_params={"ids": batch})
+        return frozenset(removed)
 
     # ---- searching ---------------------------------------------------------------------------
 

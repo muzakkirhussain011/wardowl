@@ -52,8 +52,11 @@ _MAX_WORDS = 64  # a keyword query longer than this keeps its first 64 distinct 
 # The longest TAG value the Query Engine indexes whole, in bytes: it cuts longer ones short
 # (MAX_TAG_LEN in RediSearch's src/tag_index.c), and a query that names the whole value then misses it.
 _MAX_TAG = 4096
+# Answers 1 when the hash was stored and written, 0 when it was not stored. A script runs atomically,
+# so nothing lands between the check and the write.
 _SET_IF_STORED = (
-    "if redis.call('EXISTS', KEYS[1]) == 1 then redis.call('HSET', KEYS[1], ARGV[1], ARGV[2], ARGV[3], ARGV[4]) end"
+    "if redis.call('EXISTS', KEYS[1]) == 1 then"
+    " redis.call('HSET', KEYS[1], ARGV[1], ARGV[2], ARGV[3], ARGV[4]) return 1 end return 0"
 )
 # What the server does with a search that runs out of time: Redis 8's setting, then Redis Stack's.
 _POLICY_COMMANDS = (("CONFIG", "GET", "search-on-timeout"), ("FT.CONFIG", "GET", "ON_TIMEOUT"))
@@ -278,22 +281,39 @@ class RedisBackend:
                 pipe.hset(key, mapping=fields)
             pipe.execute()
 
-    def set_metadata(self, metadata: Mapping[str, Mapping[str, Any]]) -> None:
-        """Replace the metadata of stored chunks, keeping their text and vectors. Ids not stored are ignored."""
+    def set_metadata(self, metadata: Mapping[str, Mapping[str, Any]]) -> frozenset[str]:
+        """Replace the metadata of stored chunks, keeping their text and vectors. Ids not stored are ignored.
+
+        Returns the ids whose hashes it wrote: each chunk's script answers whether its hash was
+        stored, and checks and writes in one atomic step.
+        """
         items = list(metadata.items())
+        changed: set[str] = set()
         for start in range(0, len(items), _BATCH):
+            batch = items[start : start + _BATCH]
             pipe = self.client.pipeline(transaction=False)
-            for doc_id, new in items[start : start + _BATCH]:
+            for doc_id, new in batch:
                 encoded = json.dumps(dict(new), sort_keys=True)
                 hexed = ",".join(_hex(t) for t in terms(doc_id, new))
                 # One script per chunk, so a hash deleted meanwhile is not recreated without its vector.
                 pipe.eval(_SET_IF_STORED, 1, self.prefix + doc_id, self.metadata_field, encoded, TERMS_FIELD, hexed)
-            pipe.execute()
+            answers = pipe.execute()
+            changed.update(doc_id for (doc_id, _), answer in zip(batch, answers, strict=True) if answer == 1)
+        return frozenset(changed)
 
-    def delete(self, ids: Iterable[str]) -> None:
-        keys = [self.prefix + i for i in dict.fromkeys(ids)]
-        for start in range(0, len(keys), _BATCH):
-            self.client.delete(*keys[start : start + _BATCH])
+    def delete(self, ids: Iterable[str]) -> frozenset[str]:
+        """Remove chunks by id. Ids not stored are ignored. Returns the ids whose hashes it deleted:
+        one `DEL` per key, each answering how many keys it removed."""
+        selected = list(dict.fromkeys(ids))
+        removed: set[str] = set()
+        for start in range(0, len(selected), _BATCH):
+            batch = selected[start : start + _BATCH]
+            pipe = self.client.pipeline(transaction=False)
+            for doc_id in batch:
+                pipe.delete(self.prefix + doc_id)
+            answers = pipe.execute()
+            removed.update(doc_id for doc_id, answer in zip(batch, answers, strict=True) if answer == 1)
+        return frozenset(removed)
 
     # ---- searching ---------------------------------------------------------------------------
 
