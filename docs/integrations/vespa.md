@@ -79,6 +79,15 @@ acme = VespaBackend("http://localhost:8080", embed, schema="acme")
   return its partial results as complete.
 - **Writes** go `concurrency` requests at a time (8 by default). A write that fails raises; repeated
   ids in one `add` keep the last.
+- **What writes return:** Vespa answers 200 to an update or a remove of a document that is not
+  stored, as to one that is, unless the request carries a test-and-set condition: then it answers
+  412 ([document/v1 status codes](https://docs.vespa.ai/en/reference/document-v1-api-reference.html)).
+  So `set_metadata` and `delete` send `condition=<schema>`, a
+  [document selection](https://docs.vespa.ai/en/reference/document-select-language.html) that every
+  document of the schema meets, and return the ids Vespa answered with 200: those it updated or
+  removed ([Checking that a change reached the chunks](../operations.md#checking-that-a-change-reached-the-chunks)).
+  Vespa evaluates the condition against the stored document
+  ([conditional writes](https://docs.vespa.ai/en/writing/document-v1-api-guide.html)).
 - **Ids:** a chunk id goes into the `/document/v1` path percent-encoded, `/` included. The ids `.`
   and `..` are refused with `ValueError` by `add`, `set_metadata` and `delete`, before any request:
   HTTP clients drop such a path segment, which would send the request to another path, and Vespa

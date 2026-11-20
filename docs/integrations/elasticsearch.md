@@ -101,6 +101,17 @@ itself is stored with `enabled: false`: kept in `_source` and returned exactly a
 retriever's re-check sees the true permissions, but never indexed, so arbitrary metadata cannot add
 mappings to the index. The index uses `dynamic: false` for the same reason.
 
+## What writes return
+
+`set_metadata` and `delete` send bulk requests, whose response reports each operation's status
+and result. `set_metadata` returns the ids whose update succeeded; an update of a document that is
+not stored fails with status 404 (`document_missing_exception`), which the backend ignores, as
+before. `delete` returns the ids whose delete has the result `deleted`; a delete of a document that
+is not stored succeeds with the result `not_found`. See the bulk API of
+[Elasticsearch](https://www.elastic.co/guide/en/elasticsearch/reference/8.19/docs-bulk.html) and
+[OpenSearch](https://docs.opensearch.org/latest/api-reference/document-apis/bulk/), and
+[Checking that a change reached the chunks](../operations.md#checking-that-a-change-reached-the-chunks).
+
 ## Indexes written by other tools
 
 A document without `wardowl_terms` is invisible to a pre-filtered search: its metadata may say it

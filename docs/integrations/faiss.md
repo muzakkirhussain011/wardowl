@@ -52,7 +52,8 @@ stopped early, and says `complete=False` ([Concepts](../concepts.md#what-a-resul
 
 `add` replaces chunks with the same id, and keeps only the last of an id repeated in one call, as
 if they were added in turn. `delete` removes chunks by id, and `set_metadata` changes a chunk's
-permissions without embedding it again. A lock serializes changes and searches, so one
+permissions without embedding it again. Each returns the ids it found stored, and so changed; an id
+not stored is ignored and not among them. A lock serializes changes and searches, so one
 backend can serve several threads.
 
 The backend keeps its own copy of each chunk's metadata and returns copies in search results, so

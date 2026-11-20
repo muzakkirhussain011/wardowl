@@ -48,9 +48,11 @@ So the backend stores metadata in a form that bug cannot affect:
 
 Search results are rebuilt from the JSON copy, never from the fields Chroma returns, so the
 retriever's re-check always sees the true permissions. Records written by something other than
-wardowl have no copy and are treated as having no permissions: the re-check denies them. So is a
-record whose `wardowl_metadata` is not JSON text for an object, such as one another tool or a
-manual edit wrote; before, such a record failed every search that returned it.
+wardowl have no copy and are treated as having no permissions. So is a record whose
+`wardowl_metadata` is not JSON text for an object, such as one another tool or a manual edit
+wrote; before, such a record failed every search that returned it. A search with a filter applies
+the filter to each hit's copy, so such a record is dropped there, never reaches the retriever and
+is not counted; a search without one returns it with empty metadata, and the re-check denies it.
 
 needtoknow 1.x kept the copy under `needtoknow_metadata`. Read as records without a copy, every
 chunk of such a collection would be denied, and a pre-filtered search would find nothing, with no
@@ -72,6 +74,13 @@ survives. Reading the stored fields and updating them are two calls, though, so 
 chunk between them can leave list fields the update does not know of. Every search therefore
 checks each hit's JSON copy against the filter, and drops a hit that the filter matches only
 through such a field.
+
+Chroma's update [logs](https://docs.trychroma.com/docs/collections/update-data) an id it does not
+find and ignores it, and its delete names no ids. So `set_metadata` reads the records back after
+each update and returns the ids whose JSON copy is the one it wrote: a chunk deleted between the
+first read and the update is not among them. `delete` returns the ids a read just before each
+batch's delete finds; a chunk that another writer deletes between that read and the delete is
+among them too ([Checking that a change reached the chunks](../operations.md#checking-that-a-change-reached-the-chunks)).
 
 ## One writer at a time
 

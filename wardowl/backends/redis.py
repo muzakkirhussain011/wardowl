@@ -303,12 +303,13 @@ class RedisBackend:
 
     def delete(self, ids: Iterable[str]) -> frozenset[str]:
         """Remove chunks by id. Ids not stored are ignored. Returns the ids whose hashes it deleted:
-        one `DEL` per key, each answering how many keys it removed."""
+        one `DEL` per key, each answering how many keys it removed, in one transaction (`MULTI`),
+        so each batch is deleted at once, as by one `DEL` of all its keys."""
         selected = list(dict.fromkeys(ids))
         removed: set[str] = set()
         for start in range(0, len(selected), _BATCH):
             batch = selected[start : start + _BATCH]
-            pipe = self.client.pipeline(transaction=False)
+            pipe = self.client.pipeline(transaction=True)
             for doc_id in batch:
                 pipe.delete(self.prefix + doc_id)
             answers = pipe.execute()

@@ -81,6 +81,15 @@ something else has no `wardowl_id`: it is reached by its UUID written exactly as
 report it (lower case, with hyphens). `set_metadata` sets only the payload's `metadata` key; the
 text and any other payload keys stay as they are, and a point deleted meanwhile is not recreated.
 
+Qdrant answers an update or a delete with an
+[`UpdateResult`](https://api.qdrant.tech/api-reference/points/set-payload) that says the
+operation was applied, not which points it changed. So `set_metadata` reads the points back after
+each batch of changes, in one `retrieve`, and returns the ids whose points all hold the new
+metadata, compared as JSON; `delete` reads the points before each batch's delete and returns the
+ids a point held, every one of whose points the delete then removes. A point that another writer
+deletes between that read and the delete is counted too
+([Checking that a change reached the chunks](../operations.md#checking-that-a-change-reached-the-chunks)).
+
 ```python
 from wardowl import Document
 

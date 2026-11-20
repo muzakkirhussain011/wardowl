@@ -6,6 +6,56 @@ All notable changes are recorded here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- `set_metadata` and `delete` on every built-in backend return the ids they found: `set_metadata` a
+  `frozenset` of the ids whose chunks it wrote, `delete` a `frozenset` of the ids it found stored.
+  An id that is not stored is never among them. Both returned None, so a permission sync aimed at
+  chunk ids that are no longer stored, as when the record of a document's chunks lags a re-chunk,
+  changed nothing and nothing said so (U7 in the readiness review); the 3.0 `revision=` check does
+  not catch it, since a chunk that is not stored has no revision. Compare the result with the ids
+  you sent. Each backend takes the ids from what its store reports for each write: `RETURNING id`
+  (pgvector), the bulk response's items (Elasticsearch, OpenSearch), the bulk write's matched count
+  (MongoDB), a script's answer and each `DEL`'s (Redis), the status of a conditional write (Vespa),
+  a verbose `delete_many` (Weaviate), and an update that raises for a row deleted after its lookup
+  (Weaviate, Milvus). Where the store reports nothing, the call reads back: `set_metadata` after the
+  write (Chroma, LanceDB, Qdrant, Cassandra, MongoDB when fewer documents matched than were sent,
+  Pinecone through the search its `wait` already makes), and `delete` before it (MongoDB, Milvus,
+  Chroma, LanceDB, Qdrant, Cassandra, Pinecone through the fetch it already made). A read is one
+  request for each batch of ids, or one for each id on Cassandra. Such a `delete` also names a
+  chunk that another writer deletes between its read and its delete; a `set_metadata` result never
+  names a chunk deleted before the write reached it. `PineconeBackend.set_metadata` with
+  `wait=None` reads nothing back and returns None. Code that ignores the result is unaffected; a
+  subclass that overrides either method with a `-> None` annotation now fails mypy's override
+  check. [Operations](https://muzakkirhussain011.github.io/wardowl/operations.html#checking-that-a-change-reached-the-chunks)
+  has the store-by-store table and an example, and the Google Drive page a sync that checks it.
+- The conformance kit checks what `set_metadata` returns when it is a set: exactly the ids it was
+  given that are stored, never the one that is not. When it is, the kit also deletes some documents
+  and an id that is not stored and checks the set `delete` returns the same way. A result that is
+  not a set, None included, is not checked, and `delete` is then not called, so a backend that
+  returns nothing passes as before.
+
+### Changed
+
+- `VespaBackend.set_metadata` and `delete` send each update and remove with the test-and-set
+  condition `condition=<schema>`, which every document of the schema meets. Vespa answers 200 to a
+  write to a document that is not stored, as to one that is, and 412 only when a condition is
+  given ([document/v1 status codes](https://docs.vespa.ai/en/reference/document-v1-api-reference.html)),
+  so that is how the backend learns which documents a write reached. 412 is read as "not stored",
+  as 404 still is; the documents written are the same.
+- `RedisBackend.delete` sends one `DEL` per key, in one `MULTI` transaction for each batch of 500,
+  where it sent one `DEL` with every key of the batch: each answers whether its key was there, and
+  the batch is still deleted at once.
+- `ChromaBackend.delete` deletes a repeated id once, and `MilvusBackend.set_metadata` writes a row
+  found twice by its lookup once.
+
+### Documentation
+
+- The Chroma module and page said that a record whose JSON copy cannot be read is denied by the
+  re-check. Since 2.0.0, `ChromaBackend.search` applies a filter to each hit's copy first, so under
+  a filter such a record is dropped there and never counted; only a search without a filter
+  returns it, with empty metadata, for the re-check to deny.
+
 ## [3.1.0] - 2026-11-14
 
 A minor release that adds `require_groups` and a log line for each refused token to

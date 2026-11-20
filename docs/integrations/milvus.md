@@ -71,7 +71,11 @@ reads an empty filter as "match everything".
 `set_metadata` looks the ids up and changes the rows found with a partial update of the metadata
 and terms alone: the text and vector are never written back, so a concurrent `add` keeps its text.
 A row deleted between the lookup and the update is not recreated, because Milvus refuses to insert
-a row without its vector; `set_metadata` then raises, and can be repeated.
+a row without its vector; `set_metadata` then raises, and can be repeated. It returns the ids of the
+rows it found and updated. A delete [reports](https://milvus.io/api-reference/pymilvus/v2.6.x/MilvusClient/Vector/delete.md)
+only how many entities it deleted, so `delete` returns the ids a strongly consistent query finds
+just before it; a chunk that another writer deletes between that query and the delete is among
+them too ([Checking that a change reached the chunks](../operations.md#checking-that-a-change-reached-the-chunks)).
 
 The metadata itself is stored in the JSON field and returned as written, so the retriever's
 re-check sees the true permissions. The terms field is not consulted by the re-check: if the two

@@ -76,6 +76,16 @@ MongoDB do, and raise `wardowl.backends.StaleRevision` for chunks stored with a 
 ([One writer at a time for each document](operations.md#one-writer-at-a-time-for-each-document)).
 The retriever never writes, so this is optional.
 
+Have `set_metadata` return the ids whose chunks it changed, as a `frozenset[str]`, and
+`delete(ids: Iterable[str])` the ids it found stored, the same way. Never include an id that is not
+stored, or whose chunk was deleted before your write reached it: a caller compares the result with
+the ids it sent to find a change aimed at chunk ids that are gone
+([Checking that a change reached the chunks](operations.md#checking-that-a-change-reached-the-chunks)).
+Take the ids from what the store reports for each write where it reports them (`RETURNING`, the
+items of a bulk response, a conditional write's status); where it reports only a count, or
+nothing, read the ids back after the write, as the built-in backends do. Return None if the store
+cannot tell: the conformance kit accepts it.
+
 `query` is whatever the caller passed to `retrieve`. String queries arrive as strings; a caller
 with its own vector passes a `Query`, and `Query.of(query).embedded(self.embed)` gives the vector
 to search with either way. See [Your own vectors](vectors.md#in-your-own-backend).
@@ -140,9 +150,14 @@ may miss matches, pass `exact=False`: a result may then be short, but never wron
 short results as proof that nothing else matches, and so is every search asked for with
 `exact=True`. `count`, where it returns a number, must count what `matches` selects.
 
+When `set_metadata` returns a set, `check_backend` checks that it holds exactly the ids it was given
+that are stored, and not an id that is not; it then deletes some documents and an id that is not
+stored, and checks the set `delete` returns the same way. A return value that is not a set, None
+included, is not checked, and `delete` is then not called.
+
 `check_backend` stores documents through your factory and changes them only with the backend's own
-`set_metadata`, so it shows that the backend's writes keep what the store filters on in step with
-the metadata it returns. It has no handle on the store's own client, and cannot write as another
+`set_metadata` and `delete`, so it shows that the backend's writes keep what the store filters on in
+step with the metadata it returns. It has no handle on the store's own client, and cannot write as another
 tool would. If something else changes the metadata of chunks the backend serves, such as an
 ingestion pipeline writing with the store's client, test that it also rewrites what the store
 filters on (the permission terms, on the backends that keep them): stale terms show up as
