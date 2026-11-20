@@ -6,6 +6,15 @@ All notable changes are recorded here. The format follows
 
 ## [Unreleased]
 
+### Documentation
+
+- The acceptance suite's company now has a document shared with everyone in its tenant and, in
+  both tenants, documents at the same paths, and the permission-systems scenario runs the default
+  `strategy="auto"` with every system that gives a filter (U31 in the readiness review). A fuzz
+  target and tests hand the retriever filters an authorizer built 101 levels deep and past
+  Python's recursion limit, on every path that takes them, and `In` clauses of up to 100,000
+  values (U34). Tests only; no library behaviour changes.
+
 ## [3.1.0] - 2026-11-14
 
 A minor release that adds `require_groups` and a log line for each refused token to

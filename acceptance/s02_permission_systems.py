@@ -19,17 +19,28 @@ persona's questions through `PermissionedRetriever`:
 * A plain Python rule in a `FunctionAuthorizer`, and `AllOf(TenantAuthorizer, MetadataACLAuthorizer)`
   as the baseline.
 
-All 144 documents sit in one in-process store with exact search over real embeddings computed once
+All 146 documents sit in one in-process store with exact search over real embeddings computed once
 (FAISS's flat index: `InMemoryBackend` matches words and cannot take vectors), so what is tested is
 the permission systems. OpenFGA also runs over pgvector, pre-filtering inside PostgreSQL, to show
 the filter path end to end.
 
+Two cases in the company test how each system draws its boundaries. Globex shares its onboarding
+guide with everyone: MetadataACLAuthorizer's "*", OpenFGA's and SpiceDB's `user:*`, a rule or
+condition in OPA, Cerbos, Cedar and Casbin, and the company rule's own check. Ory Keto has no
+wildcard subject, so there it is a group that holds every person of the tenant, as a directory sync
+would keep it. And both tenants file documents under the same paths. The relationship systems keep
+one namespace for every tenant, so they hold each document under its id, which names the tenant
+(`doc_id`, as docs/integrations/keto.md advises); OPA's data and Casbin's rows name documents by
+their path, and only the tenant tells the two documents at a path apart.
+
 For each system:
 
-1. Its `check` gives the company rule's answer for every persona and document.
-2. Every persona's questions, pre-filtered where the system offers a filter and post-filtered, leak
-   no canary, return only readable documents, and miss none of the readable documents of the asked
-   kind that rank in the exact top 10.
+1. Its `check` gives the company rule's answer for every persona and document, and nobody is
+   allowed the other tenant's document at a path.
+2. Every persona's questions, pre-filtered where the system offers a filter, post-filtered, and,
+   where it offers a filter, with the default strategy "auto", leak no canary, return only readable
+   documents, and miss none of the readable documents of the asked kind that rank in the exact top
+   10. A result of "auto" must report the strategy the documentation says it chose.
 3. Carol loses the master services agreements when her access is removed in the system itself: at
    once without a cache, after `invalidate()` with a `CachingAuthorizer`, and within its `ttl`
    without one.
@@ -66,9 +77,11 @@ from typing import Any
 import casbin
 from enterprise import (
     BY_ID,
+    EVERYONE,
     MODEL,
     PERSONAS,
     QUESTIONS,
+    TENANTS,
     Embedder,
     Persona,
     Report,
@@ -132,6 +145,11 @@ ALICE, CAROL, ERIN = BY_ID["alice"], BY_ID["carol"], BY_ID["erin"]
 # OpenFGA's type and userset syntax, a wildcard, a group, an e-mail address. None is anyone's id.
 ODD_IDS = ("carol ", "Carol", "user:carol", "carol#member", "*", "group:legal", "group:legal#member", "eve@example.com")
 SPICEDB_ID = re.compile(r"[a-zA-Z0-9/_|\-=+]{1,1024}")  # SpiceDB's object ids (docs/integrations/spicedb.md)
+# Asked only in this scenario, beside the company's questions: the onboarding guide is the document
+# shared with everyone at Globex, and each system's filter must let grace and heidi find it.
+ONBOARDING_QUESTION = ("What happens in my first week as a new starter?", ("onboarding",))
+# Ory Keto has no wildcard subject: the group, in each tenant, that every person of the tenant is in.
+KETO_EVERYONE = "everyone"
 
 
 # ---- the services ----------------------------------------------------------------------------
@@ -242,16 +260,18 @@ class Company:
         embedder = Embedder()
         self.specs = corpus()
         self.spec = {s.id: s for s in self.specs}
-        # Chunks carry the id of the document they belong to, which the relationship systems decide
-        # on, beside the metadata ACLs that the policy systems read.
-        self.docs = [Document(s.id, s.text, {**s.metadata(), "doc_id": s.id}) for s in self.specs]
+        # Chunks carry the id of the document they belong to, which names its tenant and which the
+        # relationship systems decide on, and its path inside the tenant, which OPA's data and
+        # Casbin's rows name it by, beside the metadata ACLs that the policy systems read.
+        self.docs = [Document(s.id, s.text, {**s.metadata(), "doc_id": s.id, "path": s.path}) for s in self.specs]
         self.doc = {d.id: d for d in self.docs}
         vectors = embedder.many([s.text for s in self.specs])
         self.vectors = {s.id: v for s, v in zip(self.specs, vectors, strict=True)}
-        asked = embedder.many([text for text, _ in QUESTIONS])
+        questions = (*QUESTIONS, ONBOARDING_QUESTION)
+        asked = embedder.many([text for text, _ in questions])
         self.questions = [
             Question(text, kinds, Query(text=text, vector=vector))
-            for (text, kinds), vector in zip(QUESTIONS, asked, strict=True)
+            for (text, kinds), vector in zip(questions, asked, strict=True)
         ]
         self.dim = embedder.dim
         # Carol may read these by name only (she is not in legal): the access the scenario revokes.
@@ -329,6 +349,7 @@ class Wiring:
     revoke: Callable[[], Any]  # removes carol's access to the MSA renewals in the system itself
     restore: Callable[[], Any]
     on_chunks: bool = False  # decisions read the chunk's metadata, not a document id the system holds
+    field: str = "doc_id"  # otherwise, the chunk's field that names the document to the system
     refuses: Callable[[str], bool] | None = None  # subject ids the docs say are refused, not denied
     container: str | None = None  # the Docker container that runs the system
     ready: Callable[[], bool] | None = None
@@ -375,6 +396,7 @@ def setup(report: Report, title: str, fn: Callable[[], Any]) -> bool:
 def equivalence(report: Report, company: Company, label: str, authorizer: Any, *, strict: bool = True) -> None:
     hits = company.hits()
     differ: list[str] = []
+    crossed: list[str] = []
     for persona in PERSONAS:
         decisions = authorizer.check(persona.subject, hits)
         if len(decisions) != len(hits) or not all(isinstance(d, bool) for d in decisions):
@@ -385,15 +407,50 @@ def equivalence(report: Report, company: Company, label: str, authorizer: Any, *
             for hit, allowed in zip(hits, decisions, strict=True)
             if allowed != can_read(persona, company.spec[hit.id])
         ]
+        # Every path holds a document in each tenant (main checks it), so this is the other tenant's
+        # document at a path the persona's tenant also uses.
+        crossed += [
+            f"{persona.id} ({persona.tenant}) allowed {hit.id}"
+            for hit, allowed in zip(hits, decisions, strict=True)
+            if allowed and company.spec[hit.id].tenant != persona.tenant
+        ]
     name = f"{label}: check equals the company rule for all {len(PERSONAS)} x {len(hits)} persona-document pairs"
     if strict or not differ:
         report.check(name, not differ, f"{len(differ)} differ, e.g. {differ[:6]}")
+        report.check(
+            f"{label}: of the two documents at each path, nobody is allowed the other tenant's",
+            not crossed,
+            f"{len(crossed)}: {crossed[:6]}",
+        )
     else:
         report.note(f"{label}: {len(differ)} of the pairs differ from the company rule, e.g. {differ[:3]}")
+        report.note(f"{label}: {len(crossed)} of them allow the other tenant's document at a path, e.g. {crossed[:3]}")
 
 
 def step_equivalence(report: Report, company: Company, w: Wiring) -> None:
     equivalence(report, company, w.name, w.make())
+
+
+class Planned:
+    """The authorizer as given, remembering whether its last `filter_for` returned a filter, which is
+    what strategy="auto" decides on: it "pre-filters when the backend supports filters and the
+    authorizer returns one" (PermissionedRetriever's docstring), and post-filters otherwise."""
+
+    def __init__(self, authorizer: Any) -> None:
+        self.authorizer = authorizer
+        self.filtered = False
+
+    def check(self, subject: Subject, hits: Sequence[Hit], action: str = "read") -> list[bool]:
+        decisions: list[bool] = self.authorizer.check(subject, hits, action)
+        return decisions
+
+    def filter_for(self, subject: Subject, action: str = "read") -> Any:
+        found = self.authorizer.filter_for(subject, action)
+        self.filtered = found is not None
+        return found
+
+    def __getattr__(self, name: str) -> Any:  # scope_for and the rest, where the authorizer has them
+        return getattr(self.authorizer, name)
 
 
 def retrieve_all(
@@ -409,23 +466,29 @@ def retrieve_all(
 ) -> None:
     """Every persona asks every question; nothing leaks, nothing unreadable comes back, nothing is missed.
     `exact` says whether the backend declares exact_search, as FAISS's flat index does and pgvector
-    does not (docs/concepts.md)."""
-    retriever = PermissionedRetriever(backend, authorizer, strategy=strategy, observers=observers)
+    does not (docs/concepts.md). Under "auto" each result must report the strategy auto chose."""
+    planned = Planned(authorizer)
+    asked = planned if strategy == "auto" else authorizer
+    retriever = PermissionedRetriever(backend, asked, strategy=strategy, observers=observers)
     unreadable: list[str] = []
     missing: list[str] = []
     odd: list[str] = []
     for persona in PERSONAS:
         texts: list[str] = []
         for index, question in enumerate(company.questions):
+            planned.filtered = False
             result = retriever.retrieve(question.query, persona.subject, k=K)
             ids = [h.id for h in result.hits]
             texts += [h.text for h in result.hits]
             unreadable += [f"{persona.id} got {d}" for d in ids if not can_read(persona, company.spec[d])]
             missing += [f"{persona.id} missed {d}" for d in sorted(company.required(persona, index) - set(ids))]
+            used = strategy
+            if strategy == "auto":
+                used = "prefilter" if planned.filtered and backend.supports_filters else "postfilter"
             # docs/concepts.md, "What a result tells you": mallory's empty results are complete from
             # an exact store; from pgvector, an approximate one, they say complete=False and, pre-filtered
             # under the default short_results="report", shortfall="unknown".
-            problem = result_problem(result, K, strategy, exact=exact)
+            problem = result_problem(result, K, used, exact=exact)
             if problem:
                 odd.append(f"{persona.id}, question {index + 1}: {problem}")
         report.no_leaks(
@@ -441,7 +504,8 @@ def retrieve_all(
     )
     # On an exact store every result is complete, as before 3.0, so the check keeps its name there.
     complete = "complete" if exact else "complete unless an approximate filtered search came back short"
-    report.check(f"{label}: ran as {strategy}, {complete}, with no violations", not odd, f"{len(odd)}: {odd[:4]}")
+    ran = "as auto chose" if strategy == "auto" else f"as {strategy}"
+    report.check(f"{label}: ran {ran}, {complete}, with no violations", not odd, f"{len(odd)}: {odd[:4]}")
 
 
 def step_retrieval(report: Report, company: Company, w: Wiring) -> None:
@@ -543,13 +607,14 @@ def step_odd_input(report: Report, company: Company, w: Wiring) -> None:
             "; ".join(not_refused),
         )
 
-    # The same MSA renewal under a document id with a space, and as a chunk without a document id.
-    # Systems that decide on the document id grant only ids they hold; those that read the chunk's
+    # The same MSA renewal under a document id (or path) with a space, and as a chunk without one.
+    # Systems that decide on the document grant only ids they hold; those that read the chunk's
     # metadata decide on that, whatever the id.
     source = company.doc[company.msa[0]]
     spaced_id = source.id.replace("msa-renewal", "msa renewal")
-    spaced = Hit(spaced_id, source.text, 1.0, {**source.metadata, "doc_id": spaced_id})
-    unnamed = Hit(f"{source.id}/chunk-2", source.text, 1.0, {k: v for k, v in source.metadata.items() if k != "doc_id"})
+    spaced_name = str(source.metadata[w.field]).replace("msa-renewal", "msa renewal")
+    spaced = Hit(spaced_id, source.text, 1.0, {**source.metadata, w.field: spaced_name})
+    unnamed = Hit(f"{source.id}/chunk-2", source.text, 1.0, {k: v for k, v in source.metadata.items() if k != w.field})
     expected = [True, True, True] if w.on_chunks else [False, False, True]
     try:
         got: Any = authorizer.check(ERIN.subject, [spaced, unnamed, company.hit(source.id)])
@@ -561,7 +626,7 @@ def step_odd_input(report: Report, company: Company, w: Wiring) -> None:
         f"{w.name}: a document id with a space, and a chunk without one, are "
         + ("decided by their metadata" if w.on_chunks else "denied"),
         got == expected or (w.refuses is None and isinstance(got, str)),
-        f"erin got {got} for [spaced id, no doc_id, the document itself]; expected {expected}",
+        f"erin got {got} for [spaced {w.field}, no {w.field}, the document itself]; expected {expected}",
     )
     if isinstance(got, str):
         report.note(f"{w.name}: one chunk with an odd document id made the whole batch fail: {got}")
@@ -688,7 +753,7 @@ def baseline(report: Report, company: Company, services: Services) -> None:
         name="AllOf(TenantAuthorizer, MetadataACLAuthorizer)",
         backend=backend,
         make=lambda **_: AllOf(TenantAuthorizer(), MetadataACLAuthorizer()),
-        strategies=("prefilter", "postfilter"),
+        strategies=("prefilter", "postfilter", "auto"),
         revoke=revoke,
         restore=restore,
         on_chunks=True,
@@ -716,7 +781,7 @@ def company_rule(subject: Subject, hits: Sequence[Hit], action: str) -> list[boo
     for hit in hits:
         users, groups = hit.metadata.get("allowed_users"), hit.metadata.get("allowed_groups")
         named = isinstance(users, list) and subject.id in users
-        grouped = isinstance(groups, list) and not subject.groups.isdisjoint(groups)
+        grouped = isinstance(groups, list) and (EVERYONE in groups or not subject.groups.isdisjoint(groups))
         same_tenant = isinstance(tenant, str) and hit.metadata.get("tenant") == tenant
         decisions.append(action == "read" and same_tenant and (named or grouped))
     return decisions
@@ -766,13 +831,21 @@ def opa(report: Report, company: Company, services: Services) -> None:
     rego = (POLICIES / "opa" / "documents.rego").read_text(encoding="utf-8").replace("acme_s02", package)
     policy_url = f"{base}/v1/policies/acme-s02-{RUN}"
     data_url = f"{base}/v1/data/{package}_data/sharing"
-    sharing = {}
+    # The sharing of each tenant's documents, by path: both tenants have a document at every path.
+    sharing: dict[str, dict[str, dict[str, Any]]] = {tenant: {} for tenant in TENANTS}
     for spec in company.specs:
-        users, groups = readers(spec)
-        sharing[spec.id] = {"tenant": spec.tenant, "users": users, "groups": groups}
+        users, groups = readers(spec)  # EVERYONE stays among the groups, where the policy looks for it
+        sharing[spec.tenant][spec.path] = {"tenant": spec.tenant, "users": users, "groups": groups}
+    msa = {company.spec[d].path for d in company.msa}
+
+    def without_carol(tenant: str, path: str, entry: dict[str, Any]) -> dict[str, Any]:
+        if tenant != CAROL.tenant or path not in msa:
+            return entry
+        return {**entry, "users": [u for u in entry["users"] if u != CAROL.id]}
+
     revoked = {
-        doc: {**entry, "users": [u for u in entry["users"] if u != CAROL.id]} if doc in company.msa else entry
-        for doc, entry in sharing.items()
+        tenant: {path: without_carol(tenant, path, entry) for path, entry in documents.items()}
+        for tenant, documents in sharing.items()
     }
 
     def seed() -> bool:
@@ -792,7 +865,8 @@ def opa(report: Report, company: Company, services: Services) -> None:
         name="OPA",
         backend=company.backend(),
         make=make,
-        strategies=("prefilter", "postfilter"),
+        strategies=("prefilter", "postfilter", "auto"),
+        field="path",
         revoke=lambda: call("PUT", data_url, revoked),
         restore=lambda: call("PUT", data_url, sharing),
         container="opa",
@@ -830,12 +904,15 @@ class OpenFGAStore:
         type document
           relations
             define tenant: [tenant]
-            define reader: [user, group#member]
+            define reader: [user, user:*, group#member]
             define viewer: reader and member from tenant
 
-    with a tuple for each person's tenant, each document's tenant and each grant. Group memberships
-    are not stored: OpenFGAAuthorizer sends the subject's groups as contextual tuples, and the
-    tenant intersection keeps one tenant's "hr" from reading another's documents.
+    with a tuple for each person's tenant, each document's tenant and each grant; a document shared
+    with everyone has `user:*` as a reader, and the intersection keeps that inside its tenant.
+    Group memberships are not stored: OpenFGAAuthorizer sends the subject's groups as contextual
+    tuples, and the tenant intersection keeps one tenant's "hr" from reading another's documents.
+    Documents are objects by their id, which names the tenant: the two documents at one path stay
+    two objects.
     """
 
     def __init__(self, url: str, company: Company) -> None:
@@ -847,7 +924,10 @@ class OpenFGAStore:
             users, groups = readers(spec)
             self.tuples.append({"user": f"tenant:{spec.tenant}", "relation": "tenant", "object": obj})
             self.tuples += [{"user": f"user:{u}", "relation": "reader", "object": obj} for u in users]
-            self.tuples += [{"user": f"group:{g}#member", "relation": "reader", "object": obj} for g in groups]
+            self.tuples += [
+                {"user": "user:*" if g == EVERYONE else f"group:{g}#member", "relation": "reader", "object": obj}
+                for g in groups
+            ]
         self.carol = [
             {"user": f"user:{CAROL.id}", "relation": "reader", "object": f"document:{d}"} for d in company.msa
         ]
@@ -889,7 +969,7 @@ def openfga(report: Report, company: Company, services: Services) -> None:
         name="OpenFGA",
         backend=company.backend(),
         make=store.authorizer,
-        strategies=("prefilter", "postfilter"),
+        strategies=("prefilter", "postfilter", "auto"),
         revoke=partial(store.write, "deletes", store.carol),
         restore=partial(store.write, "writes", store.carol),
         refuses=openfga_refuses,
@@ -991,9 +1071,12 @@ class SpiceDB:
             users, groups = readers(spec)
             self.relationships.append(self.rel(document, spec.id, "tenant", tenant, spec.tenant))
             self.relationships += [self.rel(document, spec.id, "reader", user, u) for u in users]
-            self.relationships += [
-                self.rel(document, spec.id, "reader", group, f"{spec.tenant}/{g}", "member") for g in groups
-            ]
+            for g in groups:
+                if g == EVERYONE:  # the subject wildcard user:*, which the schema allows on reader
+                    self.relationships.append(self.rel(document, spec.id, "reader", user, "*"))
+                else:
+                    members = self.rel(document, spec.id, "reader", group, f"{spec.tenant}/{g}", "member")
+                    self.relationships.append(members)
         self.carol = [self.rel(document, d, "reader", user, CAROL.id) for d in company.msa]
 
     def type(self, name: str) -> str:
@@ -1061,7 +1144,7 @@ def spicedb(report: Report, company: Company, services: Services) -> None:
         name="SpiceDB",
         backend=company.backend(),
         make=db.strict,
-        strategies=("prefilter", "postfilter"),
+        strategies=("prefilter", "postfilter", "auto"),
         revoke=partial(db.write, "OPERATION_DELETE", db.carol),
         restore=partial(db.write, "OPERATION_TOUCH", db.carol),
         refuses=spicedb_refuses,
@@ -1138,7 +1221,7 @@ def cerbos(report: Report, company: Company, services: Services) -> None:
         name="Cerbos",
         backend=backend,
         make=make,
-        strategies=("prefilter", "postfilter"),
+        strategies=("prefilter", "postfilter", "auto"),
         revoke=revoke,
         restore=restore,
         on_chunks=True,
@@ -1155,7 +1238,12 @@ def cerbos(report: Report, company: Company, services: Services) -> None:
 
 class Keto:
     """Relation tuples for the namespaces in acceptance/policies/keto: each person in their tenant's
-    groups ("northwind/hr"), and each document's `view` granted to people and to groups' members."""
+    groups ("northwind/hr"), and each document's `view` granted to people and to groups' members.
+
+    Keto has no wildcard subject: a tuple names one subject id or one subject set. So a document
+    shared with everyone is granted to the tenant's group KETO_EVERYONE ("globex/everyone"), which
+    holds every person of the tenant, as the company's directory sync would keep it; someone the
+    directory does not know is not in it."""
 
     def __init__(self, read: str, write: str, company: Company) -> None:
         self.read = read
@@ -1163,10 +1251,11 @@ class Keto:
         self.tuples = [
             {"namespace": "Group", "object": f"{p.tenant}/{g}", "relation": "members", "subject_id": p.id}
             for p in PERSONAS
-            for g in sorted(p.groups)
+            for g in (*sorted(p.groups), KETO_EVERYONE)
         ]
         for spec in company.specs:
             users, groups = readers(spec)
+            groups = [KETO_EVERYONE if g == EVERYONE else g for g in groups]
             view = {"namespace": "Document", "object": spec.id, "relation": "view"}
             self.tuples += [{**view, "subject_id": u} for u in users]
             self.tuples += [
@@ -1308,13 +1397,17 @@ def cedar(report: Report, company: Company, services: Services) -> None:
 
 
 def casbin_request(subject: Subject, hit: Hit, action: str) -> tuple[str, str, str, str]:
-    """A request for the RBAC-with-domains model: (user, tenant, document id, action)."""
+    """A request for the RBAC-with-domains model: (user, the user's tenant, document path, action).
+
+    The domain is the subject's tenant, not the chunk's, as docs/integrations/casbin.md describes:
+    the other tenant's document at the same path matches a policy row of the subject's tenant, so
+    the wiring adds the tenant check."""
     if subject.id.startswith("group:"):
         # Users and groups share Casbin's subject field: a user id like "group:legal" would be given
         # the group's grants. CasbinAuthorizer refuses such ids only when it builds the request itself.
         raise AuthorizationError(f"subject id {subject.id!r} could pass for a group")
-    doc = hit.metadata.get("doc_id")
-    return (subject.id, subject.attributes["tenant"], doc if isinstance(doc, str) else "", action)
+    path = hit.metadata.get("path")
+    return (subject.id, subject.attributes["tenant"], path if isinstance(path, str) else "", action)
 
 
 class BrokenEnforcer:
@@ -1326,20 +1419,29 @@ class BrokenEnforcer:
 
 def casbin_rules(report: Report, company: Company, services: Services) -> None:
     """The model and memberships in acceptance/policies/casbin, and a policy row for each grant,
-    written as the ingestion pipeline does when it indexes a document."""
+    written as the ingestion pipeline does when it indexes a document: in the document's tenant,
+    by its path there. Casbin has no built-in everyone; the model's matcher reads a row for the
+    subject "*" as a grant to every subject of the row's tenant."""
     enforcer = casbin.Enforcer(str(POLICIES / "casbin" / "model.conf"), str(POLICIES / "casbin" / "policy.csv"))
     enforcer.enable_auto_save(False)  # rows live in memory: the policy file in the repository is never rewritten
     rows: list[list[str]] = []
     for spec in company.specs:
         users, groups = readers(spec)
-        rows += [[u, spec.tenant, spec.id, "read"] for u in users]
-        rows += [[f"group:{g}", spec.tenant, spec.id, "read"] for g in groups]
-    carol = [[CAROL.id, CAROL.tenant, d, "read"] for d in company.msa]
+        rows += [[u, spec.tenant, spec.path, "read"] for u in users]
+        rows += [[EVERYONE if g == EVERYONE else f"group:{g}", spec.tenant, spec.path, "read"] for g in groups]
+    carol = [[CAROL.id, CAROL.tenant, company.spec[d].path, "read"] for d in company.msa]
+
+    def alone() -> CasbinAuthorizer:
+        return CasbinAuthorizer(enforcer, request=casbin_request)
+
     w = Wiring(
-        name="Casbin",
+        name="Casbin (AllOf TenantAuthorizer)",
         backend=company.backend(),
-        make=lambda **_: CasbinAuthorizer(enforcer, request=casbin_request),
+        # docs/integrations/casbin.md, "Tenants": the domain keeps grants and memberships inside the
+        # subject's tenant, and the tenant check compares the chunk's.
+        make=lambda **_: AllOf(TenantAuthorizer(), alone()),
         strategies=("postfilter",),
+        field="path",
         revoke=partial(enforcer.remove_policies, carol),
         restore=partial(enforcer.add_policies, carol),
     )
@@ -1347,6 +1449,11 @@ def casbin_rules(report: Report, company: Company, services: Services) -> None:
     def write_rows() -> None:
         if not enforcer.add_policies(rows):
             raise RuntimeError("Casbin did not add the policy rows")
+
+    def without_tenant_check() -> None:
+        # Only reported: with the subject's tenant as the domain, a policy row of that tenant also
+        # matches the other tenant's document at the same path.
+        equivalence(report, company, "Casbin alone", alone(), strict=False)
 
     def fail_closed() -> None:
         expect_refusal(
@@ -1368,6 +1475,7 @@ def casbin_rules(report: Report, company: Company, services: Services) -> None:
         )
 
     if setup(report, "Casbin: the company's model, memberships and policy rows", write_rows):
+        report.run("Casbin: CasbinAuthorizer alone against the company rule", without_tenant_check)
         common_checks(report, company, w)
         report.run("Casbin: fail closed", fail_closed)
 
@@ -1383,6 +1491,20 @@ def main() -> None:
     required = sum(len(company.required(p, i)) for p in PERSONAS for i in range(len(company.questions)))
     report.note(f"{len(company.docs)} documents embedded with {MODEL}; {required} must-return hits per strategy")
     report.check("the scenario's own expectations are not empty", required > 0, "no document is required anywhere")
+    # The premises of the checks on paths and on everyone, from the oracle alone.
+    tenants_at = {s.path: {t.tenant for t in company.specs if t.path == s.path} for s in company.specs}
+    report.check(
+        "every path names a document in each tenant",
+        all(len(found) == len(TENANTS) for found in tenants_at.values()),
+        str(sorted(p for p, found in tenants_at.items() if len(found) != len(TENANTS))[:6]),
+    )
+    everyone = [s for s in company.specs if EVERYONE in s.readers]
+    readers_of_everyone = {p.id for p in PERSONAS for s in everyone if can_read(p, s)}
+    report.check(
+        "a document shared with everyone exists, and only its tenant's people may read it",
+        bool(everyone) and readers_of_everyone == {p.id for p in PERSONAS if p.tenant in {s.tenant for s in everyone}},
+        f"{[s.id for s in everyone]} readable by {sorted(readers_of_everyone)}",
+    )
     report.check("the docker CLI is on PATH, to stop and start the services", shutil.which("docker") is not None)
     # The completeness checks take every wiring's store to prove short results complete.
     report.check(

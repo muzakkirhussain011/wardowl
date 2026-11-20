@@ -13,7 +13,9 @@ handbook, HR, finance, engineering, legal and board documents, and nine people: 
 engineer, the CFO, an SRE, legal counsel, a contractor, two people of the other tenant, and a
 signed-in user with no groups. Every document that is not public carries a canary, a code that
 appears nowhere else; a canary in a search hit, a prompt or a model's answer, for someone the oracle
-denies, is a leak, whichever component let it through. Embeddings come from
+denies, is a leak, whichever component let it through. Both tenants file documents under the same
+paths, so only the tenant tells two documents at a path apart, and Globex shares its onboarding
+guide with everyone in the company. Embeddings come from
 `BAAI/bge-small-en-v1.5` and reranking from `Xenova/ms-marco-MiniLM-L-6-v2`, through fastembed.
 
 ## The scenarios
@@ -21,7 +23,7 @@ denies, is a leak, whichever component let it through. Embeddings come from
 | Scenario | What a team builds | Checks |
 |---|---|---|
 | [`s01_stores.py`](s01_stores.py) | The assistant on 14 stores (pgvector exact and HNSW, Chroma, LanceDB, FAISS, Elasticsearch, OpenSearch, Qdrant, Milvus, MongoDB Atlas, Weaviate, Redis, Vespa, Cassandra, and the in-memory store): every person's questions under every strategy, recall against exact search, short results reported as 3.0 documents them and counted with `short_results="count"`, tenant isolation, revocation and deletion, keyword and hybrid search, async, own vectors | 2,245 |
-| [`s02_permission_systems.py`](s02_permission_systems.py) | The company's policy written natively in OPA, OpenFGA, SpiceDB, Cerbos, Ory Keto, Cedar and Casbin, and as metadata and a function: decisions equal to the oracle for every person and document, revocation, fail-closed when a service stops mid-traffic, the circuit breaker | 361 |
+| [`s02_permission_systems.py`](s02_permission_systems.py) | The company's policy written natively in OPA, OpenFGA, SpiceDB, Cerbos, Ory Keto, Cedar and Casbin, and as metadata and a function: decisions equal to the oracle for every person and document, a document shared with everyone, two tenants' documents at one path, every strategy including the default `auto`, revocation, fail-closed when a service stops mid-traffic, the circuit breaker | 361 |
 | [`s03_frameworks_and_agents.py`](s03_frameworks_and_agents.py) | LangChain, LlamaIndex, Haystack (pipelines, per-request subjects, agent tools and forged subjects) and a real MCP server and client: nothing forbidden reaches a prompt or a model | 547 |
 | [`s04_http_service.py`](s04_http_service.py) | The HTTP service for other languages, with real Keycloak tokens: 14 kinds of bad token, body and vector limits, key rotation, 50 concurrent users | 66 |
 | [`s05_operations.py`](s05_operations.py) | Day-2 operations: a shared Redis cache across processes, forged cache entries, OPA and Redis stopped mid-traffic, slow servers and timeouts, audit and OpenTelemetry without text and with only the documented metric attributes, load | 75 |

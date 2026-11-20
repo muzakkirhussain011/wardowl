@@ -22,8 +22,9 @@ resourcePolicy:
             of:
               # Never across tenants.
               - expr: request.resource.attr.tenant == request.principal.attr.tenant
-              # Shared with the reader by name, or with one of the reader's groups.
+              # Shared with the reader by name, with one of the reader's groups, or with everyone.
               - any:
                   of:
                     - expr: request.principal.id in request.resource.attr.allowed_users
                     - expr: hasIntersection(request.resource.attr.allowed_groups, request.principal.attr.groups)
+                    - expr: '"*" in request.resource.attr.allowed_groups'

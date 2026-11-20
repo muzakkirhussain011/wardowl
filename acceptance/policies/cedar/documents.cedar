@@ -11,6 +11,10 @@ when { resource has allowed_users && resource.allowed_users.contains(principal.i
 permit (principal, action == Action::"read", resource)
 when { resource has allowed_groups && resource.allowed_groups.containsAny(principal.groups) };
 
+// Shared with everyone: "*" among the groups.
+permit (principal, action == Action::"read", resource)
+when { resource has allowed_groups && resource.allowed_groups.contains("*") };
+
 // Never across tenants, whatever the sharing says. A chunk or a reader without a tenant is refused.
 forbid (principal, action, resource)
 unless { principal has tenant && resource has tenant && principal.tenant == resource.tenant };

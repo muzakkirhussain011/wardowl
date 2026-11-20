@@ -1,6 +1,6 @@
 """Scenario 3: four product teams put wardowl inside the frameworks they already use.
 
-Northwind and Globex share one knowledge base (enterprise.py): 144 documents in PostgreSQL with
+Northwind and Globex share one knowledge base (enterprise.py): 146 documents in PostgreSQL with
 pgvector, embedded once with a real sentence-embedding model, behind one authorizer for everyone,
 AllOf(TenantAuthorizer, MetadataACLAuthorizer). Four teams build assistants on it, each following
 wardowl's documentation for its framework the way a new adopter would:
