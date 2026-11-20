@@ -6,6 +6,20 @@ All notable changes are recorded here. The format follows
 
 ## [Unreleased]
 
+### Documentation
+
+- The acceptance suite's company now has a document shared with everyone in its tenant and, in
+  both tenants, documents at the same paths, and the permission-systems scenario runs the default
+  `strategy="auto"` with every system that gives a filter (U31 in the readiness review). A fuzz
+  target and tests hand the retriever filters an authorizer built 101 levels deep and past
+  Python's recursion limit, on every path that takes them, and `In` clauses of up to 100,000
+  values (U34). Tests only; no library behaviour changes.
+- The supported configurations page said that the library tests on Python 3.11, 3.13 and 3.14
+  cover the frameworks; those tests need the framework extras, which only the Python 3.12 run
+  installs. The page now says so. The HTTP service page says that the `Authorization` header is not
+  counted in `max_body_bytes`, so how long a token may be is left to the ASGI server's limits on
+  request headers.
+
 ### Added
 
 - `create_app(max_groups=...)` bounds the groups on the subject that the authenticator returns,
@@ -23,14 +37,6 @@ All notable changes are recorded here. The format follows
   without extras there; every extra is tested on 3.12. The `chroma` extra cannot be installed on
   3.15 yet: chromadb requires onnxruntime, which publishes no wheels for 3.15 and no source
   distribution.
-
-### Documentation
-
-- The supported configurations page said that the library tests on Python 3.11, 3.13 and 3.14
-  cover the frameworks; those tests need the framework extras, which only the Python 3.12 run
-  installs. The page now says so. The HTTP service page says that the `Authorization` header is not
-  counted in `max_body_bytes`, so how long a token may be is left to the ASGI server's limits on
-  request headers.
 
 ## [3.1.0] - 2026-11-14
 

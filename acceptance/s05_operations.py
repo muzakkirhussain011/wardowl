@@ -96,7 +96,8 @@ TIMEOUT = 1.0  # the HTTP authorizer's timeout in the timeout test
 REVOCATION_TTL = 3.0  # the plain cache's ttl in the revocation-bound test
 
 # The company's rules (enterprise.can_read) as OPA would hold them: the subject's own tenant, and
-# named on the chunk or in one of its groups. Revocations made during the run are in OPA's data.
+# named on the chunk, in one of its groups, or shared with everyone ("*" among the groups).
+# Revocations made during the run are in OPA's data.
 # PACKAGE and DATAROOT are replaced with names unique to the run.
 REGO = """package PACKAGE
 
@@ -118,6 +119,13 @@ allowed(r) if {
     not revoked(r)
     some group in r.metadata.allowed_groups
     group in input.subject.groups
+}
+
+# Shared with everyone in the tenant (enterprise.EVERYONE).
+allowed(r) if {
+    same_tenant(r)
+    not revoked(r)
+    "*" in r.metadata.allowed_groups
 }
 
 same_tenant(r) if {

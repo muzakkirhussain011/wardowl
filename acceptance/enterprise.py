@@ -8,6 +8,11 @@ with an independent oracle.
 Every document that is not public carries a canary, a code that appears nowhere else. A canary in
 a search hit, a prompt or a model's answer for someone the oracle denies is a leak, whichever
 component let it through.
+
+Both tenants file their documents under the same paths ("hr/salary-bands-1"), so every path names
+a document in each tenant, and only the tenant tells the two apart (`Spec.path`). One document, the
+onboarding guide, is shared with everyone in its tenant at Globex and only with the employees at
+Northwind.
 """
 
 from __future__ import annotations
@@ -58,9 +63,13 @@ BY_ID = {p.id: p for p in PERSONAS}
 
 # ---- documents -------------------------------------------------------------------------------
 
-# (kind, department, sensitivity, readers, owner, sentences). Readers are groups, or "user:<id>"
-# for one person. Each template is written once per tenant and once per variant, with the facts
-# changed, so the corpus holds near-duplicates that only permissions tell apart.
+# Among a document's readers: every person of the document's tenant, whatever their groups. It is
+# MetadataACLAuthorizer's default marker, so `Spec.metadata` can write it as it is.
+EVERYONE = "*"
+
+# (kind, department, sensitivity, readers, owner, sentences). Readers are groups, "user:<id>" for
+# one person, or EVERYONE. Each template is written once per tenant and once per variant, with the
+# facts changed, so the corpus holds near-duplicates that only permissions tell apart.
 TEMPLATES: tuple[tuple[str, str, str, tuple[str, ...], str, str], ...] = (
     (
         "handbook-leave",
@@ -173,6 +182,20 @@ TEMPLATES: tuple[tuple[str, str, str, tuple[str, ...], str, str], ...] = (
 )
 VARIANTS = 6
 
+# The onboarding guide each tenant was given when it signed up: one document per tenant, at the same
+# path, outside the templates because each tenant shares its copy its own way. Globex shares it
+# with everyone (the corpus's one document shared with everyone); Northwind only with its
+# employees, so frank and mallory may not read it. (kind, department, sensitivity, tenant ->
+# (readers, owner), sentences)
+ONBOARDING: tuple[str, str, str, dict[str, tuple[tuple[str, ...], str]], str] = (
+    "onboarding",
+    "people",
+    "internal",
+    {"northwind": (("employees",), "alice"), "globex": ((EVERYONE,), "grace")},
+    "Onboarding guide for new starters. Your laptop is ready on day {n}, you meet your buddy in week {m}, "
+    "and the security training is due within {k} days of your start date.",
+)
+
 
 @dataclass(frozen=True)
 class Spec:
@@ -209,6 +232,13 @@ class Spec:
     def document(self) -> Document:
         return Document(self.id, self.text, self.metadata())
 
+    @property
+    def path(self) -> str:
+        """Where the tenant files the document ("hr/salary-bands-1"). The other tenant has a document
+        at the same path, so a path names one only together with its tenant; `id`, the chunk id the
+        stores key on, is the tenant and the path."""
+        return self.id.removeprefix(f"{self.tenant}/")
+
 
 def _canary(doc_id: str) -> str:
     return "WO-" + hashlib.sha256(doc_id.encode()).hexdigest()[:10].upper()
@@ -225,26 +255,31 @@ def _pii_spans(text: str) -> tuple[tuple[int, int], ...]:
 
 
 def corpus() -> list[Spec]:
-    """Every document of both tenants: len(TEMPLATES) * VARIANTS * 2 of them."""
+    """Every document of both tenants: len(TEMPLATES) * VARIANTS * 2 of them, and the two onboarding guides."""
     specs = []
     for t, tenant in enumerate(TENANTS):
-        for kind, dept, sens, readers, owner, sentence in TEMPLATES:
-            for v in range(VARIANTS):
-                n, m, k = 10 + 3 * v + t, 2 + v + 2 * t, 30 + 5 * v + t
-                doc_id = f"{tenant}/{dept}/{kind}-{v + 1}"
-                text = sentence.format(n=n, m=m, k=k)
-                canary = None if sens == "public" else _canary(doc_id)
-                if canary:
-                    text += f" Reference {canary}."
-                specs.append(Spec(doc_id, tenant, kind, dept, sens, readers, owner, text, canary, _pii_spans(text)))
+        kind, dept, sens, shared, sentence = ONBOARDING
+        onboarding = (kind, dept, sens, *shared[tenant], sentence)
+        written = [*((template, v) for template in TEMPLATES for v in range(VARIANTS)), (onboarding, 0)]
+        for (kind, dept, sens, readers, owner, sentence), v in written:
+            n, m, k = 10 + 3 * v + t, 2 + v + 2 * t, 30 + 5 * v + t
+            doc_id = f"{tenant}/{dept}/{kind}-{v + 1}"
+            text = sentence.format(n=n, m=m, k=k)
+            canary = None if sens == "public" else _canary(doc_id)
+            if canary:
+                text += f" Reference {canary}."
+            specs.append(Spec(doc_id, tenant, kind, dept, sens, readers, owner, text, canary, _pii_spans(text)))
     return specs
 
 
 def can_read(persona: Persona, spec: Spec) -> bool:
-    """The company's policy, independently of wardowl: same tenant, and named or in a group."""
+    """The company's policy, independently of wardowl: same tenant, and shared with everyone, with the
+    persona by name, or with one of their groups."""
     if persona.tenant != spec.tenant:
         return False
-    return f"user:{persona.id}" in spec.readers or any(g in spec.readers for g in persona.groups)
+    if EVERYONE in spec.readers or f"user:{persona.id}" in spec.readers:
+        return True
+    return any(g in spec.readers for g in persona.groups)
 
 
 # Questions people actually ask, each with the kinds of document that answer it.

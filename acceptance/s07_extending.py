@@ -39,6 +39,7 @@ from pathlib import Path
 from typing import Any
 
 from enterprise import (
+    EVERYONE,
     PERSONAS,
     QUESTIONS,
     Embedder,
@@ -365,7 +366,12 @@ def build(path: Path) -> App:
     vectors = embedder.many([d.text for d in documents])
     backend = SQLiteBackend(str(path), embed=embedder)
     backend.add(documents, embeddings=vectors)
-    rows = [(s.tenant, s.id, r if r.startswith("user:") else f"group:{r}") for s in specs for r in s.readers]
+    # A principal per reader: "user:<id>", "group:<name>", or "*" for everyone in the tenant.
+    rows = [
+        (s.tenant, s.id, r if r.startswith("user:") or r == EVERYONE else f"group:{r}")
+        for s in specs
+        for r in s.readers
+    ]
     with backend.lock, backend.conn:
         backend.conn.executemany("INSERT INTO acl VALUES (?, ?, ?)", rows)
     return App(path, specs, documents, embedder, {d.id: v for d, v in zip(documents, vectors, strict=True)}, backend)
