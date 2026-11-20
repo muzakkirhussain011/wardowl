@@ -143,7 +143,8 @@ def test_add_keeps_the_document_id_and_delete_removes_by_it():
     backend.add([Document("doc-1", "leave policy", {"allowed_groups": ["*"]}), Document("doc-2", "salary", {})])
     stored = client.retrieve("ids", [point_id("doc-1")], with_payload=True)[0]
     assert stored.payload[ID_KEY] == "doc-1"
-    backend.delete(["doc-1"])
+    assert backend.delete(["doc-1", "never-written"]) == {"doc-1"}
+    assert backend.delete(["doc-1"]) == frozenset()
     assert [h.id for h in backend.search("leave policy salary", 5)] == ["doc-2"]
 
 
@@ -158,14 +159,16 @@ def test_changes_reach_only_the_point_that_holds_the_id():
     # A point at victim's point id that holds another id: a collision, or a write by another tool.
     payload = {ID_KEY: "intruder", "page_content": "board minutes", "metadata": {"allowed_groups": ["board"]}}
     client.upsert("owned", points=[models.PointStruct(id=point_id("victim"), vector=EMBED("board"), payload=payload)])
-    backend.set_metadata({"victim": {"allowed_groups": ["*"]}, u.upper(): {"allowed_groups": ["*"]}})
-    backend.delete(["victim"])
+    # The point at victim's point id holds another id, so neither write reaches it, and neither says it did.
+    written = backend.set_metadata({"victim": {"allowed_groups": ["*"]}, u.upper(): {"allowed_groups": ["*"]}})
+    assert written == {u.upper()}
+    assert backend.delete(["victim"]) == frozenset()
     (held,) = client.retrieve("owned", [point_id("victim")], with_payload=True)
     assert held.payload == payload  # neither changed nor deleted
     found = {h.id: h.metadata for h in backend.search("leave salary board", 5)}
     hr, everyone = {"allowed_groups": ["hr"]}, {"allowed_groups": ["*"]}
     assert found == {u: hr, u.upper(): everyone, "intruder": payload["metadata"]}
-    backend.delete([u.upper()])
+    assert backend.delete([u.upper()]) == {u.upper()}
     assert {h.id for h in backend.search("leave salary board", 5)} == {u, "intruder"}
 
 
@@ -175,7 +178,7 @@ def test_set_metadata_replaces_only_the_metadata_and_never_recreates_a_point():
     backend = QdrantBackend(client, "meta", EMBED)
     backend.add([Document("a", "leave policy", {"allowed_groups": ["hr"], "team": "x"})])
     client.set_payload("meta", payload={"source": "drive"}, points=[point_id("a")])  # a key another tool wrote
-    backend.set_metadata({"a": {"allowed_groups": ["eng"]}})
+    assert backend.set_metadata({"a": {"allowed_groups": ["eng"]}}) == {"a"}
     (point,) = client.retrieve("meta", [point_id("a")], with_payload=True)
     assert point.payload == {
         ID_KEY: "a",
@@ -183,8 +186,9 @@ def test_set_metadata_replaces_only_the_metadata_and_never_recreates_a_point():
         "metadata": {"allowed_groups": ["eng"]},  # no key of the old metadata survives
         "source": "drive",
     }
-    backend.delete(["a"])
-    backend.set_metadata({"a": {"allowed_groups": ["*"]}, "never-written": {"allowed_groups": ["*"]}})
+    assert backend.delete(["a"]) == {"a"}
+    everyone = {"allowed_groups": ["*"]}
+    assert backend.set_metadata({"a": everyone, "never-written": everyone}) == frozenset()
     assert client.count("meta").count == 0
 
 
@@ -195,14 +199,41 @@ def test_points_written_by_another_tool_are_changed_by_their_exact_uuid():
     payload = {"page_content": "leave policy", "metadata": {"allowed_groups": ["hr"]}}
     client.upsert("lc2", points=[models.PointStruct(id=point, vector=EMBED("leave policy"), payload=payload)])
     backend = QdrantBackend(client, "lc2", EMBED)
-    backend.set_metadata({point.upper(): {"allowed_groups": ["*"]}})  # not the spelling results report
+    # Not the spelling results report: no point holds it.
+    assert backend.set_metadata({point.upper(): {"allowed_groups": ["*"]}}) == frozenset()
     assert [h.metadata for h in backend.search("leave", 5)] == [{"allowed_groups": ["hr"]}]
-    backend.set_metadata({point: {"allowed_groups": ["*"]}})
+    assert backend.set_metadata({point: {"allowed_groups": ["*"]}}) == {point}
     assert [(h.id, h.metadata) for h in backend.search("leave", 5)] == [(point, {"allowed_groups": ["*"]})]
-    backend.delete([f"{{{point}}}"])
+    assert backend.delete([f"{{{point}}}"]) == frozenset()
     assert len(backend.search("leave", 5)) == 1
-    backend.delete([point])
+    assert backend.delete([point]) == {point}
     assert backend.search("leave", 5) == []
+
+
+class DeletesFirst:
+    """A Qdrant client on which another writer deletes one point just before each batch of changes."""
+
+    def __init__(self, client, point):
+        self.client, self.point = client, point
+
+    def __getattr__(self, name):
+        return getattr(self.client, name)
+
+    def batch_update_points(self, collection_name, **kwargs):
+        self.client.delete(collection_name, points_selector=[self.point], wait=True)
+        return self.client.batch_update_points(collection_name, **kwargs)
+
+
+def test_set_metadata_counts_only_the_points_that_hold_the_new_metadata_when_read_back():
+    # Qdrant says that an update was applied, not which points it changed: a point deleted before the
+    # update was reached by nothing, and the read after the update tells it apart.
+    client = qdrant_client.QdrantClient(":memory:")
+    create_collection(client, "race", EMBED.dim)
+    QdrantBackend(client, "race", EMBED).add([Document("a", "leave", {}), Document("b", "leave", {})])
+    backend = QdrantBackend(DeletesFirst(client, point_id("a")), "race", EMBED)
+    everyone = {"allowed_groups": ("*", "eng"), "level": 1.5, "owner": {"team": "x"}}  # a tuple is stored as a list
+    assert backend.set_metadata({"a": everyone, "b": everyone}) == {"b"}
+    assert [h.id for h in QdrantBackend(client, "race", EMBED).search("leave", 5)] == ["b"]
 
 
 def test_named_vectors_and_search_params_are_passed_through():
@@ -378,7 +409,7 @@ def test_current_collections_pass_the_layout_check(any_client):
         any_client.set_payload(name, payload={"needtoknow_id": "a"}, points=[point_id("a")], wait=True)
         create_collection(any_client, name, EMBED.dim)
         fresh = QdrantBackend(any_client, name, EMBED)
-        fresh.set_metadata({"a": {"allowed_groups": ["*"]}})
+        assert fresh.set_metadata({"a": {"allowed_groups": ["*"]}}) == {"a"}
         assert {h.id: h.metadata for h in fresh.search("leave", 5)}["a"] == {"allowed_groups": ["*"]}
     finally:
         any_client.delete_collection(name)
@@ -425,7 +456,7 @@ def test_a_point_is_never_reported_under_an_id_another_point_holds_where_add_wri
         if request.node.callspec.params["any_client"] == "server":  # local mode keeps each client's data apart
             assert asyncio.run(_native_asearch(any_client, name, 6, readable)) == backend.search("leave", 6, readable)
         # The point at another chunk's point id is still reported under "x" once no chunk holds "x".
-        backend.delete(["x"])
+        assert backend.delete(["x"]) == {"x"}  # the point add wrote; the copy elsewhere is not reached
         assert {h.id: h.text for h in backend.search("leave rota", 6)}["x"] == "copy"
     finally:
         any_client.delete_collection(name)

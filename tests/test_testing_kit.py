@@ -404,3 +404,58 @@ class _CreatingBackend(InMemoryBackend):
 def test_set_metadata_that_stores_unknown_ids_is_caught():
     with pytest.raises(ConformanceError, match="should not match"):
         check_backend(_CreatingBackend)
+
+
+class _OverReportingBackend(InMemoryBackend):
+    """Reports every id it was given, the one it does not hold among them."""
+
+    def set_metadata(self, metadata):
+        super().set_metadata(metadata)
+        return frozenset(metadata)
+
+
+class _UnderReportingBackend(InMemoryBackend):
+    """Leaves out of what it reports one of the ids it changed."""
+
+    def set_metadata(self, metadata):
+        return frozenset(sorted(super().set_metadata(metadata))[1:])
+
+
+class _DeleteOverReportingBackend(InMemoryBackend):
+    """Reports every id it was asked to delete."""
+
+    def delete(self, ids):
+        ids = list(ids)
+        super().delete(ids)
+        return frozenset(ids)
+
+
+def test_writes_that_report_ids_they_did_not_change_or_leave_some_out_are_caught():
+    with pytest.raises(ConformanceError, match=r"what set_metadata returned[\s\S]*did not change: \['not-stored'\]"):
+        check_backend(_OverReportingBackend)
+    with pytest.raises(ConformanceError, match=r"what set_metadata returned[\s\S]*left out ids it changed"):
+        check_backend(_UnderReportingBackend)
+    with pytest.raises(ConformanceError, match=r"what delete returned[\s\S]*did not change: \['not-stored'\]"):
+        check_backend(_DeleteOverReportingBackend)
+
+
+class _SilentBackend(InMemoryBackend):
+    """Reports nothing, as backends written before writes reported what they changed."""
+
+    def set_metadata(self, metadata):
+        super().set_metadata(metadata)
+
+    def delete(self, ids):
+        raise AssertionError("delete is checked only on a backend whose set_metadata reports its writes")
+
+
+class _CountingWritesBackend(InMemoryBackend):
+    """Returns how many chunks it changed, which is not a set of ids."""
+
+    def set_metadata(self, metadata):
+        return len(super().set_metadata(metadata))
+
+
+def test_writes_that_return_none_or_something_other_than_a_set_are_not_checked():
+    check_backend(_SilentBackend, examples=10)
+    check_backend(_CountingWritesBackend, examples=10)

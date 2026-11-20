@@ -6,6 +6,7 @@ import asyncio
 import os
 import uuid
 from functools import partial
+from types import SimpleNamespace
 
 import pytest
 
@@ -88,15 +89,35 @@ class FakeCollection:
         self.lag = lag
         self.documents, self.indexed = {}, {}
         self.pipelines, self.probes = [], 0
+        self.finds, self.read_preferences = [], []
 
     def bulk_write(self, operations, ordered=True):
+        matched = 0
         for operation in operations:
             document = operation._doc
-            self.documents[document["_id"]] = document
+            if "$set" in document:  # an update by _id, as set_metadata sends without a revision
+                stored = self.documents.get(operation._filter["_id"])
+                if stored is not None:
+                    self.documents[stored["_id"]] = {**stored, **document["$set"]}
+                    matched += 1
+            else:
+                self.documents[document["_id"]] = document
+        return SimpleNamespace(matched_count=matched)
 
     def delete_many(self, selector):
         for i in selector["_id"]["$in"]:
             self.documents.pop(i, None)
+
+    def with_options(self, read_preference=None):
+        self.read_preferences.append(read_preference)
+        return self
+
+    def find(self, query, projection):
+        self.finds.append(query)
+        found = [d for i, d in self.documents.items() if i in query["_id"]["$in"]]
+        if WRITE_FIELD in query:
+            found = [d for d in found if d[WRITE_FIELD] == query[WRITE_FIELD]]
+        return [{"_id": d["_id"]} for d in found]
 
     def aggregate(self, pipeline):
         self.pipelines.append(pipeline)
@@ -203,12 +224,31 @@ def test_delete_waits_until_the_index_no_longer_returns_the_chunks():
     backend = MongoDBBackend(collection, EMBED)
     backend.add([Document("a", "leave", {}), Document("b", "leave", {})])
     collection.lag, before = 2, collection.probes
-    backend.delete(["a", "a", "never-written"])
+    assert backend.delete(["a", "a", "never-written"]) == {"a"}  # what a read just before found stored
     assert collection.probes - before == 3 and set(collection.documents) == {"b"}
     before = collection.probes
-    backend.delete([])
-    backend.delete(["b"], wait=False)
+    assert backend.delete([]) == frozenset()
+    assert backend.delete(["b"], wait=False) == {"b"}
     assert collection.probes == before and collection.documents == {}
+
+
+def test_set_metadata_returns_the_ids_it_updated_reading_on_the_primary_only_when_some_were_missing():
+    pymongo = pytest.importorskip("pymongo")
+    collection = FakeCollection()
+    backend = MongoDBBackend(collection, EMBED)
+    backend.add([Document("a", "leave", {}), Document("b", "leave", {})])
+    # Every update matched: the count says which ids were written, and nothing is read.
+    assert backend.set_metadata({"a": {"allowed_groups": ["hr"]}, "b": {}}) == {"a", "b"}
+    assert collection.finds == []
+    # Fewer matched than were sent: the documents holding this batch's marker are read on the primary.
+    assert backend.set_metadata({"a": {"allowed_groups": ["eng"]}, "never-written": {}}) == {"a"}
+    (query,) = collection.finds
+    assert query["_id"] == {"$in": ["a", "never-written"]} and WRITE_FIELD in query
+    assert collection.read_preferences == [pymongo.ReadPreference.PRIMARY]
+    assert collection.documents["a"]["metadata"] == {"allowed_groups": ["eng"]}
+    assert backend.set_metadata({"never-written": {}}) == frozenset()
+    assert len(collection.finds) == 1  # none matched: nothing to read
+    assert backend.set_metadata({}) == frozenset()
 
 
 @pytest.mark.parametrize("bad", [True, 1.5, "7", 2**63, -(2**63) - 1])
@@ -611,7 +651,8 @@ def test_server_refuses_a_write_older_than_the_stored_revision():
         assert _stored(collection) == {"a#0": ([], 6), "a#1": ([], 6)}
         assert _readable(backend, "alice") == []
         # The same revision again (a retry) is written, and so is a newer one; ids not stored stay ignored.
-        backend.set_metadata({"a#0": {"allowed_users": ["bob"]}, "gone": {"allowed_users": ["bob"]}}, revision=6)
+        bob = {"allowed_users": ["bob"]}
+        assert backend.set_metadata({"a#0": bob, "gone": bob}, revision=6) == {"a#0"}
         assert _stored(collection) == {"a#0": (["bob"], 6), "a#1": ([], 6)}
         backend.add(_part(["carol"], ("a#0", "a#1", "a#2")), revision=7)
         assert _stored(collection) == {"a#0": (["carol"], 7), "a#1": (["carol"], 7), "a#2": (["carol"], 7)}
@@ -653,7 +694,7 @@ def test_server_writes_without_a_revision_are_unconditional():
     backend = MongoDBBackend(collection, EMBED)
     try:
         backend.add(_part(["alice"]), revision=3)
-        backend.set_metadata({"a#0": {"allowed_users": ["bob"]}})  # leaves the stored revision
+        assert backend.set_metadata({"a#0": {"allowed_users": ["bob"]}}) == {"a#0"}  # leaves the stored revision
         backend.add(_part(["carol"], ("a#1",)))  # replaces the whole document, its revision too
         assert _stored(collection) == {"a#0": (["bob"], 3), "a#1": (["carol"], None)}
         with pytest.raises(StaleRevision) as refused:

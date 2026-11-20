@@ -95,8 +95,20 @@ class FakeHandle:
         self.inserted.append(list(objects))
         return SimpleNamespace(errors=self.errors)
 
-    def delete_many(self, where):
+    def delete_many(self, where, verbose=False):
+        """Deletes as Weaviate does what the backend sends: the objects at these UUIDs that hold one
+        of these ids (`all_of`), or the objects at these UUIDs (`by_id().contains_any`)."""
         self.deleted.append(where)
+        parts = getattr(where, "filters", None)
+        if parts:
+            uids, ids = parts[0].value, parts[1].value
+            chosen = [str(u) for u in uids if (self.stored.get(str(u)) or {}).get(ID_PROPERTY) in ids]
+        else:
+            chosen = [str(u) for u in where.value if str(u) in self.stored]
+        for uid in chosen:
+            del self.stored[uid]
+        objects = [SimpleNamespace(uuid=uuid.UUID(uid), successful=True, error=None) for uid in chosen]
+        return SimpleNamespace(objects=objects if verbose else None, matches=len(chosen), successful=len(chosen))
 
 
 class FakeClient:
@@ -200,9 +212,9 @@ def test_delete_selects_by_object_id_and_skips_nothing_to_do():
     pytest.importorskip("weaviate")
     client = FakeClient()
     backend = WeaviateBackend(client, "Docs", EMBED)
-    backend.delete([])
+    assert backend.delete([]) == frozenset()
     assert client.handle.deleted == []
-    backend.delete(["a", "a", "b"])
+    assert backend.delete(["a", "a", "b"]) == frozenset()  # nothing stored
     assert len(client.handle.deleted) == 1
 
 
@@ -216,9 +228,10 @@ def test_set_metadata_changes_only_an_object_that_holds_the_id():
     }
     client = FakeClient(stored=stored)
     new = {"allowed_groups": ["*"]}
-    WeaviateBackend(client, "Docs", EMBED).set_metadata(
+    written = WeaviateBackend(client, "Docs", EMBED).set_metadata(
         {"mine": new, "victim": new, "missing": new, other_tool: new, other_tool.upper(): new}
     )
+    assert written == {"mine", other_tool}
     assert [uid for uid, _ in client.handle.updated] == [point_id("mine"), other_tool]
     assert client.handle.updated[0][1] == {
         "metadata_json": '{"allowed_groups": ["*"]}',
@@ -230,10 +243,11 @@ def test_delete_reaches_objects_of_other_tools_only_by_their_exact_uuid():
     pytest.importorskip("weaviate")
     other_tool = str(uuid.uuid4())
     client = FakeClient(stored={other_tool: {}, point_id("a"): {ID_PROPERTY: "a"}})
-    WeaviateBackend(client, "Docs", EMBED).delete(["a", other_tool, other_tool.upper()])
+    removed = WeaviateBackend(client, "Docs", EMBED).delete(["a", other_tool, other_tool.upper()])
     # First the objects add wrote, where their wardowl_id matches; then the other tool's, by exact UUID.
     _, others = client.handle.deleted
     assert others.value == [other_tool]
+    assert removed == {"a", other_tool} and client.handle.stored == {}
 
 
 def test_an_empty_id_is_still_an_id_and_its_object_is_not_another_tools():
@@ -242,10 +256,10 @@ def test_an_empty_id_is_still_an_id_and_its_object_is_not_another_tools():
     client = FakeClient(stored={empty: {ID_PROPERTY: ""}})
     backend = WeaviateBackend(client, "Docs", EMBED)
     # Asked for the id that is that object's UUID, which it does not hold, the backend leaves it alone.
-    backend.set_metadata({empty: {"allowed_groups": ["*"]}})
-    backend.delete([empty])
+    assert backend.set_metadata({empty: {"allowed_groups": ["*"]}}) == frozenset()
+    assert backend.delete([empty]) == frozenset()
     assert client.handle.updated == [] and len(client.handle.deleted) == 1  # only the delete of what add wrote
-    backend.set_metadata({"": {"allowed_groups": ["*"]}})
+    assert backend.set_metadata({"": {"allowed_groups": ["*"]}}) == {""}
     assert [uid for uid, _ in client.handle.updated] == [empty]
 
 
@@ -373,9 +387,11 @@ def test_delete_removes_chunks(client):
     name = _new_collection(client)
     backend = WeaviateBackend(client, name, EMBED)
     backend.add([Document("a", "leave policy", {"allowed_groups": ["*"]}), Document("b", "salary", {})])
-    backend.delete(["a", "never-written"])
+    written = backend.set_metadata({"b": {"allowed_groups": ["hr"]}, "never-written": {}})
+    removed = backend.delete(["a", "never-written"])
     hits = backend.search("leave policy salary", 5)
     client.collections.delete(name)
+    assert written == {"b"} and removed == {"a"}
     assert [h.id for h in hits] == ["b"]
 
 
@@ -391,17 +407,18 @@ def test_changes_reach_only_the_object_that_holds_the_id(client):
     plain = {"content": "salary bands", "metadata_json": '{"allowed_groups": ["hr"]}'}
     handle.data.insert(properties=plain, uuid=other_tool, vector={"embedding": EMBED("salary bands")})
     try:
-        backend.set_metadata({"victim": {"allowed_groups": ["*"]}, other_tool.upper(): {"allowed_groups": ["*"]}})
-        backend.delete(["victim", other_tool.upper()])
+        everyone = {"allowed_groups": ["*"]}
+        assert backend.set_metadata({"victim": everyone, other_tool.upper(): everyone}) == frozenset()
+        assert backend.delete(["victim", other_tool.upper()]) == frozenset()
         found = {h.id: h.metadata for h in backend.search("leave board salary", 5)}
         assert found == {
             "mine": {"allowed_groups": ["hr"]},
             "intruder": {"allowed_groups": ["board"]},
             other_tool: {"allowed_groups": ["hr"]},
         }
-        backend.set_metadata({other_tool: {"allowed_groups": ["*"]}})
+        assert backend.set_metadata({other_tool: {"allowed_groups": ["*"]}}) == {other_tool}
         assert {h.id: h.metadata for h in backend.search("salary", 5)}[other_tool] == {"allowed_groups": ["*"]}
-        backend.delete([other_tool, "mine"])
+        assert backend.delete([other_tool, "mine"]) == {other_tool, "mine"}
         assert [h.id for h in backend.search("leave board salary", 5)] == ["intruder"]
     finally:
         client.collections.delete(name)

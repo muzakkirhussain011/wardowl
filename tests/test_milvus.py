@@ -127,9 +127,11 @@ def test_add_writes_terms_in_batches_and_delete_skips_nothing_to_do():
     assert permission_terms({"allowed_groups": ["hr"]}) == [tag("allowed_groups", "hr")]
     with pytest.raises(ValueError):
         backend.add(docs[:2], embeddings=[EMBED("x")])
-    backend.delete([])
-    backend.delete(iter(["d1", "d2", "d1"]))
+    assert backend.delete([]) == frozenset()
+    assert backend.delete(iter(["d1", "d2", "d1"])) == frozenset()  # the fake's query finds nothing stored
     assert client.deletes == [{"collection_name": "c", "filter": "id in {ids}", "filter_params": {"ids": ["d1", "d2"]}}]
+    stored = FakeClient(stored=["d2"])
+    assert MilvusBackend(stored, "c", EMBED).delete(["d1", "d2"]) == {"d2"}  # what the query just before found
 
 
 def test_ids_with_quotes_reach_milvus_only_as_filter_parameters():
@@ -146,12 +148,15 @@ def test_ids_with_quotes_reach_milvus_only_as_filter_parameters():
 
 def test_set_metadata_writes_only_the_metadata_of_rows_found():
     client = FakeClient(stored=["a"])
-    MilvusBackend(client, "c", EMBED).set_metadata({"a": {"allowed_groups": ["hr"]}, "missing": {"team": "x"}})
+    backend = MilvusBackend(client, "c", EMBED)
+    assert backend.set_metadata({"a": {"allowed_groups": ["hr"]}, "missing": {"team": "x"}}) == {"a"}
     ((collection, rows, kwargs),) = client.upserts
     # A partial update: never the text or vector read earlier, and never a row for an id not stored.
     assert collection == "c" and kwargs == {"partial_update": True}
     assert rows == [{"id": "a", "metadata": {"allowed_groups": ["hr"]}, TERMS_FIELD: [tag("allowed_groups", "hr")]}]
-    MilvusBackend(FakeClient(), "c", EMBED).set_metadata({"missing": {}})  # nothing found, nothing written
+    nothing = FakeClient()
+    assert MilvusBackend(nothing, "c", EMBED).set_metadata({"missing": {}}) == frozenset()  # nothing found
+    assert nothing.upserts == []  # nothing written
 
 
 def test_keyword_requests_search_the_sparse_vector_with_the_text_and_the_same_filter():
@@ -301,9 +306,11 @@ def test_delete_removes_chunks():
     name = _new_collection(client)
     backend = MilvusBackend(client, name, EMBED)
     backend.add([Document("a", "leave policy", {"allowed_groups": ["*"]}), Document("b", "salary", {})])
-    backend.delete(["a", "never-written"])
+    written = backend.set_metadata({"b": {"allowed_groups": ["hr"]}, "never-written": {}})
+    removed = backend.delete(["a", "never-written"])
     hits = backend.search("leave policy salary", 5)
     client.drop_collection(name)
+    assert written == {"b"} and removed == {"a"}
     assert [h.id for h in hits] == ["b"]
 
 

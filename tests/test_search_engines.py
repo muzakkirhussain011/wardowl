@@ -11,7 +11,7 @@ import pytest
 
 from wardowl import And, Document, In, MetadataACLAuthorizer, Or, PermissionedRetriever, Query, RankFusion, Subject
 from wardowl.backends import NothingMatches
-from wardowl.backends._engines import TERMS_FIELD, EngineBackend, _raise_for_items, filter_to_query, tag, terms
+from wardowl.backends._engines import TERMS_FIELD, EngineBackend, _done, _raise_for_items, filter_to_query, tag, terms
 from wardowl.testing import QUERY, HashingEmbedder, check_backend
 
 EMBED = HashingEmbedder()
@@ -77,6 +77,52 @@ def test_bulk_errors_raise_except_deleting_what_is_not_there():
     with pytest.raises(RuntimeError, match="'a'"):
         _raise_for_items(missing, allow_not_found=False)
     _raise_for_items({"errors": False, "items": []}, allow_not_found=False)
+
+
+class Bulk:
+    """A client whose bulk writes answer as the engines document: an update of a document that is
+    not stored fails with 404 (`document_missing_exception`), and a delete of one succeeds with 404
+    and the result `not_found`, which leaves `errors` false."""
+
+    def __init__(self, stored):
+        self.stored = set(stored)
+
+    def bulk(self, operations=None, body=None, refresh=None):
+        actions = operations if operations is not None else body
+        items, errors = [], False
+        for action in actions:
+            if "update" in action:
+                doc_id = action["update"]["_id"]
+                if doc_id in self.stored:
+                    items.append({"update": {"_id": doc_id, "status": 200, "result": "updated"}})
+                else:
+                    error = {"type": "document_missing_exception"}
+                    items.append({"update": {"_id": doc_id, "status": 404, "error": error}})
+                    errors = True
+            elif "delete" in action:
+                doc_id = action["delete"]["_id"]
+                found = doc_id in self.stored
+                self.stored.discard(doc_id)
+                result = {"_id": doc_id, "status": 200 if found else 404, "result": "deleted" if found else "not_found"}
+                items.append({"delete": result})
+        return {"errors": errors, "items": items}
+
+
+@pytest.mark.parametrize("engine", ["elasticsearch", "opensearch"])
+def test_writes_return_the_ids_the_bulk_response_reports_done(engine):
+    from wardowl.backends.elasticsearch import ElasticsearchBackend
+    from wardowl.backends.opensearch import OpenSearchBackend
+
+    kind = ElasticsearchBackend if engine == "elasticsearch" else OpenSearchBackend
+    backend = kind(Bulk(["a", "b"]), "chunks", EMBED)
+    assert backend.set_metadata({"a": {"allowed_groups": ["hr"]}, "gone": {}}) == {"a"}
+    assert backend.set_metadata({}) == frozenset()
+    assert backend.delete(["a", "gone", "a"]) == {"a"}  # the second delete of "a" finds nothing
+    assert backend.delete([]) == frozenset()
+    # A noop update found the document too.
+    noop = {"errors": False, "items": [{"update": {"_id": "b", "status": 200, "result": "noop"}}]}
+    assert _done(noop, "update", ("updated", "noop")) == ["b"]
+    assert _done({"items": [{"index": {"_id": "c", "status": 201, "result": "created"}}]}, "update", ("updated",)) == []
 
 
 def test_wrong_configuration_is_rejected():
@@ -332,7 +378,8 @@ def test_delete_removes_chunks_and_ignores_missing_ones(engine):
     name = _new_index(engine)
     backend = engine["backend"](engine["client"], name, EMBED)
     backend.add([Document("a", "leave policy", {"allowed_groups": ["*"]}), Document("b", "salary", {})])
-    backend.delete(["a", "never-written"])
+    assert backend.set_metadata({"b": {"allowed_groups": ["hr"]}, "never-written": {}}) == {"b"}
+    assert backend.delete(["a", "never-written"]) == {"a"}
     assert [h.id for h in backend.search("leave policy salary", 5)] == ["b"]
     engine["client"].indices.delete(index=name)
 
