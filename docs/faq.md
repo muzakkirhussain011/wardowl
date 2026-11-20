@@ -75,7 +75,7 @@ was returned. [Benchmarks](benchmarks.md) has the method and the scripts to repr
 ## Is wardowl ready for production?
 
 It follows semantic versioning, so the public API does not break within a major version. CI tests
-it on Python 3.11 to 3.14 and runs the suite for every store and permission service against a real
+it on Python 3.11 to 3.15 and runs the suite for every store and permission service against a real
 server. Releases carry Sigstore signatures, an SBOM and provenance. No independent security audit has been carried
 out yet. The [review page](review.md) lists the project's own findings and how to check its work.
 [Production](production.md) is the checklist for a deployment.

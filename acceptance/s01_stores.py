@@ -1,6 +1,6 @@
 """Scenario 1: one knowledge assistant, served from every vector store the company runs.
 
-Northwind and Globex, the two tenants of the company's knowledge assistant, keep 144 documents
+Northwind and Globex, the two tenants of the company's knowledge assistant, keep 146 documents
 between them: handbooks, salary bands, forecasts, board minutes, runbooks, contracts and legal
 memos (acceptance/enterprise.py). Different business units chose different vector stores, so the
 platform team serves the same assistant from each of them, set up as a new adopter would from
