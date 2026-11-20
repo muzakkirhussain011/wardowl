@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Callable, Mapping, Sequence
 from typing import Any
 
 from hypothesis import strategies as st
@@ -99,6 +99,39 @@ filters = st.recursive(
 
 def expected_ids(docs: Sequence[Document], f: Filter) -> set[str]:
     return {d.id for d in docs if matches(f, d.metadata)}
+
+
+def long_value_outcomes(make: Callable[[Sequence[Document]], Any], values: Mapping[str, str]) -> dict[str, str]:
+    """What a store does with long permission values, by label.
+
+    For each value, `make` stores two chunks: one whose `allowed_groups` holds the value, and one
+    whose value differs from it only in its last character, so a store that cuts terms short
+    gives both the same term. The outcome is "found" when a filtered search for each value returns
+    its own chunk alone; otherwise it says what came back, or what the write or the search raised.
+    """
+    outcomes: dict[str, str] = {}
+    for label, value in values.items():
+        near = value[:-1] + ("h" if value[-1] != "h" else "i")
+        docs = [
+            Document("long", f"{QUERY} leave", {"allowed_groups": [value]}),
+            Document("near", f"{QUERY} leave", {"allowed_groups": [near]}),
+        ]
+        try:
+            backend = make(docs)
+        except Exception as e:  # what the store does is what is measured
+            outcomes[label] = f"the write raised {type(e).__name__}: {str(e)[:400]}"
+            continue
+        try:
+            found = [h.id for h in backend.search(QUERY, 5, In("allowed_groups", [value]))]
+            found_near = [h.id for h in backend.search(QUERY, 5, In("allowed_groups", [near]))]
+        except Exception as e:
+            outcomes[label] = f"the search raised {type(e).__name__}: {str(e)[:400]}"
+            continue
+        if found == ["long"] and found_near == ["near"]:
+            outcomes[label] = "found"
+        else:
+            outcomes[label] = f"a filter on the value returned {found}, on the near value {found_near}"
+    return outcomes
 
 
 def chroma_where_matches(where: dict[str, Any], stored: dict[str, Any], fanout: int = 16) -> bool:

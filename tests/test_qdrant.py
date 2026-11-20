@@ -8,6 +8,7 @@ import uuid
 import zlib
 
 import pytest
+from helpers import long_value_outcomes
 
 qdrant_client = pytest.importorskip("qdrant_client")
 from qdrant_client import models  # noqa: E402
@@ -599,3 +600,9 @@ def test_keyword_mode_ranks_by_bm25_inside_the_filter(any_client):
         assert [h.id for h in keyword.search("payouts", 5, In("allowed_groups", ["*"]))] == ["b"]
     finally:
         any_client.delete_collection(name)
+
+
+def test_long_permission_values(any_client):
+    values = {"4,000 characters": "g" * 4000, "40,000 characters": "g" * 40_000}
+    outcomes = long_value_outcomes(_factory(any_client), values)
+    assert outcomes == dict.fromkeys(values, "found"), "\n".join(f"{k}: {v}" for k, v in outcomes.items())

@@ -8,6 +8,7 @@ import uuid
 from types import SimpleNamespace
 
 import pytest
+from helpers import long_value_outcomes
 
 from wardowl import And, Document, In, MetadataACLAuthorizer, Or, PermissionedRetriever, Query, RankFusion, Subject
 from wardowl.backends import NothingMatches
@@ -464,3 +465,33 @@ def test_hybrid_search_with_one_query_vector_and_no_embed_function(engine):
     check_backend(make, examples=8, query=Query(QUERY, EMBED(QUERY)))
     for name in previous:
         engine["client"].indices.delete(index=name)
+
+
+_TAG = len(tag("allowed_groups", "").encode())  # the bytes a tagged term adds to its value
+
+
+def test_long_permission_values_on_the_server(engine):
+    # Lucene refuses a term longer than 32,766 bytes of UTF-8.
+    previous: list[str] = []
+
+    def make(docs):
+        for name in previous:
+            engine["client"].indices.delete(index=name)
+        previous[:] = [_new_index(engine)]
+        backend = engine["backend"](engine["client"], previous[0], EMBED)
+        backend.add(docs)
+        return backend
+
+    values = {
+        "term of 32,766 bytes": "g" * (32_766 - _TAG),
+        "term of 32,767 bytes": "g" * (32_767 - _TAG),
+        "term of 32,765 bytes in three-byte characters": "\u20ac" * ((32_765 - _TAG) // 3),
+        "term of 32,768 bytes in three-byte characters": "\u20ac" * ((32_768 - _TAG) // 3),
+        "40,000 characters": "g" * 40_000,
+    }
+    try:
+        outcomes = long_value_outcomes(make, values)
+    finally:
+        for name in previous:
+            engine["client"].indices.delete(index=name)
+    assert outcomes == dict.fromkeys(values, "found"), "\n".join(f"{k}: {v}" for k, v in outcomes.items())

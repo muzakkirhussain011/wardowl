@@ -7,6 +7,7 @@ import os
 import uuid
 
 import pytest
+from helpers import long_value_outcomes
 
 from wardowl import And, Document, In, MetadataACLAuthorizer, Or, PermissionedRetriever, Query, Subject
 from wardowl.backends import NothingMatches
@@ -299,6 +300,32 @@ def test_a_chunk_with_more_terms_than_the_collection_allows_is_refused():
     stored = backend.search("leave", 5)
     client.drop_collection(name)
     assert stored == []  # not stored with some of its permissions dropped
+
+
+def test_long_permission_values_against_milvus():
+    # create_collection's max_term_length is 1,024 by default.
+    client, previous = _client(), []
+
+    def make(docs):
+        for name in previous:
+            client.drop_collection(name)
+        previous[:] = [_new_collection(client)]
+        backend = MilvusBackend(client, previous[0], EMBED)
+        backend.add(docs)
+        return backend
+
+    extra = len(tag("allowed_groups", ""))
+    values = {
+        "term of 1,024 characters": "g" * (1024 - extra),
+        "term of 1,025 characters": "g" * (1025 - extra),
+        "term of 617 characters, 1,217 bytes": "\u00e9" * 600,
+    }
+    try:
+        outcomes = long_value_outcomes(make, values)
+    finally:
+        for name in previous:
+            client.drop_collection(name)
+    assert outcomes == dict.fromkeys(values, "found"), "\n".join(f"{k}: {v}" for k, v in outcomes.items())
 
 
 def test_delete_removes_chunks():

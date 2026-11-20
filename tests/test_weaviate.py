@@ -9,6 +9,7 @@ from types import SimpleNamespace
 from urllib.parse import urlsplit
 
 import pytest
+from helpers import long_value_outcomes
 
 from wardowl import And, Document, In, MetadataACLAuthorizer, Or, PermissionedRetriever, Query, Subject
 from wardowl.backends import NothingMatches
@@ -488,6 +489,26 @@ def test_a_subject_in_ten_thousand_groups(client):
     result = PermissionedRetriever(backend, MetadataACLAuthorizer(), strategy="prefilter").retrieve("leave", subject, 5)
     client.collections.delete(name)
     assert [h.id for h in result.hits] == ["mine"]
+
+
+def test_long_permission_values_on_the_server(client):
+    previous: list[str] = []
+
+    def make(docs):
+        for name in previous:
+            client.collections.delete(name)
+        previous[:] = [_new_collection(client)]
+        backend = WeaviateBackend(client, previous[0], EMBED)
+        backend.add(docs)
+        return backend
+
+    values = {"4,000 characters": "g" * 4000, "40,000 characters": "g" * 40_000}
+    try:
+        outcomes = long_value_outcomes(make, values)
+    finally:
+        for name in previous:
+            client.collections.delete(name)
+    assert outcomes == dict.fromkeys(values, "found"), "\n".join(f"{k}: {v}" for k, v in outcomes.items())
 
 
 # ---- keyword search and hybrid search ------------------------------------------------------------

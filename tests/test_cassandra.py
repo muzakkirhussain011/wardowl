@@ -6,6 +6,7 @@ import os
 import uuid
 
 import pytest
+from helpers import long_value_outcomes
 
 from wardowl import And, Document, In, MetadataACLAuthorizer, Or, PermissionedRetriever, Query, Subject
 from wardowl.backends._engines import tag
@@ -213,3 +214,17 @@ def test_pre_filtering_and_changes_against_cassandra(session):
     assert backend.search("launch", 3, In("allowed_groups", ["eng"])) and len(backend.search("launch", 10)) == 3
     assert backend.delete(["all", "missing"]) == {"all"} and backend.delete(["all"]) == frozenset()
     assert {h.id for h in backend.search("launch", 10)} == {"eng", "hr"}
+
+
+@needs_cassandra
+def test_long_permission_values_against_cassandra(session):
+    # Cassandra 5.0's SAI guardrail on string terms warns above 1 KiB and fails above 8 KiB by default.
+    extra = len(tag("allowed_groups", "").encode())
+    values = {
+        "term of 1,025 bytes": "g" * (1025 - extra),
+        "term of 8,192 bytes": "g" * (8192 - extra),
+        "term of 8,193 bytes": "g" * (8193 - extra),
+        "40,000 characters": "g" * 40_000,
+    }
+    outcomes = long_value_outcomes(_factory(session), values)
+    assert outcomes == dict.fromkeys(values, "found"), "\n".join(f"{k}: {v}" for k, v in outcomes.items())
