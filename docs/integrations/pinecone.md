@@ -59,11 +59,11 @@ reference semantics do, and no metadata value can change the filter's structure.
   10,000 results per query: a search with `k` above 10,000 raises `ValueError` rather than return
   10,000 hits as if no more matched. Writes go in batches of 100, 8 requests at a time. The
   permission terms are hex-encoded, so each string or integer in the metadata takes twice the UTF-8
-  bytes of its field name and value there, on top of the JSON copy of the metadata: long permission
-  values reach the 40 KB sooner than their length suggests
+  bytes of its tagged term (field name, separator, type and value) there, on top of the JSON copy
+  of the metadata: long permission values reach the 40 KB sooner than their length suggests
   ([operation limits](https://docs.pinecone.io/reference/api/database-limits/operation-limits)).
   CI's tests of values up to 40,000 characters run against the other stores, not Pinecone; the
-  conformance kit, which CI runs against Pinecone on `main`, stores values of 1,000.
+  conformance kit, which CI runs against Pinecone on `main`, stores values of 1,000 characters.
 - **Translating filters yourself:** `filter_to_pinecone` raises `NothingMatches` for a filter that
   can match nothing, since Pinecone reads a missing filter as "match everything".
 - **Namespaces** keep tenants or corpora apart; `clear()` removes every chunk in the backend's
