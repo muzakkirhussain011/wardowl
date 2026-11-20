@@ -16,13 +16,14 @@ All notable changes are recorded here. The format follows
   not catch it, since a chunk that is not stored has no revision. Compare the result with the ids
   you sent. Each backend takes the ids from what its store reports for each write: `RETURNING id`
   (pgvector), the bulk response's items (Elasticsearch, OpenSearch), the bulk write's matched count
-  (MongoDB), a script's answer and each `DEL`'s (Redis), the status of a conditional write (Vespa),
-  a verbose `delete_many` (Weaviate), and an update that raises for a row deleted after its lookup
-  (Weaviate, Milvus). Where the store reports nothing, the call reads back: `set_metadata` after the
-  write (Chroma, LanceDB, Qdrant, Cassandra, MongoDB when fewer documents matched than were sent,
-  Pinecone through the search its `wait` already makes), and `delete` before it (MongoDB, Milvus,
-  Chroma, LanceDB, Qdrant, Cassandra, Pinecone through the fetch it already made). A read is one
-  request for each batch of ids, or one for each id on Cassandra. Such a `delete` also names a
+  (MongoDB), a script's answer and each `DEL`'s (Redis), the status of a conditional update
+  (Vespa), a verbose `delete_many` (Weaviate), and an update that raises for a row deleted after its
+  lookup (Weaviate, Milvus). Where the store reports nothing, the call reads: `set_metadata` after
+  the write (Chroma, LanceDB, Qdrant, Cassandra, MongoDB when fewer documents matched than were
+  sent, Pinecone through the search its `wait` already makes), and `delete` before it (MongoDB,
+  Milvus, Chroma, LanceDB, Qdrant, Cassandra, Vespa, Pinecone through the fetch it already made). A
+  read is one request for each batch of ids, or one for each id on Cassandra and for a Vespa
+  `delete`. Such a `delete` also names a
   chunk that another writer deletes between its read and its delete; a `set_metadata` result never
   names a chunk deleted before the write reached it. `PineconeBackend.set_metadata` with
   `wait=None` reads nothing back and returns None. Code that ignores the result is unaffected; a
@@ -37,12 +38,14 @@ All notable changes are recorded here. The format follows
 
 ### Changed
 
-- `VespaBackend.set_metadata` and `delete` send each update and remove with the test-and-set
-  condition `condition=<schema>`, which every document of the schema meets. Vespa answers 200 to a
-  write to a document that is not stored, as to one that is, and 412 only when a condition is
-  given ([document/v1 status codes](https://docs.vespa.ai/en/reference/document-v1-api-reference.html)),
-  so that is how the backend learns which documents a write reached. 412 is read as "not stored",
-  as 404 still is; the documents written are the same.
+- `VespaBackend.set_metadata` sends each update with the test-and-set condition
+  `condition=<schema>`, which every document of the schema meets. Vespa answers 200 to an update of
+  a document that is not stored, as to one that is, and 412 when a condition is given
+  ([document/v1 status codes](https://docs.vespa.ai/en/reference/document-v1-api-reference.html)),
+  so that is how the backend learns which documents an update reached. 412 is read as "not
+  stored", as 404 still is; the documents written are the same. `VespaBackend.delete` gets each
+  document's `wardowl_id` before it removes it, one more request per id: Vespa 8.763.13 answered 200
+  to a remove of a document that is not stored, with such a condition too, in wardowl's CI.
 - `RedisBackend.delete` sends one `DEL` per key, in one `MULTI` transaction for each batch of 500,
   where it sent one `DEL` with every key of the batch: each answers whether its key was there, and
   the batch is still deleted at once.

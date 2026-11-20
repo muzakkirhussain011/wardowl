@@ -205,7 +205,7 @@ class LanceDBBackend:
         Returns the ids whose rows hold the new metadata when the call reads them back after each
         merge: the merge reports how many rows it updated, not which.
         """
-        rows = [
+        rows: list[dict[str, Any]] = [
             {
                 "id": doc_id,
                 self.metadata_field: json.dumps(dict(new)),

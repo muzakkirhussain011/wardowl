@@ -242,7 +242,7 @@ write changed from what its store reports, and where the store reports nothing i
 | Elasticsearch, OpenSearch | The updates the bulk response reports done; a missing document's fails with 404 | The deletes whose result is `deleted`; a missing document's is `not_found` |
 | MongoDB | All the ids, when the bulk write matched as many documents as it was sent; otherwise one read on the primary names the documents that hold the batch's write marker | The ids a read on the primary finds just before the delete |
 | Redis | Each chunk's script answers whether its hash was stored, in the step that writes it | Each key's `DEL` answers whether it removed the key |
-| Vespa | Each update carries a condition every document of the schema meets; one that is not stored fails it with 412 | The same, for each remove |
+| Vespa | Each update carries a condition every document of the schema meets; one that is not stored fails it with 412 | The ids a get of each document finds just before the removes |
 | Weaviate | The objects its lookup found, each then updated by UUID; Weaviate refuses to update an object that is not stored, so one deleted in between makes the call raise | The objects `delete_many(..., verbose=True)` reports deleted |
 | Milvus | The rows a strongly consistent query found, all of which the partial update then wrote, since it raises otherwise | The ids a strongly consistent query finds just before the delete |
 | Chroma | The records that hold the new metadata when read back after the update | The ids a read finds just before the delete |
@@ -252,7 +252,7 @@ write changed from what its store reports, and where the store reports nothing i
 | Pinecone | With `wait` (the default), the ids a search shows holding the new metadata when the wait ends; with `wait=None`, None | The ids the fetch before the delete shows holding them |
 
 The reads are of the call's own ids, one request for each batch of them, or one for each id on
-Cassandra. A `set_metadata` result never names a chunk that was deleted before the write reached
+Cassandra and for a Vespa `delete`. A `set_metadata` result never names a chunk that was deleted before the write reached
 it: a store that cannot say so is read back after the write. A `delete` that reads first names the
 ids that read found, every one of which is deleted once the call's delete has run; the store's
 delete does not say which chunks it removed, so a chunk that another writer deletes between the

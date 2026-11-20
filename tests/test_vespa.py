@@ -66,7 +66,7 @@ class Fake:
         httpx = pytest.importorskip("httpx")
         self.requests = []
         self.reply, self.status = reply, status
-        self.stored = set()  # the document paths written, which conditional writes find
+        self.stored = set()  # the document paths written, which gets and conditional updates find
         self.client = httpx.Client(transport=httpx.MockTransport(self.handle))
 
     def handle(self, request):
@@ -80,11 +80,13 @@ class Fake:
         path = request.url.path
         if request.method == "POST":
             self.stored.add(path)
+        elif request.method == "GET" and path not in self.stored:
+            return httpx.Response(404, json={"message": "not found"})
         elif "condition" in request.url.params and path not in self.stored:
-            # Vespa answers a write whose condition is not met, or whose document is not stored, with 412.
+            # Vespa answers an update whose document is not stored, under a condition, with 412.
             return httpx.Response(412, json={"message": "condition not met"})
         elif request.method == "DELETE":
-            self.stored.discard(path)
+            self.stored.discard(path)  # 200 whether it was stored or not
         return httpx.Response(200, json={})
 
     def backend(self, **kwargs):
@@ -109,13 +111,17 @@ def test_requests_carry_the_filter_vectors_and_escaped_ids():
     assert body["hits"] == 3 and len(body["input.query(q)"]) == EMBED.dim
     backend.add([Document("a/b", "one", {"team": "x"}), Document("a/b", "two", {})])
     assert backend.set_metadata({"a/b": {"team": ["y"]}}) == {"a/b"}
-    assert backend.delete(["a/b", "c"]) == {"a/b"}  # "c" is not stored: its condition fails with 412
+    assert backend.delete(["a/b", "c"]) == {"a/b"}  # the get before the remove finds only "a/b"
     put, update = json.loads(fake.requests[1].content), json.loads(fake.requests[2].content)
     assert fake.requests[1].url.raw_path == b"/document/v1/wardowl/wardowl/docid/a%2Fb"
-    # An update or a remove carries a condition every document of the schema meets: only a document
-    # that is not stored fails it.
+    # An update carries a condition every document of the schema meets: only a document that is not
+    # stored fails it.
     assert fake.requests[2].url.raw_path == b"/document/v1/wardowl/wardowl/docid/a%2Fb?condition=wardowl"
-    assert put["fields"]["text"] == "two" and len(fake.requests) == 5  # the last of a repeated id wins
+    # A delete reads each document's id, then removes it.
+    gets = [r for r in fake.requests[3:] if r.method == "GET"]
+    assert len(gets) == 2 and all(r.url.params["fieldSet"] == "wardowl:wardowl_id" for r in gets)
+    assert [r.method for r in fake.requests[5:]] == ["DELETE", "DELETE"]
+    assert put["fields"]["text"] == "two" and len(fake.requests) == 7  # the last of a repeated id wins
     assert update["fields"][TERMS_FIELD]["assign"] == [tag("team", "y").encode().hex()]
     # httpx drops "." and ".." from a path, so their requests would reach another one: they are
     # refused before anything is sent. Ids that merely hold dots keep them.
@@ -126,11 +132,10 @@ def test_requests_carry_the_filter_vectors_and_escaped_ids():
             backend.set_metadata({bad: {"team": ["y"]}})
         with pytest.raises(ValueError, match="Vespa cannot address"):
             backend.add([Document(bad, "text", {})])
-    assert len(fake.requests) == 5
+    assert len(fake.requests) == 7
     assert backend.delete(["...", "a..b", "./x"]) == frozenset()
-    paths = sorted(request.url.raw_path for request in fake.requests[5:])
-    docid = b"/document/v1/wardowl/wardowl/docid/"
-    assert paths == [docid + p + b"?condition=wardowl" for p in (b".%2Fx", b"...", b"a..b")]
+    paths = sorted(request.url.raw_path for request in fake.requests[7:] if request.method == "DELETE")
+    assert paths == [b"/document/v1/wardowl/wardowl/docid/" + p for p in (b".%2Fx", b"...", b"a..b")]
 
 
 def test_keyword_mode_sends_the_text():
