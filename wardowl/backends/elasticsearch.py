@@ -25,9 +25,9 @@ from wardowl.backends._engines import (
     TERMS_FIELD,
     EngineBackend,
     check_layout,
+    engine_terms,
     filter_to_query,
     mappings,
-    terms,
 )
 
 __all__ = ["TERMS_FIELD", "ElasticsearchBackend", "create_index", "filter_to_query", "permission_terms"]
@@ -35,7 +35,7 @@ __all__ = ["TERMS_FIELD", "ElasticsearchBackend", "create_index", "filter_to_que
 
 def permission_terms(metadata: Mapping[str, Any]) -> list[str]:
     """The value of `wardowl_terms` for a chunk with this metadata."""
-    return terms("metadata", metadata)
+    return engine_terms("metadata", metadata)
 
 
 def create_index(

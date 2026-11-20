@@ -113,7 +113,10 @@ may not contain `.`, `[`, `]` or `"`, which Qdrant reads as path syntax; such a 
 `ValueError`, so retrieval fails closed.
 
 The backend passes wardowl's [conformance kit](../extending.md#test-it-with-the-conformance-kit)
-in CI against a real Qdrant server (v1.19.2) and against Qdrant's local mode.
+in CI against a real Qdrant server (v1.19.2) and against Qdrant's local mode. Both also store
+permission values of 4,000 and 40,000 characters and find each one's chunk with a filter, while a
+value that differs only in its last character matches only its own chunk, before and after
+`set_metadata` changes it.
 
 ## Search quality and async
 

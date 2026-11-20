@@ -86,6 +86,9 @@ metadata, so `1` and `"1"` stay apart, and booleans, floats, nested lists and ob
   filter that can match nothing, since Weaviate reads a missing filter as "match everything".
 - The metadata is stored as JSON text and returned exactly as written, so the retriever's re-check
   sees the true permissions whatever their shape, and arbitrary metadata never changes the schema.
+- Long values: CI stores permission values of 4,000 and 40,000 characters on Weaviate 1.39.12 and
+  finds each one's chunk with a filter, while a value that differs only in its last character
+  matches only its own chunk, before and after `set_metadata` changes it.
 
 ## Collections written by other tools
 

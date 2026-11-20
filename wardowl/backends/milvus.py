@@ -126,7 +126,7 @@ def create_collection(
 
     `max_terms` caps the tagged terms per chunk: one per string or integer in its metadata, so a
     chunk shared with many groups needs more. `max_term_length` caps one term, which is the field
-    name, two characters and the value.
+    name, two characters and the value, in bytes of UTF-8; Milvus refuses a longer one.
 
     `text_search=True` analyzes the text with Milvus's standard analyzer, which keeps every word,
     and adds a BM25 function that fills a sparse vector, `wardowl_sparse`, with an inverted index,

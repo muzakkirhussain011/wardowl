@@ -5,7 +5,11 @@ holding its text, its metadata as JSON (returned exactly as written), its vector
 permission terms of `wardowl.backends._engines` in a `set<text>` column with an SAI index. A
 filter is rewritten as an OR of ANDs: each AND becomes one ANN query whose `WHERE` requires its
 terms (`wardowl_terms CONTAINS ?`), the queries run concurrently, and the best `k` of their
-results are kept. Every value is a bound parameter, never CQL text.
+results are kept. Every value is a bound parameter, never CQL text. SAI does not index a term
+longer than `sai_string_term_size_fail_threshold` (8 KiB by default): the write fails, or, for a
+superuser or with authentication off, is stored without it, and a filter never finds the row. So a
+term longer than 8,192 bytes is written as its SHA-256 digest, and a filter looks for such a term in
+both forms, since a cluster whose threshold is higher indexed it whole.
 
 `create_table(session, keyspace, table, dim)` creates the table and its indexes. Cassandra allows
 1,000 rows per ANN query, so a search with `k` above that raises `ValueError`. A filter that expands
@@ -30,7 +34,7 @@ import threading
 from collections.abc import Iterable, Mapping, Sequence
 from typing import Any
 
-from wardowl.backends._engines import _SEP, tag, terms
+from wardowl.backends._engines import _SEP, digest, tag, terms
 from wardowl.backends._vectors import document_vectors
 from wardowl.filters import And, Filter, In, Or, _ordered, matches
 from wardowl.types import Document, Embed, Hit, Query
@@ -39,6 +43,30 @@ __all__ = ["CassandraBackend", "TooManyQueries", "create_table", "filter_to_conj
 
 _NAME = re.compile(r"[a-z_][a-z0-9_]{0,47}\Z")
 _MAX_LIMIT = 1000  # Cassandra's limit for ANN queries
+# Cassandra 5.0's default for sai_string_term_size_fail_threshold, in bytes. SAI does not index a
+# longer term: an ordinary user's write fails, and a superuser's, or any with authentication off,
+# is stored without the term, so a filter never finds its row (Guardrail.enabled skips superusers;
+# TrieMemoryIndex.addTerm skips the term).
+_MAX_TERM_BYTES = 8192
+
+
+def _over(term: str) -> bool:
+    return len(term.encode("utf-8", "surrogatepass")) > _MAX_TERM_BYTES
+
+
+def _stored(term: str) -> str:
+    """The form a term is written in: itself, or its digest when it is longer than `_MAX_TERM_BYTES`."""
+    return digest(term) if _over(term) else term
+
+
+def _forms(term: str) -> tuple[str, ...]:
+    """The forms a filter looks for: a long term as written now, and as written before, which a
+    cluster whose threshold is higher than the default indexed."""
+    return (term, digest(term)) if _over(term) else (term,)
+
+
+def _row_terms(doc_id: str, metadata: Mapping[str, Any]) -> set[str]:
+    return {_stored(t) for t in terms(doc_id, metadata)}
 
 
 class TooManyQueries(ValueError):
@@ -52,7 +80,10 @@ def _too_many(limit: int) -> TooManyQueries:
 def required_terms(f: Filter) -> frozenset[str]:
     """Terms every chunk the filter matches must have (possibly none)."""
     if isinstance(f, In):
-        return frozenset({tag(f.field, v) for v in f.values}) if len(f.values) == 1 else frozenset()
+        if len(f.values) != 1:
+            return frozenset()
+        forms = _forms(tag(f.field, next(iter(f.values))))
+        return frozenset(forms) if len(forms) == 1 else frozenset()  # a long term has two forms
     if isinstance(f, And):
         return frozenset().union(*(required_terms(c) for c in f.clauses))
     if isinstance(f, Or):
@@ -75,12 +106,13 @@ def filter_to_conjunctions(f: Filter, limit: int = 10_000) -> list[frozenset[str
     """The filter as an OR of ANDs: a chunk matches when its terms include every term of one set.
 
     An empty list means nothing can match. ANDs implied by others are dropped, and a filter that
-    needs more than `limit` ANDs raises `ValueError`.
+    needs more than `limit` ANDs raises `ValueError`. A term longer than 8,192 bytes gives two
+    ANDs, one with the term and one with its digest, since a row holds one or the other.
     """
     if isinstance(f, In):
         if _SEP in f.field:
             raise ValueError(f"field {f.field!r} may not contain \\x1f")
-        return _minimal((frozenset({tag(f.field, v)}) for v in _ordered(f.values)), limit)
+        return _minimal((frozenset({t}) for v in _ordered(f.values) for t in _forms(tag(f.field, v))), limit)
     if isinstance(f, And):
         found: list[frozenset[str]] = [frozenset()]
         for clause in f.clauses:
@@ -199,7 +231,7 @@ class CassandraBackend:
         rows: list[tuple[Any, ...]] = []
         for i in latest.values():
             doc = docs[i]
-            row = (doc.id, doc.text, json.dumps(dict(doc.metadata)), set(terms(doc.id, doc.metadata)))
+            row = (doc.id, doc.text, json.dumps(dict(doc.metadata)), _row_terms(doc.id, doc.metadata))
             rows.append((*row, [float(x) for x in vectors[i]]))
         self._run(
             f"INSERT INTO {self.name} (id, text, metadata, wardowl_terms, embedding) VALUES (?, ?, ?, ?, ?)",
@@ -235,7 +267,7 @@ class CassandraBackend:
         have their text. A plain write reports nothing, and a row left without text by a delete
         between the lookup and the update is not counted.
         """
-        rows = [(json.dumps(dict(new)), set(terms(i, new)), i) for i, new in metadata.items()]
+        rows = [(json.dumps(dict(new)), _row_terms(i, new), i) for i, new in metadata.items()]
         found = self._run(f"SELECT id FROM {self.name} WHERE id = ?", [(i,) for _, _, i in rows])
         stored = [row for row, result in zip(rows, found, strict=True) if result.one() is not None]
         self._run(f"UPDATE {self.name} SET metadata = ?, wardowl_terms = ? WHERE id = ?", stored, write=True)

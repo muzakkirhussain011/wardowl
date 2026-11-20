@@ -35,6 +35,17 @@ All notable changes are recorded here. The format follows
   and an id that is not stored and checks the set `delete` returns the same way. A result that is
   not a set, None included, is not checked, and `delete` is then not called, so a backend that
   returns nothing passes as before.
+- The conformance kit checks long values (U42 in the readiness review). Once in each run,
+  `check_backend` stores a corpus whose permission values are `long_value_length` characters long
+  (1,000 by default): two that differ only in their last character, one of two-byte characters, and
+  the characters the first two share, as a value of its own. Filters on each, retrieval for subjects
+  who hold them, and a `set_metadata` to another long value must give exactly what the reference
+  gives. Its values had been at most nine characters long, so a store that cuts long strings short
+  when it indexes them, or leaves them out of the index, passed. A backend of your own that passed
+  before can fail here: pass `long_value_length` under your store's documented limit if it refuses
+  longer values with an error, or 0 to leave the check out. A failure shows each long value as runs
+  of its characters, such as `<x 999 times>1`. wardowl's CI passes 40,000 to the Elasticsearch and
+  OpenSearch runs, and 500 to Milvus's, whose default `max_term_length` is 1,024 bytes.
 - `create_app(max_groups=...)` bounds the groups on the subject that the authenticator returns,
   whichever authenticator it is (U40 in the readiness review). A subject in more groups answers
   401, the same answer as a refused token, before anything is searched, and the `wardowl` logger
@@ -67,8 +78,52 @@ All notable changes are recorded here. The format follows
 - `ChromaBackend.delete` deletes a repeated id once, and `MilvusBackend.set_metadata` writes a row
   found twice by its lookup once.
 
+### Fixed
+
+- `ElasticsearchBackend` and `OpenSearchBackend` write chunks whose metadata holds a long value
+  (U17 in the readiness review). Lucene indexes a term of at most 32,766 bytes of UTF-8, and the
+  engines refuse a document with a longer `keyword` value
+  ([Elasticsearch](https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/keyword)).
+  CI measured it before the change: a permission term (field name and value together) of 32,766
+  bytes was found, and one of 32,767 bytes, or of 32,768 bytes in three-byte characters, made `add`
+  raise `RuntimeError` on Elasticsearch 9.5.5 (`document_parsing_exception`) and OpenSearch 3.9.0
+  ("Document contains at least one immense term"). A term longer than 32,766 bytes is now stored and
+  searched as its SHA-256 digest, as `RedisBackend` and `MongoDBBackend` do with theirs, in `add`,
+  `set_metadata`, filters and `permission_terms`. Terms of 32,766 bytes or fewer are unchanged, and
+  no keyword field could hold a longer one, so nothing that worked changes and no index needs
+  writing again.
+- `CassandraBackend` finds chunks whose metadata holds a long value (U42 in the readiness review).
+  SAI does not index a string term longer than `sai_string_term_size_fail_threshold`, 8 KiB by
+  default. In Cassandra's source the guardrail fails an ordinary user's write, and is skipped for
+  a superuser or with authentication off, when the row is stored and its index leaves the term
+  out. CI's Cassandra 5.0.9 runs without authentication: a filter on a value whose term was 8,193
+  bytes, or a value of 40,000 characters, found nothing and raised nothing, while a term of 8,192
+  bytes was found. A term longer than 8,192 bytes is now written as its SHA-256 digest, and a
+  filter looks for both the term and its digest, so rows that a cluster with a higher threshold
+  indexed with the whole term are still found. A row written with such a term before, on a cluster
+  at the default threshold, was never indexed under it: write it again with `add` or
+  `set_metadata` to make it findable. `filter_to_conjunctions` gives such a term two ANDs, and
+  `required_terms` no longer counts it as required.
+
 ### Documentation
 
+- The Milvus page and `create_collection` say that `max_term_length` counts bytes of UTF-8, as
+  Milvus's `max_length` does ([String field](https://milvus.io/docs/string.md)); the page said only
+  "caps one term". CI measured that a longer term fails the write with `MilvusException`: 1,025
+  bytes, and 617 characters in 1,217 bytes, against the default of 1,024.
+- The pages of the other stores say what CI stores and finds: values of 4,000 and 40,000 characters
+  on Weaviate, Qdrant, LanceDB, Vespa, Chroma and PostgreSQL (whose `jsonb_path_ops` index hashes
+  each value whole). The Elasticsearch page says not to give `wardowl_terms` an `ignore_above`, as
+  the `index.mapping.ignore_above` setting or the `logsdb` index mode would: a longer value is left
+  out of the index, and a filter never finds its chunk. The Pinecone page says that the permission
+  terms are hex-encoded, so they take twice the bytes of their field names and values toward its
+  40 KB of metadata per record, and that CI's long-value tests do not run against Pinecone.
+- Tests store permission values at and just over each store's limit, or of 4,000 and 40,000
+  characters where none is documented, and check that a filter finds each one's chunk and no other,
+  before and after `set_metadata`, on every store CI runs: PostgreSQL, Chroma, Qdrant (server and
+  local mode), Weaviate, Elasticsearch, OpenSearch, Vespa, Cassandra and LanceDB (with and without
+  its `LABEL_LIST` index); on Milvus, that a term over `max_term_length` fails the write. MongoDB
+  and Redis have had such tests since 3.0.0. Tests only.
 - The Chroma module and page said that a record whose JSON copy cannot be read is denied by the
   re-check. Since 2.0.0, `ChromaBackend.search` applies a filter to each hit's copy first, so under
   a filter such a record is dropped there and never counted; only a search without a filter

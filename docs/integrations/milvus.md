@@ -87,7 +87,13 @@ ever disagree, a chunk can be hidden from a pre-filtered search, never leaked.
   metadata; a chunk shared with more groups than that needs a larger value, within what your Milvus
   allows for an array field. Inserting a chunk with more fails, so nothing is stored with partial
   permissions.
-- `max_term_length` (default 1,024) caps one term: the field name, two characters and the value.
+- `max_term_length` (default 1,024) caps one term: the field name, two characters and the value,
+  in bytes of UTF-8, as Milvus counts a `VARCHAR`'s `max_length`
+  ([String field](https://milvus.io/docs/string.md)). A longer term fails the write with
+  `MilvusException`, so no chunk is stored with a permission cut short or dropped. CI measured it
+  on Milvus 3.0.2: a term of 1,024 bytes was stored and found, and terms of 1,025 bytes, and of 617
+  characters in 1,217 bytes, were refused. It can be raised to 65,535, the largest `max_length`
+  Milvus documents for a `VARCHAR`.
 - `max_content_length` (default 65,535, Milvus's largest `VARCHAR`) caps the chunk text.
 - `max_id_length` (default 512) caps document ids.
 

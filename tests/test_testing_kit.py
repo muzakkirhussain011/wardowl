@@ -208,9 +208,11 @@ def test_retrieval_is_checked_through_aretrieve_too():
         check_backend(_AsyncEveryoneBug)
 
 
-def _lenient(normalise):
+def _lenient(normalise, *, filters=True):
     """A backend that compares values after `normalise`, as a store that folds case, normalises
-    Unicode or compares numbers as text would: it matches values the reference keeps apart."""
+    Unicode or compares numbers as text would: it matches values the reference keeps apart. With
+    `filters=False` it changes only the values it stores, as a store that cuts short or leaves out
+    what it indexes and looks for the filter's values whole."""
 
     def each(value):
         return [normalise(v) for v in value] if isinstance(value, list) else normalise(value)
@@ -224,7 +226,8 @@ def _lenient(normalise):
         def search(self, query, k, filter=None):
             hits = super().search(query, len(self) + 1)
             if filter is not None:
-                hits = [h for h in hits if matches(mapped(filter), {n: each(v) for n, v in h.metadata.items()})]
+                f = mapped(filter) if filters else filter
+                hits = [h for h in hits if matches(f, {n: each(v) for n, v in h.metadata.items()})]
             return hits[:k]
 
     return Lenient
@@ -243,6 +246,46 @@ def test_a_backend_that_matches_values_the_reference_keeps_apart_is_caught(norma
     # The kit's data once held none of these pairs, so such a backend passed it.
     with pytest.raises(ConformanceError):
         check_backend(_lenient(normalise), examples=100)
+
+
+def _cut(v):
+    return v[:255] if isinstance(v, str) else v  # as a store that indexes the first 255 characters
+
+
+def _dropped(v):
+    return None if isinstance(v, str) and len(v) > 255 else v  # as a keyword field with ignore_above: 255
+
+
+def test_long_values_are_checked_once_and_shown_short():
+    check_backend(InMemoryBackend, examples=2, long_value_length=40_000)
+    check_backend(_lenient(_cut), examples=2, long_value_length=200)  # within what the store indexes
+    check_backend(_lenient(_dropped, filters=False), examples=2, long_value_length=0)  # left out
+    with pytest.raises(ValueError, match="long_value_length"):
+        check_backend(InMemoryBackend, long_value_length=-1)
+
+
+@pytest.mark.parametrize(
+    ("backend", "problem"),
+    [
+        (_lenient(_cut), "should not match"),  # filters cut short too: values that start alike match
+        (_lenient(_cut, filters=False), "missed documents"),
+        (_lenient(_dropped, filters=False), "missed documents"),
+    ],
+    ids=["cut", "cut-when-stored", "dropped"],
+)
+def test_a_backend_that_cuts_or_drops_long_values_is_caught(backend, problem):
+    # The kit's values were at most nine characters long, so such a backend passed it.
+    with pytest.raises(ConformanceError, match=problem) as failure:
+        check_backend(backend, examples=2)
+    message = str(failure.value)
+    assert "values of 1,000 characters, long_value_length=1000" in message
+    assert "<x 999 times>1" in message and "x" * 100 not in message
+
+
+def test_an_approximate_backend_that_cuts_long_values_is_caught_when_it_matches_wrongly():
+    check_backend(_lenient(_dropped, filters=False), examples=2, exact=False)  # it may miss matches
+    with pytest.raises(ConformanceError, match="should not match"):
+        check_backend(_lenient(_cut), examples=2, exact=False)
 
 
 class _DottedPathBackend(InMemoryBackend):
