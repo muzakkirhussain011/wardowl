@@ -41,8 +41,11 @@ them; [`.github/workflows/ci.yml`](.github/workflows/ci.yml) shows how each serv
 A backend implements `search(query, k, filter=None) -> list[Hit]` and sets `supports_filters`.
 Translate the `In` / `And` / `Or` filter into the store's native filter; the in-memory backend and
 `wardowl.filters.matches` define the semantics you must match, including "a missing field
-never matches". An authorizer implements `check(subject, hits, action)` and, when the permission
-system can enumerate what a subject may read, `filter_for(subject, action)`.
+never matches". An authorizer implements `check(subject, hits, action)` and
+`filter_for(subject, action)`. Both are required: the retriever calls `filter_for` whenever it may
+pre-filter (`strategy` `"auto"` or `"prefilter"` with a backend that takes filters), and an
+authorizer without it fails those retrievals with `AuthorizationError`. When the permission system
+cannot enumerate what a subject may read, `filter_for` returns `None` and results are post-filtered.
 
 ## Design changes
 
@@ -54,9 +57,13 @@ before code is written.
 
 Maintainers release from `main`:
 
-1. Open a pull request that sets `__version__` in `wardowl/__init__.py` and moves the
-   *Unreleased* changelog entries under a dated heading for the new version.
-2. After it merges, publish a GitHub release tagged `v` plus the version (for example `v1.2.0`),
+1. Open a pull request from a `release/<version>` branch that sets `__version__` in
+   `wardowl/__init__.py` and moves the *Unreleased* changelog entries under a dated heading for the
+   new version. Each push to that branch runs the
+   [Acceptance workflow](.github/workflows/acceptance.yml) on the branch's own code: the
+   real-world scenarios against real servers, an identity provider and embedding models, whose
+   weekly runs test only what is already on PyPI.
+2. After it merges, and once the Acceptance run on its last commit has passed, publish a GitHub release tagged `v` plus the version (for example `v1.2.0`),
    marked as a pre-release for release candidates.
 3. [`release.yml`](.github/workflows/release.yml) builds the package, checks that the tag matches the
    version, and uploads it to PyPI with trusted publishing; no API token exists. It then attaches

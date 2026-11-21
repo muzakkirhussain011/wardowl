@@ -282,7 +282,10 @@ comes back. `tcp_user_timeout` and keepalives catch a network that drops packets
 such as a proxy, that accepts and acknowledges everything and never answers: for that, bound the
 whole retrieval in your application, for example with `asyncio.wait_for` around `aretrieve`, or
 with `retrieval_timeout` in the [HTTP service](http.md#time-bounds-and-threads) and the
-[MCP tool](mcp.md#failures).
+[MCP tool](mcp.md#failures). Such a bound frees the caller, not the search. Without `async_pool`,
+`aretrieve` runs the search in a worker thread, which nothing can stop from outside: the thread and
+the pooled connection it holds stay busy until the database answers or one of the settings above
+ends the call, so leave room for them in the pool's size and the event loop's executor.
 
 ## Async
 

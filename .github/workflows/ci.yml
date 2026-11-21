@@ -192,6 +192,9 @@ jobs:
           WARDOWL_TEST_WEAVIATE_GRPC_PORT: "50051"
           WARDOWL_TEST_ELASTICSEARCH_URL: http://127.0.0.1:9200
           WARDOWL_TEST_OPENSEARCH_URL: http://127.0.0.1:9201
+          # Every extra is installed and every service started, so a suite that skips itself here has
+          # lost one of them: tests/conftest.py then fails the run (Pinecone's service tests excepted).
+          WARDOWL_CI_NO_SKIPS: "1"
         run: |
           pytest -q -ra --cov --cov-report=
           coverage report --format=markdown >> "$GITHUB_STEP_SUMMARY"
@@ -261,11 +264,15 @@ jobs:
           pip install --require-hashes --no-deps -r "$RUNNER_TEMP/requirements.txt"
           pip install --require-hashes --no-deps -r .github/requirements/build.txt
           pip install --no-deps --no-build-isolation -e .
-      - name: Pinecone, the service (skipped without the secret)
+      - name: Pinecone, the service (its tests skip without the PINECONE_API_KEY secret)
         env:
           WARDOWL_TEST_PINECONE_API_KEY: ${{ secrets.PINECONE_API_KEY }}
           PYTEST_DISABLE_PLUGIN_AUTOLOAD: "1"
-        run: pytest -q -p no:cacheprovider tests/test_pinecone.py
+        run: |
+          if [ -z "$WARDOWL_TEST_PINECONE_API_KEY" ]; then
+            echo "::warning::No PINECONE_API_KEY secret: the tests against Pinecone's service are skipped, and only those against a scripted stand-in run"
+          fi
+          pytest -q -p no:cacheprovider tests/test_pinecone.py
 
   library:
     name: library (Python ${{ matrix.python }})

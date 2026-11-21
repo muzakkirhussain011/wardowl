@@ -13,10 +13,12 @@ Given an authorizer that answers correctly:
 2. **Failures return nothing.** An authorizer that raises, times out, returns the wrong number of
    decisions or returns non-boolean decisions makes the call raise `AuthorizationError`. There is
    no fallback to unfiltered results, and a `PermissionNodePostprocessor` in a LlamaIndex pipeline
-   behaves the same way. The error's message is fixed, never the text of the exception behind it,
+   behaves the same way. The error's message never holds the text of the exception behind it,
    which can name hosts or credentials and is kept as its `__cause__` for your logs: agent
-   frameworks such as Haystack's show a tool's error to the model. A failed search or count in the
-   backend raises `SearchError` the same way, with a fixed message and nothing returned.
+   frameworks such as Haystack's show a tool's error to the model. Some messages name a resource
+   or subject id, or carry the error field of a permission service's answer (threat T12 in the
+   [threat model](threat-model.md)). A failed search or count in the backend raises `SearchError`
+   the same way, with a fixed message and nothing returned.
 3. **A backend's filtering bugs cannot leak.** With `recheck=True` (the default), pre-filtered hits
    are checked again, and anything the backend returned outside the filter is dropped and counted
    in `violations`. With `recheck=False`, hits are still matched against the filter locally, at no
@@ -51,7 +53,7 @@ services. The tests compare with an oracle written without the library's own fil
 | S7 | An incomplete candidate search is never reported as complete. | `test_core.py` (post-filtering capped; short and empty results from approximate and exact searches), `test_short_results.py` (counts, searches run again, and the conformance kit's checks of both), truncated or deadline-cut lists in `test_openfga.py` and `test_spicedb.py`, Redis's partial results after a timeout (a RESP3 warning, or a RESP2 answer from a server whose policy is not `fail`) in `test_redis_vector.py`. `complete` cannot see an approximate index that returns k chunks other than the true top k; `recall_sample_rate` measures it. |
 | S8 | The documented defaults keep every protection on. | `recheck=True`, `strategy="auto"`, empty `And`/`Or` and single-string groups refused (`test_core.py`) |
 | S9 | Cached decisions are used for at most `ttl`, and not at all after `invalidate()`; for `source_staleness` seconds after it, no answer about the invalidated subjects is cached, in any replica, so a service that is itself behind cannot refill the cache with a decision from before the change. | `test_caching_events.py`, `test_shared_cache.py` (the hold through a real Redis), `test_revocation.py` (revocation under concurrent retrievals, one and three replicas; a service answering from stale data, sync and async, here and in another replica) |
-| S10 | Errors and telemetry reveal no content, credentials or query text. `AuthorizationError`, `SearchError` and `AuditError` messages are fixed: the text of the exception behind one stays in its `__cause__`. | `test_caching_events.py` (events and OpenTelemetry), `test_core.py` (a failing authorizer, redactor, store search or count whose error names a password), `test_frameworks.py` and `test_haystack.py` (the same failure seen through LangChain, LlamaIndex and Haystack), `test_mcp.py` (a failing permission service, store or subject function), each authorizer's tests |
+| S10 | Errors and telemetry reveal no content, credentials or query text. `SearchError` and `AuditError` messages are fixed, and `AuthorizationError` messages are written by wardowl: none holds the text of the exception behind it, which stays in its `__cause__`. An `AuthorizationError` message can name a resource or subject id, or carry a permission service's own error field (T12). | `test_caching_events.py` (events and OpenTelemetry), `test_core.py` (a failing authorizer, redactor, store search or count whose error names a password), `test_frameworks.py` and `test_haystack.py` (the same failure seen through LangChain, LlamaIndex and Haystack), `test_mcp.py` (a failing permission service, store or subject function), each authorizer's tests |
 
 S1 to S10 assume the authorizer answers correctly, the backend returns the metadata it stored, and
 the subject comes from authentication; the next sections cover those assumptions. The test files

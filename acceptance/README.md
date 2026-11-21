@@ -39,8 +39,8 @@ skipped unless their credentials are set.
 
 The [Acceptance workflow](../.github/workflows/acceptance.yml) starts every server as a container,
 installs wardowl from [`requirements.txt`](requirements.txt) by hash, and runs the scenarios. It
-runs weekly and by hand against the release on PyPI, and on a push to an `acceptance/**` branch
-against that branch's code. To run one yourself, start the servers it names (see the workflow for
+runs weekly and by hand against the release on PyPI, and on a push to an `acceptance/**` or
+`release/**` branch against that branch's code, so each release is tested before it is published. To run one yourself, start the servers it names (see the workflow for
 images, ports and environment variables), then:
 
 ```bash

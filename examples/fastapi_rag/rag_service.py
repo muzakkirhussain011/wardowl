@@ -17,6 +17,8 @@ How it holds:
 5. A failed permission check answers 503 with no details; the details go to the server log.
 6. Each retrieval is logged as a structured event (who asked, what came back), never the query or
    the text.
+7. A request body over 256 KiB is refused with 413 before it is read in full, and so before the
+   token is checked: FastAPI reads the whole body before it runs the dependency that checks it.
 
 This is a reference, not a product. The documents are synthetic and kept in memory; the token is an
 HS256 JWT signed with a secret from the environment; `cite_sources` stands in for your model. In
@@ -33,13 +35,15 @@ import json
 import logging
 import os
 from collections.abc import Callable, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Annotated
 
 import jwt
 from fastapi import Depends, FastAPI, HTTPException
+from fastapi.responses import JSONResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel, ConfigDict, Field
+from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 from wardowl import (
     AllOf,
@@ -67,7 +71,7 @@ Model = Callable[[str, Sequence[Hit]], str]
 class Settings:
     """How tokens are verified, from the environment."""
 
-    jwt_secret: str
+    jwt_secret: str = field(repr=False)  # out of repr(), which logs, debuggers and error reporters use
     issuer: str = "https://id.example.test"
     audience: str = "rag-service"
 
@@ -125,6 +129,45 @@ def cite_sources(question: str, passages: Sequence[Hit]) -> str:
     return " ".join(p.text for p in passages)
 
 
+class BodyLimit:
+    """Refuses a request body over `limit` bytes with 413, by its Content-Length and by the bytes
+    received, before the application reads it, then hands the body on."""
+
+    def __init__(self, app: ASGIApp, limit: int = 256 * 1024) -> None:
+        self.app, self.limit = app, limit
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+        too_large = JSONResponse({"detail": "the request body is too large"}, status_code=413)
+        declared = dict(scope["headers"]).get(b"content-length", b"")
+        if declared.isdigit() and (len(declared) > 18 or int(declared) > self.limit):
+            await too_large(scope, receive, send)
+            return
+        body = bytearray()
+        more = True
+        while more:
+            message = await receive()
+            if message["type"] != "http.request":  # the client went away
+                return
+            body += message.get("body", b"")
+            if len(body) > self.limit:
+                await too_large(scope, receive, send)
+                return
+            more = bool(message.get("more_body", False))
+        replayed = False
+
+        async def replay() -> Message:
+            nonlocal replayed
+            if replayed:
+                return await receive()
+            replayed = True
+            return {"type": "http.request", "body": bytes(body), "more_body": False}
+
+        await self.app(scope, replay, send)
+
+
 class SearchRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")  # a body that names a user, group or tenant is refused
 
@@ -163,6 +206,7 @@ def create_app(
     retriever = retriever or build_retriever(InMemoryBackend(demo_documents()))
     bearer = HTTPBearer(auto_error=False)
     app = FastAPI(title="Permission-aware RAG")
+    app.add_middleware(BodyLimit)
 
     def caller(credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer)]) -> Subject:
         """The verified caller, from the token alone."""

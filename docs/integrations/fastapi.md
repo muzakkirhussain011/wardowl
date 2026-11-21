@@ -47,6 +47,13 @@ tenant's chunks.
 **Only permitted chunks reach the model.** `/ask` retrieves first and passes the model the result,
 nothing else.
 
+**Oversized bodies are refused first.** FastAPI reads a request's whole body before it runs the
+dependency that checks the token, so without a limit an unauthenticated client could make the
+service read and parse a large body before refusing it. A small ASGI middleware, `BodyLimit`, answers 413 to a body over
+256 KiB, by its `Content-Length` or by the bytes received, before FastAPI reads it, as
+`wardowl.server` does for its own service. The settings object keeps the token secret out of its
+`repr()`.
+
 **Failures say nothing.** An `AuthorizationError` becomes a 503 with a fixed message; the details go
 to the server log. Each retrieval is logged as a structured `RetrievalEvent`, without the query or
 the text.
@@ -58,7 +65,8 @@ tenant see only that tenant; a body or query string naming another user, group o
 nothing; a missing, malformed, wrongly signed, expired, unsigned or wrongly addressed token is
 refused before any search; a document whose sharing changes stops being returned on the next
 request, and so does one shared with a group the caller has left; the model is given exactly the
-permitted chunks; and a failing permission service answers 503 without naming it.
+permitted chunks; a failing permission service answers 503 without naming it; and a body over
+256 KiB answers 413, with or without a token, whether or not it declares its length.
 
 ## For production
 

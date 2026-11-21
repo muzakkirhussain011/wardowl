@@ -342,9 +342,9 @@ Two corpora, two embedding models and a few hundred queries each; indexes at the
 settings; a single 4-CPU machine, which in the load benchmark ran the store, OPA and the client
 together, so no network sat between them; local Chroma, not Chroma's distributed or cloud service;
 Milvus and MongoDB Atlas not yet measured at a million chunks, and LanceDB only at its
-defaults; OpenFGA not
-measured; and under concurrent load, the per-store runs counted errors but did not check results
-(the pgvector run checked every chunk, and the harness now always does). Index tuning (pgvector
+defaults; and OpenFGA not measured. Under concurrent load, the pgvector run and the six-store run
+checked every returned chunk against its subject's permissions; the separate runs of Qdrant,
+LanceDB and Elasticsearch's index types counted errors but did not check results. Index tuning (pgvector
 `ef_search`, Elasticsearch's index type and `num_candidates`, Chroma's HNSW parameters) moves both
 recall and latency, and is worth measuring on your own data with the same harnesses; only
 Elasticsearch's has been measured here.

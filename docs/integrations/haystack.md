@@ -138,8 +138,10 @@ the run with nothing returned.
 `run_async` has the same inputs and outputs, for `Pipeline.run_async`. Any failure of the
 permission service raises `AuthorizationError`, so the pipeline stops rather than generating from
 unfiltered documents. As a tool, the failure reaches the model: an `Agent` shows a tool's error to
-it. The error's message is therefore fixed ("authorizer failed", for example), and the text of the
-exception behind it, which can name hosts or credentials, stays in its `__cause__`, for your logs.
+it. The error's message is therefore written by wardowl ("authorizer failed", for example), and the
+text of the exception behind it, which can name hosts or credentials, stays in its `__cause__`, for
+your logs. Some messages name a resource or subject id, or carry a permission service's own error
+field ([threat model](../threat-model.md), T12).
 
 ## Metadata
 

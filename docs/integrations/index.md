@@ -46,9 +46,11 @@ client.
 
 ## Choosing a store
 
-Every store applies the permission filter inside its own search, passes the
-[conformance kit](../extending.md#test-it-with-the-conformance-kit) in CI against the real store,
-and keeps permission values out of query text. They differ in what is worth knowing in production:
+Every store applies the permission filter inside its own search and keeps permission values out of
+query text, and every one but Pinecone passes the
+[conformance kit](../extending.md#test-it-with-the-conformance-kit) in CI against the real store
+([Pinecone's tests](pinecone.md#production-notes) need an API key that CI does not have). They
+differ in what is worth knowing in production:
 
 | Store | A write is searchable | Native `aretrieve` | Permission values travel as | Keyword search | CI tests against |
 |---|---|---|---|---|---|
@@ -65,7 +67,7 @@ and keeps permission values out of query text. They differ in what is worth know
 | [FAISS](faiss.md) | At once | No (a thread) | `matches` over the stored metadata, then an ID selector | None | faiss-cpu 1.16, in process |
 | [Vespa](vespa.md) | When `add` returns | No (a thread) | Hex-encoded terms in YQL (`in`) | BM25, `mode="keyword"` | 8.763.13 |
 | [Apache Cassandra](cassandra.md) | When `add` returns, at the session's consistency level | No (a thread) | Bound `CONTAINS` parameters, one ANN query per AND | No | 5.0.9 |
-| [Pinecone](pinecone.md) | Within seconds; at once with `wait=` | No (a thread) | `$in` on hex-encoded terms, `$and`, `$or` | No | Pinecone serverless, API 2026-07 |
+| [Pinecone](pinecone.md) | Within seconds; at once with `wait=` | No (a thread) | `$in` on hex-encoded terms, `$and`, `$or` | No | A scripted stand-in for the API (2026-07); the service only with an API key, which CI does not have |
 
 Keyword and vector search combine into [hybrid search](../hybrid.md) with `RankFusion`, across
 stores as well as within one. Measured recall, latency and throughput at a million chunks are in
