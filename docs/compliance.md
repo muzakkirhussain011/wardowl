@@ -45,13 +45,30 @@ wardowl stores no documents and keeps no history of its own:
 
 - **Chunks** live in your vector store. Deleting a document there removes it from retrieval at once.
 - **Cached decisions and filters** hold permission answers for a subject, never document content,
-  and expire within `ttl` (30 seconds by default), in the process and in a shared Redis cache.
+  and none is used after `ttl` (30 seconds by default). In the process, an answer past its time
+  stays in memory, under a key that holds the whole `Subject` (id, groups and attributes), until it
+  is looked up again, until the cache holds more than `maxsize` answers (100,000 by default) and
+  drops the oldest, or until `invalidate()` removes it; `stats().entries` counts such answers too.
+  In a shared Redis cache, answers expire within `ttl`, and each subject's index of them within
+  `ttl` plus a minute of its last write. Each `invalidate()` writes an epoch that stays in Redis for
+  `ttl` plus `source_staleness` plus an hour. The Redis key names of all three hold a digest of the
+  subject id (BLAKE2b, 128 bits, without a key), not the id itself
+  ([Operations](operations.md#sharing-the-cache-across-processes)).
+- **Permissions on other people's documents** name the people they are shared with. A sync
+  connector writes them into the chunks' metadata: the Google Drive connector puts each grantee's
+  address, lowercased, in `allowed_users` on every chunk of every document shared with them. They
+  stay there until the document is synced again or its chunks' metadata is replaced with
+  `set_metadata`.
 - **Audit events** contain the subject id, chunk ids, counts and outcome, and the query only as an
   HMAC when you supply a key. Where they are kept and for how long is set by your observer and your
   log storage, so your retention policy applies to them.
 
 To erase a person's data, delete their documents from the store and their entries from your audit
-log under your retention rules; nothing else needs clearing once `ttl` has passed.
+log under your retention rules, and take their identifier out of the permissions of documents
+shared with them, by syncing those documents again or with `set_metadata`. `invalidate(subject_id)`
+then drops their cached answers in the process at once; what it leaves in Redis expires on its own,
+within the times above. Where erasure matters, give subjects opaque ids rather than email
+addresses: the id is what events and permissions carry.
 
 ## What wardowl does not cover
 

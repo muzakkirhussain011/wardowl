@@ -41,8 +41,11 @@ them; [`.github/workflows/ci.yml`](.github/workflows/ci.yml) shows how each serv
 A backend implements `search(query, k, filter=None) -> list[Hit]` and sets `supports_filters`.
 Translate the `In` / `And` / `Or` filter into the store's native filter; the in-memory backend and
 `wardowl.filters.matches` define the semantics you must match, including "a missing field
-never matches". An authorizer implements `check(subject, hits, action)` and, when the permission
-system can enumerate what a subject may read, `filter_for(subject, action)`.
+never matches". An authorizer implements `check(subject, hits, action)` and
+`filter_for(subject, action)`. Both are required: the retriever calls `filter_for` whenever it may
+pre-filter (`strategy` `"auto"` or `"prefilter"` with a backend that takes filters), and an
+authorizer without it fails those retrievals with `AuthorizationError`. When the permission system
+cannot enumerate what a subject may read, `filter_for` returns `None` and results are post-filtered.
 
 ## Design changes
 

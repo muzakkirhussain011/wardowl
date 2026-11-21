@@ -86,8 +86,10 @@ authorizer = CachingAuthorizer(openfga, ttl=30, shared=shared, namespace="openfg
 
 - **Two tiers:** each process looks in its own cache first, then in Redis, and only then asks the
   permission service; answers go to both. A process keeps its own copy for at most `local_ttl`
-  seconds (1 by default), then reads Redis again. Redis, Valkey, Dragonfly and Redis Cluster work
-  (the keys for one subject id share a hash slot).
+  seconds (1 by default), then reads Redis again. CI tests it against a single Redis server.
+  Redis Cluster (the keys for one subject id share a hash slot) and Redis-compatible stores such as
+  Valkey and Dragonfly are expected to work through the same client calls, and are not tested
+  ([Supported configurations](support.md#caching-and-deployment)).
 - **The revocation bound still holds.** Each shared entry carries its expiry time, and a replica
   that copies it keeps it only for the time it has left, never a fresh `ttl`. This relies on
   replicas' clocks agreeing, as NTP keeps them.
@@ -338,9 +340,12 @@ shared by every authorizer that calls the same service. A call it rejects raises
 caused by `wardowl.authorizers.CircuitOpenError`, so `RetrievalEvent.cause` says
 `"CircuitOpenError"`.
 
-Every `AuthorizationError` carries a fixed message, such as "authorizer failed" or "OPA decision
-failed: ConnectionRefusedError", never the text of the exception behind it: that text can name
-hosts, users or credentials, and agent frameworks show a tool's error to the model. The exception
+Every `AuthorizationError` carries a message wardowl writes, such as "authorizer failed" or "OPA
+decision failed: ConnectionRefusedError", never the text of the exception behind it: that text can
+name hosts, users or credentials, and agent frameworks show a tool's error to the model. Some
+messages name what was being decided: a resource or subject id, a configured action or decision
+path, or the error field of a permission service's answer (OpenFGA's, SpiceDB's and Keto's), as
+threat T12 in the [threat model](threat-model.md) records. The exception
 itself is the error's `__cause__`, so a log that records the traceback (`logging.exception`, or the
 HTTP service's log) keeps the details, and `RetrievalEvent.cause` names its type.
 
@@ -524,6 +529,7 @@ either.
 |---|---|---|
 | Any violation | `wardowl.violations` increases | The store returned chunks that the re-check rejected. Nothing leaked, because the re-check caught them. Causes: a bug in the store or its translation; permission terms another tool left stale; MongoDB's index catching up after `add` or `set_metadata`; an authorizer whose filter selects more than its `check` allows; a permission changed between the filter and the check. The [runbook](runbook.md#the-violations-count-rose) tells them apart. |
 | Authorization failures | `wardowl.retrievals` with `error.type = AuthorizationError` | The permission service is failing. Users are getting errors, which is the safe outcome, but it is an outage. |
+| Store failures | `wardowl.retrievals` with `error.type = SearchError` | The vector store cannot be reached, times out or refuses the query, and nothing is returned; the HTTP service answers 500. `RetrievalEvent.cause` (the span's `wardowl.error.cause`) names the store client's exception. |
 | Incomplete results | Share of `wardowl.outcome = incomplete` | Post-filtering is hitting `max_candidates`: raise it, or move to pre-filtering. Or an approximate index returned fewer than k hits under the permission filter: it stopped early, or the user may read fewer than k matching chunks, and wardowl cannot tell which. Tune the store's filtered search ([pgvector's scan limits](integrations/pgvector.md#iterative-index-scans), [Qdrant's ACORN](integrations/qdrant.md#filters-on-common-values)), or tell the two apart and repair the misses with [`short_results`](concepts.md#short-results). |
 | Index misses | `wardowl.short_results` with `wardowl.shortfall = missed`, and `wardowl.sampled_recall` falling | The index is missing chunks users may read: short results it cut off, or full results that are not the true top k. Raise the store's search limits, or repair short results with `short_results="exact"`. |
 | Audit events lost | `wardowl.observer_failures` increases (or `PermissionedRetriever.observer_failures`), or `wardowl.retrievals` with `error.type = AuditError` | An audit log or exporter cannot record retrievals: a full disk, a closed stream, an unreachable collector. Among `observers` the retrievals go on and their events are lost; among `required_observers` the retrievals fail. Fix the sink first. |

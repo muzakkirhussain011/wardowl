@@ -34,8 +34,10 @@ none. [Concepts](concepts.md) explains pre-filtering, post-filtering and the re-
 
 pgvector, Qdrant, Milvus, MongoDB Atlas Vector Search, Weaviate, Redis, LanceDB, Elasticsearch,
 OpenSearch, Vespa, Apache Cassandra, Pinecone, Chroma and FAISS, plus any LangChain or LlamaIndex
-vector store through post-filtering. Every built-in backend passes the same conformance tests
-against the real store in CI. See [Integrations](integrations/index.md).
+vector store through post-filtering. Every built-in backend but Pinecone's passes the same
+conformance tests against the real store in CI; Pinecone's service tests need an API key, which
+the repository does not hold as of November 2026, so CI tests that backend against a scripted
+stand-in for its API. See [Integrations](integrations/index.md).
 
 ## Which permission systems does it work with?
 
@@ -75,8 +77,9 @@ was returned. [Benchmarks](benchmarks.md) has the method and the scripts to repr
 ## Is wardowl ready for production?
 
 It follows semantic versioning, so the public API does not break within a major version. CI tests
-it on Python 3.11 to 3.15 and runs the suite for every store and permission service against a real
-server. Releases carry Sigstore signatures, an SBOM and provenance. No independent security audit has been carried
+it on Python 3.11 to 3.15 and runs the suites for the stores and permission services against real
+servers, or in process for Chroma, LanceDB, FAISS, Cedar and Casbin; Pinecone's service is the
+exception ([Pinecone](integrations/pinecone.md#production-notes)). Releases carry Sigstore signatures, an SBOM and provenance. No independent security audit has been carried
 out yet. The [review page](review.md) lists the project's own findings and how to check its work.
 [Production](production.md) is the checklist for a deployment.
 
