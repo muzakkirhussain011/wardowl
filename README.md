@@ -628,8 +628,10 @@ revisions, time bounds and audit observers that must record every retrieval; Upg
 changes. 3.1 lets every SpiceDB request carry the latest ZedToken, can refuse OIDC tokens without
 groups, invalidates a subject in a shared Redis cache without scanning the database, and refuses
 malformed filters and search replies, and stores left in needtoknow 1.x's layout, with an error
-that says why. Next, in rough order: permission sync from SharePoint and Confluence, and an Azure
-AI Search backend. Contributions are welcome; see
+that says why. 3.2 has the write methods return the ids they found, can bound the groups a token
+gives the HTTP service, writes and finds long permission values on Elasticsearch, OpenSearch and
+Cassandra, and supports Python 3.15. Next, in rough order: permission sync from SharePoint and
+Confluence, and an Azure AI Search backend. Contributions are welcome; see
 [CONTRIBUTING.md](https://github.com/muzakkirhussain011/wardowl/blob/main/CONTRIBUTING.md).
 
 ## Example deployment

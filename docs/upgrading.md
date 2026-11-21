@@ -1,5 +1,5 @@
 ---
-description: How to upgrade wardowl from 3.0 to 3.1, from 2.1 to 3.0, and from needtoknow 1.x to wardowl 2.0. Covers each change that can break existing code, and what to change.
+description: How to upgrade wardowl from 3.1 to 3.2, from 3.0 to 3.1, from 2.1 to 3.0, and from needtoknow 1.x to wardowl 2.0. Covers each change that can break existing code, and what to change.
 ---
 
 # Upgrading
@@ -7,6 +7,59 @@ description: How to upgrade wardowl from 3.0 to 3.1, from 2.1 to 3.0, and from n
 A major version can change behaviour that code written for the one before relies on; a minor
 version adds features, and can refuse wrong input sooner. This page lists those changes, newest
 first, with what to change. The full list of changes is in the [changelog](changelog.md).
+
+## From 3.1 to 3.2
+
+wardowl 3.2.0 is a minor release. Code that follows the documented types needs no change. It adds
+Python 3.15; the extras and the minimum versions of the store clients are the same as in 3.1.
+Nothing needs indexing again, except some Cassandra rows (below). 3.1.x keeps getting security
+fixes for six months after 3.2.0; the
+[security policy](https://github.com/muzakkirhussain011/wardowl/blob/main/SECURITY.md#supported-versions)
+gives the date.
+
+```bash
+pip install --upgrade "wardowl==3.2.*"   # with the same extras, e.g. "wardowl[pgvector,redis]==3.2.*"
+```
+
+### What you may see
+
+- `set_metadata` and `delete` on the built-in backends return a `frozenset` of the ids they found,
+  where they returned None; `PineconeBackend.set_metadata` with `wait=None` still returns None.
+  Code that ignores the result is unaffected. A subclass of a built-in backend that overrides
+  either method with a `-> None` annotation now fails mypy's override check: annotate it as the
+  parent does, and return what the parent returns
+  ([Checking that a change reached the chunks](operations.md#checking-that-a-change-reached-the-chunks)).
+- The conformance kit stores one corpus of long permission values in each run, `long_value_length`
+  characters long (1,000 by default), so a backend of your own that passed in 3.1 can fail. If your
+  store refuses longer values with an error, pass a `long_value_length` under its documented limit,
+  or 0 to leave the check out. If a filter misses a long value, your store cuts long values short
+  or leaves them out of its index, and a chunk with such a value is never found under a pre-filter:
+  store such terms as a digest, as the Elasticsearch, OpenSearch and Cassandra backends now do
+  ([Test it with the conformance kit](extending.md#test-it-with-the-conformance-kit)).
+- On Elasticsearch and OpenSearch, a permission term longer than 32,766 bytes of UTF-8 is stored
+  and searched as its SHA-256 digest, where `add` and `set_metadata` raised `RuntimeError`.
+  `permission_terms` returns the same digests, so a document you write with it is found. Shorter
+  terms are unchanged.
+- On Cassandra, a permission term longer than 8,192 bytes is written as its digest, and a filter
+  looks for the term and its digest. A row that 3.1 wrote with such a term, on a cluster at the
+  default `sai_string_term_size_fail_threshold`, was never indexed under it, and no filter found
+  it: write it again with `add` or `set_metadata`. On a cluster whose threshold is higher, such
+  rows are found as before. `filter_to_conjunctions` gives such a term two ANDs.
+- `VespaBackend.set_metadata` sends each update with a test-and-set condition, and
+  `VespaBackend.delete` gets each document before it removes it, one more request per id.
+  `RedisBackend.delete` sends one `DEL` per key, in one `MULTI` transaction for each batch of 500.
+
+### Additions worth knowing
+
+They change nothing until you use them.
+
+- `create_app(max_groups=...)` answers 401 for a subject in more groups than the bound, before
+  anything is searched, and logs it at INFO on the `wardowl` logger. The default, None, sets no
+  bound. Set it above the most groups any of your users has: a user over it cannot use the service
+  ([The API](integrations/http.md#the-api)).
+- Python 3.15 is supported. CI tests the library there without extras, as on 3.11, 3.13 and 3.14.
+  The `chroma` extra cannot be installed on 3.15 yet: chromadb requires onnxruntime, which
+  publishes no wheels for 3.15.
 
 ## From 3.0 to 3.1
 

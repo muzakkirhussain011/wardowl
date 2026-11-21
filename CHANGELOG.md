@@ -6,6 +6,20 @@ All notable changes are recorded here. The format follows
 
 ## [Unreleased]
 
+## [3.2.0] - 2026-11-21
+
+A minor release in which `set_metadata` and `delete` return the ids they found on every built-in
+backend, so a permission sync can see that a change reached no chunk; `create_app(max_groups=...)`
+bounds the groups on the subject a token gives; Elasticsearch and OpenSearch write, and Cassandra
+finds, chunks whose permission values are longer than the store indexes whole; the conformance kit
+checks long values and what those two methods return; and Python 3.15 is supported. A backend of
+your own that passed the kit can fail its long-value check, and a subclass of a built-in backend
+that overrides `set_metadata` or `delete` with a `-> None` annotation now fails mypy's override
+check. Nothing else documented changes, and nothing needs indexing again, except Cassandra rows
+written with such a value at the default threshold, which a filter never found.
+[Upgrading](https://muzakkirhussain011.github.io/wardowl/upgrading.html#from-31-to-32) lists what
+to check.
+
 ### Added
 
 - `set_metadata` and `delete` on every built-in backend return the ids they found: `set_metadata` a
