@@ -30,7 +30,7 @@ def run(pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch):
 
 SKIPPED_TEST = "import pytest\n\ndef test_it():\n    pytest.skip('set WARDOWL_TEST_EXAMPLE_URL to run')\n"
 SKIPPED_MODULE = "import pytest\n\npytest.importorskip('a_module_that_is_not_installed')\n\ndef test_it():\n    pass\n"
-PINECONE = "import pytest\n\ndef test_it():\n    pytest.skip('set WARDOWL_TEST_PINECONE_API_KEY to run against Pinecone')\n"
+PINECONE = "import pytest\n\ndef test_it():\n    pytest.skip('set WARDOWL_TEST_PINECONE_API_KEY to run')\n"
 XFAIL = "import pytest\n\n@pytest.mark.xfail(strict=True)\ndef test_it():\n    assert False\n"
 
 
