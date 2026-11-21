@@ -5,14 +5,15 @@ name: Acceptance
 # oracle of who may read what (acceptance/enterprise.py). See acceptance/README.md.
 #
 # Weekly and by hand, the published package from PyPI is tested, as users install it. A push to
-# an acceptance/** branch tests that branch's code instead, so a fix is checked before release.
+# an acceptance/** or release/** branch tests that branch's code instead, so a fix, and each
+# release, is checked before it is published.
 
 on:
   schedule:
     - cron: "0 6 * * 1"
   workflow_dispatch:
   push:
-    branches: ["acceptance/**"]
+    branches: ["acceptance/**", "release/**"]
     paths-ignore: ["acceptance/kaggle/**"]
 
 permissions:
@@ -105,9 +106,9 @@ jobs:
         run: |
           python -m pip install --require-hashes --no-deps -r acceptance/requirements.txt
           if [ "$GITHUB_EVENT_NAME" = push ]; then
-            # An acceptance branch tests its own code: the same dependencies, this checkout's wardowl,
-            # built into a wheel and installed from it, as a release would be. The wheel is installed
-            # by its hash, like every other package here.
+            # An acceptance or release branch tests its own code: the same dependencies, this
+            # checkout's wardowl, built into a wheel and installed from it, as a release would be.
+            # The wheel is installed by its hash, like every other package here.
             python -m pip wheel --no-deps --no-build-isolation --wheel-dir "$RUNNER_TEMP/dist" .
             wheel=$(ls "$RUNNER_TEMP"/dist/wardowl-*.whl)
             echo "wardowl @ file://$wheel --hash=sha256:$(sha256sum "$wheel" | cut -d ' ' -f 1)" > "$RUNNER_TEMP/wardowl.txt"
