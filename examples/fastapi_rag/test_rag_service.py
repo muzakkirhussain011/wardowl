@@ -120,6 +120,22 @@ def test_a_failed_permission_check_answers_503_and_reveals_nothing():
     assert "opa.internal" not in response.text and "passages" not in response.json()
 
 
+def test_a_body_over_256_kib_is_refused_before_the_token_is_checked(service):
+    client, _, _ = service
+    big = {"query": "leave " * 50_000}  # 300,000 bytes; the model's 2,000-character bound comes later
+    assert client.post("/search", json=big).status_code == 413  # no token at all
+    assert client.post("/search", json=big, headers=bearer(token())).status_code == 413
+    assert client.post("/search", json={"query": "leave"}, headers=bearer(token())).status_code == 200
+    # Streamed without a Content-Length, the bytes received are counted instead.
+    chunked = iter([b'{"query": "', b"x" * (300 * 1024), b'"}'])
+    headers = {"Content-Type": "application/json", **bearer(token())}
+    assert client.post("/search", content=chunked, headers=headers).status_code == 413
+
+
+def test_the_secret_stays_out_of_the_settings_repr():
+    assert SETTINGS.jwt_secret not in repr(SETTINGS) and SETTINGS.issuer in repr(SETTINGS)
+
+
 def test_settings_refuse_a_missing_or_short_secret(monkeypatch):
     monkeypatch.delenv("WARDOWL_DEMO_JWT_SECRET", raising=False)
     with pytest.raises(RuntimeError):

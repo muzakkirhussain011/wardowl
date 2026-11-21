@@ -19,6 +19,12 @@ All notable changes are recorded here. The format follows
   an `acceptance/**` branch does, and the contributing guide says to publish a release only once
   that run has passed (L1). The weekly runs test the release on PyPI, and no step of a release
   asked for a run on its code: none tested the commit 3.2.0 was built from before it was published.
+- The FastAPI example (`examples/fastapi_rag`) refuses a request body over 256 KiB with 413 before
+  reading it, by its `Content-Length` or by the bytes received (L36). FastAPI 0.162.7, the locked
+  version, reads and parses the whole body before it runs the dependency that checks the token, so
+  an unauthenticated request was read and parsed in full and only then answered 401;
+  `wardowl.server` already refused such bodies first. Its settings keep the token secret out of
+  their `repr()` (L37). Tests cover both.
 - The `pinecone` job warns, in the run's annotations, when it has no `PINECONE_API_KEY` secret, and
   its step name says that the service tests skip without it: the job passed either way (L4, L30).
 
