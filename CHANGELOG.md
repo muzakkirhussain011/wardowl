@@ -27,6 +27,7 @@ All notable changes are recorded here. The format follows
   their `repr()` (L37). Tests cover both.
 - The `pinecone` job warns, in the run's annotations, when it has no `PINECONE_API_KEY` secret, and
   its step name says that the service tests skip without it: the job passed either way (L4, L30).
+
 ### Documentation
 
 - The FAQ, the integrations overview, the Pinecone page and the review page said that every
