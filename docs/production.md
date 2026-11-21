@@ -28,9 +28,12 @@ fails. Each item links to the page with the details.
 - [ ] Permission metadata is copied onto every chunk at ingestion, and re-copied when a document's
   sharing changes. How soon that happens is your revocation delay for those chunks.
   ([Security model](security.md#what-it-relies-on))
-- [ ] The permission fields are indexed in your vector store: `create_schema` (pgvector),
-  `create_collection` (Qdrant, Milvus) and `create_index` (Elasticsearch, OpenSearch) create the
-  indexes; Chroma needs no setup. ([Integrations](integrations/index.md))
+- [ ] The permission fields are indexed in your vector store, with the setup its integration page
+  gives: `create_schema` (pgvector), `create_collection` (Qdrant, Milvus, Weaviate), `create_index`
+  (Elasticsearch, OpenSearch, Redis), `create_search_index` (MongoDB), `create_table` (Cassandra),
+  the schema `schema()` writes (Vespa), and for LanceDB `create_table`, then `create_indexes` once
+  the table holds data. Chroma needs only a collection, FAISS nothing, and Pinecone a vector index
+  of the right dimension. ([Integrations](integrations/index.md))
 - [ ] Your own backend or authorizer, if you wrote one, passes the conformance kit.
   ([Extending wardowl](extending.md#test-it-with-the-conformance-kit))
 
@@ -60,6 +63,8 @@ fails. Each item links to the page with the details.
   pool is sized with `max_workers` for the concurrency you expect. Every store and permission
   service still has its own client timeouts, which free the threads that `retrieval_timeout`
   cannot stop. ([HTTP service](integrations/http.md#time-bounds-and-threads))
+- [ ] A proxy or gateway in front of the HTTP service limits each caller's request rate: the service
+  has no rate limit of its own. ([HTTP service](integrations/http.md#in-production))
 - [ ] Connections use TLS and credentials (`headers=`, or `token=` for SpiceDB).
 - [ ] `CachingAuthorizer` sits in front, with a `ttl` chosen as a security decision: it is the
   longest a revoked permission keeps granting access. ([Operations](operations.md#permission-caching))

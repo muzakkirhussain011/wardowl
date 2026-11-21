@@ -86,8 +86,10 @@ authorizer = CachingAuthorizer(openfga, ttl=30, shared=shared, namespace="openfg
 
 - **Two tiers:** each process looks in its own cache first, then in Redis, and only then asks the
   permission service; answers go to both. A process keeps its own copy for at most `local_ttl`
-  seconds (1 by default), then reads Redis again. Redis, Valkey, Dragonfly and Redis Cluster work
-  (the keys for one subject id share a hash slot).
+  seconds (1 by default), then reads Redis again. CI tests it against a single Redis server.
+  Redis Cluster (the keys for one subject id share a hash slot) and Redis-compatible stores such as
+  Valkey and Dragonfly are expected to work through the same client calls, and are not tested
+  ([Supported configurations](support.md#caching-and-deployment)).
 - **The revocation bound still holds.** Each shared entry carries its expiry time, and a replica
   that copies it keeps it only for the time it has left, never a fresh `ttl`. This relies on
   replicas' clocks agreeing, as NTP keeps them.
@@ -338,9 +340,12 @@ shared by every authorizer that calls the same service. A call it rejects raises
 caused by `wardowl.authorizers.CircuitOpenError`, so `RetrievalEvent.cause` says
 `"CircuitOpenError"`.
 
-Every `AuthorizationError` carries a fixed message, such as "authorizer failed" or "OPA decision
-failed: ConnectionRefusedError", never the text of the exception behind it: that text can name
-hosts, users or credentials, and agent frameworks show a tool's error to the model. The exception
+Every `AuthorizationError` carries a message wardowl writes, such as "authorizer failed" or "OPA
+decision failed: ConnectionRefusedError", never the text of the exception behind it: that text can
+name hosts, users or credentials, and agent frameworks show a tool's error to the model. Some
+messages name what was being decided: a resource or subject id, a configured action or decision
+path, or the error field of a permission service's answer (OpenFGA's, SpiceDB's and Keto's), as
+threat T12 in the [threat model](threat-model.md) records. The exception
 itself is the error's `__cause__`, so a log that records the traceback (`logging.exception`, or the
 HTTP service's log) keeps the details, and `RetrievalEvent.cause` names its type.
 

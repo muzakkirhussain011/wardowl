@@ -40,8 +40,8 @@ separate deployment with its
 
 - **A backend** returns hits best first, applies a filter exactly as `matches` defines it, returns
   "nothing can match" as no results (never as no filter), and returns each chunk's metadata as
-  stored. `wardowl.testing.check_backend` checks all four, and every built-in backend passes it
-  against its real store in CI.
+  stored. `wardowl.testing.check_backend` checks all four, and every built-in backend but
+  Pinecone's passes it against its real store in CI.
 - **An authorizer**'s `check` returns one real `bool` per hit, in order; `filter_for` returns a filter
   that selects exactly what `check` allows, or None; `scope_for`, when present, returns a condition
   every readable chunk meets. `wardowl.testing.check_authorizer` checks the first two agree. Any
@@ -75,8 +75,10 @@ separate deployment with its
 
 - **Tests.** Over 500, many of them Hypothesis property tests, compared with oracles written without
   the library's filter code. CI runs them on Python 3.11 to 3.15 on Linux, the library tests on
-  macOS and Windows too, and the suites against 12 vector stores and 5 permission services running
-  as real servers, Pinecone's service, and FAISS, Cedar and Casbin in process. Branch coverage must
+  macOS and Windows too, and the suites against 10 vector stores and 5 permission services running
+  as real servers, Chroma and LanceDB embedded, and FAISS, Cedar and Casbin in process. Pinecone's
+  service tests need an API key that CI does not have, so its backend is tested against a scripted
+  stand-in for the API ([Pinecone](integrations/pinecone.md#production-notes)). Branch coverage must
   stay at 90% or more for the package and 95% or more for the code that decides access (the retriever, filters, authorizers and cache).
 - **Fuzzing.** ClusterFuzzLite (Atheris) fuzzes filter parsing and the translations that write query
   text, on pull requests and weekly.
@@ -87,8 +89,17 @@ separate deployment with its
   the hash of the file on the GitHub release, and runs it. OpenSSF Scorecard runs on every change, and
   a check fails when one of its scores drops.
 - **Dependencies.** The core has none at run time. The optional extras and the test tools are listed
-  with their hashes in `uv.lock`, and each release's SBOM lists what it was built with. Advisories
+  with their hashes in `uv.lock`, and the tools that build a release in
+  `.github/requirements/build.txt`. Each release's SBOM lists the environment its wheel was
+  installed into to make it: wardowl, which has no runtime dependencies, and that environment's pip
+  (for 3.2.0, pip 25.0.1). It does not list the extras' packages or the build tools. Advisories
   that have no fix yet are listed with reasons in `osv-scanner.toml`.
+- **Review of changes.** As of November 2026, one maintainer has write access, and a pull request
+  merges once its required checks pass, with no approving review required. The signatures,
+  attestations and provenance show which workflow run built each file from which commit; they do
+  not show that a second person reviewed that commit.
+  [GOVERNANCE.md](https://github.com/muzakkirhussain011/wardowl/blob/main/GOVERNANCE.md) says how
+  that changes as maintainers join.
 - **Benchmarks.** [Benchmarks](benchmarks.md): recall, latency and leak checks at up to a million
   chunks, with the scripts and settings to reproduce them.
 

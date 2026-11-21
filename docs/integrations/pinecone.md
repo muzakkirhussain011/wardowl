@@ -63,7 +63,12 @@ reference semantics do, and no metadata value can change the filter's structure.
   of the metadata: long permission values reach the 40 KB sooner than their length suggests
   ([operation limits](https://docs.pinecone.io/reference/api/database-limits/operation-limits)).
   CI's tests of values up to 40,000 characters run against the other stores, not Pinecone; the
-  conformance kit, which CI runs against Pinecone on `main`, stores values of 1,000 characters.
+  conformance kit stores values of 1,000 characters.
+- **What CI tests:** the filter translation, the requests and the handling of replies, against a
+  scripted stand-in for the API, on every change. The tests against Pinecone's service, the
+  conformance kit among them, run on `main` and by hand only when the `PINECONE_API_KEY` secret is
+  set, and are skipped without it. As of November 2026 the repository has no such secret, so they do not run in
+  CI.
 - **Translating filters yourself:** `filter_to_pinecone` raises `NothingMatches` for a filter that
   can match nothing, since Pinecone reads a missing filter as "match everything".
 - **Namespaces** keep tenants or corpora apart; `clear()` removes every chunk in the backend's
