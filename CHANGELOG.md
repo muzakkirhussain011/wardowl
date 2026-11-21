@@ -31,6 +31,7 @@ All notable changes are recorded here. The format follows
   install would refuse a file whose hash differs from the one PyPI serves, which cannot be replaced;
   the check also ties the wheel to the Release workflow and its tag. SECURITY.md's command for
   checking provenance now names that workflow and tag.
+
 ### Added
 
 - CI's test job, which installs every extra and starts every service, fails when a test or a test
