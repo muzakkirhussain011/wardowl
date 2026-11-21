@@ -99,14 +99,18 @@ python -m sigstore verify identity \
 ```
 
 A file from PyPI and the same file from the GitHub release are byte-identical: both come from one
-build. After each release, `verify-release.yml` installs it from PyPI pinned to the hash of the
-GitHub release's wheel, runs the quickstart, and, from 1.4.0, runs the security test suites of that
-version against the installed package. Those tests come from the release's source distribution, after
-its provenance and its PyPI hash are checked, never from a git checkout of the tag.
+build. After each release, `verify-release.yml` checks the GitHub release's wheel against its build
+provenance (from 1.4.0), installs the release from PyPI pinned to that wheel's hash, runs the
+quickstart, and, from 1.4.0, runs the security test suites of that version against the installed
+package. Those tests come from the release's source distribution, after its provenance and its
+PyPI hash are checked, never from a git checkout of the tag.
 
 From 1.4.0, each release also carries SLSA build provenance (`wardowl-<version>.intoto.jsonl`),
-also stored as a GitHub attestation. With the GitHub CLI:
+also stored as a GitHub attestation. With the GitHub CLI, naming the workflow that must have built
+the file and the tag it must have been built from:
 
 ```bash
-gh attestation verify wardowl-3.2.0-py3-none-any.whl --repo muzakkirhussain011/wardowl
+gh attestation verify wardowl-3.2.0-py3-none-any.whl --repo muzakkirhussain011/wardowl \
+  --signer-workflow muzakkirhussain011/wardowl/.github/workflows/release.yml \
+  --source-ref refs/tags/v3.2.0
 ```
