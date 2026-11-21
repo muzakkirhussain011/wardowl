@@ -109,9 +109,10 @@ get errors; nothing is exposed.
 
 A retrieval still succeeds during the outage when `CachingAuthorizer` holds every answer it needs:
 the subject's filter when it pre-filters, and a decision for every chunk it checks. One that
-reaches a chunk without a cached decision asks the service and fails. These answers last only until they expire,
-and changing `ttl` does not extend them: each answer's expiry is fixed when it is stored, and a new
-`CachingAuthorizer` with a longer `ttl` starts empty.
+reaches a chunk without a cached decision asks the service and fails. These answers last only
+until they expire, and a longer `ttl` does not extend them: each answer's expiry is fixed when it
+is stored. A new `CachingAuthorizer` with a longer `ttl` starts with an empty cache in its process,
+and the answers it reads from a shared Redis cache keep the expiry they were stored with.
 
 ## The shared cache is failing, or someone else may have written to it
 
