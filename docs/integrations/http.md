@@ -349,5 +349,13 @@ monitoring can count.
   others.
 - Set `retrieval_timeout`, and size the thread pool with `max_workers` for the concurrency you
   expect ([Time bounds and threads](#time-bounds-and-threads)).
+- Limit each caller's request rate in the proxy or gateway in front of the service. The service
+  bounds what one request can cost (`max_k`, `max_query_length`, `max_vector_length`,
+  `max_body_bytes`) but not how many requests a caller sends, and keeps no per-caller budget. A
+  shared `CircuitBreaker` opens for every caller once the permission service fails often enough,
+  whoever caused the load.
+- The service sets no CORS headers, so a browser does not let a page from another origin call it.
+  A browser front end that must call it directly needs Starlette's `CORSMiddleware` added to the
+  app, allowing that origin alone.
 - Scale it out like any stateless web service. With a `CachingAuthorizer`, share its cache across
   replicas through Redis ([Revocation](../revocation.md)).

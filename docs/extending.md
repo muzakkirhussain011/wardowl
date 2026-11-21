@@ -104,8 +104,10 @@ class MyAuthorizer:
         """A filter selecting exactly what the subject may access, or None."""
 ```
 
-`check` is required. `filter_for` may always return `None`, in which case results are
-post-filtered. If it returns a filter, the filter and `check` must agree: the store applies the
+`check` and `filter_for` are both required. The retriever calls `filter_for` whenever it may
+pre-filter (`strategy` `"auto"` or `"prefilter"` with a backend that takes filters), so an
+authorizer without it fails those retrievals with `AuthorizationError`. `filter_for` may always
+return `None`, in which case results are post-filtered. If it returns a filter, the filter and `check` must agree: the store applies the
 filter, `check` re-checks the results, and any disagreement shows up as `violations`. Async
 versions are `afilter_for` and `acheck`.
 

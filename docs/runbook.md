@@ -98,8 +98,8 @@ get errors; nothing is exposed.
    service, `ConnectionRefusedError` or another `OSError` for one that cannot be reached,
    `CircuitOpenError` for calls an open circuit breaker refused, and none for an error status
    (HTTP 503) or an answer in the wrong shape, which the service's own logs explain. The error's
-   message is fixed; the text of the underlying exception is in its `__cause__`, in tracebacks
-   your logs record.
+   message never holds the text of the underlying exception; that is in its `__cause__`, in
+   tracebacks your logs record.
 2. Check the circuit breaker: while `CircuitBreaker.is_open`, calls are refused without contacting
    the service, for `reset_after` seconds, then one probe goes through. The causes of the failures
    before it opened say why it opened.
@@ -107,8 +107,12 @@ get errors; nothing is exposed.
    removing the authorizer, or with a fallback that grants access: that turns an outage into an
    exposure.
 
-Subjects whose decisions are still cached keep working until their entries expire. Raising `ttl`
-during an outage keeps more of them working, and lengthens how long a revocation takes to apply.
+A retrieval still succeeds during the outage when `CachingAuthorizer` holds every answer it needs:
+the subject's filter when it pre-filters, and a decision for every chunk it checks. One that
+reaches a chunk without a cached decision asks the service and fails. These answers last only
+until they expire, and a longer `ttl` does not extend them: each answer's expiry is fixed when it
+is stored. A new `CachingAuthorizer` with a longer `ttl` starts with an empty cache in its process,
+and the answers it reads from a shared Redis cache keep the expiry they were stored with.
 
 ## The shared cache is failing, or someone else may have written to it
 

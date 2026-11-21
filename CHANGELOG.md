@@ -6,6 +6,60 @@ All notable changes are recorded here. The format follows
 
 ## [Unreleased]
 
+### Documentation
+
+- The FAQ, the integrations overview, the Pinecone page and the review page said that every
+  built-in backend passes the conformance kit against its real store in CI, Pinecone's included.
+  Pinecone's service tests run only with the `PINECONE_API_KEY` secret, which the repository does
+  not have, so CI skips them and tests that backend against a scripted stand-in for its API; the
+  pages now say so (L4 and L30 in the readiness review). The review page also counted Chroma and
+  LanceDB among the stores CI runs as servers; it now says that 10 run as servers and those two
+  embedded.
+- The contributing guide said that an authorizer implements `filter_for` only when its permission
+  system can list what a subject may read, and the extending guide called only `check` required.
+  The retriever calls `filter_for` whenever it may pre-filter, so an authorizer without it fails
+  those retrievals with `AuthorizationError`. Both pages now say that both methods are required and
+  that `filter_for` may return None (L11).
+- The compliance page said that cached decisions expire within `ttl` and that nothing else needs
+  clearing to erase a person's data. An expired answer stays in the process's memory, under a key
+  that holds the whole `Subject`, until it is looked up again, evicted or invalidated; an epoch
+  stays in Redis for `ttl` plus `source_staleness` plus an hour; and a sync connector writes the
+  people a document is shared with, such as Google Drive's lowercased addresses, onto its chunks.
+  The page now lists each, and the erasure steps include the permissions on documents shared with
+  the person (L15, L16).
+- The benchmarks page said that the per-store load runs did not check results. The six-store run of
+  2026-11-08 checked every returned chunk, as its results file records; the page now names the
+  runs that did not: Qdrant's, LanceDB's and Elasticsearch's index types, each in a session of its
+  own (L17).
+- The HTTP service page and the production checklist say that the service limits what one request
+  can cost but not how many a caller sends, so a proxy in front of it must limit each caller's
+  rate, and that it sets no CORS headers (L19, L23). The pgvector page, which suggests
+  `asyncio.wait_for` around `aretrieve`, says that such a bound frees the caller but not a search
+  running in a worker thread, which keeps its pooled connection until the database answers or a
+  timeout ends it (L20).
+- The operations guide's table of what to alert on had no row for a failing vector store, which
+  raises `SearchError` since 3.0.0; it has one now (L24).
+- The operations guide said that Redis Cluster, Valkey and Dragonfly "work" with the shared cache;
+  CI tests a single Redis server, and the guide now says, as the supported configurations page
+  does, that those are expected to work and are not tested (L21).
+- The production checklist named the index setup of five stores and said that Chroma needs none;
+  it now names the setup of every store, including LanceDB's `create_indexes` once the table holds
+  data (L25).
+- The review page said that each release's SBOM lists what the release was built with. It lists
+  the environment the wheel was installed into to make it: wardowl and that environment's pip. The
+  page now says so, and where the extras and the build tools are recorded instead (L8, L26). It
+  also says that one maintainer has write access and that pull requests merge without an approving
+  review, so the signatures and provenance show which workflow built a file, not that a second
+  person reviewed it (L12).
+- The runbook said that raising `ttl` during an outage of the permission service keeps more
+  subjects working. A cached answer's expiry is fixed when it is stored, and a new
+  `CachingAuthorizer` starts empty, so nothing extends them; the runbook now says which retrievals
+  still succeed: those whose filter and every checked chunk are cached (L28).
+- The security model, the operations guide, the runbook and the Haystack page said that every
+  `AuthorizationError` message is fixed. None holds the text of the exception behind it, but some
+  name a resource or subject id, or carry the error field of an OpenFGA, SpiceDB or Keto answer, as
+  threat T12 already said; the pages now say so (L29).
+
 ## [3.2.0] - 2026-11-21
 
 A minor release in which `set_metadata` and `delete` return the ids they found on every built-in
