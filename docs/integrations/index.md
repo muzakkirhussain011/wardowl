@@ -63,8 +63,8 @@ differ in what is worth knowing in production:
 | [MongoDB Atlas Vector Search](mongodb.md) | When `add` returns: it waits for the search index | `AsyncMongoClient` | A BSON filter (`$in`) | BM25 (Atlas Search), `mode="keyword"` | Atlas Local 8.0.30 |
 | [Weaviate](weaviate.md) | When `add` returns | `WeaviateAsyncClient` | Filter objects (`contains_any`) | BM25, `mode="keyword"` | 1.39.12 |
 | [Redis](redis.md) | When `add` returns | `redis.asyncio` | Hex-encoded TAG values | BM25, `mode="keyword"` | 8.10.2 |
-| [LanceDB](lancedb.md) | When `add` returns | No (a thread) | Hex-encoded list values (`array_has_any`) | BM25, `mode="keyword"` | LanceDB 0.40, embedded |
-| [FAISS](faiss.md) | At once | No (a thread) | `matches` over the stored metadata, then an ID selector | None | faiss-cpu 1.15, in process |
+| [LanceDB](lancedb.md) | When `add` returns | No (a thread) | Hex-encoded list values (`array_has_any`) | BM25, `mode="keyword"` | LanceDB 0.41, embedded |
+| [FAISS](faiss.md) | At once | No (a thread) | `matches` over the stored metadata, then an ID selector | None | faiss-cpu 1.16, in process |
 | [Vespa](vespa.md) | When `add` returns | No (a thread) | Hex-encoded terms in YQL (`in`) | BM25, `mode="keyword"` | 8.763.13 |
 | [Apache Cassandra](cassandra.md) | When `add` returns, at the session's consistency level | No (a thread) | Bound `CONTAINS` parameters, one ANN query per AND | No | 5.0.9 |
 | [Pinecone](pinecone.md) | Within seconds; at once with `wait=` | No (a thread) | `$in` on hex-encoded terms, `$and`, `$or` | No | A scripted stand-in for the API (2026-07); the service only with an API key, which CI does not have |

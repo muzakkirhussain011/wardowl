@@ -1,7 +1,10 @@
 # Advisories in uv.lock that have no fixed release and that wardowl's code cannot reach.
 # OSV-Scanner, and OpenSSF Scorecard's Vulnerabilities check, skip them until `ignoreUntil`; then
-# they count again and each one is looked at afresh. Dependabot proposes the fixed release as soon
-# as there is one. Reviewed 2026-10-17.
+# they count again and each one is looked at afresh. When a fixed release comes out, Dependabot's
+# weekly version updates propose it once it is a week old (.github/dependabot.yml), and the Lock
+# workflow can take it at once (`upgrade`); its entry here is then removed. Reviewed 2026-11-21:
+# OSV still lists no fixed release for the four Chroma advisories (last affected 1.5.9, the latest
+# release on PyPI).
 
 # ChromaDB 1.5.9, the latest release. The four advisories are in the Chroma server: its HTTP API and
 # its own tenant and RBAC checks. wardowl's Chroma backend is a client that applies permissions
@@ -28,10 +31,3 @@ reason = "Chroma server: code injection by a user with UPDATE_COLLECTION. wardow
 id = "PYSEC-2026-3815"
 ignoreUntil = 2027-01-15
 reason = "Chroma server: SimpleRBACAuthorizationProvider ignores tenant, database and collection. wardowl does not use Chroma's RBAC; no fixed release yet."
-
-# NLTK 3.10.3, the latest release, comes in only through llama-index-core (the llamaindex extra).
-
-[[IgnoredVulns]]
-id = "GHSA-8mgp-746c-j5xp"
-ignoreUntil = 2027-01-15
-reason = "NLTK model save and load APIs bypass path security. wardowl never calls NLTK; it is a dependency of llama-index-core. No fixed release yet."

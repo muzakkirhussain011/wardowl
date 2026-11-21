@@ -2,7 +2,7 @@
 
 What wardowl is tested with, in CI, on every change. This is library compatibility: it says the
 code passes its tests against these versions, not that a deployment of yours has been verified.
-Versions are as of October 2026; the [CI workflow](https://github.com/muzakkirhussain011/wardowl/blob/main/.github/workflows/ci.yml)
+Versions are as of November 2026 (3.2.0); the [CI workflow](https://github.com/muzakkirhussain011/wardowl/blob/main/.github/workflows/ci.yml)
 and [`uv.lock`](https://github.com/muzakkirhussain011/wardowl/blob/main/uv.lock) are the current
 record.
 
@@ -31,7 +31,9 @@ The stores and permission services run as servers on Linux only, so their suites
 ## Vector stores
 
 Each store runs as a real server (or embedded library) in CI, and its backend passes the
-[conformance kit](extending.md#test-it-with-the-conformance-kit) against it.
+[conformance kit](extending.md#test-it-with-the-conformance-kit) against it, except Pinecone. Its
+service tests run on `main` and by hand only when the repository's `PINECONE_API_KEY` secret is set,
+and as of November 2026 it is not: CI tests that backend against a scripted stand-in for the API.
 
 | Store | Server tested | Client tested | Client declared |
 |---|---|---|---|
@@ -39,16 +41,16 @@ Each store runs as a real server (or embedded library) in CI, and its backend pa
 | Chroma | in-process client 1.5.9 (no server) | chromadb 1.5.9 | `chromadb>=1.5` |
 | Elasticsearch | 9.5.5 | elasticsearch 9.5.1 | `elasticsearch>=8.12` |
 | OpenSearch | 3.9.0 | opensearch-py 3.2.0 | `opensearch-py>=2.4` |
-| Qdrant | 1.19.2 | qdrant-client 1.19.1 | `qdrant-client>=1.15` |
-| Milvus | 3.0.2 standalone | pymilvus 3.0.2 | `pymilvus>=2.6` |
-| MongoDB Atlas Vector Search | Atlas Local 8.0.30 | pymongo 4.18.3 | `pymongo>=4.13` |
-| Weaviate | 1.39.12 | weaviate-client 4.23.1 | `weaviate-client>=4.16` |
+| Qdrant | 1.19.2 | qdrant-client 1.20.0 | `qdrant-client>=1.15` |
+| Milvus | 3.0.2 standalone | pymilvus 3.0.3 | `pymilvus>=2.6.2` |
+| MongoDB Atlas Vector Search | Atlas Local 8.0.30 | pymongo 4.20.0 | `pymongo>=4.18.3` |
+| Weaviate | 1.39.12 | weaviate-client 4.24.1 | `weaviate-client>=4.16` |
 | Redis (Query Engine) | 8.10.2 | redis 8.1.0 | `redis>=5` |
-| LanceDB | embedded 0.40.0 | lancedb 0.40.0 | `lancedb>=0.40` |
-| FAISS | in process | faiss-cpu 1.15.1 | `faiss-cpu>=1.15` |
+| LanceDB | embedded 0.41.0 | lancedb 0.41.0 | `lancedb>=0.40` |
+| FAISS | in process | faiss-cpu 1.16.0 | `faiss-cpu>=1.15` |
 | Vespa | 8.763.13 | httpx 0.28.1 | `httpx>=0.27` |
 | Apache Cassandra | 5.0.9 | cassandra-driver 3.30.1 | `cassandra-driver>=3.29` |
-| Pinecone | serverless (AWS us-east-1), API 2026-07 | httpx 0.28.1 | `httpx>=0.27` |
+| Pinecone | none in CI without the secret; a scripted stand-in for API 2026-07 | httpx 0.28.1 | `httpx>=0.27` |
 
 ## Permission services
 
@@ -68,11 +70,11 @@ The HTTP authorizers use only the standard library to reach these services; the 
 
 | Package | Version tested | Declared |
 |---|---|---|
-| langchain-core | 1.6.12 | `langchain-core>=1.0` |
-| llama-index-core | 0.14.25 | `llama-index-core>=0.12` |
-| haystack-ai | 3.3.0 | `haystack-ai>=2.12` |
+| langchain-core | 1.8.0 | `langchain-core>=1.3.3` |
+| llama-index-core | 0.14.25 | `llama-index-core>=0.13` |
+| haystack-ai | 3.5.0 | `haystack-ai>=2.12` |
 | mcp (the MCP Python SDK) | 2.3.0 | `mcp>=2.3` |
-| opentelemetry-api | 1.45.1 | `opentelemetry-api>=1.30` |
+| opentelemetry-api | 1.45.2 | `opentelemetry-api>=1.45.2` |
 
 ## Caching and deployment
 

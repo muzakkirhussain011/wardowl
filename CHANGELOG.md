@@ -6,6 +6,32 @@ All notable changes are recorded here. The format follows
 
 ## [Unreleased]
 
+### Security
+
+- Four extras need newer clients (L40 in the readiness review): `mongodb` pymongo 4.18.3 or later
+  (it allowed 4.13, and versions before 4.18.3 have published advisories, three of them high: an
+  out-of-bounds read in BSON decoding, GHSA-98qm-wvgf-w4cf, an out-of-bounds write in BSON encoding,
+  GHSA-v4x9-3549-crwv, and host injection in connection-string parsing, GHSA-vp6j-j7w5-5xjj),
+  `llamaindex` llama-index-core 0.13 or later (it allowed 0.12, which has seven advisories, the
+  last fixed in 0.13.0, GHSA-cr7q-2w66-hjcm), `otel` opentelemetry-api 1.45.2 or later (it allowed
+  1.30; GHSA-xcq7-p3pf-p88h and GHSA-mf5v-w3w3-f6cg are fixed in 1.45.1 and 1.45.2), and `server`
+  PyJWT 2.15 or later (GHSA-42vr-xj54-vc7v and GHSA-x33g-cr3x-6449 are fixed in 2.15.0). Each new
+  minimum is the first release OSV lists without an advisory, in the same major version. The
+  versions CI tests were already newer, so nothing tested changes; the minimums are what an install
+  that pins older clients could resolve to. Whether wardowl's own code reaches these advisories was
+  not assessed. The supported configurations page declares these minimums, and showed two older
+  ones (`pymilvus>=2.6`, `langchain-core>=1.0`) where pyproject.toml declares 2.6.2 and 1.3.3; a
+  test now compares the page with pyproject.toml, and its tested versions are those of uv.lock
+  (L31, L33, L34).
+- `osv-scanner.toml` ignored NLTK's GHSA-8mgp-746c-j5xp with the reason "No fixed release yet"; NLTK
+  3.10.4 fixes it, and uv.lock holds 3.10.4 since 2026-11-13, so the entry is gone (L38, L39). The
+  four Chroma entries stay: OSV lists 1.5.9, the latest release, as affected.
+- `verify-release.yml` checks the GitHub release's wheel against its build provenance before using
+  its hash to pin the install from PyPI, as it already checked the source distribution (L9). Its
+  install would refuse a file whose hash differs from the one PyPI serves, which cannot be replaced;
+  the check also ties the wheel to the Release workflow and its tag. SECURITY.md's command for
+  checking provenance now names that workflow and tag.
+
 ### Added
 
 - CI's test job, which installs every extra and starts every service, fails when a test or a test

@@ -8,7 +8,7 @@ LanceDB is an embedded vector database: it runs inside your process, on a local 
 object storage, with no server to operate. The backend runs LanceDB's vector search with the
 permission filter applied before ranking (LanceDB's pre-filtering), so the k nearest chunks the
 subject may read come back however few of the table's chunks that is. CI runs wardowl's
-[conformance kit](../extending.md#test-it-with-the-conformance-kit) against LanceDB 0.40.
+[conformance kit](../extending.md#test-it-with-the-conformance-kit) against LanceDB 0.41.
 
 ```python
 import lancedb
