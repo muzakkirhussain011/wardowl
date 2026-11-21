@@ -37,6 +37,8 @@ All notable changes are recorded here. The format follows
   `asyncio.wait_for` around `aretrieve`, says that such a bound frees the caller but not a search
   running in a worker thread, which keeps its pooled connection until the database answers or a
   timeout ends it (L20).
+- The operations guide's table of what to alert on had no row for a failing vector store, which
+  raises `SearchError` since 3.0.0; it has one now (L24).
 - The operations guide said that Redis Cluster, Valkey and Dragonfly "work" with the shared cache;
   CI tests a single Redis server, and the guide now says, as the supported configurations page
   does, that those are expected to work and are not tested (L21).
