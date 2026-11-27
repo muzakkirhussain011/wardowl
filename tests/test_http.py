@@ -234,7 +234,10 @@ def test_total_timeout_must_be_a_positive_number_of_seconds():
             SpiceDBAuthorizer("http://spicedb:8443", total_timeout=bad)
     assert JsonClient("http://opa:8181", service="t", timeout=1, headers={}).deadline() is None
     client = JsonClient("http://opa:8181", service="t", timeout=1, headers={}, total_timeout=5)
-    assert 4 < client.deadline() - time.monotonic() <= 5
+    before = time.monotonic()
+    deadline = client.deadline()
+    assert deadline is not None
+    assert before + 5 <= deadline <= time.monotonic() + 5
 
 
 def test_total_timeout_ends_the_request_in_flight_and_sends_nothing_after_it(server):
