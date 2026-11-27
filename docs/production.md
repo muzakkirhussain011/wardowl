@@ -34,6 +34,8 @@ fails. Each item links to the page with the details.
   the schema `schema()` writes (Vespa), and for LanceDB `create_table`, then `create_indexes` once
   the table holds data. Chroma needs only a collection, FAISS nothing, and Pinecone a vector index
   of the right dimension. ([Integrations](integrations/index.md))
+- [ ] If you use Chroma 1.5.9, run it in process. For a remote store, use a different backend
+  while the Chroma HTTP server's upstream advisories remain unpatched. ([Chroma](integrations/chroma.md))
 - [ ] Your own backend or authorizer, if you wrote one, passes the conformance kit.
   ([Extending wardowl](extending.md#test-it-with-the-conformance-kit))
 

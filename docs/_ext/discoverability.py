@@ -5,7 +5,7 @@
 - The front page gets a descriptive ``<title>``.
 - ``sitemap.xml`` lists every page, for search consoles, with a ``<lastmod>``: when the page's source,
   or a file it includes or documents, last changed on the branch being built. ``llms.txt`` lists
-  every page with its description, in the format proposed at llmstxt.org.
+  every page with its description, in the format proposed at llmstxt.org, with setup and security first.
 
 A robots.txt would have no effect here: crawlers read it only at the root of the host, and the site
 is served under ``/wardowl/``.
@@ -29,12 +29,12 @@ logger = logging.getLogger(__name__)
 
 FRONT_PAGE_TITLE = "wardowl: permission-aware retrieval for RAG in Python"
 SUMMARY = (
-    "wardowl is an open-source Python library for permission-aware retrieval in RAG: it puts your "
-    "permission system's filter inside the vector store's search when the system can express one, "
-    "checks every hit before it is returned and fails closed, so each user gets only the chunks they "
-    "are allowed to read."
+    "wardowl is an open-source Python library for permission-aware retrieval and document-level access "
+    "control in RAG. It applies permissions in vector search when supported, checks results by default, "
+    "and fails closed on authorization errors."
 )
 REPOSITORY = "https://github.com/muzakkirhussain011/wardowl"
+PYPI = "https://pypi.org/project/wardowl/"
 LIMIT = 160
 SKIP = {"genindex", "search", "py-modindex"}
 # The front page's structured data lives in a template and carries the release number, so a change
@@ -145,12 +145,23 @@ def _write_files(app: Sphinx, exception: Exception | None) -> None:
     )
     (out / "sitemap.xml").write_text(sitemap, encoding="utf-8")
 
-    lines = [f"# {app.config.project}", "", f"> {SUMMARY}", "", "## Documentation", ""]
-    for p in pages:
-        title = app.env.titles[p].astext() if p in app.env.titles else p
-        description = _descriptions.get(p)
-        lines.append(f"- [{title}]({_url(app, p)})" + (f": {description}" if description else ""))
-    lines += ["", "## Source", "", f"- [GitHub repository]({REPOSITORY})", ""]
+    start_pages = [p for p in ("quickstart", "integrations/index", "security", "production") if p in pages]
+    other_pages = [p for p in pages if p not in start_pages]
+    lines = [
+        f"# {app.config.project}",
+        "",
+        f"> {SUMMARY}",
+        "",
+        "Install with `pip install wardowl`. Build the subject from the authenticated user's identity "
+        "and groups, then pass it to the retriever for each request.",
+    ]
+    for heading, selected in (("Start here", start_pages), ("Documentation", other_pages)):
+        lines += ["", f"## {heading}", ""]
+        for p in selected:
+            title = app.env.titles[p].astext() if p in app.env.titles else p
+            description = _descriptions.get(p)
+            lines.append(f"- [{title}]({_url(app, p)})" + (f": {description}" if description else ""))
+    lines += ["", "## Source", "", f"- [GitHub repository]({REPOSITORY})", f"- [PyPI package]({PYPI})", ""]
     (out / "llms.txt").write_text("\n".join(lines), encoding="utf-8")
 
 

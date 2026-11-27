@@ -4,22 +4,40 @@
 pip install "wardowl[haystack]"
 ```
 
-`WardowlRetriever` is a Haystack component that returns only the documents a subject may read,
-from any wardowl backend and authorizer. The extra requires `haystack-ai` 2.12 or later; CI tests
-the current Haystack 3 release.
+`WardowlRetriever` adds document-level access control to a Haystack RAG pipeline. It returns only
+the chunks the authenticated user may read, using any wardowl backend and authorizer.
+The extra requires `haystack-ai` 2.12 or later. CI tests the current Haystack 3 release.
+
+## Run a permission-aware pipeline
+
+This example runs locally without a model or vector database. Both employees ask the same
+question. Only the HR employee can retrieve the salary document.
 
 ```python
 from haystack import Pipeline
 
-from wardowl import PermissionedRetriever
+from wardowl import Document, InMemoryBackend, MetadataACLAuthorizer, PermissionedRetriever, Subject
 from wardowl.haystack import WardowlRetriever
 
+backend = InMemoryBackend(
+    [
+        Document("handbook", "Annual leave is 25 days.", {"allowed_groups": ["*"]}),
+        Document("salaries", "Salary bands by job grade.", {"allowed_groups": ["hr"]}),
+    ]
+)
+retriever = PermissionedRetriever(backend, MetadataACLAuthorizer())
 pipeline = Pipeline()
-pipeline.add_component("retriever", WardowlRetriever(PermissionedRetriever(backend, authorizer), top_k=5))
-# ... a prompt builder and a generator, connected to "retriever.documents"
+pipeline.add_component("retriever", WardowlRetriever(retriever, top_k=5))
 
-result = pipeline.run({"retriever": {"query": question, "subject": subject}})
+for subject in (Subject("bob", groups=["engineering"]), Subject("alice", groups=["hr"])):
+    result = pipeline.run({"retriever": {"query": "salary bands", "subject": subject}})
+    print(subject.id, [doc.id for doc in result["retriever"]["documents"]])
+    # bob []
+    # alice ['salaries']
 ```
+
+In an application, use the authenticated session to construct the subject for each run. Connect
+`retriever.documents` to the component that builds the prompt.
 
 ## The subject is a run input
 
