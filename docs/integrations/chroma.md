@@ -6,6 +6,17 @@ pip install "wardowl[chroma]"
 
 The permission filter becomes Chroma's `where` clause, so Chroma filters inside the search.
 
+```{warning}
+Use the in-process Chroma client below for deployments on Chroma 1.5.9. The self-hosted Chroma
+HTTP server has unresolved upstream authorization and code-execution advisories. Direct requests
+to that server are outside wardowl's enforcement boundary. If your deployment needs a remote
+vector store, use another supported backend while the advisories remain unpatched.
+[GHSA-36p7-vc44-83pf](https://github.com/advisories/GHSA-36p7-vc44-83pf),
+[GHSA-f4j7-r4q5-qw2c](https://github.com/advisories/GHSA-f4j7-r4q5-qw2c),
+[GHSA-2wm9-hf6c-p5cr](https://github.com/advisories/GHSA-2wm9-hf6c-p5cr),
+[GHSA-xph7-9rjv-w5fr](https://github.com/advisories/GHSA-xph7-9rjv-w5fr).
+```
+
 ## Set up
 
 ```python
